@@ -1,0 +1,20 @@
+{
+  "name": "plaid-node-walkthrough",
+  "version": "0.1.0",
+  "description": "A sample app and accompanying walkthrough for the Plaid API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "developers@plaid.com",
+  "repository": "https://github.com/plaid/quickstart",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "1.15.x",
+    "ejs": "2.4.x",
+    "envvar": "1.1.x",
+    "express": "4.13.x",
+    "moment": "2.17.x",
+    "plaid": "2.0.x"
+  }
+}
