@@ -9,12 +9,14 @@ from flask import jsonify
 app = Flask(__name__)
 
 
-# FILL IN YOUR OWN CREDENTIALS TO FULLY WORK THROUGH THIS TUTORIAL
+# Fill in your Plaid API keys - https://dashboard.plaid.com/account/keys
 PLAID_SECRET = 'PLAID_SECRET'
 PLAID_CLIENT_ID = 'PLAID_CLIENT_ID'
 PLAID_PUBLIC_KEY = 'PLAID_PUBLIC_KEY'
-# The environment must either be in development or production to properly 
-# authenticate your bank credentials
+# Use 'sandbox' to test with Plaid's Sandbox environment (username: user_good,
+# password: pass_good)
+# Use `development` to test with live users and credentials and `production`
+# to go live
 PLAID_ENV='development'
 
 
