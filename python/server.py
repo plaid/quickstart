@@ -71,7 +71,7 @@ def transactions():
   return jsonify(response)
 
 @app.route("/create_public_token", methods=['GET'])
-def public_token():
+def create_public_token():
   global access_token
   # Create a one-time use public_token for the Item. This public_token can be used to
   # initialize Link in update mode for the user.
