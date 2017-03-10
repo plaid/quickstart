@@ -15,4 +15,5 @@ PLAID_SECRET=[SECRET] \
 PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
 PLAID_ENV=sandbox \
 node index.js
+# Go to http://localhost:8000
 ```
