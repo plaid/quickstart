@@ -8,14 +8,22 @@ from flask import jsonify
 
 app = Flask(__name__)
 
-client = plaid.Client(os.environ['PLAID_CLIENT_ID'],
-                  os.environ['PLAID_SECRET'],
-                  os.environ['PLAID_PUBLIC_KEY'],
-                  os.environ['PLAID_ENV'])
+
+# FILL IN YOUR OWN CREDENTIALS TO FULLY WORK THROUGH THIS TUTORIAL
+PLAID_SECRET = 'PLAID_SECRET'
+PLAID_CLIENT_ID = 'PLAID_CLIENT_ID'
+PLAID_PUBLIC_KEY = 'PLAID_PUBLIC_KEY'
+# The environment must either be in development or production to properly 
+# authenticate your bank credentials
+PLAID_ENV='development'
+
+
+client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
+                  public_key=PLAID_PUBLIC_KEY, environment=PLAID_ENV)
 
 @app.route("/")
 def index():
-   return render_template('index.ejs', plaid_public_key=os.environ['PLAID_PUBLIC_KEY'], plaid_environment=os.environ['PLAID_ENV'])
+   return render_template('index.ejs', plaid_public_key=PLAID_PUBLIC_KEY, plaid_environment=PLAID_ENV)
 
 
 access_token = None
@@ -63,7 +71,7 @@ def transactions():
   return jsonify(response)
 
 @app.route("/create_public_token", methods=['GET'])
-def transactions():
+def public_token():
   global access_token
   # Create a one-time use public_token for the Item. This public_token can be used to
   # initialize Link in update mode for the user.
