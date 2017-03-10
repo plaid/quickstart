@@ -5,7 +5,7 @@
 ``` bash
 git clone git@github.com:plaid/quickstart.git
 cd quickstart/node
-gem install
+npm install
 
 # The above call defaults to test/tartan credentials.
 # Substitute other values with any of the following:
