@@ -1,150 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Plaid Walkthrough Example</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Plaid Walkthrough Example</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <div id="banner">
-        <h1>Plaid Example Walkthrough</h1>
-        <p id="intro">
-            This is an example application that walks through integrating Plaid Link using the API to retrieve Auth and Transaction data.
-        </p>
-        <p id="steps">
-            Great - you just created an Item! The server was successfully able to exchange the public_token for an access_token.
-            Below are a few options - you can get account data, retrieve information about the Item itself, or pull transaction data.
-        </p>
+  <div id="banner">
+    <h1>Plaid Example Walkthrough</h1>
+    <p id="intro">
+      This is an example application that walks through integrating Plaid Link using the API to retrieve Auth and Transaction data.
+    </p>
+    <p id="steps">
+      Great - you just created an Item! The server was successfully able to exchange the public_token for an access_token.
+      Below are a few options - you can get account data, retrieve information about the Item itself, or pull transaction data.
+    </p>
+  </div>
+
+  <div id="container">
+    <p>
+      Click the button below to open a list of Institutions - after you select one,
+      you'll be guided through an authentication process. The public_token will be passed
+      back to the example server, which will then exchange it for an access token and log it
+      to your console.
+    </p>
+
+    <button id="link-btn">Link Account</button>
+  </div>
+
+  <div id="app">
+    <div class="box">
+      <button id="get-accounts-btn">Get Accounts</button>
+      <div id="get-accounts-data"></div>
     </div>
 
-    <div id="container">
-        <p>
-            Click the button below to open a list of Institutions - after you select one,
-            you'll be guided through an authentication process. The public_token will be passed
-            back to the example server, which will then exchange it for an access token and log it
-            to your console.
-        </p>
-
-        <button id="link-btn">Link Account</button>
+    <div class="box">
+      <button id="get-item-btn">Get Item</button>
+      <div id="upgrade-to-connect-data" class="inner"></div>
     </div>
 
-    <div id="app">
-        <div class="box">
-            <button id="get-accounts-btn">Get Accounts</button>
-            <div id="get-accounts-data"></div>
-        </div>
-
-        <div class="box">
-            <button id="get-item-btn">Get Item</button>
-            <div id="upgrade-to-connect-data" class="inner"></div>
-        </div>
-
-        <div class="box" id="txnBox">
-            <button id="get-transaction-data">Get Transactions</button>
-            <div id="get-transactions-data"></div>
-        </div>
+    <div class="box" id="txnBox">
+      <button id="get-transaction-data">Get Transactions</button>
+      <div id="get-transactions-data"></div>
     </div>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
-    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
-    <script>
-    function getParameterByName(name, url) {
-        if (!url) url = window.location.href;
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <script>
+  function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+      results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+  };
+  (function($) {
+    var handler = Plaid.create({
+      apiVersion: 'v2',
+      clientName: 'Plaid Walkthrough Demo',
+      env: '<%= PLAID_ENV %>',
+      product: ['transactions'],
+      key: '<%= PLAID_PUBLIC_KEY %>',
+      onSuccess: function(public_token) {
+        $.post('/get_access_token', {
+          public_token: public_token
+        }, function() {
+          $('#container').fadeOut('fast', function() {
+            $('#intro').hide();
+            $('#app, #steps').fadeIn('slow');
+          });
+        });
+      },
+    });
+
+    $('#link-btn').on('click', function(e) {
+      handler.open();
+    });
+
+    var accessToken = getParameterByName('access_token');
+    if (accessToken != null) {
+      $.post('/set_access_token', {
+        access_token: accessToken
+      }, function() {
+        $('#container').fadeOut('fast', function() {
+          $('#intro').hide();
+          $('#app, #steps').fadeIn('slow');
+        });
+      });
     }
-    ;(function($) {
-        var handler = Plaid.create({
-            apiVersion: 'v2',
-            clientName: 'Plaid Walkthrough Demo',
-            env: '<%= PLAID_ENV %>',
-            product: ['transactions'],
-            key: '<%= PLAID_PUBLIC_KEY %>',
-            onSuccess: function(public_token) {
-                $.post('/get_access_token', {public_token: public_token}, function() {
-                    $('#container').fadeOut('fast', function() {
-                        $('#intro').hide();
-                        $('#app, #steps').fadeIn('slow');
-                    });
-                });
-            },
+
+    $('#get-accounts-btn').on('click', function(e) {
+      $.get('/accounts', function(data) {
+        $('#get-accounts-data').slideUp(function() {
+          var html = '';
+          data.accounts.forEach(function(account, idx) {
+            html += '<div class="inner">';
+            html += '<strong>' + account.name +
+              ' $' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</strong><br>';
+            html += account.subtype + ' ' + account.mask;
+            html += '</div>';
+          });
+
+          $(this).html(html).slideDown();
         });
+      });
+    });
 
-        $('#link-btn').on('click', function(e) {
-            handler.open();
+    $('#get-item-btn').on('click', function(e) {
+      $.post('/item', function(data) {
+        $('#upgrade-to-connect-data').slideUp(function() {
+          if (data.error)
+            $(this).html('<p>' + data.error + '</p>').slideDown();
+          else {
+            var html = '';
+            html += '<p>Here\'s some basic information about your Item:</p>';
+            html += '<p>Institution name:' + data.institution.name + '</p>';
+            html += '<p>Billed products: ' + data.item.billed_products.join(', ') + '</p>';
+            html += '<p>Available products: ' + data.item.available_products.join(', ') + '</p>';
+
+            $(this).html(html).slideDown();
+            $('#txnBox').slideDown();
+          }
         });
+      });
+    });
 
-        var accessToken =  getParameterByName('access_token');
-        if (accessToken != null) {
-            $.post('/set_access_token', {access_token: accessToken}, function() {
-                $('#container').fadeOut('fast', function() {
-                    $('#intro').hide();
-                    $('#app, #steps').fadeIn('slow');
-                });
-            });
-        }
+    $('#get-transaction-data').on('click', function(e) {
+      $.post('/transactions', function(data) {
+        $('#get-transactions-data').slideUp(function() {
+          var html = '';
+          data.transactions.forEach(function(txn, idx) {
+            html += '<div class="inner">';
+            html += '<strong>' + txn.name + '</strong><br>';
+            html += '$' + txn.amount;
+            html += '<br><em>' + txn.date + '</em>';
+            html += '</div>';
+          });
 
-        $('#get-accounts-btn').on('click', function(e) {
-            $.get('/accounts', function(data) {
-                $('#get-accounts-data').slideUp(function() {
-                    var html = '';
-                    data.accounts.forEach(function(account, idx) {
-                        html += '<div class="inner">';
-                        html += '<strong>' + account.name +
-                                ' $' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</strong><br>';
-                        html += account.subtype + ' ' + account.mask;
-                        html += '</div>';
-                    });
-
-                    $(this).html(html).slideDown();
-                });
-            });
+          $(this).slideUp(function() {
+            $(this).html(html).slideDown();
+          });
         });
-
-        $('#get-item-btn').on('click', function(e) {
-            $.post('/item', function(data) {
-                $('#upgrade-to-connect-data').slideUp(function() {
-                    if(data.error)
-                        $(this).html('<p>' + data.error + '</p>').slideDown();
-                    else {
-                        var html = '';
-                        html += '<p>Here\'s some basic information about your Item:</p>';
-                        html += '<p>Institution name:' + data.institution.name +'</p>';
-                        html += '<p>Billed products: ' + data.item.billed_products.join(', ') + '</p>';
-                        html += '<p>Available products: ' + data.item.available_products.join(', ') + '</p>';
-
-
-                        $(this).html(html).slideDown();
-                        $('#txnBox').slideDown();
-                    }
-                });
-            });
-        });
-
-        $('#get-transaction-data').on('click', function(e) {
-            $.post('/transactions', function(data) {
-                $('#get-transactions-data').slideUp(function() {
-                    var html = '';
-                    data.transactions.forEach(function(txn, idx) {
-                        html += '<div class="inner">';
-                        html += '<strong>' + txn.name + '</strong><br>';
-                        html += '$' + txn.amount;
-                        html += '<br><em>' + txn.date + '</em>';
-                        html += '</div>';
-                    });
-
-                    $(this).slideUp(function() {
-                        $(this).html(html).slideDown();
-                    });
-                });
-            });
-        });
-    })(jQuery);
-    </script>
+      });
+    });
+  })(jQuery);
+  </script>
 </body>
 </html>
