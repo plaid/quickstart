@@ -131,20 +131,42 @@
 
     $('#get-transaction-data').on('click', function(e) {
       $.post('/transactions', function(data) {
-        $('#get-transactions-data').slideUp(function() {
-          var html = '';
-          data.transactions.forEach(function(txn, idx) {
-            html += '<div class="inner">';
-            html += '<strong>' + txn.name + '</strong><br>';
-            html += '$' + txn.amount;
-            html += '<br><em>' + txn.date + '</em>';
-            html += '</div>';
-          });
+        if (data.error != null) {
+          // Format the error
+          var errorHtml = '<div class="inner"><p>' +
+           '<strong>' + data.error.error_code + ':</strong> ' +
+           data.error.error_message + '</p></div>';
 
-          $(this).slideUp(function() {
-            $(this).html(html).slideDown();
+          if (data.error.error_code === 'PRODUCT_NOT_READY') {
+            // Add additional context for `PRODUCT_NOT_READY` errors
+            errorHtml += '<div class="inner"><p>The PRODUCT_NOT_READY ' +
+             'error is returned when a request to retrieve Transaction data ' +
+             'is made before Plaid finishes the <a href="https://plaid.com/' +
+             'docs/quickstart/#transaction-data-with-webhooks">initial ' +
+             'transaction pull.</a></p></div>';
+          }
+          // Render the error
+          $('#get-transactions-data').slideUp(function() {
+            $(this).slideUp(function() {
+              $(this).html(errorHtml).slideDown();
+            });
           });
-        });
+        } else {
+          $('#get-transactions-data').slideUp(function() {
+            var html = '';
+            data.transactions.forEach(function(txn, idx) {
+              html += '<div class="inner">';
+              html += '<strong>' + txn.name + '</strong><br>';
+              html += '$' + txn.amount;
+              html += '<br><em>' + txn.date + '</em>';
+              html += '</div>';
+            });
+
+            $(this).slideUp(function() {
+              $(this).html(html).slideDown();
+            });
+          });
+        }
       });
     });
   })(jQuery);
