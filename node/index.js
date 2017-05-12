@@ -16,6 +16,7 @@ var PLAID_ENV = envvar.string('PLAID_ENV', 'sandbox');
 // persistent data store
 var ACCESS_TOKEN = null;
 var PUBLIC_TOKEN = null;
+var ITEM_ID = null;
 
 // Initialize the Plaid client
 var client = new plaid.Client(
@@ -51,7 +52,9 @@ app.post('/get_access_token', function(request, response, next) {
       });
     }
     ACCESS_TOKEN = tokenResponse.access_token;
+    ITEM_ID = tokenResponse.item_id;
     console.log('Access Token: ' + ACCESS_TOKEN);
+    console.log('Item ID: ' + ITEM_ID);
     response.json({
       'error': false
     });
