@@ -17,7 +17,7 @@ end
 
 post '/set_access_token' do
   access_token = params['access_token']
-  puts 'access token: #{access_token}'
+  puts "access token: #{access_token}"
   { error: false }.to_json
 end
 
@@ -25,8 +25,8 @@ post '/get_access_token' do
   exchange_token_response = client.item.public_token.exchange(params['public_token'])
   access_token = exchange_token_response['access_token']
   item_id = exchange_token_response['item_id']
-  puts 'access token: #{access_token}'
-  puts 'access token: #{item_id}'
+  puts "access token: #{access_token}"
+  puts "item id: #{item_id}"
   exchange_token_response.to_json
 end
 
