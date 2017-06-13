@@ -111,7 +111,7 @@ app.post('/item', (request, response, next) => {
   });
 });
 
-app.post('/transactions', (request, response, next) =>{
+app.post('/transactions', (request, response, next) => {
   // Pull transactions for the Item for the last 30 days
   const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
   const endDate = moment().format('YYYY-MM-DD');
