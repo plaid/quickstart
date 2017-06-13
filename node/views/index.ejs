@@ -92,9 +92,9 @@
     $('#get-item-btn').on('click', function(e) {
       $.post('/item', function(data) {
         $('#get-item-data').slideUp(function() {
-          if (data.error)
+          if (data.error) {
             $(this).html('<p>' + data.error + '</p>').slideDown();
-          else {
+          } else {
             var html = '<div class="inner">';
             html += '<p>Here\'s some basic information about your Item:</p>';
             html += '<p>Institution name:' + data.institution.name + '</p>';
@@ -112,18 +112,22 @@
     $('#get-transactions-btn').on('click', function(e) {
       $.post('/transactions', function(data) {
         $('#get-transactions-data').slideUp(function() {
-          var html = '';
-          data.transactions.forEach(function(txn, idx) {
-            html += '<div class="inner">';
-            html += '<strong>' + txn.name + '</strong><br>';
-            html += '$' + txn.amount;
-            html += '<br><em>' + txn.date + '</em>';
-            html += '</div>';
-          });
+          if (data.error) {
+            window.alert(data.error.error_message);
+          } else {
+            var html = '';
+            data.transactions.forEach(function(txn, idx) {
+              html += '<div class="inner">';
+              html += '<strong>' + txn.name + '</strong><br>';
+              html += '$' + txn.amount;
+              html += '<br><em>' + txn.date + '</em>';
+              html += '</div>';
+            });
 
-          $(this).slideUp(function() {
-            $(this).html(html).slideDown();
-          });
+            $(this).slideUp(function() {
+              $(this).html(html).slideDown();
+            });
+          }
         });
       });
     });
