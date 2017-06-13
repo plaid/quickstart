@@ -161,9 +161,7 @@ button:hover {
   line-height: 17px;
   margin-top: 5px;
 }
-#steps,
-#upgrade-to-connect-data,
-#txnBox {
+#steps {
   display: none;
 }
 .green {
