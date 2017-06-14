@@ -43,13 +43,6 @@ def get_access_token():
 
   return jsonify(exchange_response)
 
-@app.route("/set_access_token", methods=['POST'])
-def set_access_token():
-  global access_token
-  access_token = request.form['access_token']
-  print 'access token: ' + access_token
-  return jsonify({'error': False})
-
 @app.route("/accounts", methods=['GET'])
 def accounts():
   global access_token

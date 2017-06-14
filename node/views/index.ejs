@@ -49,15 +49,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
-  function getParameterByName(name, url) {
-    if (!url) url = window.location.href;
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-      results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-  };
   (function($) {
     var handler = Plaid.create({
       apiVersion: 'v2',
@@ -80,18 +71,6 @@
     $('#link-btn').on('click', function(e) {
       handler.open();
     });
-
-    var accessToken = getParameterByName('access_token');
-    if (accessToken != null) {
-      $.post('/set_access_token', {
-        access_token: accessToken
-      }, function() {
-        $('#container').fadeOut('fast', function() {
-          $('#intro').hide();
-          $('#app, #steps').fadeIn('slow');
-        });
-      });
-    }
 
     $('#get-accounts-btn').on('click', function(e) {
       $.get('/accounts', function(data) {

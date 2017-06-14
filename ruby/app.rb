@@ -15,12 +15,6 @@ get '/' do
   erb :index
 end
 
-post '/set_access_token' do
-  access_token = params['access_token']
-  puts "access token: #{access_token}"
-  { error: false }.to_json
-end
-
 post '/get_access_token' do
   exchange_token_response = client.item.public_token.exchange(params['public_token'])
   access_token = exchange_token_response['access_token']
