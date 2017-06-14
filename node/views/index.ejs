@@ -37,11 +37,11 @@
 
     <div class="box">
       <button id="get-item-btn">Get Item</button>
-      <div id="upgrade-to-connect-data" class="inner"></div>
+      <div id="get-item-data"></div>
     </div>
 
-    <div class="box" id="txnBox">
-      <button id="get-transaction-data">Get Transactions</button>
+    <div class="box">
+      <button id="get-transactions-btn">Get Transactions</button>
       <div id="get-transactions-data"></div>
     </div>
   </div>
@@ -112,24 +112,24 @@
 
     $('#get-item-btn').on('click', function(e) {
       $.post('/item', function(data) {
-        $('#upgrade-to-connect-data').slideUp(function() {
+        $('#get-item-data').slideUp(function() {
           if (data.error)
             $(this).html('<p>' + data.error + '</p>').slideDown();
           else {
-            var html = '';
+            var html = '<div class="inner">';
             html += '<p>Here\'s some basic information about your Item:</p>';
             html += '<p>Institution name:' + data.institution.name + '</p>';
             html += '<p>Billed products: ' + data.item.billed_products.join(', ') + '</p>';
             html += '<p>Available products: ' + data.item.available_products.join(', ') + '</p>';
+            html += '</div>';
 
             $(this).html(html).slideDown();
-            $('#txnBox').slideDown();
           }
         });
       });
     });
 
-    $('#get-transaction-data').on('click', function(e) {
+    $('#get-transactions-btn').on('click', function(e) {
       $.post('/transactions', function(data) {
         if (data.error != null) {
           // Format the error

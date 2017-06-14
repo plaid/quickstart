@@ -24,7 +24,7 @@ a:hover { text-decoration: underline; }
 
 #banner, #container, .box { min-width: 280px; max-width: 800px; margin: 20px auto 0; padding: 20px; background: #fff; border: 1px solid #c9c9c9; border-radius: 2px; text-align: left; }
 #container p { font-size: 14px; line-height: 17px; margin-bottom: 20px; }
-button { 
+button {
     background-color: #1a476a;
     background-image: -webkit-linear-gradient(top, #29618e, #164a74);
     background-image: linear-gradient(to bottom, #29618e, #164a74);
@@ -47,5 +47,5 @@ button:hover { color: #f1f1f1; cursor: pointer; }
 #banner { border-top: 0px; margin-top: 0px; border-radius: 0 0 2px 2px; }
 #banner h1 { color: #1a476a; font-size: 18px; font-weight: bold; }
 #banner p { font-size: 14px; line-height: 17px; margin-top: 5px; }
-#steps, #upgrade-to-connect-data, #txnBox { display: none; }
+#steps { display: none; }
 .green { background: #3ab683; color: #fff; }
