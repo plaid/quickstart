@@ -107,7 +107,7 @@
         });
 
     $('#get-transactions-btn').on('click', function(e) {
-      $.post('/transactions', function(data) {
+      $.get('/transactions', function(data) {
         if (data.error != null) {
           // Format the error
           var errorHtml = '<div class="inner"><p>' +
