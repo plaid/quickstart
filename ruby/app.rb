@@ -15,12 +15,6 @@ get '/' do
   erb :index
 end
 
-post '/set_access_token' do
-  access_token = params['access_token']
-  puts "access token: #{access_token}"
-  { error: false }.to_json
-end
-
 post '/get_access_token' do
   exchange_token_response = client.item.public_token.exchange(params['public_token'])
   access_token = exchange_token_response['access_token']
@@ -46,7 +40,11 @@ end
 get '/transactions' do
   now = Date.today
   thirty_days_ago = (now - 30)
-  transactions_response = client.transactions.get(access_token, thirty_days_ago, now)
+  begin
+    transactions_response = client.transactions.get(access_token, thirty_days_ago, now)
+  rescue Plaid::ItemError => e
+    transactions_response = { error: {error_code: e.error_code, error_message: e.error_message}}
+  end
   content_type :json
   transactions_response.to_json
 end

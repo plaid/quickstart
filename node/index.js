@@ -61,14 +61,6 @@ app.post('/get_access_token', function(request, response, next) {
   });
 });
 
-app.post('/set_access_token', function(request, response, next) {
-  ACCESS_TOKEN = request.body.access_token;
-  console.log('Access Token: ' + ACCESS_TOKEN);
-  response.json({
-    'error': false
-  });
-});
-
 app.get('/accounts', function(request, response, next) {
   // Retrieve high-level account information and account and routing numbers
   // for each account associated with the Item.

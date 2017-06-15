@@ -37,11 +37,11 @@
 
         <div class="box">
             <button id="get-item-btn">Get Item</button>
-            <div id="upgrade-to-connect-data" class="inner"></div>
+            <div id="get-item-data"></div>
         </div>
 
-        <div class="box" id="txnBox">
-            <button id="get-transaction-data">Get Transactions</button>
+        <div class="box">
+            <button id="get-transactions-btn">Get Transactions</button>
             <div id="get-transactions-data"></div>
         </div>
     </div>
@@ -49,16 +49,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
     <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
     <script>
-    function getParameterByName(name, url) {
-        if (!url) url = window.location.href;
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
-    }
-    ;(function($) {
+    (function($) {
         var handler = Plaid.create({
             apiVersion: 'v2',
             clientName: 'Plaid Walkthrough Demo',
@@ -79,17 +70,6 @@
             handler.open();
         });
 
-        var accessToken =  getParameterByName('access_token');
-        if (accessToken != null) {
-            console.log('token');
-            $.post('/set_access_token', {access_token: accessToken}, function() {
-                $('#container').fadeOut('fast', function() {
-                    $('#intro').hide();
-                    $('#app, #steps').fadeIn('slow');
-                });
-            });
-        }
-
         $('#get-accounts-btn').on('click', function(e) {
             $.get('/accounts', function(data) {
                 $('#get-accounts-data').slideUp(function() {
@@ -109,26 +89,25 @@
 
         $('#get-item-btn').on('click', function(e) {
             $.get('/item', function(data) {
-                $('#upgrade-to-connect-data').slideUp(function() {
+                $('#get-item-data').slideUp(function() {
                     if(data.error)
                         $(this).html('<p>' + data.error + '</p>').slideDown();
                     else {
-                        var html = '';
+                        var html = '<div class="inner">';
                         html += '<p>Here\'s some basic information about your Item:</p>';
                         html += '<p>Institution name:' + data.institution.name +'</p>';
                         html += '<p>Billed products: ' + data.item.billed_products.join(', ') + '</p>';
                         html += '<p>Available products: ' + data.item.available_products.join(', ') + '</p>';
-
+                        html += '</div>';
 
                         $(this).html(html).slideDown();
-                        $('#txnBox').slideDown();
                     }
                 });
             });
         });
 
-    $('#get-transaction-data').on('click', function(e) {
-      $.post('/transactions', function(data) {
+    $('#get-transactions-btn').on('click', function(e) {
+      $.get('/transactions', function(data) {
         if (data.error != null) {
           // Format the error
           var errorHtml = '<div class="inner"><p>' +

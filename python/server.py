@@ -43,13 +43,6 @@ def get_access_token():
 
   return jsonify(exchange_response)
 
-@app.route("/set_access_token", methods=['POST'])
-def set_access_token():
-  global access_token
-  access_token = request.form['access_token']
-  print 'access token: ' + access_token
-  return jsonify({'error': False})
-
 @app.route("/accounts", methods=['GET'])
 def accounts():
   global access_token
@@ -70,8 +63,11 @@ def transactions():
   start_date = "{:%Y-%m-%d}".format(datetime.datetime.now() + datetime.timedelta(-30))
   end_date = "{:%Y-%m-%d}".format(datetime.datetime.now())
 
-  response = client.Transactions.get(access_token, start_date, end_date)
-  return jsonify(response)
+  try:
+    response = client.Transactions.get(access_token, start_date, end_date)
+    return jsonify(response)
+  except plaid.errors.PlaidError as e:
+    return jsonify({'error': {'error_code': e.code, 'error_message': str(e)}})
 
 @app.route("/create_public_token", methods=['GET'])
 def create_public_token():
