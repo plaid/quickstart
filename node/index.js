@@ -1,6 +1,4 @@
 'use strict';
-const dotenv = require('dotenv');
-dotenv.config();
 const envvar = require('envvar');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -89,7 +87,7 @@ app.post('/item', function(request, response, next) {
         item: itemResponse.item,
         institution: instRes.institution,
       });
-    }).catch(err => {
+    }).catch(error => {
       let msg = 'Unable to pull institution information from the Plaid API.';
       console.log(msg + '\n' + error);
       return response.json({ error: msg });
