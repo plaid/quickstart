@@ -10,14 +10,14 @@ app = Flask(__name__)
 
 
 # Fill in your Plaid API keys - https://dashboard.plaid.com/account/keys
-PLAID_CLIENT_ID = 'PLAID_CLIENT_ID'
-PLAID_SECRET = 'PLAID_SECRET'
-PLAID_PUBLIC_KEY = 'PLAID_PUBLIC_KEY'
+PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
+PLAID_SECRET = os.getenv('PLAID_SECRET')
+PLAID_PUBLIC_KEY = os.getenv('PLAID_PUBLIC_KEY')
 # Use 'sandbox' to test with Plaid's Sandbox environment (username: user_good,
 # password: pass_good)
 # Use `development` to test with live users and credentials and `production`
 # to go live
-PLAID_ENV='sandbox'
+PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
 
 
 client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
@@ -36,6 +36,7 @@ def get_access_token():
   global access_token
   public_token = request.form['public_token']
   exchange_response = client.Item.public_token.exchange(public_token)
+  print 'public token: ' + public_token
   print 'access token: ' + exchange_response['access_token']
   print 'item ID: ' + exchange_response['item_id']
 
@@ -78,4 +79,4 @@ def create_public_token():
   return jsonify(response)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=os.getenv('PORT', 5000))
