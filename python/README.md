@@ -8,7 +8,10 @@ cd quickstart/python
 pip install -r requirements.txt
 
 # Fill in your Plaid API keys (client ID, secret, public_key)
-# in server.py to test!
+# to test!
+PLAID_CLIENT_ID=[CLIENT_ID] \
+PLAID_SECRET=[SECRET] \
+PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
 python server.py
 # Go to http://localhost:5000
 ```
