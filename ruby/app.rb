@@ -4,6 +4,14 @@ require 'plaid'
 
 set :public_folder, File.dirname(__FILE__) + '/public'
 
+if ENV['PLAID_CLIENT_ID'] == nil
+  raise 'Missing `PLAID_CLIENT_ID`, find your client ID and other API keys at https://dashboard.plaid.com/account/keys'
+elsif ENV['PLAID_SECRET'] == nil
+  raise 'Missing `PLAID_SECRET`, find your secret and other API keys at https://dashboard.plaid.com/account/keys'
+elsif ENV['PLAID_PUBLIC_KEY'] == nil
+  raise 'Missing `PLAID_PUBLIC_KEY`, find your public_key and other API keys at https://dashboard.plaid.com/account/keys'
+end
+
 client = Plaid::Client.new(env: :sandbox,
                            client_id: ENV['PLAID_CLIENT_ID'],
                            secret: ENV['PLAID_SECRET'],
