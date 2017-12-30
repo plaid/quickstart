@@ -13,6 +13,14 @@ app = Flask(__name__)
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
 PLAID_SECRET = os.getenv('PLAID_SECRET')
 PLAID_PUBLIC_KEY = os.getenv('PLAID_PUBLIC_KEY')
+
+if PLAID_CLIENT_ID is None:
+  raise Exception('Missing `PLAID_CLIENT_ID`, find your client ID and other API keys at https://dashboard.plaid.com/account/keys')
+elif PLAID_SECRET is None:
+  raise Exception('Missing `PLAID_SECRET`, find your secret and other API keys at https://dashboard.plaid.com/account/keys')
+elif PLAID_PUBLIC_KEY is None:
+  raise Exception('Missing `PLAID_PUBLIC_KEY`, find your public_key and other API keys at https://dashboard.plaid.com/account/keys')
+
 # Use 'sandbox' to test with Plaid's Sandbox environment (username: user_good,
 # password: pass_good)
 # Use `development` to test with live users and credentials and `production`
