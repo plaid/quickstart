@@ -19,7 +19,6 @@ PLAID_PUBLIC_KEY = os.getenv('PLAID_PUBLIC_KEY')
 # to go live
 PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
 
-
 client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
                   public_key=PLAID_PUBLIC_KEY, environment=PLAID_ENV)
 
@@ -36,9 +35,9 @@ def get_access_token():
   global access_token
   public_token = request.form['public_token']
   exchange_response = client.Item.public_token.exchange(public_token)
-  print 'public token: ' + public_token
-  print 'access token: ' + exchange_response['access_token']
-  print 'item ID: ' + exchange_response['item_id']
+  print('public token: ' + public_token)
+  print('access token: ' + exchange_response['access_token'])
+  print('item ID: ' + exchange_response['item_id'])
 
   access_token = exchange_response['access_token']
 
