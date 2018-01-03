@@ -19,6 +19,7 @@ PLAID_PUBLIC_KEY = os.getenv('PLAID_PUBLIC_KEY')
 # to go live
 PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
 
+
 client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
                   public_key=PLAID_PUBLIC_KEY, environment=PLAID_ENV)
 
