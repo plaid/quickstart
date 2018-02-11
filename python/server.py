@@ -1,6 +1,8 @@
 import os
 import datetime
+import json
 import plaid
+
 from flask import Flask
 from flask import render_template
 from flask import request
@@ -18,6 +20,7 @@ PLAID_PUBLIC_KEY = os.getenv('PLAID_PUBLIC_KEY')
 # Use `development` to test with live users and credentials and `production`
 # to go live
 PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
+PLAID_WEBHOOK_URL = json.dumps(os.getenv('PLAID_WEBHOOK_URL', None))
 
 
 client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
@@ -25,7 +28,10 @@ client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
 
 @app.route("/")
 def index():
-   return render_template('index.ejs', plaid_public_key=PLAID_PUBLIC_KEY, plaid_environment=PLAID_ENV)
+   return render_template('index.ejs',
+                          plaid_public_key=PLAID_PUBLIC_KEY,
+                          plaid_environment=PLAID_ENV,
+                          plaid_webhook_url=PLAID_WEBHOOK_URL)
 
 
 access_token = None
