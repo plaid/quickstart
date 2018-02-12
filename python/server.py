@@ -36,9 +36,9 @@ def get_access_token():
   global access_token
   public_token = request.form['public_token']
   exchange_response = client.Item.public_token.exchange(public_token)
-  print 'public token: ' + public_token
-  print 'access token: ' + exchange_response['access_token']
-  print 'item ID: ' + exchange_response['item_id']
+  print('public token: ' + public_token)
+  print('access token: ' + exchange_response['access_token'])
+  print('item ID: ' + exchange_response['item_id'])
 
   access_token = exchange_response['access_token']
 
