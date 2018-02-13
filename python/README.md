@@ -7,11 +7,8 @@ git clone https://github.com/plaid/quickstart.git
 cd quickstart/python
 pip install -r requirements.txt
 
-# Fill in your Plaid API keys (client ID, secret, public_key)
-# to test!
-PLAID_CLIENT_ID=[CLIENT_ID] \
-PLAID_SECRET=[SECRET] \
-PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
+# Fill in your API keys (https://dashboard.plaid.com/account/keys) in
+# server.py and then start the sample app:
 python server.py
-# Go to http://localhost:5000
+# Go to http://127.0.0.1:5000
 ```

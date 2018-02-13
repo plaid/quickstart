@@ -10,14 +10,14 @@ app = Flask(__name__)
 
 
 # Fill in your Plaid API keys - https://dashboard.plaid.com/account/keys
-PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
-PLAID_SECRET = os.getenv('PLAID_SECRET')
-PLAID_PUBLIC_KEY = os.getenv('PLAID_PUBLIC_KEY')
+PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID', '<YOUR_CLIENT_ID>')
+PLAID_SECRET = os.getenv('PLAID_SECRET', '<YOUR_SECRET>')
+PLAID_PUBLIC_KEY = os.getenv('PLAID_PUBLIC_KEY', '<YOUR_PUBLIC_KEY>')
 # Use 'sandbox' to test with Plaid's Sandbox environment (username: user_good,
 # password: pass_good)
 # Use `development` to test with live users and credentials and `production`
 # to go live
-PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
+PLAID_ENV = os.getenv('PLAID_ENV', '<DESIRED_ENVIRONMENT>')
 
 
 client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
