@@ -11,10 +11,10 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "1.15.x",
-    "ejs": "2.4.x",
+    "ejs": "2.5.x",
     "envvar": "1.1.x",
     "express": "4.13.x",
-    "moment": "2.17.x",
-    "plaid": "2.0.x"
+    "moment": "2.19.x",
+    "plaid": "2.3.x"
   }
 }
