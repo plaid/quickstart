@@ -46,7 +46,7 @@ app.post('/get_access_token', function(request, response, next) {
   client.exchangePublicToken(PUBLIC_TOKEN, function(error, tokenResponse) {
     if (error != null) {
       var msg = 'Could not exchange public_token!';
-      console.log(msg + '\n' + error);
+      console.log(msg + '\n' + JSON.stringify(error));
       return response.json({
         error: msg
       });
@@ -67,7 +67,7 @@ app.get('/accounts', function(request, response, next) {
   client.getAuth(ACCESS_TOKEN, function(error, authResponse) {
     if (error != null) {
       var msg = 'Unable to pull accounts from the Plaid API.';
-      console.log(msg + '\n' + error);
+      console.log(msg + '\n' + JSON.stringify(error));
       return response.json({
         error: msg
       });
@@ -97,7 +97,7 @@ app.post('/item', function(request, response, next) {
     client.getInstitutionById(itemResponse.item.institution_id, function(err, instRes) {
       if (err != null) {
         var msg = 'Unable to pull institution information from the Plaid API.';
-        console.log(msg + '\n' + error);
+        console.log(msg + '\n' + JSON.stringify(error));
         return response.json({
           error: msg
         });
