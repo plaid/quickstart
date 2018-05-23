@@ -5,9 +5,11 @@ This repository accompanies Plaid's [**quickstart guide**][quickstart]. Here you
 - [Node][node-example]
 - [Ruby][ruby-example]
 - [Python][python-example]
+- [Go][go-example]
 
 [quickstart]: https://plaid.com/docs/quickstart
 [resources]: https://plaid.com/docs/resources
 [node-example]: /node
 [ruby-example]: /ruby
 [python-example]: /python
+[go-example]: /go
