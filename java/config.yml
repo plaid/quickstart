@@ -1,0 +1,8 @@
+logging:
+  level: INFO
+  loggers:
+    com.plaid: DEBUG
+
+plaidClientID: ${PLAID_CLIENT_ID}
+plaidPublicKey: ${PLAID_PUBLIC_KEY}
+plaidSecret: ${PLAID_SECRET}
