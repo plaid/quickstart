@@ -2,7 +2,6 @@ package com.plaid.quickstart.resources;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.plaid.client.PlaidClient;
 import com.plaid.client.request.ItemPublicTokenExchangeRequest;
 import com.plaid.client.response.ItemPublicTokenExchangeResponse;
@@ -14,51 +13,34 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.core.MediaType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import retrofit2.Response;
 
-@Path("/")
+@Path("/get_access_token")
+@Produces(MediaType.APPLICATION_JSON)
 public class AccessTokenResource {
-    private PlaidClient plaidClient;
+  private static final Logger LOG = LoggerFactory.getLogger(AccessTokenResource.class);
 
-    public AccessTokenResource(PlaidClient _plaidClient) {
-        plaidClient = _plaidClient;
-    }
+  private PlaidClient plaidClient;
 
-    @POST
-    @Path("get_access_token")
-    @Produces("application/json")
-    public Object getAccessToken(@FormParam("public_token") String publicToken) throws IOException {
-        Response<ItemPublicTokenExchangeResponse> itemResponse = plaidClient.service()
-            .itemPublicTokenExchange(new ItemPublicTokenExchangeRequest(publicToken))
-            .execute();
+  public AccessTokenResource(PlaidClient plaidClient) {
+    this.plaidClient = plaidClient;
+  }
 
-        QuickstartApplication.accessToken = itemResponse.body().getAccessToken();
+  @POST
+  public ItemPublicTokenExchangeResponse getAccessToken(@FormParam("public_token") String publicToken) throws IOException {
+    Response<ItemPublicTokenExchangeResponse> itemResponse = plaidClient.service()
+        .itemPublicTokenExchange(new ItemPublicTokenExchangeRequest(publicToken))
+        .execute();
 
-        System.out.println("public token: " + publicToken);
-        System.out.println("access token: " + QuickstartApplication.accessToken);
-        System.out.println("item ID: " + itemResponse.body().getItemId());
+    QuickstartApplication.accessToken = itemResponse.body().getAccessToken();
 
-        return itemResponse.body();
-    }
+    LOG.info("public token: " + publicToken);
+    LOG.info("access token: " + QuickstartApplication.accessToken);
+    LOG.info("item ID: " + itemResponse.body().getItemId());
 
-    public class ItemResponse {
-        private String accessToken;
-        private String itemId;
-
-        public ItemResponse(String _accessToken, String _itemId) {
-            accessToken = _accessToken;
-            itemId = _itemId;
-        }
-
-        @JsonProperty
-        public String getAccessToken() {
-            return accessToken;
-        }
-
-        @JsonProperty
-        public String getItemID() {
-            return itemId;
-        }
-    }
+    return itemResponse.body();
+  }
 }
-
