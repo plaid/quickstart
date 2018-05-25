@@ -17,18 +17,18 @@ import retrofit2.Response;
 @Path("/create_public_token")
 @Produces(MediaType.APPLICATION_JSON)
 public class PublicTokenResource {
-    private PlaidClient plaidClient;
+  private PlaidClient plaidClient;
 
-    public PublicTokenResource(PlaidClient _plaidClient) {
-        plaidClient = _plaidClient;
-    }
+  public PublicTokenResource(PlaidClient plaidClient) {
+    this.plaidClient = plaidClient;
+  }
 
-    @GET
-    public Object createPublicToken() throws IOException {
-        Response<ItemPublicTokenCreateResponse> publicTokenResponse = plaidClient.service()
-            .itemPublicTokenCreate(new ItemPublicTokenCreateRequest(QuickstartApplication.accessToken))
-            .execute();
+  @GET
+  public ItemPublicTokenCreateResponse createPublicToken() throws IOException {
+    Response<ItemPublicTokenCreateResponse> publicTokenResponse = plaidClient.service()
+      .itemPublicTokenCreate(new ItemPublicTokenCreateRequest(QuickstartApplication.accessToken))
+      .execute();
 
-        return publicTokenResponse.body();
-    }
+    return publicTokenResponse.body();
+  }
 }

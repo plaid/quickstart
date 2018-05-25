@@ -1,5 +1,7 @@
 ### plaid-java quickstart
 
+Requires java version 10.0.1.
+
 [Quickstart guide](https://plaid.com/docs/quickstart)
 
 ``` bash

@@ -22,38 +22,38 @@ import retrofit2.Response;
 @Path("/item")
 @Produces(MediaType.APPLICATION_JSON)
 public class ItemResource {
-    private PlaidClient plaidClient;
+  private PlaidClient plaidClient;
 
-    public ItemResource(PlaidClient _plaidClient) {
-        plaidClient = _plaidClient;
+  public ItemResource(PlaidClient plaidClient) {
+    this.plaidClient = plaidClient;
+  }
+
+  @POST
+  public ItemResponse getItem() throws IOException {
+    Response<ItemGetResponse> itemResponse = plaidClient.service()
+      .itemGet(new ItemGetRequest(QuickstartApplication.accessToken))
+      .execute();
+
+    Response<InstitutionsGetByIdResponse> institutionsResponse = plaidClient.service()
+      .institutionsGetById(new InstitutionsGetByIdRequest(itemResponse.body().getItem().getInstitutionId()))
+      .execute();
+
+    return new ItemResponse(
+      itemResponse.body().getItem(),
+      institutionsResponse.body().getInstitution()
+    );
+  }
+
+  public static class ItemResponse {
+    @JsonProperty
+    public ItemStatus item;
+
+    @JsonProperty
+    public Institution institution;
+
+    public ItemResponse(ItemStatus item, Institution institution) {
+      this.item = item;
+      this.institution = institution;
     }
-
-    @POST
-    public ItemResponse getItem() throws IOException {
-        Response<ItemGetResponse> itemResponse = plaidClient.service()
-            .itemGet(new ItemGetRequest(QuickstartApplication.accessToken))
-            .execute();
-
-        Response<InstitutionsGetByIdResponse> institutionsResponse = plaidClient.service()
-            .institutionsGetById(new InstitutionsGetByIdRequest(itemResponse.body().getItem().getInstitutionId()))
-            .execute();
-
-        return new ItemResponse(
-            itemResponse.body().getItem(),
-            institutionsResponse.body().getInstitution()
-        );
-    }
-
-    public static class ItemResponse {
-        @JsonProperty
-        public ItemStatus item;
-
-        @JsonProperty
-        public Institution institution;
-
-        public ItemResponse(ItemStatus _item, Institution _institution) {
-            item = _item;
-            institution = _institution;
-        }
-    }
+  }
 }

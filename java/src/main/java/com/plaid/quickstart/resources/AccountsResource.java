@@ -17,18 +17,18 @@ import retrofit2.Response;
 @Path("/accounts")
 @Produces(MediaType.APPLICATION_JSON)
 public class AccountsResource {
-    private PlaidClient plaidClient;
+  private PlaidClient plaidClient;
 
-    public AccountsResource(PlaidClient _plaidClient) {
-        plaidClient = _plaidClient;
-    }
+  public AccountsResource(PlaidClient plaidClient) {
+    this.plaidClient = plaidClient;
+  }
 
-    @GET
-    public Object getAccounts() throws IOException {
-        Response<AccountsGetResponse> accountsResponse = plaidClient.service()
-            .accountsGet(new AccountsGetRequest(QuickstartApplication.accessToken))
-            .execute();
+  @GET
+  public AccountsGetResponse getAccounts() throws IOException {
+    Response<AccountsGetResponse> accountsResponse = plaidClient.service()
+      .accountsGet(new AccountsGetRequest(QuickstartApplication.accessToken))
+      .execute();
 
-        return accountsResponse.body();
-    }
+    return accountsResponse.body();
+  }
 }
