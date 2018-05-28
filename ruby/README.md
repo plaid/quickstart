@@ -14,6 +14,7 @@ bundle
 PLAID_CLIENT_ID=[CLIENT_ID] \
 PLAID_SECRET=[SECRET] \
 PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
+PLAID_ENV=sandbox \
 ruby app.rb
 # Go to http://localhost:4567
 ```

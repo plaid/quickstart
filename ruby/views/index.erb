@@ -53,7 +53,7 @@
         var handler = Plaid.create({
             apiVersion: 'v2',
             clientName: 'Plaid Walkthrough Demo',
-            env: 'sandbox',
+            env: '<%= ENV["PLAID_ENV"] %>',
             product: ['transactions'],
             key: '<%= ENV["PLAID_PUBLIC_KEY"] %>',
             onSuccess: function(public_token) {
