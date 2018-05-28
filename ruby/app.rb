@@ -4,7 +4,7 @@ require 'plaid'
 
 set :public_folder, File.dirname(__FILE__) + '/public'
 
-client = Plaid::Client.new(env: :sandbox,
+client = Plaid::Client.new(env: ENV['PLAID_ENV'],
                            client_id: ENV['PLAID_CLIENT_ID'],
                            secret: ENV['PLAID_SECRET'],
                            public_key: ENV['PLAID_PUBLIC_KEY'])
