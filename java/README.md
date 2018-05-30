@@ -7,7 +7,7 @@ Requires java version >= 8.
 ``` bash
 git clone https://github.com/plaid/quickstart.git
 cd quickstart/java
-mvn clean install
+mvn clean package
 
 # Fill in your Plaid API keys (client ID, secret, public_key)
 # to test!

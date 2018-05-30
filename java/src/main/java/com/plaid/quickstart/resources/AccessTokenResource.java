@@ -35,6 +35,7 @@ public class AccessTokenResource {
         .itemPublicTokenExchange(new ItemPublicTokenExchangeRequest(publicToken))
         .execute();
 
+    // Ideally, we would store this somewhere more persistent
     QuickstartApplication.accessToken = itemResponse.body().getAccessToken();
 
     LOG.info("public token: " + publicToken);
