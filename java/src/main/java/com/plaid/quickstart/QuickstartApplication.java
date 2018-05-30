@@ -17,7 +17,6 @@ import com.plaid.quickstart.resources.PublicTokenResource;
 import com.plaid.quickstart.resources.TransactionsResource;
 
 public class QuickstartApplication extends Application<QuickstartConfiguration> {
-
   private PlaidClient plaidClient;
   public static String accessToken;
 
@@ -50,17 +49,11 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
       .sandboxBaseUrl() // or equivalent, depending on which environment you're calling into
       .build();
 
-    final AccessTokenResource accessTokenResource = new AccessTokenResource(plaidClient);
-    environment.jersey().register(accessTokenResource);
-    final AccountsResource accountsResource = new AccountsResource(plaidClient);
-    environment.jersey().register(accountsResource);
-    final IndexResource indexResource = new IndexResource("sandbox", configuration.getPlaidPublicKey());
-    environment.jersey().register(indexResource);
-    final ItemResource itemResource = new ItemResource(plaidClient);
-    environment.jersey().register(itemResource);
-    final PublicTokenResource publicTokenResource = new PublicTokenResource(plaidClient);
-    environment.jersey().register(publicTokenResource);
-    final TransactionsResource transactionsResource = new TransactionsResource(plaidClient);
-    environment.jersey().register(transactionsResource);
+    environment.jersey().register(new AccessTokenResource(plaidClient));
+    environment.jersey().register(new AccountsResource(plaidClient));
+    environment.jersey().register(new IndexResource("sandbox", configuration.getPlaidPublicKey()));
+    environment.jersey().register(new ItemResource(plaidClient));
+    environment.jersey().register(new PublicTokenResource(plaidClient));
+    environment.jersey().register(new TransactionsResource(plaidClient));
   }
 }
