@@ -1,5 +1,7 @@
 'use strict';
 
+var util = require('util');
+
 var envvar = require('envvar');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -23,7 +25,8 @@ var client = new plaid.Client(
   PLAID_CLIENT_ID,
   PLAID_SECRET,
   PLAID_PUBLIC_KEY,
-  plaid.environments[PLAID_ENV]
+  plaid.environments[PLAID_ENV],
+  {version: '2018-05-22'}
 );
 
 var app = express();
@@ -46,40 +49,72 @@ app.post('/get_access_token', function(request, response, next) {
   client.exchangePublicToken(PUBLIC_TOKEN, function(error, tokenResponse) {
     if (error != null) {
       var msg = 'Could not exchange public_token!';
-      console.log(msg + '\n' + JSON.stringify(error));
+      console.log(msg + '\n' + error);
       return response.json({
         error: msg
       });
     }
     ACCESS_TOKEN = tokenResponse.access_token;
     ITEM_ID = tokenResponse.item_id;
-    console.log('Access Token: ' + ACCESS_TOKEN);
-    console.log('Item ID: ' + ITEM_ID);
+    prettyPrintResponse(tokenResponse);
     response.json({
-      'error': false
+      access_token: ACCESS_TOKEN,
+      item_id: ITEM_ID,
+      error: false
     });
   });
 });
 
-app.get('/accounts', function(request, response, next) {
-  // Retrieve high-level account information and account and routing numbers
-  // for each account associated with the Item.
-  client.getAuth(ACCESS_TOKEN, function(error, authResponse) {
-    if (error != null) {
-      var msg = 'Unable to pull accounts from the Plaid API.';
-      console.log(msg + '\n' + JSON.stringify(error));
+app.post('/get_product', function(request, response, next) {
+  // Retrieve product data for an Item
+  var productMap = {
+    auth: 'getAuth',
+    balance: 'getBalance',
+    transactions: 'getTransactions',
+    identity: 'getIdentity',
+    accounts: 'getAccounts',
+  };
+  if (productMap[request.body.product] == null) {
+      var msg = '"' + String(request.body.product) + '" is an invalid product.';
+      console.log(msg);
       return response.json({
         error: msg
       });
-    }
-
-    console.log(authResponse.accounts);
-    response.json({
-      error: false,
-      accounts: authResponse.accounts,
-      numbers: authResponse.numbers,
+  } else if (request.body.product == 'transactions') {
+    // Pull transactions for the Item for the last 30 days
+    var startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
+    var endDate = moment().format('YYYY-MM-DD');
+    client.getTransactions(ACCESS_TOKEN, startDate, endDate, {
+      count: 250,
+      offset: 0,
+    }, function(error, transactionsResponse) {
+      if (error != null) {
+        prettyPrintResponse(error);
+        return response.json({
+          error: error
+        });
+      } else {
+        prettyPrintResponse(transactionsResponse);
+        response.json({error: false, transactions: transactionsResponse});
+      }
     });
-  });
+
+  } else {
+    client[productMap[request.body.product]](ACCESS_TOKEN, function(error, productResponse) {
+      if (error != null) {
+        var msg = 'Unable to pull "' + request.body.product + '" from the Plaid API.';
+        prettyPrintResponse(error);
+        return response.json({
+          error: msg
+        });
+      }
+
+      prettyPrintResponse(productResponse);
+      var responseBody = {error: false};
+      responseBody[request.body.product] = productResponse;
+      response.json(responseBody);
+    });
+  }
 });
 
 app.post('/item', function(request, response, next) {
@@ -87,21 +122,21 @@ app.post('/item', function(request, response, next) {
   // billed products, webhook information, and more.
   client.getItem(ACCESS_TOKEN, function(error, itemResponse) {
     if (error != null) {
-      console.log(JSON.stringify(error));
+      prettyPrintResponse(error);
       return response.json({
         error: error
       });
     }
-
     // Also pull information about the institution
     client.getInstitutionById(itemResponse.item.institution_id, function(err, instRes) {
       if (err != null) {
         var msg = 'Unable to pull institution information from the Plaid API.';
-        console.log(msg + '\n' + JSON.stringify(error));
+        console.log(msg + '\n' + error);
         return response.json({
           error: msg
         });
       } else {
+        prettyPrintResponse(itemResponse);
         response.json({
           item: itemResponse.item,
           institution: instRes.institution,
@@ -111,25 +146,20 @@ app.post('/item', function(request, response, next) {
   });
 });
 
-app.post('/transactions', function(request, response, next) {
-  // Pull transactions for the Item for the last 30 days
-  var startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
-  var endDate = moment().format('YYYY-MM-DD');
-  client.getTransactions(ACCESS_TOKEN, startDate, endDate, {
-    count: 250,
-    offset: 0,
-  }, function(error, transactionsResponse) {
-    if (error != null) {
-      console.log(JSON.stringify(error));
-      return response.json({
-        error: error
-      });
-    }
-    console.log('pulled ' + transactionsResponse.transactions.length + ' transactions');
-    response.json(transactionsResponse);
-  });
-});
-
 var server = app.listen(APP_PORT, function() {
   console.log('plaid-walkthrough server listening on port ' + APP_PORT);
+});
+
+var prettyPrintResponse = response => {
+  console.log(util.inspect(response, {colors: true, depth: 4}));
+};
+
+app.post('/set_access_token', function(request, response, next) {
+  ACCESS_TOKEN = request.body.access_token;
+  client.getItem(ACCESS_TOKEN, function(error, itemResponse) {
+    response.json({
+      item_id: itemResponse.item.item_id,
+      error: false,
+    });
+  });
 });
