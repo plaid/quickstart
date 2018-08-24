@@ -72,7 +72,6 @@ Item overview
 }
 
 .item-overview__id {
-  white-space: nowrap;
   text-overflow: ellipsis;
   overflow-x: hidden;
 }
