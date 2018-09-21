@@ -11,6 +11,7 @@ bundle
 
 # Start the sample app using your API keys available from the Dashboard:
 # https://dashboard.plaid.com
+PLAID_ENV=sandbox \
 PLAID_CLIENT_ID=[CLIENT_ID] \
 PLAID_SECRET=[SECRET] \
 PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
