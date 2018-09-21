@@ -210,7 +210,7 @@
     });
 
     $('#get-accounts-btn').on('click', function(e) {
-      $.post('/get_product', {product: 'auth'}, function(data) {
+      $.get('/accounts', function(data) {
         $('#get-accounts-data').slideUp(function() {
           var authData = data.auth;
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balances</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
@@ -229,7 +229,7 @@
     });
 
     $('#get-auth-btn').on('click', function(e) {
-      $.post('/get_product', {product: 'auth'}, function(data) {
+      $.get('/auth', function(data) {
         $('#get-auth-data').slideUp(function() {
           var authData = data.auth;
           var isAch = authData.numbers.ach.length > 0;
@@ -269,7 +269,7 @@
     });
 
     $('#get-identity-btn').on('click', function(e) {
-      $.post('/get_product', {product: 'identity'}, function(data) {
+      $.get('/identity', function(data) {
         $('#get-identity-data').slideUp(function() {
           var identityData = data.identity.identity;
           var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
@@ -298,7 +298,7 @@
     });
 
     $('#get-item-btn').on('click', function(e) {
-      $.post('/item', function(data) {
+      $.get('/item', function(data) {
         $('#get-item-data').slideUp(function() {
           if (data.error)
             $(this).html('<p>' + data.error + '</p>').slideDown();
@@ -315,7 +315,7 @@
     });
 
     $('#get-transactions-btn').on('click', function(e) {
-      $.post('/get_product', {product: 'transactions'}, function(data) {
+      $.get('/transactions', function(data) {
         if (data.error != null && data.error.error_code != null) {
           // Format the error
           var errorHtml = '<div class="inner"><p>' +
@@ -356,7 +356,7 @@
     });
 
     $('#get-balance-btn').on('click', function(e) {
-      $.post('/get_product', {product: 'balance'}, function(data) {
+      $.get('/balance', function(data) {
         $('#get-balance-data').slideUp(function() {
           var balanceData = data.balance;
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balance</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
