@@ -175,7 +175,7 @@
       apiVersion: 'v2',
       clientName: 'Plaid Quickstart',
       env: '{{ plaid_environment }}',
-      product: ['auth'],
+      product: ['transactions'],
       key: '{{ plaid_public_key }}',
       // webhook: 'https://your-domain.tld/plaid-webhook',
       onSuccess: function(public_token) {
@@ -319,11 +319,11 @@
           // Format the error
           var errorHtml = '<div class="inner"><p>' +
            '<strong>' + data.error.error_code + ':</strong> ' +
-           data.error.error_message + '</p></div>';
+           (data.error.display_message == null ? data.error.error_message : data.error.display_message)  + '</p></div>';
 
           if (data.error.error_code === 'PRODUCT_NOT_READY') {
             // Add additional context for `PRODUCT_NOT_READY` errors
-            errorHtml += '<div class="inner"><p>The PRODUCT_NOT_READY ' +
+            errorHtml += '<div class="inner"><p>Note: The PRODUCT_NOT_READY ' +
              'error is returned when a request to retrieve Transaction data ' +
              'is made before Plaid finishes the <a href="https://plaid.com/' +
              'docs/quickstart/#transaction-data-with-webhooks">initial ' +

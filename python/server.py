@@ -37,13 +37,14 @@ access_token = None
 def get_access_token():
   global access_token
   public_token = request.form['public_token']
-  exchange_response = client.Item.public_token.exchange(public_token)
-  access_token = exchange_response['access_token']
+  try:
+    exchange_response = client.Item.public_token.exchange(public_token)
+  except plaid.errors.PlaidError as e:
+    return jsonify(format_error(e))
 
   pretty_print_response(exchange_response)
-
+  access_token = exchange_response['access_token']
   return jsonify(exchange_response)
-
 
 # Retrieve ACH or ETF account numbers for an Item
 # https://plaid.com/docs/#auth
@@ -66,7 +67,7 @@ def get_transactions():
   try:
     transactions_response = client.Transactions.get(access_token, start_date, end_date)
   except plaid.errors.PlaidError as e:
-    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+    return jsonify(format_error(e))
   pretty_print_response(transactions_response)
   return jsonify({'error': None, 'transactions': transactions_response})
 
@@ -123,6 +124,9 @@ def set_access_token():
 
 def pretty_print_response(response):
   print json.dumps(response, indent=2, sort_keys=True)
+
+def format_error(e):
+  return {'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type, 'error_message': e.message } }
 
 if __name__ == '__main__':
     app.run(port=os.getenv('PORT', 5000))

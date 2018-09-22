@@ -52,10 +52,9 @@ app.post('/get_access_token', function(request, response, next) {
   PUBLIC_TOKEN = request.body.public_token;
   client.exchangePublicToken(PUBLIC_TOKEN, function(error, tokenResponse) {
     if (error != null) {
-      var msg = 'Could not exchange public_token!';
-      console.log(msg + '\n' + JSON.stringify(error));
+      prettyPrintResponse(error);
       return response.json({
-        error: msg
+        error: error,
       });
     }
     ACCESS_TOKEN = tokenResponse.access_token;
@@ -64,7 +63,7 @@ app.post('/get_access_token', function(request, response, next) {
     response.json({
       access_token: ACCESS_TOKEN,
       item_id: ITEM_ID,
-      error: false
+      error: null,
     });
   });
 });
@@ -87,7 +86,7 @@ app.get('/transactions', function(request, response, next) {
       });
     } else {
       prettyPrintResponse(transactionsResponse);
-      response.json({error: false, transactions: transactionsResponse});
+      response.json({error: null, transactions: transactionsResponse});
     }
   });
 });
