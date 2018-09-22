@@ -5,13 +5,19 @@
 ``` bash
 git clone https://github.com/plaid/quickstart.git
 cd quickstart/python
+
+# If you use virtualenv
+# virtualenv venv
+# source venv/bin/activate
+
 pip install -r requirements.txt
 
-# Fill in your Plaid API keys (client ID, secret, public_key)
-# to test!
-PLAID_CLIENT_ID=[CLIENT_ID] \
-PLAID_SECRET=[SECRET] \
-PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
+# Start the Quickstart with your API keys from the Dashboard
+# https://dashboard.plaid.com/account/keys
+PLAID_CLIENT_ID='[CLIENT_ID]' \
+PLAID_SECRET='[SECRET]' \
+PLAID_PUBLIC_KEY='[PUBLIC_KEY]' \
+PLAID_ENV=sandbox \
 python server.py
 # Go to http://localhost:5000
 ```
