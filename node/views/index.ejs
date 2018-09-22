@@ -212,9 +212,9 @@
     $('#get-accounts-btn').on('click', function(e) {
       $.get('/accounts', function(data) {
         $('#get-accounts-data').slideUp(function() {
-          var authData = data.auth;
+          var accountsData = data.accounts;
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balances</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
-          authData.accounts.forEach(function(account, idx) {
+          accountsData.accounts.forEach(function(account, idx) {
             html += '<tr>';
             html += '<td>' + account.name + '</td>';
             html += '<td>$' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</td>';
