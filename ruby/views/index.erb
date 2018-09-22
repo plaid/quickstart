@@ -340,7 +340,7 @@
     });
 
     $('#get-balance-btn').on('click', function(e) {
-      $.post('/get_product', {product: 'balance'}, function(data) {
+      $.get('/balance', function(data) {
         $('#get-balance-data').slideUp(function() {
           var balanceData = data.balance;
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balance</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
