@@ -1,7 +1,9 @@
+import base64
 import os
 import datetime
 import plaid
 import json
+import time
 from flask import Flask
 from flask import render_template
 from flask import request
@@ -103,6 +105,50 @@ def get_accounts():
     return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
   pretty_print_response(accounts_response)
   return jsonify({'error': None, 'accounts': accounts_response})
+
+# Create and then retrieve an Asset Report for one or more Items. Note that an
+# Asset Report can contain up to 100 items, but for simplicity we're only
+# including one Item here.
+# https://plaid.com/docs/#assets
+@app.route('/assets', methods=['GET'])
+def get_assets():
+  try:
+    asset_report_create_response = client.AssetReport.create([access_token], 10)
+  except plaid.errors.PlaidError as e:
+    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+  pretty_print_response(asset_report_create_response)
+
+  asset_report_token = asset_report_create_response['asset_report_token']
+
+  # Poll for the completion of the Asset Report.
+  num_retries_remaining = 20
+  asset_report_json = None
+  while num_retries_remaining > 0:
+    try:
+      asset_report_get_response = client.AssetReport.get(asset_report_token)
+      asset_report_json = asset_report_get_response['report']
+      break
+    except plaid.errors.PlaidError as e:
+      if e.code == 'PRODUCT_NOT_READY':
+        num_retries_remaining -= 1
+        time.sleep(1)
+        continue
+      return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+
+  if asset_report_json == None:
+    return jsonify({'error': {'display_message': 'Timed out when polling for Asset Report', 'error_code': e.code, 'error_type': e.type } })
+
+  asset_report_pdf = None
+  try:
+    asset_report_pdf = client.AssetReport.get_pdf(asset_report_token)
+  except plaid.errors.PlaidError as e:
+    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+
+  return jsonify({
+    'error': None,
+    'json': asset_report_json,
+    'pdf': base64.b64encode(asset_report_pdf),
+  })
 
 # Retrieve high-level information about an Item
 # https://plaid.com/docs/#retrieve-item

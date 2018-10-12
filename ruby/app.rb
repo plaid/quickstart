@@ -1,3 +1,4 @@
+require 'base64'
 require 'date'
 require 'json'
 require 'plaid'
@@ -112,6 +113,65 @@ get '/accounts' do
     error_response.to_json
   end
 end
+
+# Create and then retrieve an Asset Report for one or more Items. Note that an
+# Asset Report can contain up to 100 items, but for simplicity we're only
+# including one Item here.
+# https://plaid.com/docs/#assets
+# rubocop:disable Metrics/BlockLength
+get '/assets' do
+  begin
+    asset_report_create_response =
+      client.asset_report.create([access_token], 10, {})
+    pretty_print_response(asset_report_create_response)
+  rescue Plaid::PlaidAPIError => e
+    error_response = format_error(e)
+    pretty_print_response(error_response)
+    content_type :json
+    error_response.to_json
+  end
+
+  asset_report_token = asset_report_create_response['asset_report_token']
+
+  asset_report_json = nil
+  num_retries_remaining = 1
+  while num_retries_remaining > 0
+    begin
+      asset_report_get_response = client.asset_report.get(asset_report_token)
+      asset_report_json = asset_report_get_response['report']
+      break
+    rescue Plaid::PlaidAPIError => e
+      if e.error_code == 'PRODUCT_NOT_READY'
+        num_retries_remaining -= 1
+        sleep(1)
+        next
+      end
+      error_response = format_error(e)
+      pretty_print_response(error_response)
+      content_type :json
+      return error_response.to_json
+    end
+  end
+
+  if asset_report_json.nil?
+    content_type :json
+    return {
+      error: {
+        error_code: 0,
+        error_message: 'Timed out when polling for Asset Report'
+      }
+    }.to_json
+  end
+
+  asset_report_pdf = client.asset_report.get_pdf(asset_report_token)
+
+  content_type :json
+  {
+    json: asset_report_json,
+    pdf: Base64.encode64(asset_report_pdf)
+  }.to_json
+end
+# rubocop:enable Metrics/BlockLength
 
 # Retrieve high-level information about an Item
 # https://plaid.com/docs/#retrieve-item

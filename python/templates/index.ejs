@@ -121,6 +121,28 @@
               </div>
             </div>
 
+            <!-- Assets -->
+            <div class="item-data-row">
+                <div class="item-data-row__left">
+                  <div class="item-data-row__request-type">post</div>
+                </div>
+                <div class="item-data-row__center">
+                  <div class="item-data-row__nicename">Assets</div>
+                  <div class="item-data-row__endpoint">/asset_report/*</div>
+                  <div class="item-data-row__description">Create a point-in-time snapshot of a user's assets.</div>
+                </div>
+
+                <div class="item-data-row__right">
+                  <button id="get-assets-btn" class="button button--is-small button--is-default button--is-full-width">Send request</button>
+
+                  <a id="download-assets-pdf-btn" class="button button--is-small button--is-primary button--is-full-width" style="display: none; margin: 10px 0px;";>Download as PDF</a>
+                </div>
+
+                <div class="item-data-row__response">
+                  <table><tbody id="get-assets-data"></tbody></table>
+                </div>
+              </div>
+
           </div>
 
           <div class="box">
@@ -175,7 +197,7 @@
       apiVersion: 'v2',
       clientName: 'Plaid Quickstart',
       env: '{{ plaid_environment }}',
-      product: ['transactions'],
+      product: ['assets', 'transactions'],
       key: '{{ plaid_public_key }}',
       // webhook: 'https://your-domain.tld/plaid-webhook',
       onSuccess: function(public_token) {
@@ -367,6 +389,38 @@
             html += '<td>' + account.mask + '</td>';
             html += '</tr>';
           });
+
+          $(this).html(html).slideDown();
+        });
+      });
+    });
+
+    $('#get-assets-btn').on('click', function(e) {
+      $.get('/assets', function(data) {
+        $('#get-assets-data').slideUp(function() {
+          var reportData = data.json;
+          var html = `
+          <tr>
+            <td><strong>Account</strong></td>
+            <td><strong>Balance</strong></td>
+            <td><strong># Transactions</strong></td>
+            <td><strong># Days Available</strong></td>
+          </tr>`;
+          reportData.items.forEach(function(item, itemIdx) {
+            item.accounts.forEach(function(account, accountIdx) {
+              html += '<tr>';
+              html += '<td>' + account.name + '</td>';
+              html += '<td>$' + account.balances.current + '</td>'
+              html += '<td>' + account.transactions.length + '</td>';
+              html += '<td>' + account.days_available + '</td>';
+              html += '</tr>';
+            });
+          });
+
+          $('#download-assets-pdf-btn')
+            .attr('href', `data:application/pdf;base64,${data.pdf}`)
+            .attr('download', 'Asset Report.pdf')
+            .show();
 
           $(this).html(html).slideDown();
         });
