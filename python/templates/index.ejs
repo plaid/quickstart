@@ -121,8 +121,8 @@
               </div>
             </div>
 
-            <!-- Assets -->
-            <div class="item-data-row">
+            <!-- Assets (hidden unless 'assets' is included in the product list) -->
+            <div id='assets' class="item-data-row" style='display:none;'>
                 <div class="item-data-row__left">
                   <div class="item-data-row__request-type">post</div>
                 </div>
@@ -193,11 +193,16 @@
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
   (function($) {
+    var products = '{{ plaid_products }}'.split(',');
+    if (products.includes('assets')) {
+      $('#assets').show();
+    }
+
     var handler = Plaid.create({
       apiVersion: 'v2',
       clientName: 'Plaid Quickstart',
       env: '{{ plaid_environment }}',
-      product: ['assets', 'transactions'],
+      product: products,
       key: '{{ plaid_public_key }}',
       // webhook: 'https://your-domain.tld/plaid-webhook',
       onSuccess: function(public_token) {
