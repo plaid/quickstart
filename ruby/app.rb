@@ -134,7 +134,7 @@ get '/assets' do
   asset_report_token = asset_report_create_response['asset_report_token']
 
   asset_report_json = nil
-  num_retries_remaining = 1
+  num_retries_remaining = 20
   while num_retries_remaining > 0
     begin
       asset_report_get_response = client.asset_report.get(asset_report_token)
