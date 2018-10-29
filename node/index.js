@@ -14,6 +14,11 @@ var PLAID_SECRET = envvar.string('PLAID_SECRET');
 var PLAID_PUBLIC_KEY = envvar.string('PLAID_PUBLIC_KEY');
 var PLAID_ENV = envvar.string('PLAID_ENV', 'sandbox');
 
+// PLAID_PRODUCTS is a comma-separated list of products to use when initializing
+// Link. Note that this list must contain 'assets' in order for the app to be
+// able to create and retrieve asset reports.
+var PLAID_PRODUCTS = envvar.string('PLAID_PRODUCTS', 'transactions');
+
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
 var ACCESS_TOKEN = null;
@@ -42,6 +47,7 @@ app.get('/', function(request, response, next) {
   response.render('index.ejs', {
     PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
     PLAID_ENV: PLAID_ENV,
+    PLAID_PRODUCTS: PLAID_PRODUCTS,
   });
 });
 
@@ -151,6 +157,50 @@ app.get('/auth', function(request, response, next) {
   });
 });
 
+// Create and then retrieve an Asset Report for one or more Items. Note that an
+// Asset Report can contain up to 100 items, but for simplicity we're only
+// including one Item here.
+// https://plaid.com/docs/#assets
+app.get('/assets', function(request, response, next) {
+  // You can specify up to two years of transaction history for an Asset
+  // Report.
+  var daysRequested = 10;
+
+  // The `options` object allows you to specify a webhook for Asset Report
+  // generation, as well as information that you want included in the Asset
+  // Report. All fields are optional.
+  var options = {
+    client_report_id: 'Custom Report ID #123',
+    // webhook: 'https://your-domain.tld/plaid-webhook',
+    user: {
+      client_user_id: 'Custom User ID #456',
+      first_name: 'Alice',
+      middle_name: 'Bobcat',
+      last_name: 'Cranberry',
+      ssn: '123-45-6789',
+      phone_number: '555-123-4567',
+      email: 'alice@example.com',
+    },
+  };
+  client.createAssetReport(
+    [ACCESS_TOKEN],
+    daysRequested,
+    options,
+    function(error, assetReportCreateResponse) {
+      if (error != null) {
+        prettyPrintResponse(error);
+        return response.json({
+          error: error,
+        });
+      }
+      prettyPrintResponse(assetReportCreateResponse);
+
+      var assetReportToken = assetReportCreateResponse.asset_report_token;
+      respondWithAssetReport(20, assetReportToken, client, response);
+    },
+  );
+});
+
 // Retrieve information about an Item
 // https://plaid.com/docs/#retrieve-item
 app.get('/item', function(request, response, next) {
@@ -188,6 +238,61 @@ var server = app.listen(APP_PORT, function() {
 
 var prettyPrintResponse = response => {
   console.log(util.inspect(response, {colors: true, depth: 4}));
+};
+
+// This is a helper function to poll for the completion of an Asset Report and
+// then send it in the response to the client. Alternatively, you can provide a
+// webhook in the `options` object in your `/asset_report/create` request to be
+// notified when the Asset Report is finished being generated.
+var respondWithAssetReport = (
+  numRetriesRemaining,
+  assetReportToken,
+  client,
+  response,
+) => {
+  if (numRetriesRemaining == 0) {
+    return response.json({
+      error: 'Timed out when polling for Asset Report',
+    });
+  }
+
+  client.getAssetReport(
+    assetReportToken,
+    function(error, assetReportGetResponse) {
+      if (error != null) {
+        prettyPrintResponse(error);
+        if (error.error_code == 'PRODUCT_NOT_READY') {
+          setTimeout(
+            () => respondWithAssetReport(
+              --numRetriesRemaining, assetReportToken, client, response),
+            1000,
+          );
+          return
+        }
+
+        return response.json({
+          error: error,
+        });
+      }
+
+      client.getAssetReportPdf(
+        assetReportToken,
+        function(error, assetReportGetPdfResponse) {
+          if (error != null) {
+            return response.json({
+              error: error,
+            });
+          }
+
+          response.json({
+            error: null,
+            json: assetReportGetResponse.report,
+            pdf: assetReportGetPdfResponse.buffer.toString('base64'),
+          })
+        },
+      );
+    },
+  );
 };
 
 app.post('/set_access_token', function(request, response, next) {
