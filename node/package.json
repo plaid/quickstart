@@ -10,11 +10,11 @@
   "repository": "https://github.com/plaid/quickstart",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "1.18.3",
+    "body-parser": "1.18.x",
     "ejs": "2.5.x",
     "envvar": "1.1.x",
-    "express": "4.16.4",
-    "moment": "2.22.2",
+    "express": "4.16.x",
+    "moment": "2.22.x",
     "plaid": "2.x.x"
   }
 }
