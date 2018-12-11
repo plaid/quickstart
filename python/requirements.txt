@@ -1,9 +1,9 @@
-Flask==0.12
+Flask>=0.12.3
 Jinja2==2.9.5
 MarkupSafe==0.23
-Werkzeug==0.11.15
+Werkzeug>=0.14
 click==6.7
 itsdangerous==0.24
-requests==2.13.0
+requests==2.20.0
 wsgiref==0.1.2
 plaid-python>=2.3
