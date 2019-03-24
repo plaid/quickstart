@@ -197,8 +197,7 @@ app.get('/assets', function(request, response, next) {
 
       var assetReportToken = assetReportCreateResponse.asset_report_token;
       respondWithAssetReport(20, assetReportToken, client, response);
-    },
-  );
+    });
 });
 
 // Retrieve information about an Item
@@ -248,7 +247,7 @@ var respondWithAssetReport = (
   numRetriesRemaining,
   assetReportToken,
   client,
-  response,
+  response
 ) => {
   if (numRetriesRemaining == 0) {
     return response.json({
@@ -265,7 +264,7 @@ var respondWithAssetReport = (
           setTimeout(
             () => respondWithAssetReport(
               --numRetriesRemaining, assetReportToken, client, response),
-            1000,
+            1000
           );
           return
         }
@@ -289,9 +288,9 @@ var respondWithAssetReport = (
             json: assetReportGetResponse.report,
             pdf: assetReportGetPdfResponse.buffer.toString('base64'),
           })
-        },
+        }
       );
-    },
+    }
   );
 };
 
