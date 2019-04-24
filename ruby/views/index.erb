@@ -238,6 +238,10 @@
     $('#get-accounts-btn').on('click', function(e) {
       $.get('/accounts', function(data) {
         $('#get-accounts-data').slideUp(function() {
+          if (data.error != null) {
+            displayError(this, data.error);
+            return;
+          }
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balances</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
           data.accounts.accounts.forEach(function(account, idx) {
             html += '<tr>';
@@ -256,6 +260,10 @@
     $('#get-auth-btn').on('click', function(e) {
       $.get('/auth', function(data) {
         $('#get-auth-data').slideUp(function() {
+          if (data.error != null) {
+            displayError(this, data.error);
+            return;
+          }
           var authData = data.auth;
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balance</strong></td><td><strong>Account #</strong></td><td><strong>Routing #</strong></td></tr>';
           if (authData.numbers.ach.length > 0) {
@@ -282,6 +290,10 @@
     $('#get-identity-btn').on('click', function(e) {
       $.get('/identity', function(data) {
         $('#get-identity-data').slideUp(function() {
+          if (data.error != null) {
+            displayError(this, data.error);
+            return;
+          }
           var identityData = data.identity.identity;
           var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
           html += '<td>';
@@ -311,9 +323,9 @@
     $('#get-item-btn').on('click', function(e) {
       $.get('/item', function(data) {
         $('#get-item-data').slideUp(function() {
-          if (data.error)
-            $(this).html('<p>' + data.error + '</p>').slideDown();
-          else {
+          if (data.error) {
+            displayError(this, data.error);
+          } else {
             var html = '';
             html += '<tr><td>Institution name</td><td>' + data.institution.name + '</td></tr>';
             html += '<tr><td>Billed products</td><td>' + data.item.billed_products.join(', ') + '</td></tr>';
@@ -369,6 +381,10 @@
     $('#get-balance-btn').on('click', function(e) {
       $.get('/balance', function(data) {
         $('#get-balance-data').slideUp(function() {
+          if (data.error != null) {
+            displayError(this, data.error);
+            return;
+          }
           var balanceData = data.balance;
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balance</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
           balanceData.accounts.forEach(function(account, idx) {
@@ -388,6 +404,10 @@
     $('#get-assets-btn').on('click', function(e) {
       $.get('/assets', function(data) {
         $('#get-assets-data').slideUp(function() {
+          if (data.error != null) {
+            displayError(this, data.error);
+            return;
+          }
           var reportData = data.json;
           var html = `
           <tr>
@@ -422,6 +442,17 @@ function qs(key) {
     key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars
     var match = location.search.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
     return match && decodeURIComponent(match[1].replace(/\+/g, " "));
+}
+
+function displayError(element, error) {
+  var html = `
+    <div class="alert alert-danger">
+      <p><strong>Error Code:</strong> ${error.error_code}</p>
+      <p><strong>Error Type:</strong> ${error.error_type}</p>
+      <p><strong>Error Message:</strong> ${error.display_message == null ? error.error_message : error.display_message}</p>
+      <div>Check out our <a href="https://plaid.com/docs/#errors-overview">errors documentation</a> for more information.</div>
+    </div>`;
+  $(element).html(html).slideDown();
 }
   </script>
 </body>
