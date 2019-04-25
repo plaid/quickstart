@@ -155,7 +155,7 @@ def get_assets():
   return jsonify({
     'error': None,
     'json': asset_report_json,
-    'pdf': base64.b64encode(asset_report_pdf),
+    'pdf': base64.b64encode(asset_report_pdf).decode('utf-8'),
   })
 
 # Retrieve high-level information about an Item
