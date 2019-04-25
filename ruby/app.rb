@@ -192,7 +192,12 @@ post '/set_access_token' do
 end
 
 def format_error(err)
-  { error: { error_code: err.error_code, error_message: err.error_message } }
+  { error: {
+      error_code: err.error_code,
+      error_message: err.error_message,
+      error_type: err.error_type
+    }
+  }
 end
 
 def pretty_print_response(response)
