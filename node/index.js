@@ -256,8 +256,10 @@ var respondWithAssetReport = (
     });
   }
 
+  var includeInsights = false;
   client.getAssetReport(
     assetReportToken,
+    includeInsights,
     function(error, assetReportGetResponse) {
       if (error != null) {
         prettyPrintResponse(error);
