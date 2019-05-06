@@ -258,6 +258,7 @@ var respondWithAssetReport = (
 
   client.getAssetReport(
     assetReportToken,
+    false,
     function(error, assetReportGetResponse) {
       if (error != null) {
         prettyPrintResponse(error);
