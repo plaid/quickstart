@@ -204,6 +204,7 @@
       env: '<%= PLAID_ENV %>',
       product: products,
       key: '<%= PLAID_PUBLIC_KEY %>',
+      countryCodes: '<%= PLAID_COUNTRY_CODES %>'.split(','),
       // webhook: 'https://your-domain.tld/plaid-webhook',
       onSuccess: function(public_token) {
         $.post('/get_access_token', {
