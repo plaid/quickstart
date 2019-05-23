@@ -26,6 +26,10 @@ PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
 # able to create and retrieve asset reports.
 PLAID_PRODUCTS = os.getenv('PLAID_PRODUCTS', 'transactions')
 
+# PLAID_COUNTRY_CODES is a comma-separated list of countries for which users
+# will be able to select institutions from.
+PLAID_COUNTRY_CODES = os.getenv('PLAID_COUNTRY_CODES', 'us,ca,gb,fr,es')
+
 client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
                       public_key=PLAID_PUBLIC_KEY, environment=PLAID_ENV, api_version='2018-05-22')
 
@@ -36,6 +40,7 @@ def index():
     plaid_public_key=PLAID_PUBLIC_KEY,
     plaid_environment=PLAID_ENV,
     plaid_products=PLAID_PRODUCTS,
+    plaid_country_codes=PLAID_COUNTRY_CODES,
   )
 
 access_token = None
