@@ -20,6 +20,7 @@ PLAID_SECRET='SECRET' \
 PLAID_PUBLIC_KEY='PUBLIC_KEY' \
 PLAID_ENV='sandbox' \
 PLAID_PRODUCTS='transactions' \
+PLAID_COUNTRY_CODES='us,ca,gb,fr,es' \
 ruby app.rb
 # Go to http://localhost:4567
 ```
