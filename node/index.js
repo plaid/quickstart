@@ -37,7 +37,7 @@ var client = new plaid.Client(
   PLAID_SECRET,
   PLAID_PUBLIC_KEY,
   plaid.environments[PLAID_ENV],
-  {version: '2018-05-22', clientApp: 'Plaid Quickstart'}
+  {version: '2019-05-29', clientApp: 'Plaid Quickstart'}
 );
 
 var app = express();
