@@ -15,6 +15,6 @@
     "envvar": "1.1.x",
     "express": "4.16.x",
     "moment": "2.22.x",
-    "plaid": "3.x.x"
+    "plaid": "4.x.x"
   }
 }
