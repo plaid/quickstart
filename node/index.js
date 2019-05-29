@@ -19,6 +19,11 @@ var PLAID_ENV = envvar.string('PLAID_ENV', 'sandbox');
 // able to create and retrieve asset reports.
 var PLAID_PRODUCTS = envvar.string('PLAID_PRODUCTS', 'transactions');
 
+// PLAID_PRODUCTS is a comma-separated list of countries for which users
+// will be able to select institutions from.
+var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US,CA,GB,FR,ES');
+
+
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
 var ACCESS_TOKEN = null;
@@ -48,6 +53,7 @@ app.get('/', function(request, response, next) {
     PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
     PLAID_ENV: PLAID_ENV,
     PLAID_PRODUCTS: PLAID_PRODUCTS,
+    PLAID_COUNTRY_CODES: PLAID_COUNTRY_CODES,
   });
 });
 

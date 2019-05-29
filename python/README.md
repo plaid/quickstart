@@ -23,6 +23,7 @@ PLAID_SECRET='SECRET' \
 PLAID_PUBLIC_KEY='PUBLIC_KEY' \
 PLAID_ENV='sandbox' \
 PLAID_PRODUCTS='transactions' \
+PLAID_COUNTRY_CODES='US,CA,GB,FR,ES' \
 python server.py
 # Go to http://localhost:5000
 ```
