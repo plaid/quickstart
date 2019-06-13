@@ -127,6 +127,8 @@ func main() {
 	uc := UserCredentials{}
 
 	router := gin.Default()
+	router.Static("/assets", "./assets")
+
 	api := router.Group("/api")
 
 	api.POST("/set_access_token", func(c *gin.Context) { uc.ExchangePublicToken(c, cl) })
