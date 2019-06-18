@@ -163,6 +163,33 @@ def get_assets():
     'pdf': base64.b64encode(asset_report_pdf),
   })
 
+# Retrieve investment holdings data for an Item
+# https://plaid.com/docs/#investments
+@app.route('/holdings', methods=['GET'])
+def get_holdings():
+  try:
+    holdings_response = client.Holdings.get(access_token)
+  except plaid.errors.PlaidError as e:
+    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+  pretty_print_response(holdings_response)
+  return jsonify({'error': None, 'holdings': holdings_response})
+
+# Retrieve Investment Transactions for an Item
+# https://plaid.com/docs/#investments
+@app.route('/investment_transactions', methods=['GET'])
+def get_investment_transactions():
+  # Pull transactions for the last 30 days
+  start_date = '{:%Y-%m-%d}'.format(datetime.datetime.now() + datetime.timedelta(-30))
+  end_date = '{:%Y-%m-%d}'.format(datetime.datetime.now())
+  try:
+    investment_transactions_response = client.InvestmentTransactions.get(access_token,
+                                                                         start_date,
+                                                                         end_date)
+  except plaid.errors.PlaidError as e:
+    return jsonify(format_error(e))
+  pretty_print_response(investment_transactions_response)
+  return jsonify({'error': None, 'investment_transactions': investment_transactions_response})
+
 # Retrieve high-level information about an Item
 # https://plaid.com/docs/#retrieve-item
 @app.route('/item', methods=['GET'])
