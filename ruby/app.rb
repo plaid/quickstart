@@ -114,40 +114,6 @@ get '/accounts' do
   end
 end
 
-# Retrieve Holdings data for an Item
-# https://plaid.com/docs/#investments
-get '/holdings' do
-  begin
-    product_response = client.holdings.get(access_token)
-    pretty_print_response(product_response)
-    content_type :json
-    { holdings: product_response }.to_json
-  rescue Plaid::PlaidAPIError => e
-    error_response = format_error(e)
-    pretty_print_response(error_response)
-    content_type :json
-    error_response.to_json
-  end
-end
-
-# Retrieve Investment Transactions data for an Item
-# https://plaid.com/docs/#investments
-get '/investment_transactions' do
-  now = Date.today
-  thirty_days_ago = (now - 30)
-  begin
-    product_response = client.investment_transactions.get(access_token, thirty_days_ago, now)
-    pretty_print_response(product_response)
-    content_type :json
-    { investment_transactions: product_response }.to_json
-  rescue Plaid::PlaidAPIError => e
-    error_response = format_error(e)
-    pretty_print_response(error_response)
-    content_type :json
-    error_response.to_json
-  end
-end
-
 # Create and then retrieve an Asset Report for one or more Items. Note that an
 # Asset Report can contain up to 100 items, but for simplicity we're only
 # including one Item here.
