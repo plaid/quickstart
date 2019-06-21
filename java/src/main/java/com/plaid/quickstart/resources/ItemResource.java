@@ -3,6 +3,7 @@ package com.plaid.quickstart.resources;
 import java.io.IOException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.plaid.client.PlaidClient;
 import com.plaid.client.request.ItemGetRequest;
 import com.plaid.client.request.InstitutionsGetByIdRequest;

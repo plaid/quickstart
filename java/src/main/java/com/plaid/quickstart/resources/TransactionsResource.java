@@ -3,8 +3,12 @@ package com.plaid.quickstart.resources;
 import java.io.IOException;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.plaid.client.PlaidClient;
 import com.plaid.client.request.TransactionsGetRequest;
+import com.plaid.client.response.ErrorResponse;
+import com.plaid.client.response.ItemStatus;
 import com.plaid.client.response.TransactionsGetResponse;
 import com.plaid.quickstart.QuickstartApplication;
 
@@ -26,17 +30,29 @@ public class TransactionsResource {
 
   @POST
   public TransactionsGetResponse getTransactions() throws IOException {
-    Date startDate = new Date(System.currentTimeMillis() - 86400 * 30 * 1000);
+    String accessToken = QuickstartApplication.accessToken;
+    Date startDate = new Date(System.currentTimeMillis() - 86400000L * 100);
     Date endDate = new Date();
 
-    Response<TransactionsGetResponse> transactionsResponse = plaidClient.service().transactionsGet(
-      new TransactionsGetRequest(
-        QuickstartApplication.accessToken,
-        startDate,
-        endDate
-      )
-    ).execute();
+    TransactionsGetRequest request =
+      new TransactionsGetRequest(accessToken, startDate, endDate)
+        .withCount(100);
 
-    return transactionsResponse.body();
+    Response<TransactionsGetResponse> response = null;
+    for (int i = 0; i < 5; i++) {
+      response = plaidClient.service().transactionsGet(request).execute();
+      if (response.isSuccessful()) {
+        break;
+      } else {
+        try {
+          ErrorResponse errorResponse = plaidClient.parseError(response);
+          Thread.sleep(3000);
+        } catch(InterruptedException e) {
+          // catch error
+        }
+      }
+    }
+
+    return response.body();
   }
 }

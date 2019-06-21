@@ -109,7 +109,8 @@
 
   $('#get-transactions-btn').on('click', function(e) {
     $.post('/transactions', function(data) {
-    if (data.error != null) {
+      console.log(data);
+    if (data.error != null && data.error.error_code != null) {
       // Format the error
       var errorHtml = '<div class="inner"><p>' +
        '<strong>' + data.error.error_code + ':</strong> ' +
@@ -125,9 +126,9 @@
       }
       // Render the error
       $('#get-transactions-data').slideUp(function() {
-      $(this).slideUp(function() {
-        $(this).html(errorHtml).slideDown();
-      });
+        $(this).slideUp(function() {
+          $(this).html(errorHtml).slideDown();
+        });
       });
     } else {
       $('#get-transactions-data').slideUp(function() {
