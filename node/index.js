@@ -163,6 +163,38 @@ app.get('/auth', function(request, response, next) {
   });
 });
 
+// Retrieve Holdings for an Item
+// https://plaid.com/docs/#investments
+app.get('/holdings', function(request, response, next) {
+  client.getHoldings(ACCESS_TOKEN, function(error, holdingsResponse) {
+    if (error != null) {
+      prettyPrintResponse(error);
+      return response.json({
+        error: error,
+      });
+    }
+    prettyPrintResponse(holdingsResponse);
+    response.json({error: null, holdings: holdingsResponse});
+  });
+});
+
+// Retrieve Investment Transactions for an Item
+// https://plaid.com/docs/#investments
+app.get('/investment_transactions', function(request, response, next) {
+  var startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
+  var endDate = moment().format('YYYY-MM-DD');
+  client.getInvestmentTransactions(ACCESS_TOKEN, startDate, endDate, function(error, investmentTransactionsResponse) {
+    if (error != null) {
+      prettyPrintResponse(error);
+      return response.json({
+        error: error,
+      });
+    }
+    prettyPrintResponse(investmentTransactionsResponse);
+    response.json({error: null, investment_transactions: investmentTransactionsResponse});
+  });
+});
+
 // Create and then retrieve an Asset Report for one or more Items. Note that an
 // Asset Report can contain up to 100 items, but for simplicity we're only
 // including one Item here.
