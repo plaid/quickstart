@@ -7,6 +7,7 @@ Here you'll find full example integration apps using our [**client libraries**][
 - [Node][node-example]
 - [Ruby][ruby-example]
 - [Python][python-example]
+- [Java][java-example]
 
 ![Plaid quickstart app](/assets/quickstart-screenshot.png)
 
@@ -15,3 +16,4 @@ Here you'll find full example integration apps using our [**client libraries**][
 [node-example]: /node
 [ruby-example]: /ruby
 [python-example]: /python
+[java-example]: /java
