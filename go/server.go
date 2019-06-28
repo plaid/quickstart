@@ -1,148 +1,181 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/plaid/plaid-go/plaid"
 )
 
-// this can be moved out of main...
-type UserCredentials struct {
-	Client      *plaid.Client
-	PublicToken string
-	AccessToken string
-	ItemID      string
+// Fill with your Plaid API keys - https://dashboard.plaid.com/account/keys
+var (
+	PLAID_CLIENT_ID  = os.Getenv("PLAID_CLIENT_ID")
+	PLAID_SECRET     = os.Getenv("PLAID_SECRET")
+	PLAID_PUBLIC_KEY = os.Getenv("PLAID_PUBLIC_KEY")
+	// Use 'sandbox' to test with fake credentials in Plaid's Sandbox environment
+	// Use `development` to test with real credentials while developing
+	// Use `production` to go live with real users
+	APP_PORT = os.Getenv("APP_PORT")
+)
+
+var clientOptions = plaid.ClientOptions{
+	PLAID_CLIENT_ID,
+	PLAID_SECRET,
+	PLAID_PUBLIC_KEY,
+	plaid.Sandbox, // Available environments are Sandbox, Development, and Production
+	&http.Client{},
 }
 
-//Loads .env file
-//Creates new plaid client based on these options
-func CreateNewClient() *plaid.Client {
-	err := godotenv.Load()
+var client, err = plaid.NewClient(clientOptions)
+
+var accessToken string
+var itemID string
+
+func getAccessToken(c *gin.Context) {
+	publicToken := c.PostForm("public_token")
+	response, err := client.ExchangePublicToken(publicToken)
+	accessToken = response.AccessToken
+	itemID = response.ItemID
+
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-	clientOptions := plaid.ClientOptions{
-		os.Getenv("PLAID_CLIENT_ID"),
-		os.Getenv("PLAID_SECRET"),
-		os.Getenv("PLAID_PUBLIC_KEY"),
-		plaid.Sandbox,  // Available environments are Sandbox, Development, and Production
-		&http.Client{}, // This parameter is optional
-	}
-	client, err := plaid.NewClient(clientOptions)
-	handleError(err)
-	return client
-}
 
-// Gets Public Token from request body of /set-access-token
-// Passed into ExchangePublicToken
-func GetPublicToken(c *gin.Context) string {
-	c.Header("Content-Type", "application/json")
+	fmt.Println("public token: " + publicToken)
+	fmt.Println("access token: " + accessToken)
+	fmt.Println("item ID: " + itemID)
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "acesss token",
-	})
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(c.Request.Body)
-	public_token := buf.String()
-	return public_token
-}
-
-// Exchanges public token for user credentials
-// Returns these credentials into UserCredentials Struct with NewUserCredentials
-// (These struct values are then used for all the other routes)
-func (uc *UserCredentials) ExchangePublicToken(c *gin.Context, cl *plaid.Client) {
-	public_token := GetPublicToken(c)
-
-	// POST /item/public_token/exchange
-	accessTokenResp, err := cl.ExchangePublicToken(public_token)
-	handleError(err)
-
-	uc.Client = cl
-	uc.PublicToken = public_token
-	uc.AccessToken = accessTokenResp.AccessToken
-	uc.ItemID = accessTokenResp.ItemID
-}
-
-func (uc UserCredentials) GetBalances(c *gin.Context, cl *plaid.Client) {
-	// POST /acounts/balances/get
-	balanceResp, err := cl.GetBalances(uc.AccessToken)
-	handleError(err)
-
-	c.Header("Content-Type", "application/json")
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"Account Name:":    balanceResp.Accounts[0].Name,
-		"Account Balance:": balanceResp.Accounts[0].Balances.Available,
+		"access_token": accessToken,
+		"item_id":      itemID,
 	})
 }
 
-func (uc UserCredentials) GetAccounts(c *gin.Context, cl *plaid.Client) {
-	// POST /accounts/get
-	accountsResp, err := cl.GetAccounts(uc.AccessToken)
-	handleError(err)
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"Accounts:": accountsResp.Accounts,
-	})
-}
+func auth(c *gin.Context) {
+	response, err := client.GetAuth(accessToken)
 
-func (uc UserCredentials) GetAuth(c *gin.Context, cl *plaid.Client) {
-	// POST /auth/get
-	authResp, err := cl.GetAuth(uc.AccessToken)
-	handleError(err)
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"Account Number:": authResp.Numbers.ACH[0].Account,
-	})
-}
-
-func (uc UserCredentials) GetTransactions(c *gin.Context, cl *plaid.Client) {
-	// POST /transactions/get
-	transactionsResp, err := cl.GetTransactions(uc.AccessToken, "2010-01-01", "2018-01-01")
-	if plaidErr, ok := err.(plaid.Error); ok {
-		// Poll until transactions are ready
-		for ok && plaidErr.ErrorCode == "PRODUCT_NOT_READY" {
-			time.Sleep(5 * time.Second)
-			transactionsResp, err = cl.GetTransactions(uc.AccessToken, "2010-01-01", "2018-01-01")
-			plaidErr, ok = err.(plaid.Error)
-		}
-		handleError(err)
-	}
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"Transactions:": transactionsResp.Transactions,
-	})
-	t, err := json.MarshalIndent(transactionsResp.Transactions, "", "    ")
 	if err != nil {
-		fmt.Println("error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-	os.Stdout.Write(t)
+
+	c.JSON(http.StatusOK, gin.H{
+		"accounts": response.Accounts,
+		"numbers":  response.Numbers,
+	})
+}
+
+func accounts(c *gin.Context) {
+	response, err := client.GetAccounts(accessToken)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"accounts": response.Accounts,
+	})
+}
+
+func balance(c *gin.Context) {
+	response, err := client.GetBalances(accessToken)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"accounts": response.Accounts,
+	})
+}
+
+func item(c *gin.Context) {
+	response, err := client.GetItem(accessToken)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	institution, err := client.GetInstitutionByID(response.Item.InstitutionID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"item":        item,
+		"institution": institution,
+	})
+}
+
+func transactions(c *gin.Context) {
+	// pull transactions for the past 30 days
+	endDate := time.Now().Local().Format("2006-01-02")
+	startDate := time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02")
+
+	response, err := client.GetTransactions(accessToken, startDate, endDate)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"accounts":     response.Accounts,
+		"transactions": response.Transactions,
+	})
+}
+
+func createPublicToken(c *gin.Context) {
+	// Create a one-time use public_token for the Item.
+	// This public_token can be used to initialize Link in update mode for a user
+	publicToken, err := client.CreatePublicToken(accessToken)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"public_token": publicToken,
+	})
 }
 
 func main() {
-	cl := CreateNewClient()
-	uc := UserCredentials{}
-
-	router := gin.Default()
-	router.Static("/assets", "./assets")
-
-	api := router.Group("/api")
-
-	api.POST("/set_access_token", func(c *gin.Context) { uc.ExchangePublicToken(c, cl) })
-
-	api.GET("/auth", func(c *gin.Context) { uc.GetAuth(c, cl) })
-	api.GET("/accounts", func(c *gin.Context) { uc.GetAccounts(c, cl) })
-	api.GET("/balances", func(c *gin.Context) { uc.GetBalances(c, cl) })
-	api.GET("/transactions", func(c *gin.Context) { uc.GetTransactions(c, cl) })
-	// Start and run the server
-	router.Run(":8080")
-}
-
-func handleError(err error) {
-	if err != nil {
-		panic(err)
+	if APP_PORT == "" {
+		APP_PORT = "8000"
 	}
+
+	r := gin.Default()
+	r.LoadHTMLFiles("templates/index.tmpl")
+	r.Static("/static", "./static")
+
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"plaid_environment": plaid.Sandbox,
+			"plaid_public_key":  PLAID_PUBLIC_KEY,
+		})
+	})
+
+	// Setup our internal API routes
+	api := r.Group("/api")
+
+	api.POST("/get_access_token", getAccessToken)
+	api.GET("/auth", auth)
+	api.GET("/accounts", accounts)
+	api.GET("/balance", balance)
+	api.GET("/item", item)
+	api.POST("/item", item)
+	api.GET("/transactions", transactions)
+	api.POST("/transactions", transactions)
+	api.GET("/create_public_token", createPublicToken)
+
+	r.Run(":" + APP_PORT)
 }
