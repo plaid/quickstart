@@ -193,18 +193,18 @@
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
   (function($) {
-    var products = '<%= PLAID_PRODUCTS %>'.split(',');
+    // Specify the Plaid products you wish to use
+    var products = ["auth", "transactions"];
     if (products.includes('assets')) {
       $('#assets').show();
     }
 
     var handler = Plaid.create({
-      apiVersion: 'v2',
       clientName: 'Plaid Quickstart',
-      env: '<%= PLAID_ENV %>',
+      env: '{{ .plaid_environment }}',
       product: products,
-      key: '<%= PLAID_PUBLIC_KEY %>',
-      countryCodes: '<%= PLAID_COUNTRY_CODES %>'.split(','),
+      key: '{{ .plaid_public_key }}',
+      // countryCodes: '{{ .plaid_country_codes }}'.split(','),
       // webhook: 'https://your-domain.tld/plaid-webhook',
       onSuccess: function(public_token) {
         $.post('/set_access_token', {
@@ -246,7 +246,7 @@
             return;
           }
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balances</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
-          data.accounts.accounts.forEach(function(account, idx) {
+          data.accounts.forEach(function(account, idx) {
             html += '<tr>';
             html += '<td>' + account.name + '</td>';
             html += '<td>$' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</td>';
@@ -267,15 +267,14 @@
             displayError(this, data.error);
             return;
           }
-          var authData = data.auth;
-          var isAch = authData.numbers.ach.length > 0;
+          var isAch = data.numbers.ach.length > 0;
           var routingLabel = isAch ? 'Routing #' : 'Institution and Branch #';
 
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balance</strong></td><td><strong>Account #</strong></td><td><strong>'+ routingLabel +'</strong></td></tr>';
           if (isAch) {
-            authData.numbers.ach.forEach(function(achNumbers, idx) {
+            data.numbers.ach.forEach(function(achNumbers, idx) {
               // Find the account associated with this set of account and routing numbers
-              var account = authData.accounts.filter(function(a) {
+              var account = data.accounts.filter(function(a) {
                 return a.account_id == achNumbers.account_id;
               })[0];
               html += '<tr>';
@@ -286,9 +285,9 @@
               html += '</tr>';
             });
           } else {
-            authData.numbers.eft.forEach(function(eftNumber, idx) {
+            data.numbers.eft.forEach(function(eftNumber, idx) {
               // Find the account associated with this set of account and routing numbers
-              var account = authData.accounts.filter(function(a) {
+              var account = data.accounts.filter(function(a) {
                 return a.account_id == eftNumber.account_id;
               })[0];
               html += '<tr>';
@@ -311,26 +310,30 @@
             displayError(this, data.error);
             return;
           }
-          var identityData = data.identity.identity;
-          var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
-          html += '<td>';
-          identityData.names.forEach(function(name, idx) {
-            html += name + '<br />';
+          var identityData = data.identity[0];
+          identityData.owners.forEach(function(owner, idx) {
+            var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
+            html += '<td>';
+            owner.names.forEach(function(name, idx) {
+              html += name + '<br />';
+            });
+            html += '</td><td>';
+            owner.emails.forEach(function(email, idx) {
+              html += email.data + '<br />';
+            });
+            html += '</td><td>';
+            owner.phone_numbers.forEach(function(number, idx) {
+              html += number.data + '<br />';
+            });
+            html += '</td><td>';
+            owner.addresses.forEach(function(address, idx) {
+              html += address.data.street + '<br />';
+              html += address.data.city + ', ' + address.data.state + ' ' + address.data.zip;
+            });
+            html += '</td>';
+            html += '</tr>';
           });
-          html += '</td><td>';
-          identityData.emails.forEach(function(email, idx) {
-            html += email.data + '<br />';
-          });
-          html += '</td><td>';
-          identityData.phone_numbers.forEach(function(number, idx) {
-            html += number.data + '<br />';
-          });
-          html += '</td><td>';
-          identityData.addresses.forEach(function(address, idx) {
-            html += address.data.street + '<br />';
-            html += address.data.city + ', ' + address.data.state + ' ' + address.data.zip;
-          });
-          html += '</td></tr>';
+
 
           $(this).html(html).slideDown();
         });
@@ -379,7 +382,7 @@
         } else {
           $('#get-transactions-data').slideUp(function() {
             var html = '<tr><td><strong>Name</strong></td><td><strong>Amount</strong></td><td><strong>Date</strong></td></tr>';
-            data.transactions.transactions.forEach(function(txn, idx) {
+            data.transactions.forEach(function(txn, idx) {
               html += '<tr>';
               html += '<td>' + txn.name + '</td>';
               html += '<td>$' + txn.amount + '</td>';
@@ -402,9 +405,8 @@
             displayError(this, data.error);
             return;
           }
-          var balanceData = data.balance;
           var html = '<tr><td><strong>Name</strong></td><td><strong>Balance</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
-          balanceData.accounts.forEach(function(account, idx) {
+          data.accounts.forEach(function(account, idx) {
             html += '<tr>';
             html += '<td>' + account.name + '</td>';
             html += '<td>$' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</td>'

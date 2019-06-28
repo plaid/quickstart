@@ -111,8 +111,21 @@ func item(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"item":        item,
-		"institution": institution,
+		"item":        response.Item,
+		"institution": institution.Institution,
+	})
+}
+
+func identity(c *gin.Context) {
+	response, err := client.GetIdentity(accessToken)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"identity": response.Accounts,
 	})
 }
 
@@ -159,23 +172,21 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"plaid_environment": plaid.Sandbox,
+			"plaid_environment": "sandbox", // Switch this environment
 			"plaid_public_key":  PLAID_PUBLIC_KEY,
 		})
 	})
 
-	// Setup our internal API routes
-	api := r.Group("/api")
-
-	api.POST("/get_access_token", getAccessToken)
-	api.GET("/auth", auth)
-	api.GET("/accounts", accounts)
-	api.GET("/balance", balance)
-	api.GET("/item", item)
-	api.POST("/item", item)
-	api.GET("/transactions", transactions)
-	api.POST("/transactions", transactions)
-	api.GET("/create_public_token", createPublicToken)
+	r.POST("/set_access_token", getAccessToken)
+	r.GET("/auth", auth)
+	r.GET("/accounts", accounts)
+	r.GET("/balance", balance)
+	r.GET("/item", item)
+	r.POST("/item", item)
+	r.GET("/identity", identity)
+	r.GET("/transactions", transactions)
+	r.POST("/transactions", transactions)
+	r.GET("/create_public_token", createPublicToken)
 
 	r.Run(":" + APP_PORT)
 }
