@@ -4,6 +4,7 @@ This repository accompanies Plaid's [**quickstart guide**][quickstart].
 
 Here you'll find full example integration apps using our [**client libraries**][libraries]:
 
+- [Go][go-example]
 - [Node][node-example]
 - [Ruby][ruby-example]
 - [Python][python-example]
@@ -17,3 +18,4 @@ Here you'll find full example integration apps using our [**client libraries**][
 [ruby-example]: /ruby
 [python-example]: /python
 [java-example]: /java
+[go-example]: /go
