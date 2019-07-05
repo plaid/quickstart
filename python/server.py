@@ -30,8 +30,14 @@ PLAID_PRODUCTS = os.getenv('PLAID_PRODUCTS', 'transactions')
 # will be able to select institutions from.
 PLAID_COUNTRY_CODES = os.getenv('PLAID_COUNTRY_CODES', 'US,CA,GB,FR,ES')
 
-client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
-                      public_key=PLAID_PUBLIC_KEY, environment=PLAID_ENV, api_version='2019-05-29')
+client = plaid.Client(
+  client_id = PLAID_CLIENT_ID,
+  secret=PLAID_SECRET,
+  public_key=PLAID_PUBLIC_KEY,
+  environment=PLAID_ENV,
+  api_version='2019-05-29',
+  client_app='Plaid Quickstart' # internal flag - Don't change
+)
 
 @app.route('/')
 def index():
