@@ -36,7 +36,7 @@ client = plaid.Client(
   public_key=PLAID_PUBLIC_KEY,
   environment=PLAID_ENV,
   api_version='2019-05-29',
-  client_app='Plaid Quickstart' # internal flag - Don't change
+  client_app='Plaid Quickstart' # internal flag - don't modify
 )
 
 @app.route('/')
