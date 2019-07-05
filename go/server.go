@@ -10,6 +10,15 @@ import (
 	"github.com/plaid/plaid-go/plaid"
 )
 
+type transport struct {
+	underlyingTransport http.RoundTripper
+}
+
+func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("Plaid-Client-App", "Plaid Quickstart")
+	return t.underlyingTransport.RoundTrip(req)
+}
+
 // Fill with your Plaid API keys - https://dashboard.plaid.com/account/keys
 var (
 	PLAID_CLIENT_ID  = os.Getenv("PLAID_CLIENT_ID")
@@ -26,7 +35,9 @@ var clientOptions = plaid.ClientOptions{
 	PLAID_SECRET,
 	PLAID_PUBLIC_KEY,
 	plaid.Sandbox, // Available environments are Sandbox, Development, and Production
-	&http.Client{},
+	&http.Client{ // Optional
+		Transport: &transport{underlyingTransport: http.DefaultTransport},
+	},
 }
 
 var client, err = plaid.NewClient(clientOptions)
