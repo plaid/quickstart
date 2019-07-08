@@ -121,6 +121,42 @@
               </div>
             </div>
 
+            <!-- Holdings -->
+            <div class="item-data-row">
+              <div class="item-data-row__left">
+                <div class="item-data-row__request-type">post</div>
+              </div>
+              <div class="item-data-row__center">
+                <div class="item-data-row__nicename">Holdings</div>
+                <div class="item-data-row__endpoint">/investments/holdings/get</div>
+                <div class="item-data-row__description">Retrieve investment holdings on file with the bank, brokerage, or investment institution. Analyze over-exposure to market segments.</div>
+              </div>
+              <div class="item-data-row__right">
+                <button id="get-holdings-btn" class="button button--is-small button--is-default button--is-full-width">Send request</button>
+              </div>
+              <div class="item-data-row__response">
+                <table><tbody id="get-holdings-data"></tbody></table>
+              </div>
+            </div>
+
+            <!-- Investment Transactions -->
+            <div class="item-data-row">
+              <div class="item-data-row__left">
+                <div class="item-data-row__request-type">post</div>
+              </div>
+              <div class="item-data-row__center">
+                <div class="item-data-row__nicename">Investment Transactions</div>
+                <div class="item-data-row__endpoint">/investments/transactions/get</div>
+                <div class="item-data-row__description">Retrieve investment transactions to analyze cash flow and trading performance.</div>
+              </div>
+              <div class="item-data-row__right">
+                <button id="get-investment-transactions-btn" class="button button--is-small button--is-default button--is-full-width">Send request</button>
+              </div>
+              <div class="item-data-row__response">
+                <table><tbody id="get-investment-transactions-data"></tbody></table>
+              </div>
+            </div>
+
             <!-- Assets (hidden unless 'assets' is included in the product list) -->
             <div id='assets' class="item-data-row" style='display:none;'>
               <div class="item-data-row__left">
@@ -397,6 +433,70 @@
             html += '</tr>';
           });
 
+          $(this).html(html).slideDown();
+        });
+      });
+    });
+
+    $('#get-holdings-btn').on('click', function(e) {
+      $.get('/holdings', function(data) {
+        $('#get-holdings-data').slideUp(function() {
+          if (data.error != null) {
+            displayError(this, data.error);
+            return;
+          }
+          // Organize by Account
+          var holdingsData = data.holdings.holdings.sort(function(a, b) {
+            if (a.account_id > b.account_id) return 1;
+            return -1;
+          });
+          var html = '<tr class="response-row response-row--is-holdings"></tr><td><strong>Account Mask</strong></td><td><strong>Name</strong></td><td><strong>Quantity</strong></td><td><strong>Close Price</strong></td><td><strong>Value</strong></td><tr class="response-row response-row--is-holding">';
+          holdingsData.forEach(function(h, idx) {
+            const account = data.holdings.accounts.filter(a => a.account_id === h.account_id)[0];
+            const security = data.holdings.securities.filter(s => s.security_id === h.security_id)[0];
+            if (account == null) {
+              displayError(this, {
+                code: 500,
+                type: 'Internal',
+                display_message: 'Holding lacks a account',
+              });
+            }
+            if (security == null) {
+              displayError(this, {
+                code: 500,
+                type: 'Internal',
+                display_message: 'Holding lacks a security',
+              });
+            }
+            html += '<tr>';
+            html += '<td>' + account.mask + '</td>';
+            html += '<td>' + security.name + '</td>';
+            html += '<td>' + h.quantity + '</td>';
+            html += '<td>$' + security.close_price + '</td>';
+            html += '<td>$' + h.quantity * security.close_price + '</td>';
+            html += '</tr>';
+          });
+          $(this).html(html).slideDown();
+        });
+      });
+    });
+
+    $('#get-investment-transactions-btn').on('click', function(e) {
+      $.get('/investment_transactions', function(data) {
+        $('#get-investment-transactions-data').slideUp(function() {
+          if (data.error != null) {
+            displayError(this, data.error);
+            return;
+          }
+          investmentTransactionData = data.investment_transactions.investment_transactions;
+          var html = '<tr class="response-row response-row--is-investment-transactions"></tr><td><strong>Name</strong></td><td><strong>Amount</strong></td><td><strong>Date</strong></td><tr class="response-row response-row--is-investment-transaction">';
+          investmentTransactionData.forEach(function(invTxn, idx) {
+            html += '<tr>';
+            html += '<td>' + invTxn.name + '</td>';
+            html += '<td>$' + invTxn.amount + '</td>';
+            html += '<td>' + invTxn.date + '</td>';
+            html += '</tr>';
+          });
           $(this).html(html).slideDown();
         });
       });
