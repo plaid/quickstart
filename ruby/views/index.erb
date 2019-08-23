@@ -331,27 +331,33 @@
             displayError(this, data.error);
             return;
           }
-          var identityData = data.identity.identity;
-          var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
-          html += '<td>';
-          identityData.names.forEach(function(name, idx) {
-            html += name + '<br />';
+          var identityData = data.identity.accounts;
+          var html = '';
+          identityData.forEach(function(account, idx) {
+            html += '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
+            html += '<td>';
+            html += account.name + '<br />';
+            html += '</td><td>';
+            var owners = account.owners;
+            owners.forEach(function(owner, idx2) {
+              var emails = owner.emails;
+              emails.forEach(function(email, idx3) {
+                html += email.data + '<br />';
+              })
+              html += '</td><td>';
+              var phone_numbers = owner.phone_numbers;
+              phone_numbers.forEach(function(phone_number, idx3) {
+                html += phone_number.data + '<br />';
+              })
+              html += '</td><td>';
+              var addresses = owner.addresses;
+              addresses.forEach(function(address, idx3) {
+                html += address.data.street + '<br />';
+                html += address.data.city + ', ' + address.data.region + ' ' + address.data.postal_code;
+              })
+              html += '</td></tr>';
+            })
           });
-          html += '</td><td>';
-          identityData.emails.forEach(function(email, idx) {
-            html += email.data + '<br />';
-          });
-          html += '</td><td>';
-          identityData.phone_numbers.forEach(function(number, idx) {
-            html += number.data + '<br />';
-          });
-          html += '</td><td>';
-          identityData.addresses.forEach(function(address, idx) {
-            html += address.data.street + '<br />';
-            html += address.data.city + ', ' + address.data.state + ' ' + address.data.zip;
-          });
-          html += '</td></tr>';
-
           $(this).html(html).slideDown();
         });
       });
@@ -558,3 +564,4 @@ function displayError(element, error) {
   </script>
 </body>
 </html>
+
