@@ -8,6 +8,7 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import jsonify
+from plaid import client
 
 app = Flask(__name__)
 
@@ -30,7 +31,7 @@ PLAID_PRODUCTS = os.getenv('PLAID_PRODUCTS', 'transactions')
 # will be able to select institutions from.
 PLAID_COUNTRY_CODES = os.getenv('PLAID_COUNTRY_CODES', 'US,CA,GB,FR,ES')
 
-client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
+client = plaid.client.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
                       public_key=PLAID_PUBLIC_KEY, environment=PLAID_ENV, api_version='2019-05-29')
 
 @app.route('/')
