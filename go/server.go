@@ -10,11 +10,22 @@ import (
 	"github.com/plaid/plaid-go/plaid"
 )
 
+func init() {
+	if PLAID_PRODUCTS == "" {
+		PLAID_PRODUCTS = "transactions"
+	}
+	if PLAID_COUNTRY_CODES == "" {
+		PLAID_COUNTRY_CODES = "US,CA,GB,FR,ES"
+	}
+}
+
 // Fill with your Plaid API keys - https://dashboard.plaid.com/account/keys
 var (
-	PLAID_CLIENT_ID  = os.Getenv("PLAID_CLIENT_ID")
-	PLAID_SECRET     = os.Getenv("PLAID_SECRET")
-	PLAID_PUBLIC_KEY = os.Getenv("PLAID_PUBLIC_KEY")
+	PLAID_CLIENT_ID     = os.Getenv("PLAID_CLIENT_ID")
+	PLAID_SECRET        = os.Getenv("PLAID_SECRET")
+	PLAID_PUBLIC_KEY    = os.Getenv("PLAID_PUBLIC_KEY")
+	PLAID_PRODUCTS      = os.Getenv("PLAID_PRODUCTS")
+	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
 	// Use 'sandbox' to test with fake credentials in Plaid's Sandbox environment
 	// Use `development` to test with real credentials while developing
 	// Use `production` to go live with real users
@@ -31,8 +42,15 @@ var clientOptions = plaid.ClientOptions{
 
 var client, err = plaid.NewClient(clientOptions)
 
+// We store the access_token in memory - in production, store it in a secure
+// persistent data store.
 var accessToken string
 var itemID string
+
+// We store the payment_token in memory - in production, store it in a secure
+// persistent data store.
+var paymentToken string
+var paymentID string
 
 func getAccessToken(c *gin.Context) {
 	publicToken := c.PostForm("public_token")
@@ -52,6 +70,47 @@ func getAccessToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"access_token": accessToken,
 		"item_id":      itemID,
+	})
+}
+
+// Sets the payment token in memory on the server side. We generate a new
+// payment token so that the developer is not required to supply one.
+// This makes the quickstart easier to use.
+func setPaymentToken(c *gin.Context) {
+	recipientCreateResp, err := client.CreatePaymentRecipient("Harry Potter", "GB33BUKB20201555555555", plaid.PaymentRecipientAddress{
+		Street:     []string{"4 Privet Drive"},
+		City:       "Little Whinging",
+		PostalCode: "11111",
+		Country:    "GB",
+	})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	recipientID := recipientCreateResp.RecipientID
+
+	paymentCreateResp, err := client.CreatePayment(recipientID, "payment_ref", plaid.PaymentAmount{
+		Currency: "GBP",
+		Value:    12.34,
+	})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	paymentID = paymentCreateResp.PaymentID
+
+	paymentTokenCreateResp, err := client.CreatePaymentToken(paymentID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	paymentToken = paymentTokenCreateResp.PaymentToken
+
+	fmt.Println("payment token: " + paymentToken)
+	fmt.Println("payment id: " + paymentID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"payment_token": paymentToken,
 	})
 }
 
@@ -147,6 +206,21 @@ func transactions(c *gin.Context) {
 	})
 }
 
+// Retrieve Payment for a specified Payment ID
+// https://plaid.com/docs/#payment-initiation
+func payment(c *gin.Context) {
+	response, err := client.GetPayment(paymentID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"payment": response.Payment,
+	})
+}
+
 func createPublicToken(c *gin.Context) {
 	// Create a one-time use public_token for the Item.
 	// This public_token can be used to initialize Link in update mode for a user
@@ -172,12 +246,15 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"plaid_environment": "sandbox", // Switch this environment
-			"plaid_public_key":  PLAID_PUBLIC_KEY,
+			"plaid_environment":   "sandbox", // Switch this environment
+			"plaid_public_key":    PLAID_PUBLIC_KEY,
+			"plaid_products":      PLAID_PRODUCTS,
+			"plaid_country_codes": PLAID_COUNTRY_CODES,
 		})
 	})
 
 	r.POST("/set_access_token", getAccessToken)
+	r.POST("/set_payment_token", setPaymentToken)
 	r.GET("/auth", auth)
 	r.GET("/accounts", accounts)
 	r.GET("/balance", balance)
@@ -186,6 +263,7 @@ func main() {
 	r.GET("/identity", identity)
 	r.GET("/transactions", transactions)
 	r.POST("/transactions", transactions)
+	r.GET("/payment", payment)
 	r.GET("/create_public_token", createPublicToken)
 
 	r.Run(":" + APP_PORT)
