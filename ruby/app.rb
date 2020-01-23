@@ -12,7 +12,13 @@ client = Plaid::Client.new(env: ENV['PLAID_ENV'],
                            secret: ENV['PLAID_SECRET'],
                            public_key: ENV['PLAID_PUBLIC_KEY'])
 
+# We store the access_token in memory - in production, store it in a secure
+# persistent data store.
 access_token = nil
+# We store the payment_token in memory - in production, store it in a secure
+# persistent data store.
+payment_token = nil
+payment_id = nil
 
 get '/' do
   erb :index
@@ -219,11 +225,63 @@ get '/item' do
     institution: institution_response['institution'] }.to_json
 end
 
+# Retrieve Payment for a specified Payment ID
+# https://plaid.com/docs/#payment-initiation
+get '/payment' do
+  begin
+    payment_get_response = client.payment_initiation.get_payment(payment_id)
+    content_type :json
+    { payment: payment_get_response }.to_json
+  rescue Plaid::PlaidAPIError => e
+    error_response = format_error(e)
+    pretty_print_response(error_response)
+    content_type :json
+    error_response.to_json
+  end
+end
+
 post '/set_access_token' do
   access_token = params['access_token']
   item = client.item.get(access_token)
   content_type :json
   { error: false, item_id: item['item']['item_id'] }.to_json
+end
+
+# Sets the payment token in memory on the server side. We generate a new
+# payment token so that the developer is not required to supply one.
+# This makes the quickstart easier to use.
+post '/set_payment_token' do
+  begin
+    create_recipient_response = client.payment_initiation.create_recipient(
+      'Harry Potter',
+      'GB33BUKB20201555555555',
+      street:      ['4 Privet Drive'],
+      city:        'Little Whinging',
+      postal_code: '11111',
+      country:     'GB'
+    )
+    recipient_id = create_recipient_response.recipient_id
+
+    create_payment_response = client.payment_initiation.create_payment(
+      recipient_id,
+      'payment_ref',
+      currency: 'GBP',
+      value:    12.34
+    )
+    payment_id = create_payment_response.payment_id
+
+    create_payment_token_response =
+      client.payment_initiation.create_payment_token(payment_id)
+    payment_token = create_payment_token_response.payment_token
+
+    content_type :json
+    { payment_token: payment_token }.to_json
+  rescue Plaid::PlaidAPIError => e
+    error_response = format_error(e)
+    pretty_print_response(error_response)
+    content_type :json
+    error_response.to_json
+  end
 end
 
 def format_error(err)
