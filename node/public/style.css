@@ -87,7 +87,6 @@ One off tweaks to the layout for tables
 
 .response-row--is-identity td {
   width: 25%;
-  display: inline-block;
   overflow-wrap: break-word;
   vertical-align: top;
 }
