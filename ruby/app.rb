@@ -264,7 +264,7 @@ post '/set_payment_token' do
 
     create_payment_response = client.payment_initiation.create_payment(
       recipient_id,
-      'payment_ref',
+      'payment-ref',
       currency: 'GBP',
       value:    12.34
     )

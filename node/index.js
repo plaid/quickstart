@@ -376,7 +376,7 @@ app.post('/set_payment_token', function(request, response, next) {
 
     return client.createPayment(
       recipientId,
-      'payment_ref',
+      'payment-ref',
       {currency: 'GBP', value: 12.34},
     ).then(function(createPaymentResponse) {
       let paymentId = createPaymentResponse.payment_id;
