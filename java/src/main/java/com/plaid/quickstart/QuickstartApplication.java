@@ -13,12 +13,19 @@ import com.plaid.quickstart.resources.AccessTokenResource;
 import com.plaid.quickstart.resources.AccountsResource;
 import com.plaid.quickstart.resources.IndexResource;
 import com.plaid.quickstart.resources.ItemResource;
+import com.plaid.quickstart.resources.PaymentInitiationResource;
 import com.plaid.quickstart.resources.PublicTokenResource;
 import com.plaid.quickstart.resources.TransactionsResource;
 
 public class QuickstartApplication extends Application<QuickstartConfiguration> {
   private PlaidClient plaidClient;
+  // We store the accessToken in memory - in production, store it in a secure
+  // persistent data store.
   public static String accessToken;
+  // We store the paymentToken in memory - in production, store it in a secure
+  // persistent data store.
+  public static String paymentToken;
+  public static String paymentId;
 
   public static void main(final String[] args) throws Exception {
     new QuickstartApplication().run(args);
@@ -51,9 +58,15 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
 
     environment.jersey().register(new AccessTokenResource(plaidClient));
     environment.jersey().register(new AccountsResource(plaidClient));
-    environment.jersey().register(new IndexResource("sandbox", configuration.getPlaidPublicKey()));
+    environment.jersey().register(new IndexResource(
+      "sandbox",
+      configuration.getPlaidPublicKey(),
+      configuration.getPlaidProducts(),
+      configuration.getPlaidCountryCodes()
+    ));
     environment.jersey().register(new ItemResource(plaidClient));
     environment.jersey().register(new PublicTokenResource(plaidClient));
     environment.jersey().register(new TransactionsResource(plaidClient));
+    environment.jersey().register(new PaymentInitiationResource(plaidClient));
   }
 }

@@ -15,6 +15,12 @@ public class QuickstartConfiguration extends Configuration {
   @NotEmpty
   private String plaidPublicKey;
 
+  @NotEmpty
+  private String plaidProducts;
+
+  @NotEmpty
+  private String plaidCountryCodes;
+
   @JsonProperty
   public String getPlaidClientID() {
     return plaidClientID;
@@ -28,5 +34,15 @@ public class QuickstartConfiguration extends Configuration {
   @JsonProperty
   public String getPlaidPublicKey() {
     return plaidPublicKey;
+  }
+
+  @JsonProperty
+  public String getPlaidProducts() {
+    return plaidProducts;
+  }
+
+  @JsonProperty
+  public String getPlaidCountryCodes() {
+    return plaidCountryCodes;
   }
 }
