@@ -89,7 +89,7 @@ func setPaymentToken(c *gin.Context) {
 	}
 	recipientID := recipientCreateResp.RecipientID
 
-	paymentCreateResp, err := client.CreatePayment(recipientID, "payment_ref", plaid.PaymentAmount{
+	paymentCreateResp, err := client.CreatePayment(recipientID, "payment-ref", plaid.PaymentAmount{
 		Currency: "GBP",
 		Value:    12.34,
 	})
