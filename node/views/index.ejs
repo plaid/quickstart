@@ -27,7 +27,8 @@
             Click the button below to open a list of Institutions. After you select one, you’ll be guided through an authentication process. Upon completion, a public_token will be passed back to the server and exchanged for access_token.
           </p>
 
-          <button id="link-btn" class="button button--is-primary">Connect with Plaid</button>
+          <button id="link-btn" class="button button--is-primary" disabled>Connect with Plaid</button>
+          <div class="loading-indicator"></div>
         </div>
 
         <div id="app" class="connected-view">
@@ -40,6 +41,10 @@
               <h3 class="item-overview__heading">access_token</h3>
               <p class="item-overview__id" id="access_token">••••••••hsakjsl</p>
             </div>
+            <div class="payment_initiation item-overview__column" style='display:none;'>
+              <h3 class="item-overview__heading">payment_token</h3>
+              <p class="item-overview__id" id="payment_token">••••••••hsakjsl</p>
+            </div>
 
             <div style="clear: both"></div>
           </div>
@@ -47,6 +52,7 @@
           <p>Now that you have an access_token you can make all of the following API requests:</p>
 
           <div class="box">
+
             <h3 class="box__heading">Products</h3>
 
             <!-- Auth -->
@@ -181,6 +187,27 @@
               </div>
             </div>
 
+
+            <!-- Payment Initiation (hidden unless 'payment_initiation' is included in the product list) -->
+            <div class="payment_initiation item-data-row" style='display:none;'>
+              <div class="item-data-row__left">
+                <div class="item-data-row__request-type">post</div>
+              </div>
+              <div class="item-data-row__center">
+                <div class="item-data-row__nicename">Payment Initiation</div>
+                <div class="item-data-row__endpoint">/payment_initiation/payment/get</div>
+                <div class="item-data-row__description">Retrieve payment initiation status for the payment you just initiated.</div>
+              </div>
+
+              <div class="item-data-row__right">
+                <button id="get-payment-btn" class="button button--is-small button--is-default button--is-full-width">Send request</button>
+              </div>
+
+              <div class="item-data-row__response">
+                <table><tbody id="get-payment-data"></tbody></table>
+              </div>
+            </div>
+
           </div>
 
           <div class="box">
@@ -236,27 +263,68 @@
       $('#assets').show();
     }
 
-    var handler = Plaid.create({
-      apiVersion: 'v2',
-      clientName: 'Plaid Quickstart',
-      env: '<%= PLAID_ENV %>',
-      product: products,
-      key: '<%= PLAID_PUBLIC_KEY %>',
-      countryCodes: '<%= PLAID_COUNTRY_CODES %>'.split(','),
-      // webhook: 'https://your-domain.tld/plaid-webhook',
-      onSuccess: function(public_token) {
-        $.post('/get_access_token', {
-          public_token: public_token
-        }, function(data) {
-          $('#container').fadeOut('fast', function() {
-            $('#item_id').text(data.item_id);
-            $('#access_token').text(data.access_token);
-            $('#intro').hide();
-            $('#app, #steps').fadeIn('slow');
-          });
+    if (products.includes('payment_initiation')) {
+      $('.payment_initiation').show();
+      $.post('/set_payment_token', {}, function(data) {
+        var paymentToken = data.paymentToken;
+        $('#payment_token').text(paymentToken);
+
+        // In the case of payment_initiation product, we need to wait for
+        // payment token to be generated before the Link handler can be
+        // initialized.
+        handler = Plaid.create({
+          apiVersion: 'v2',
+          clientName: 'Plaid Quickstart',
+          env: '<%= PLAID_ENV %>',
+          product: products,
+          key: '<%= PLAID_PUBLIC_KEY %>',
+          countryCodes: '<%= PLAID_COUNTRY_CODES %>'.split(','),
+          paymentToken: paymentToken,
+          language: 'en',
+          onSuccess: function(public_token) {
+            // This public token exchange step is not relevant for the
+            // payment_initiation product and should be skipped.
+            $.post('/get_access_token', {
+              public_token: public_token
+            }, function(data) {
+              $('#container').fadeOut('fast', function() {
+                $('#item_id').text(data.item_id);
+                $('#access_token').text(data.access_token);
+                $('#intro').hide();
+                $('#app, #steps').fadeIn('slow');
+              });
+            });
+          },
         });
-      },
-    });
+        $('#link-btn').attr('disabled', false);
+        $('.loading-indicator').hide();
+      });
+    } else {
+      var handler = Plaid.create({
+        apiVersion: 'v2',
+        clientName: 'Plaid Quickstart',
+        env: '<%= PLAID_ENV %>',
+        product: products,
+        key: '<%= PLAID_PUBLIC_KEY %>',
+        countryCodes: '<%= PLAID_COUNTRY_CODES %>'.split(','),
+        // webhook: 'https://your-domain.tld/plaid-webhook',
+        onSuccess: function(public_token) {
+          $.post('/get_access_token', {
+            public_token: public_token
+          }, function(data) {
+            $('#container').fadeOut('fast', function() {
+              $('#item_id').text(data.item_id);
+              $('#access_token').text(data.access_token);
+              $('#intro').hide();
+              $('#app, #steps').fadeIn('slow');
+            });
+          });
+        },
+      });
+      $('#link-btn').attr('disabled', false);
+      $('.loading-indicator').hide();
+    }
+
     var accessToken = qs('access_token');
     if (accessToken != null && accessToken != '') {
       $.post('/set_access_token', {
@@ -555,6 +623,27 @@
         });
       });
     });
+
+    $('#get-payment-btn').on('click', function(e) {
+      $.get('/payment_get', function(data) {
+        $('#get-payment-data').slideUp(function() {
+          if (data.error != null) {
+            displayError(this, data.error);
+            return;
+          }
+          var paymentData = data.payment;
+          var html = '';
+          html += '<tr><td>Payment ID</td><td>' + paymentData.payment_id + '</td></tr>';
+          html += '<tr><td>Amount</td><td>' + (paymentData.amount.currency + ' ' + paymentData.amount.value) + '</td></tr>';
+          html += '<tr><td>Status</td><td>' + paymentData.status + '</td></tr>';
+          html += '<tr><td>Last Status Update</td><td>' + paymentData.last_status_update + '</td></tr>';
+          html += '<tr><td>Recipient ID</td><td>' + paymentData.recipient_id + '</td></tr>';
+
+          $(this).html(html).slideDown();
+        });
+      });
+    });
+
   })(jQuery);
 
 function qs(key) {
