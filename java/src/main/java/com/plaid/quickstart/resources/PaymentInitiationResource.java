@@ -76,7 +76,7 @@ public class PaymentInitiationResource {
 
     // Create payment
     Amount amount = new Amount("GBP", 12.34);
-    PaymentCreateRequest paymentCreateRequest = new PaymentCreateRequest(recipientId, "payment_ref", amount);
+    PaymentCreateRequest paymentCreateRequest = new PaymentCreateRequest(recipientId, "payment-ref", amount);
     Response<PaymentCreateResponse> paymentCreateResponse =
       plaidClient.service().paymentCreate(paymentCreateRequest).execute();
     if (!paymentCreateResponse.isSuccessful()) {
