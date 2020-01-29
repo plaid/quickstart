@@ -47,7 +47,6 @@ public class PaymentInitiationResource {
     if (!paymentGetResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(paymentGetResponse);
-        Thread.sleep(3000);
       } catch(InterruptedException e) {
         // catch error
       }
@@ -67,7 +66,6 @@ public class PaymentInitiationResource {
     if (!recipientCreateResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(recipientCreateResponse);
-        Thread.sleep(3000);
       } catch(InterruptedException e) {
         // catch error
       }
@@ -82,7 +80,6 @@ public class PaymentInitiationResource {
     if (!paymentCreateResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(paymentCreateResponse);
-        Thread.sleep(3000);
       } catch(InterruptedException e) {
         // catch error
       }
@@ -95,7 +92,6 @@ public class PaymentInitiationResource {
     if (!createPaymentTokenResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(createPaymentTokenResponse);
-        Thread.sleep(3000);
       } catch(InterruptedException e) {
         // catch error
       }
