@@ -27,11 +27,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import retrofit2.Response;
 
 @Path("/payment_initiation")
 @Produces(MediaType.APPLICATION_JSON)
 public class PaymentInitiationResource {
+  private static final Logger LOG = LoggerFactory.getLogger(PaymentInitiationResource.class);
+
   private PlaidClient plaidClient;
 
   public PaymentInitiationResource(PlaidClient plaidClient) {
@@ -47,8 +52,9 @@ public class PaymentInitiationResource {
     if (!paymentGetResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(paymentGetResponse);
+        LOG.info("error: " + errorResponse);
       } catch(InterruptedException e) {
-        // catch error
+        LOG.info("error: " + e);
       }
     }
 
@@ -66,8 +72,9 @@ public class PaymentInitiationResource {
     if (!recipientCreateResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(recipientCreateResponse);
+        LOG.info("error: " + errorResponse);
       } catch(InterruptedException e) {
-        // catch error
+        LOG.info("error: " + e);
       }
     }
     String recipientId = recipientCreateResponse.body().getRecipientId();
@@ -80,8 +87,9 @@ public class PaymentInitiationResource {
     if (!paymentCreateResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(paymentCreateResponse);
+        LOG.info("error: " + errorResponse);
       } catch(InterruptedException e) {
-        // catch error
+        LOG.info("error: " + e);
       }
     }
     QuickstartApplication.paymentId = paymentCreateResponse.body().getPaymentId();
@@ -92,8 +100,9 @@ public class PaymentInitiationResource {
     if (!createPaymentTokenResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(createPaymentTokenResponse);
+        LOG.info("error: " + errorResponse);
       } catch(InterruptedException e) {
-        // catch error
+        LOG.info("error: " + e);
       }
     }
     QuickstartApplication.paymentToken = createPaymentTokenResponse.body().getPaymentToken();
