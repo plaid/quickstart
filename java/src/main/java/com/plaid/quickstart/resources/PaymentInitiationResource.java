@@ -52,9 +52,9 @@ public class PaymentInitiationResource {
     if (!paymentGetResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(paymentGetResponse);
-        LOG.info("error: " + errorResponse);
-      } catch(InterruptedException e) {
-        LOG.info("error: " + e);
+        LOG.error("error: " + errorResponse);
+      } catch(Exception e) {
+        LOG.error("error: " + e);
       }
     }
 
@@ -72,9 +72,9 @@ public class PaymentInitiationResource {
     if (!recipientCreateResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(recipientCreateResponse);
-        LOG.info("error: " + errorResponse);
-      } catch(InterruptedException e) {
-        LOG.info("error: " + e);
+        LOG.error("error: " + errorResponse);
+      } catch(Exception e) {
+        LOG.error("error: " + e);
       }
     }
     String recipientId = recipientCreateResponse.body().getRecipientId();
@@ -87,9 +87,9 @@ public class PaymentInitiationResource {
     if (!paymentCreateResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(paymentCreateResponse);
-        LOG.info("error: " + errorResponse);
-      } catch(InterruptedException e) {
-        LOG.info("error: " + e);
+        LOG.error("error: " + errorResponse);
+      } catch(Exception e) {
+        LOG.error("error: " + e);
       }
     }
     QuickstartApplication.paymentId = paymentCreateResponse.body().getPaymentId();
@@ -100,9 +100,9 @@ public class PaymentInitiationResource {
     if (!createPaymentTokenResponse.isSuccessful()) {
       try {
         ErrorResponse errorResponse = plaidClient.parseError(createPaymentTokenResponse);
-        LOG.info("error: " + errorResponse);
-      } catch(InterruptedException e) {
-        LOG.info("error: " + e);
+        LOG.error("error: " + errorResponse);
+      } catch(Exception e) {
+        LOG.error("error: " + e);
       }
     }
     QuickstartApplication.paymentToken = createPaymentTokenResponse.body().getPaymentToken();
