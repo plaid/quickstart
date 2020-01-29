@@ -78,6 +78,7 @@ public class PaymentInitiationResource {
       }
     }
     String recipientId = recipientCreateResponse.body().getRecipientId();
+    LOG.info("Recipient ID: " + recipientId);
 
     // Create payment
     Amount amount = new Amount("GBP", 12.34);
@@ -92,7 +93,9 @@ public class PaymentInitiationResource {
         LOG.error("error: " + e);
       }
     }
-    QuickstartApplication.paymentId = paymentCreateResponse.body().getPaymentId();
+    String paymentId = paymentCreateResponse.body().getPaymentId();
+    QuickstartApplication.paymentId = paymentId;
+    LOG.info("Payment ID: " + paymentId);
 
     // Create payment token
     Response<PaymentTokenCreateResponse> createPaymentTokenResponse =
@@ -105,7 +108,9 @@ public class PaymentInitiationResource {
         LOG.error("error: " + e);
       }
     }
-    QuickstartApplication.paymentToken = createPaymentTokenResponse.body().getPaymentToken();
+    String paymentToken = createPaymentTokenResponse.body().getPaymentToken();
+    QuickstartApplication.paymentToken = paymentToken;
+    LOG.info("Payment Token: " + paymentToken);
 
     return new PaymentTokenResponse(QuickstartApplication.paymentToken);
   }
