@@ -6,3 +6,5 @@ logging:
 plaidClientID: ${PLAID_CLIENT_ID}
 plaidPublicKey: ${PLAID_PUBLIC_KEY}
 plaidSecret: ${PLAID_SECRET}
+plaidProducts: ${PLAID_PRODUCTS}
+plaidCountryCodes: ${PLAID_COUNTRY_CODES}

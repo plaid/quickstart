@@ -49,3 +49,44 @@ button:hover { color: #f1f1f1; cursor: pointer; }
 #banner p { font-size: 14px; line-height: 17px; margin-top: 5px; }
 #steps { display: none; }
 .green { background: #3ab683; color: #fff; }
+
+.loading-indicator {
+  -webkit-animation: rot 1200ms infinite cubic-bezier(0.23, 1.2, 0.32, 1);
+  animation: rot 1200ms infinite cubic-bezier(0.23, 1.2, 0.32, 1);
+  border-bottom: 2px solid #e3e3e3;
+  border-left: 2px solid #e3e3e3;
+  border-radius: 100%;
+  border-right: 2px solid #e3e3e3;
+  border-top: 2px solid #7e7e7e;
+  font-size: 100%;
+  font: inherit;
+  height: 45px;
+  left: calc(50% - (45px / 2));
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 80%;
+  vertical-align: baseline;
+  width: 45px;
+  box-sizing: border-box
+}
+@keyframes rot {
+  from {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@-webkit-keyframes rot {
+  from {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}

@@ -11,7 +11,7 @@
   <div id="banner">
     <h1>Plaid Example Walkthrough</h1>
     <p id="intro">
-      This is an example application that walks through integrating Plaid Link using the API to retrieve Auth and Transaction data.
+      This is an example application that walks through integrating Plaid Link using the API to retrieve data for some of our products.
     </p>
     <p id="steps">
       Great - you just created an Item! The server was successfully able to exchange the public_token for an access_token.
@@ -27,7 +27,8 @@
       to your console.
     </p>
 
-    <button id="link-btn">Open Link</button>
+    <button id="link-btn" disabled>Open Link</button>
+    <div class="loading-indicator"></div>
   </div>
 
   <div id="app">
@@ -45,27 +46,72 @@
       <button id="get-transactions-btn">Get Transactions</button>
       <div id="get-transactions-data"></div>
     </div>
+
+    <div class="box payment_initiation" style='display:none;'>
+      <button id="get-payment-btn">Get Payment</button>
+      <div id="get-payment-data"></div>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
   (function($) {
-    var handler = Plaid.create({
-      apiVersion: 'v2',
-      clientName: 'Plaid Walkthrough Demo',
-      env: '${plaidEnvironment}',
-      product: ['transactions'],
-      key: '${plaidPublicKey}',
-      onSuccess: function(public_token) {
-        $.post('/get_access_token', {public_token: public_token}, function() {
-          $('#container').fadeOut('fast', function() {
-            $('#intro').hide();
-            $('#app, #steps').fadeIn('slow');
-          });
+    var products = '${plaidProducts}'.split(',');
+    let handler = null;
+
+    if (products.includes('payment_initiation')) {
+      $('.payment_initiation').show();
+      $.post('/payment_initiation', {}, function(data) {
+        var paymentToken = data.paymentToken;
+
+        // In the case of payment_initiation product, we need to wait for
+        // payment token to be generated before the Link handler can be
+        // initialized.
+        handler = Plaid.create({
+          apiVersion: 'v2',
+          clientName: 'Plaid Quickstart',
+          env: '${plaidEnvironment}',
+          product: products,
+          key: '${plaidPublicKey}',
+          countryCodes: '${plaidCountryCodes}'.split(','),
+          paymentToken: paymentToken,
+          language: 'en',
+          onSuccess: function(public_token) {
+            // This public token exchange step is not relevant for the
+            // payment_initiation product and should be skipped.
+            $.post('/get_access_token', {public_token: public_token}, function() {
+              $('#container').fadeOut('fast', function() {
+                $('#intro').hide();
+                $('#app, #steps').fadeIn('slow');
+              });
+            });
+          },
         });
-      },
-    });
+        $('#link-btn').attr('disabled', false);
+        $('.loading-indicator').hide();
+      });
+    } else {
+      handler = Plaid.create({
+        apiVersion: 'v2',
+        clientName: 'Plaid Quickstart',
+        env: '${plaidEnvironment}',
+        product: products,
+        key: '${plaidPublicKey}',
+        countryCodes: '${plaidCountryCodes}'.split(','),
+        // webhook: 'https://your-domain.tld/plaid-webhook',
+        onSuccess: function(public_token) {
+          $.post('/get_access_token', {public_token: public_token}, function() {
+            $('#container').fadeOut('fast', function() {
+              $('#intro').hide();
+              $('#app, #steps').fadeIn('slow');
+            });
+          });
+        },
+      });
+      $('#link-btn').attr('disabled', false);
+      $('.loading-indicator').hide();
+    }
 
     $('#link-btn').on('click', function(e) {
       handler.open();
@@ -148,6 +194,29 @@
     }
     });
   });
+
+  $('#get-payment-btn').on('click', function(e) {
+    $.get('/payment_initiation', function(data) {
+
+      $('#get-payment-data').slideUp(function() {
+        if(data.error)
+          $(this).html('<p>' + data.error + '</p>').slideDown();
+        else {
+          var html = '<div class="inner">';
+          html += '<p>Here\'s some basic information about your Payment:</p>';
+          html += '<p>Payment ID:' + data.paymentId +'</p>';
+          html += '<p>Amount: ' + (data.amount.currency + ' ' + data.amount.value) + '</p>';
+          html += '<p>Status: ' + data.status + '</p>';
+          html += '<p>Last Status Update: ' + data.lastStatusUpdate + '</p>';
+          html += '<p>Recipient ID: ' + data.recipientId + '</p>';
+          html += '</div>';
+
+          $(this).html(html).slideDown();
+        }
+      });
+    });
+  });
+
   })(jQuery);
   </script>
 </body>
