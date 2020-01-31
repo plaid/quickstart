@@ -22,3 +22,20 @@ PLAID_COUNTRY_CODES='US,CA,GB,FR,ES' \
 node index.js
 # Go to http://localhost:8000
 ```
+
+``` bash
+# The OAuth redirect flow
+#
+# You will need to whitelist the OAuth redirect URI for your client ID through
+# the Plaid developer dashboard at https://dashboard.plaid.com/team/api.
+PLAID_CLIENT_ID='CLIENT_ID' \
+PLAID_SECRET='SECRET' \
+PLAID_PUBLIC_KEY='PUBLIC_KEY' \
+PLAID_ENV='sandbox' \
+PLAID_PRODUCTS='transactions' \
+PLAID_COUNTRY_CODES='GB' \
+PLAID_OAUTH_REDIRECT_URI='http://localhost:8000/oauth-response.html' \
+PLAID_OAUTH_NONCE='nice-and-long-nonce' \
+node index.js
+# Go to http://localhost:8000
+```
