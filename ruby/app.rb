@@ -26,7 +26,7 @@ get '/' do
   erb :index, :locals => {:item_id => item_id, :access_token => access_token}
 end
 
-# This is an end-point defined for the OAuth flow to redirect to.
+# This is an endpoint defined for the OAuth flow to redirect to.
 get '/oauth-response.html' do
   erb :oauthresponse
 end
