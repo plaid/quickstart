@@ -30,6 +30,8 @@ node index.js
 ```
 
 ## The OAuth redirect flow
+Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should provide two additional configuration parameters, PLAID_OAUTH_NONCE and PLAID_OAUTH_REDIRECT_URI.
+
 ``` bash
 # Start the Quickstart with your API keys from the Dashboard
 # https://dashboard.plaid.com/account/keys
