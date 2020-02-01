@@ -47,6 +47,7 @@ var client, err = plaid.NewClient(clientOptions)
 var accessToken string
 var itemID string
 
+// The payment_token is only relevant for the UK Payment Initiation product.
 // We store the payment_token in memory - in production, store it in a secure
 // persistent data store.
 var paymentToken string
@@ -73,6 +74,7 @@ func getAccessToken(c *gin.Context) {
 	})
 }
 
+// This functionality is only relevant for the UK Payment Initiation product.
 // Sets the payment token in memory on the server side. We generate a new
 // payment token so that the developer is not required to supply one.
 // This makes the quickstart easier to use.
@@ -206,8 +208,8 @@ func transactions(c *gin.Context) {
 	})
 }
 
+// This functionality is only relevant for the UK Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
-// https://plaid.com/docs/#payment-initiation
 func payment(c *gin.Context) {
 	response, err := client.GetPayment(paymentID)
 

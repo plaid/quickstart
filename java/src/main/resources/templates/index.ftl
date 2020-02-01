@@ -47,6 +47,7 @@
       <div id="get-transactions-data"></div>
     </div>
 
+    <!-- This functionality is only relevant for the UK Payment Initiation product. -->
     <div class="box payment_initiation" style='display:none;'>
       <button id="get-payment-btn">Get Payment</button>
       <div id="get-payment-data"></div>
@@ -60,6 +61,7 @@
     var products = '${plaidProducts}'.split(',');
     let handler = null;
 
+    // This functionality is only relevant for the UK Payment Initiation product.
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
       $.post('/payment_initiation', {}, function(data) {
@@ -195,6 +197,7 @@
     });
   });
 
+  // This functionality is only relevant for the UK Payment Initiation product.
   $('#get-payment-btn').on('click', function(e) {
     $.get('/payment_initiation', function(data) {
 

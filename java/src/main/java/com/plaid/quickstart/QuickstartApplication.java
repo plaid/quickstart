@@ -22,6 +22,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
   // We store the accessToken in memory - in production, store it in a secure
   // persistent data store.
   public static String accessToken;
+  // The payment_token is only relevant for the UK Payment Initiation product.
   // We store the paymentToken in memory - in production, store it in a secure
   // persistent data store.
   public static String paymentToken;

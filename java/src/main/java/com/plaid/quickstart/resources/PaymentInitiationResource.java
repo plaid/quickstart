@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import retrofit2.Response;
 
+// This functionality is only relevant for the UK Payment Initiation product.
 @Path("/payment_initiation")
 @Produces(MediaType.APPLICATION_JSON)
 public class PaymentInitiationResource {
