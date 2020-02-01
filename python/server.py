@@ -199,7 +199,6 @@ def get_investment_transactions():
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
-# https://plaid.com/docs/#payment-initiation
 @app.route('/payment', methods=['GET'])
 def payment():
   global payment_id

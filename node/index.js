@@ -245,7 +245,6 @@ app.get('/assets', function(request, response, next) {
 
 // This functionality is only relevant for the UK Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
-// https://plaid.com/docs/#payment-initiation
 app.get('/payment_get', function(request, response, next) {
   client.getPayment(PAYMENT_ID, function(error, paymentGetResponse) {
     if (error != null) {

@@ -228,7 +228,6 @@ end
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
-# https://plaid.com/docs/#payment-initiation
 get '/payment' do
   begin
     payment_get_response = client.payment_initiation.get_payment(payment_id)

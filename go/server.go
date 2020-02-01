@@ -210,7 +210,6 @@ func transactions(c *gin.Context) {
 
 // This functionality is only relevant for the UK Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
-// https://plaid.com/docs/#payment-initiation
 func payment(c *gin.Context) {
 	response, err := client.GetPayment(paymentID)
 
