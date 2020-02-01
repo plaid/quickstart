@@ -15,6 +15,7 @@ client = Plaid::Client.new(env: ENV['PLAID_ENV'],
 # We store the access_token in memory - in production, store it in a secure
 # persistent data store.
 access_token = nil
+# The payment_token is only relevant for the UK Payment Initiation product.
 # We store the payment_token in memory - in production, store it in a secure
 # persistent data store.
 payment_token = nil
@@ -225,8 +226,8 @@ get '/item' do
     institution: institution_response['institution'] }.to_json
 end
 
+# This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
-# https://plaid.com/docs/#payment-initiation
 get '/payment' do
   begin
     payment_get_response = client.payment_initiation.get_payment(payment_id)
@@ -247,6 +248,7 @@ post '/set_access_token' do
   { error: false, item_id: item['item']['item_id'] }.to_json
 end
 
+# This functionality is only relevant for the UK Payment Initiation product.
 # Sets the payment token in memory on the server side. We generate a new
 # payment token so that the developer is not required to supply one.
 # This makes the quickstart easier to use.

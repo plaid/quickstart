@@ -40,6 +40,7 @@ var PLAID_OAUTH_NONCE = envvar.string('PLAID_OAUTH_NONCE', '');
 var ACCESS_TOKEN = null;
 var PUBLIC_TOKEN = null;
 var ITEM_ID = null;
+// The payment_token is only relevant for the UK Payment Initiation product.
 // We store the payment_token in memory - in production, store it in a secure
 // persistent data store
 var PAYMENT_TOKEN = null;
@@ -268,8 +269,8 @@ app.get('/assets', function(request, response, next) {
     });
 });
 
+// This functionality is only relevant for the UK Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
-// https://plaid.com/docs/#payment-initiation
 app.get('/payment_get', function(request, response, next) {
   client.getPayment(PAYMENT_ID, function(error, paymentGetResponse) {
     if (error != null) {
@@ -389,6 +390,7 @@ app.post('/set_access_token', function(request, response, next) {
   });
 });
 
+// This functionality is only relevant for the UK Payment Initiation product.
 // Sets the payment token in memory on the server side. We generate a new
 // payment token so that the developer is not required to supply one.
 // This makes the quickstart easier to use.
