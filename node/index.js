@@ -74,7 +74,7 @@ app.get('/', function(request, response, next) {
   });
 });
 
-// This is an end-point defined for the OAuth flow to redirect to.
+// This is an endpoint defined for the OAuth flow to redirect to.
 app.get('/oauth-response.html', function(request, response, next) {
   response.render('oauth-response.ejs', {
     PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
