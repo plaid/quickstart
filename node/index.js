@@ -30,7 +30,9 @@ var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US,CA');
 // this redirect URI for your client ID through the Plaid developer dashboard
 // at https://dashboard.plaid.com/team/api.
 var PLAID_OAUTH_REDIRECT_URI = envvar.string('PLAID_OAUTH_REDIRECT_URI', '');
-// Set PLAID_OAUTH_NONCE to 'nice-and-long-nonce'
+// Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
+// session. The nonce will be used to re-open Link upon completion of the OAuth
+// redirect. The nonce must be at least 16 characters long.
 var PLAID_OAUTH_NONCE = envvar.string('PLAID_OAUTH_NONCE', '');
 
 // We store the access_token in memory - in production, store it in a secure
