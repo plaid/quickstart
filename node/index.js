@@ -25,7 +25,7 @@ var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US,CA');
 // Parameters used for the OAuth redirect Link flow.
 //
 // Set PLAID_OAUTH_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
-// The OAuth redirect flow requires an end-point on the developer's website
+// The OAuth redirect flow requires an endpoint on the developer's website
 // that the bank website should redirect to. You will need to whitelist
 // this redirect URI for your client ID through the Plaid developer dashboard
 // at https://dashboard.plaid.com/team/api.
