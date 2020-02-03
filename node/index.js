@@ -13,7 +13,6 @@ var PLAID_CLIENT_ID = envvar.string('PLAID_CLIENT_ID');
 var PLAID_SECRET = envvar.string('PLAID_SECRET');
 var PLAID_PUBLIC_KEY = envvar.string('PLAID_PUBLIC_KEY');
 var PLAID_ENV = envvar.string('PLAID_ENV', 'sandbox');
-
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
@@ -23,6 +22,18 @@ var PLAID_PRODUCTS = envvar.string('PLAID_PRODUCTS', 'transactions');
 // will be able to select institutions from.
 var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US,CA');
 
+// Parameters used for the OAuth redirect Link flow.
+//
+// Set PLAID_OAUTH_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
+// The OAuth redirect flow requires an endpoint on the developer's website
+// that the bank website should redirect to. You will need to whitelist
+// this redirect URI for your client ID through the Plaid developer dashboard
+// at https://dashboard.plaid.com/team/api.
+var PLAID_OAUTH_REDIRECT_URI = envvar.string('PLAID_OAUTH_REDIRECT_URI', '');
+// Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
+// session. The nonce will be used to re-open Link upon completion of the OAuth
+// redirect. The nonce must be at least 16 characters long.
+var PLAID_OAUTH_NONCE = envvar.string('PLAID_OAUTH_NONCE', '');
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
@@ -59,6 +70,21 @@ app.get('/', function(request, response, next) {
     PLAID_ENV: PLAID_ENV,
     PLAID_PRODUCTS: PLAID_PRODUCTS,
     PLAID_COUNTRY_CODES: PLAID_COUNTRY_CODES,
+    PLAID_OAUTH_REDIRECT_URI: PLAID_OAUTH_REDIRECT_URI,
+    PLAID_OAUTH_NONCE: PLAID_OAUTH_NONCE,
+    ITEM_ID: ITEM_ID,
+    ACCESS_TOKEN: ACCESS_TOKEN,
+  });
+});
+
+// This is an endpoint defined for the OAuth flow to redirect to.
+app.get('/oauth-response.html', function(request, response, next) {
+  response.render('oauth-response.ejs', {
+    PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
+    PLAID_ENV: PLAID_ENV,
+    PLAID_PRODUCTS: PLAID_PRODUCTS,
+    PLAID_COUNTRY_CODES: PLAID_COUNTRY_CODES,
+    PLAID_OAUTH_NONCE: PLAID_OAUTH_NONCE,
   });
 });
 
