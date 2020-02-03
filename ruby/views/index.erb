@@ -256,11 +256,37 @@
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
   (function($) {
+    // Handles redirect from the oauth response page for the oauth flow.
+    if (document.referrer != null && document.referrer.includes('http://localhost:4567/oauth-response.html')) {
+      $('#container').fadeOut('fast', function() {
+        $('#item_id').text('<%= item_id %>');
+        $('#access_token').text('<%= access_token %>');
+        $('#intro').hide();
+        $('#app, #steps').fadeIn('slow');
+      });
+    }
+
     var products = '<%= ENV["PLAID_PRODUCTS"] || "transactions" %>'.split(',');
     if (products.includes('assets')) {
       $('#assets').show();
     }
 
+    var linkHandlerCommonOptions = {
+      apiVersion: 'v2',
+      clientName: 'Plaid Quickstart',
+      env: '<%= ENV["PLAID_ENV"] %>',
+      product: products,
+      key: '<%= ENV["PLAID_PUBLIC_KEY"] %>',
+      countryCodes: '<%= ENV["PLAID_COUNTRY_CODES"] || "US,CA,GB,FR,ES" %>'.split(','),
+    };
+    var oauthRedirectUri = '<%= ENV["PLAID_OAUTH_REDIRECT_URI"] %>';
+    if (oauthRedirectUri != '') {
+      linkHandlerCommonOptions.oauthRedirectUri = oauthRedirectUri;
+    }
+    var oauthNonce = '<%= ENV["PLAID_OAUTH_NONCE"] %>';
+    if (oauthNonce != '') {
+      linkHandlerCommonOptions.oauthNonce = oauthNonce;
+    }
     // This functionality is only relevant for the UK Payment Initiation product.
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
@@ -272,12 +298,7 @@
         // payment token to be generated before the Link handler can be
         // initialized.
         handler = Plaid.create({
-          apiVersion: 'v2',
-          clientName: 'Plaid Quickstart',
-          env: '<%= ENV["PLAID_ENV"] %>',
-          product: products,
-          key: '<%= ENV["PLAID_PUBLIC_KEY"] %>',
-          countryCodes: '<%= ENV["PLAID_COUNTRY_CODES"] || "US,CA,GB,FR,ES" %>'.split(','),
+          ...linkHandlerCommonOptions,
           paymentToken: paymentToken,
           language: 'en',
           onSuccess: function(public_token) {
@@ -300,12 +321,7 @@
       });
     } else {
       var handler = Plaid.create({
-        apiVersion: 'v2',
-        clientName: 'Plaid Quickstart',
-        env: '<%= ENV["PLAID_ENV"] %>',
-        product: products,
-        key: '<%= ENV["PLAID_PUBLIC_KEY"] %>',
-        countryCodes: '<%= ENV["PLAID_COUNTRY_CODES"] || "US,CA,GB,FR,ES" %>'.split(','),
+        ...linkHandlerCommonOptions,
         // webhook: 'https://your-domain.tld/plaid-webhook',
         onSuccess: function(public_token) {
           $.post('/get_access_token', {

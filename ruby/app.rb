@@ -20,9 +20,15 @@ access_token = nil
 # persistent data store.
 payment_token = nil
 payment_id = nil
+item_id = nil
 
 get '/' do
-  erb :index
+  erb :index, :locals => {:item_id => item_id, :access_token => access_token}
+end
+
+# This is an endpoint defined for the OAuth flow to redirect to.
+get '/oauth-response.html' do
+  erb :oauthresponse
 end
 
 # Exchange token flow - exchange a Link public_token for
@@ -32,6 +38,7 @@ post '/get_access_token' do
   exchange_token_response =
     client.item.public_token.exchange(params['public_token'])
   access_token = exchange_token_response['access_token']
+  item_id = exchange_token_response['item_id']
   pretty_print_response(exchange_token_response)
 
   content_type :json
