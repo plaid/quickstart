@@ -1,28 +1,60 @@
-### plaid-go quickstart
+# Quickstart for plaid-go
 
-[Quickstart guide](https://plaid.com/docs/quickstart)
+To run this application locally, first install it and then run either of the flows described below. Additionally, please also refer to the [Quickstart guide](https://plaid.com/docs/quickstart).
 
-## Setup
-Copy the following commands to install the golang quickstart.
-
+## Installing the quickstart app
 ``` bash
 git clone https://github.com/plaid/quickstart.git
 cd quickstart/go
 go build
 ```
 
-## Run
-Copy the following commands, and replace the given environment variables
-with your Plaid API keys to run the local-server.
+## The canonical flow
+``` bash
+# Start the Quickstart with your API keys from the Dashboard
+# https://dashboard.plaid.com/account/keys
+#
+# PLAID_PRODUCTS is a comma-separated list of products to use when
+# initializing Link. Note that this list must contain 'assets' in
+# order for the app to be able to create and retrieve asset reports.
 
-```bash
-# Fill in your Plaid API keys (client ID, secret, public_key) to test!
 APP_PORT=8000 \
 PLAID_CLIENT_ID=[CLIENT_ID] \
 PLAID_SECRET=[SECRET] \
 PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
 PLAID_PRODUCTS=[PRODUCTS] \
-PLAID_COUNTRY_CODES=[COUNTRY_CODES] \
+PLAID_COUNTRY_CODES='GB' \
 go run server.go
+
+# Go to http://localhost:8000
+```
+
+## The OAuth redirect flow
+Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should provide two additional configuration parameters, `PLAID_OAUTH_NONCE` and `PLAID_OAUTH_REDIRECT_URI`.
+
+``` bash
+# You will need to whitelist the PLAID_OAUTH_REDIRECT_URI for
+# your client ID through the Plaid developer dashboard at
+# https://dashboard.plaid.com/team/api.
+#
+# Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID.
+# The nonce must be at least 16 characters long.
+#
+# Start the Quickstart with your API keys from the Dashboard
+# https://dashboard.plaid.com/account/keys
+#
+# PLAID_PRODUCTS is a comma-separated list of products to use when
+# initializing Link.
+
+APP_PORT=8000 \
+PLAID_CLIENT_ID=[CLIENT_ID] \
+PLAID_SECRET=[SECRET] \
+PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
+PLAID_PRODUCTS=[PRODUCTS] \
+PLAID_COUNTRY_CODES='GB' \
+PLAID_OAUTH_REDIRECT_URI='http://localhost:8000/oauth-response.html' \
+PLAID_OAUTH_NONCE='nice-and-long-nonce' \
+go run server.go
+
 # Go to http://localhost:8000
 ```
