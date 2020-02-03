@@ -8,3 +8,5 @@ plaidPublicKey: ${PLAID_PUBLIC_KEY}
 plaidSecret: ${PLAID_SECRET}
 plaidProducts: ${PLAID_PRODUCTS}
 plaidCountryCodes: ${PLAID_COUNTRY_CODES}
+plaidOauthRedirectUri: ${PLAID_OAUTH_REDIRECT_URI:-}
+plaidOauthNonce: ${PLAID_OAUTH_NONCE:-}

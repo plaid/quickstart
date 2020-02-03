@@ -21,6 +21,20 @@ public class QuickstartConfiguration extends Configuration {
   @NotEmpty
   private String plaidCountryCodes;
 
+  // Parameters used for the OAuth redirect Link flow.
+
+  // Set PLAID_OAUTH_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
+  // The OAuth redirect flow requires an endpoint on the developer's website
+  // that the bank website should redirect to. You will need to whitelist
+  // this redirect URI for your client ID through the Plaid developer dashboard
+  // at https://dashboard.plaid.com/team/api.
+  private String plaidOauthRedirectUri;
+
+  // Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
+  // session. The nonce will be used to re-open Link upon completion of the OAuth
+  // redirect. The nonce must be at least 16 characters long.
+  private String plaidOauthNonce;
+
   @JsonProperty
   public String getPlaidClientID() {
     return plaidClientID;
@@ -44,5 +58,15 @@ public class QuickstartConfiguration extends Configuration {
   @JsonProperty
   public String getPlaidCountryCodes() {
     return plaidCountryCodes;
+  }
+
+  @JsonProperty
+  public String getPlaidOauthRedirectUri() {
+    return plaidOauthRedirectUri;
+  }
+
+  @JsonProperty
+  public String getPlaidOauthNonce() {
+    return plaidOauthNonce;
   }
 }
