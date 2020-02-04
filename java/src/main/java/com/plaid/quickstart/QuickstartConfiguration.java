@@ -28,12 +28,12 @@ public class QuickstartConfiguration extends Configuration {
   // that the bank website should redirect to. You will need to whitelist
   // this redirect URI for your client ID through the Plaid developer dashboard
   // at https://dashboard.plaid.com/team/api.
-  private String plaidOauthRedirectUri;
+  private String plaidOAuthRedirectUri;
 
   // Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
   // session. The nonce will be used to re-open Link upon completion of the OAuth
   // redirect. The nonce must be at least 16 characters long.
-  private String plaidOauthNonce;
+  private String plaidOAuthNonce;
 
   @JsonProperty
   public String getPlaidClientID() {
@@ -61,12 +61,12 @@ public class QuickstartConfiguration extends Configuration {
   }
 
   @JsonProperty
-  public String getPlaidOauthRedirectUri() {
-    return plaidOauthRedirectUri;
+  public String getPlaidOAuthRedirectUri() {
+    return plaidOAuthRedirectUri;
   }
 
   @JsonProperty
-  public String getPlaidOauthNonce() {
-    return plaidOauthNonce;
+  public String getPlaidOAuthNonce() {
+    return plaidOAuthNonce;
   }
 }

@@ -7,27 +7,27 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 @Path("/oauth-response.html")
-public class OauthResource {
+public class OAuthResource {
   private final String plaidEnvironment;
   private final String plaidPublicKey;
   private final String plaidProducts;
   private final String plaidCountryCodes;
-  private final String plaidOauthNonce;
+  private final String plaidOAuthNonce;
 
-  public OauthResource(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOauthNonce) {
+  public OAuthResource(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOAuthNonce) {
     this.plaidEnvironment = plaidEnvironment;
     this.plaidPublicKey = plaidPublicKey;
     this.plaidProducts = plaidProducts;
     this.plaidCountryCodes = plaidCountryCodes;
-    this.plaidOauthNonce = plaidOauthNonce;
+    this.plaidOAuthNonce = plaidOAuthNonce;
   }
 
   @GET
-  public OauthView get() {
-    return new OauthView(plaidEnvironment, plaidPublicKey, plaidProducts, plaidCountryCodes, plaidOauthNonce);
+  public OAuthView get() {
+    return new OAuthView(plaidEnvironment, plaidPublicKey, plaidProducts, plaidCountryCodes, plaidOAuthNonce);
   }
 
-  public class OauthView extends View {
+  public class OAuthView extends View {
     @JsonProperty
     private final String plaidEnvironment;
 
@@ -41,15 +41,15 @@ public class OauthResource {
     private final String plaidCountryCodes;
 
     @JsonProperty
-    private final String plaidOauthNonce;
+    private final String plaidOAuthNonce;
 
-    public OauthView(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOauthNonce) {
+    public OAuthView(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOAuthNonce) {
       super("../../../../templates/oauth-response.ftl");
       this.plaidEnvironment = plaidEnvironment;
       this.plaidPublicKey = plaidPublicKey;
       this.plaidProducts = plaidProducts;
       this.plaidCountryCodes = plaidCountryCodes;
-      this.plaidOauthNonce = plaidOauthNonce;
+      this.plaidOAuthNonce = plaidOAuthNonce;
     }
 
     public String getPlaidEnvironment() {
@@ -68,8 +68,8 @@ public class OauthResource {
       return plaidCountryCodes;
     }
 
-    public String getPlaidOauthNonce() {
-      return plaidOauthNonce;
+    public String getPlaidOAuthNonce() {
+      return plaidOAuthNonce;
     }
   }
 }

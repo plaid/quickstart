@@ -12,21 +12,21 @@ public class IndexResource {
   private final String plaidPublicKey;
   private final String plaidProducts;
   private final String plaidCountryCodes;
-  private final String plaidOauthRedirectUri;
-  private final String plaidOauthNonce;
+  private final String plaidOAuthRedirectUri;
+  private final String plaidOAuthNonce;
 
-  public IndexResource(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOauthRedirectUri, String plaidOauthNonce) {
+  public IndexResource(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOAuthRedirectUri, String plaidOAuthNonce) {
     this.plaidEnvironment = plaidEnvironment;
     this.plaidPublicKey = plaidPublicKey;
     this.plaidProducts = plaidProducts;
     this.plaidCountryCodes = plaidCountryCodes;
-    this.plaidOauthRedirectUri = plaidOauthRedirectUri;
-    this.plaidOauthNonce = plaidOauthNonce;
+    this.plaidOAuthRedirectUri = plaidOAuthRedirectUri;
+    this.plaidOAuthNonce = plaidOAuthNonce;
   }
 
   @GET
   public IndexView get() {
-    return new IndexView(plaidEnvironment, plaidPublicKey, plaidProducts, plaidCountryCodes, plaidOauthRedirectUri, plaidOauthNonce);
+    return new IndexView(plaidEnvironment, plaidPublicKey, plaidProducts, plaidCountryCodes, plaidOAuthRedirectUri, plaidOAuthNonce);
   }
 
   public class IndexView extends View {
@@ -43,19 +43,19 @@ public class IndexResource {
     private final String plaidCountryCodes;
 
     @JsonProperty
-    private final String plaidOauthRedirectUri;
+    private final String plaidOAuthRedirectUri;
 
     @JsonProperty
-    private final String plaidOauthNonce;
+    private final String plaidOAuthNonce;
 
-    public IndexView(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOauthRedirectUri, String plaidOauthNonce) {
+    public IndexView(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOAuthRedirectUri, String plaidOAuthNonce) {
       super("../../../../templates/index.ftl");
       this.plaidEnvironment = plaidEnvironment;
       this.plaidPublicKey = plaidPublicKey;
       this.plaidProducts = plaidProducts;
       this.plaidCountryCodes = plaidCountryCodes;
-      this.plaidOauthRedirectUri = plaidOauthRedirectUri;
-      this.plaidOauthNonce = plaidOauthNonce;
+      this.plaidOAuthRedirectUri = plaidOAuthRedirectUri;
+      this.plaidOAuthNonce = plaidOAuthNonce;
     }
 
     public String getPlaidEnvironment() {
@@ -74,12 +74,12 @@ public class IndexResource {
       return plaidCountryCodes;
     }
 
-    public String getPlaidOauthRedirectUri() {
-      return plaidOauthRedirectUri;
+    public String getPlaidOAuthRedirectUri() {
+      return plaidOAuthRedirectUri;
     }
 
-    public String getPlaidOauthNonce() {
-      return plaidOauthNonce;
+    public String getPlaidOAuthNonce() {
+      return plaidOAuthNonce;
     }
   }
 }

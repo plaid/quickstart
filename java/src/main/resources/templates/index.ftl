@@ -77,11 +77,11 @@
       key: '${plaidPublicKey}',
       countryCodes: '${plaidCountryCodes}'.split(','),
     };
-    var oauthRedirectUri = '${plaidOauthRedirectUri}';
+    var oauthRedirectUri = '${plaidOAuthRedirectUri}';
     if (oauthRedirectUri != '') {
       linkHandlerCommonOptions.oauthRedirectUri = oauthRedirectUri;
     }
-    var oauthNonce = '${plaidOauthNonce}';
+    var oauthNonce = '${plaidOAuthNonce}';
     if (oauthNonce != '') {
       linkHandlerCommonOptions.oauthNonce = oauthNonce;
     }

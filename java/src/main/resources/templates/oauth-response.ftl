@@ -22,7 +22,7 @@
       key: '${plaidPublicKey}',
       countryCodes: '${plaidCountryCodes}'.split(','),
     };
-    var oauthNonce = '${plaidOauthNonce}';
+    var oauthNonce = '${plaidOAuthNonce}';
     if (oauthNonce == null || oauthNonce == '') {
       console.error('oauth_nonce should not be empty');
     }

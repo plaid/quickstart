@@ -13,7 +13,7 @@ import com.plaid.quickstart.resources.AccessTokenResource;
 import com.plaid.quickstart.resources.AccountsResource;
 import com.plaid.quickstart.resources.IndexResource;
 import com.plaid.quickstart.resources.ItemResource;
-import com.plaid.quickstart.resources.OauthResource;
+import com.plaid.quickstart.resources.OAuthResource;
 import com.plaid.quickstart.resources.PaymentInitiationResource;
 import com.plaid.quickstart.resources.PublicTokenResource;
 import com.plaid.quickstart.resources.TransactionsResource;
@@ -65,15 +65,15 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
       configuration.getPlaidPublicKey(),
       configuration.getPlaidProducts(),
       configuration.getPlaidCountryCodes(),
-      configuration.getPlaidOauthRedirectUri(),
-      configuration.getPlaidOauthNonce()
+      configuration.getPlaidOAuthRedirectUri(),
+      configuration.getPlaidOAuthNonce()
     ));
-    environment.jersey().register(new OauthResource(
+    environment.jersey().register(new OAuthResource(
       "sandbox",
       configuration.getPlaidPublicKey(),
       configuration.getPlaidProducts(),
       configuration.getPlaidCountryCodes(),
-      configuration.getPlaidOauthNonce()
+      configuration.getPlaidOAuthNonce()
     ));
     environment.jersey().register(new ItemResource(plaidClient));
     environment.jersey().register(new PublicTokenResource(plaidClient));
