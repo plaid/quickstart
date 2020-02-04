@@ -26,6 +26,19 @@ var (
 	PLAID_PUBLIC_KEY    = os.Getenv("PLAID_PUBLIC_KEY")
 	PLAID_PRODUCTS      = os.Getenv("PLAID_PRODUCTS")
 	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
+	// Parameters used for the OAuth redirect Link flow.
+	//
+	// Set PLAID_OAUTH_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
+	// The OAuth redirect flow requires an endpoint on the developer's website
+	// that the bank website should redirect to. You will need to whitelist
+	// this redirect URI for your client ID through the Plaid developer dashboard
+	// at https://dashboard.plaid.com/team/api.
+	PLAID_OAUTH_REDIRECT_URI = os.Getenv("PLAID_OAUTH_REDIRECT_URI")
+	// Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
+	// session. The nonce will be used to re-open Link upon completion of the OAuth
+	// redirect. The nonce must be at least 16 characters long.
+	PLAID_OAUTH_NONCE = os.Getenv("PLAID_OAUTH_NONCE")
+
 	// Use 'sandbox' to test with fake credentials in Plaid's Sandbox environment
 	// Use `development` to test with real credentials while developing
 	// Use `production` to go live with real users
@@ -243,15 +256,29 @@ func main() {
 	}
 
 	r := gin.Default()
-	r.LoadHTMLFiles("templates/index.tmpl")
+	r.LoadHTMLFiles("templates/index.tmpl", "templates/oauth-response.tmpl")
 	r.Static("/static", "./static")
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"plaid_environment":        "sandbox", // Switch this environment
+			"plaid_public_key":         PLAID_PUBLIC_KEY,
+			"plaid_products":           PLAID_PRODUCTS,
+			"plaid_country_codes":      PLAID_COUNTRY_CODES,
+			"plaid_oauth_redirect_uri": PLAID_OAUTH_REDIRECT_URI,
+			"plaid_oauth_nonce":        PLAID_OAUTH_NONCE,
+			"item_id":                  itemID,
+			"access_token":             accessToken,
+		})
+	})
+
+	r.GET("/oauth-response.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "oauth-response.tmpl", gin.H{
 			"plaid_environment":   "sandbox", // Switch this environment
 			"plaid_public_key":    PLAID_PUBLIC_KEY,
 			"plaid_products":      PLAID_PRODUCTS,
 			"plaid_country_codes": PLAID_COUNTRY_CODES,
+			"plaid_oauth_nonce":   PLAID_OAUTH_NONCE,
 		})
 	})
 
