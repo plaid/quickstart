@@ -6,30 +6,28 @@ import io.dropwizard.views.View;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
-@Path("/")
-public class IndexResource {
+@Path("/oauth-response.html")
+public class OAuthResource {
   private final String plaidEnvironment;
   private final String plaidPublicKey;
   private final String plaidProducts;
   private final String plaidCountryCodes;
-  private final String plaidOAuthRedirectUri;
   private final String plaidOAuthNonce;
 
-  public IndexResource(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOAuthRedirectUri, String plaidOAuthNonce) {
+  public OAuthResource(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOAuthNonce) {
     this.plaidEnvironment = plaidEnvironment;
     this.plaidPublicKey = plaidPublicKey;
     this.plaidProducts = plaidProducts;
     this.plaidCountryCodes = plaidCountryCodes;
-    this.plaidOAuthRedirectUri = plaidOAuthRedirectUri;
     this.plaidOAuthNonce = plaidOAuthNonce;
   }
 
   @GET
-  public IndexView get() {
-    return new IndexView(plaidEnvironment, plaidPublicKey, plaidProducts, plaidCountryCodes, plaidOAuthRedirectUri, plaidOAuthNonce);
+  public OAuthView get() {
+    return new OAuthView(plaidEnvironment, plaidPublicKey, plaidProducts, plaidCountryCodes, plaidOAuthNonce);
   }
 
-  public class IndexView extends View {
+  public class OAuthView extends View {
     @JsonProperty
     private final String plaidEnvironment;
 
@@ -43,18 +41,14 @@ public class IndexResource {
     private final String plaidCountryCodes;
 
     @JsonProperty
-    private final String plaidOAuthRedirectUri;
-
-    @JsonProperty
     private final String plaidOAuthNonce;
 
-    public IndexView(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOAuthRedirectUri, String plaidOAuthNonce) {
-      super("../../../../templates/index.ftl");
+    public OAuthView(String plaidEnvironment, String plaidPublicKey, String plaidProducts, String plaidCountryCodes, String plaidOAuthNonce) {
+      super("../../../../templates/oauth-response.ftl");
       this.plaidEnvironment = plaidEnvironment;
       this.plaidPublicKey = plaidPublicKey;
       this.plaidProducts = plaidProducts;
       this.plaidCountryCodes = plaidCountryCodes;
-      this.plaidOAuthRedirectUri = plaidOAuthRedirectUri;
       this.plaidOAuthNonce = plaidOAuthNonce;
     }
 
@@ -72,10 +66,6 @@ public class IndexResource {
 
     public String getPlaidCountryCodes() {
       return plaidCountryCodes;
-    }
-
-    public String getPlaidOAuthRedirectUri() {
-      return plaidOAuthRedirectUri;
     }
 
     public String getPlaidOAuthNonce() {

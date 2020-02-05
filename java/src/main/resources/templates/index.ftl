@@ -58,9 +58,33 @@
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
   (function($) {
+    // Handles redirect from the oauth response page for the oauth flow.
+    if (document.referrer != null && document.referrer.includes('http://localhost:8080/oauth-response.html')) {
+      $('#container').fadeOut('fast', function() {
+        $('#intro').hide();
+        $('#app, #steps').fadeIn('slow');
+      });
+    }
+
     var products = '${plaidProducts}'.split(',');
     let handler = null;
 
+    var linkHandlerCommonOptions = {
+      apiVersion: 'v2',
+      clientName: 'Plaid Quickstart',
+      env: '${plaidEnvironment}',
+      product: products,
+      key: '${plaidPublicKey}',
+      countryCodes: '${plaidCountryCodes}'.split(','),
+    };
+    var oauthRedirectUri = '${plaidOAuthRedirectUri}';
+    if (oauthRedirectUri != '') {
+      linkHandlerCommonOptions.oauthRedirectUri = oauthRedirectUri;
+    }
+    var oauthNonce = '${plaidOAuthNonce}';
+    if (oauthNonce != '') {
+      linkHandlerCommonOptions.oauthNonce = oauthNonce;
+    }
     // This functionality is only relevant for the UK Payment Initiation product.
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
@@ -71,12 +95,7 @@
         // payment token to be generated before the Link handler can be
         // initialized.
         handler = Plaid.create({
-          apiVersion: 'v2',
-          clientName: 'Plaid Quickstart',
-          env: '${plaidEnvironment}',
-          product: products,
-          key: '${plaidPublicKey}',
-          countryCodes: '${plaidCountryCodes}'.split(','),
+          ...linkHandlerCommonOptions,
           paymentToken: paymentToken,
           language: 'en',
           onSuccess: function(public_token) {
@@ -95,12 +114,7 @@
       });
     } else {
       handler = Plaid.create({
-        apiVersion: 'v2',
-        clientName: 'Plaid Quickstart',
-        env: '${plaidEnvironment}',
-        product: products,
-        key: '${plaidPublicKey}',
-        countryCodes: '${plaidCountryCodes}'.split(','),
+        ...linkHandlerCommonOptions,
         // webhook: 'https://your-domain.tld/plaid-webhook',
         onSuccess: function(public_token) {
           $.post('/get_access_token', {public_token: public_token}, function() {
