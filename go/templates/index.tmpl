@@ -397,8 +397,8 @@
             return;
           }
           var identityData = data.identity[0];
+          var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
           identityData.owners.forEach(function(owner, idx) {
-            var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
             html += '<td>';
             owner.names.forEach(function(name, idx) {
               html += name + '<br />';
