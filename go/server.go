@@ -15,7 +15,7 @@ func init() {
 		PLAID_PRODUCTS = "transactions"
 	}
 	if PLAID_COUNTRY_CODES == "" {
-		PLAID_COUNTRY_CODES = "US,CA"
+		PLAID_COUNTRY_CODES = "US,CA,GB,FR,ES,IE,NL"
 	}
 }
 
