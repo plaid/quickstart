@@ -20,7 +20,7 @@ var PLAID_PRODUCTS = envvar.string('PLAID_PRODUCTS', 'transactions');
 
 // PLAID_PRODUCTS is a comma-separated list of countries for which users
 // will be able to select institutions from.
-var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US,CA');
+var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US,CA,GB,FR,ES,IE,NL');
 
 // Parameters used for the OAuth redirect Link flow.
 //

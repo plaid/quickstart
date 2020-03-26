@@ -15,15 +15,15 @@ go build
 # https://dashboard.plaid.com/account/keys
 #
 # PLAID_PRODUCTS is a comma-separated list of products to use when
-# initializing Link. Note that this list must contain 'assets' in
-# order for the app to be able to create and retrieve asset reports.
+# initializing Link, see https://plaid.com/docs/#item-product-access
+# for complete list.
 
 APP_PORT=8000 \
 PLAID_CLIENT_ID=[CLIENT_ID] \
 PLAID_SECRET=[SECRET] \
 PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
 PLAID_PRODUCTS=[PRODUCTS] \
-PLAID_COUNTRY_CODES=[COUNTRY_CODES] \
+PLAID_COUNTRY_CODES='US,CA,GB,FR,ES,IE,NL' \
 go run server.go
 
 # Go to http://localhost:8000
@@ -44,14 +44,15 @@ Some European institutions require an OAuth redirect authentication flow, where 
 # https://dashboard.plaid.com/account/keys
 #
 # PLAID_PRODUCTS is a comma-separated list of products to use when
-# initializing Link.
+# initializing Link, see https://plaid.com/docs/#item-product-access
+# for complete list.
 
 APP_PORT=8000 \
 PLAID_CLIENT_ID=[CLIENT_ID] \
 PLAID_SECRET=[SECRET] \
 PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
 PLAID_PRODUCTS=[PRODUCTS] \
-PLAID_COUNTRY_CODES='GB' \
+PLAID_COUNTRY_CODES='GB,FR,ES,IE,NL' \
 PLAID_OAUTH_REDIRECT_URI='http://localhost:8000/oauth-response.html' \
 PLAID_OAUTH_NONCE='nice-and-long-nonce' \
 go run server.go

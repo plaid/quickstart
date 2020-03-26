@@ -16,15 +16,15 @@ bundle
 # https://dashboard.plaid.com/account/keys
 #
 # PLAID_PRODUCTS is a comma-separated list of products to use when
-# initializing Link. Note that this list must contain 'assets' in
-# order for the app to be able to create and retrieve asset reports.
+# initializing Link, see https://plaid.com/docs/#item-product-access
+# for complete list.
 
 PLAID_CLIENT_ID='CLIENT_ID' \
 PLAID_SECRET='SECRET' \
 PLAID_PUBLIC_KEY='PUBLIC_KEY' \
 PLAID_ENV='sandbox' \
 PLAID_PRODUCTS='transactions' \
-PLAID_COUNTRY_CODES='US,CA,GB,FR,ES' \
+PLAID_COUNTRY_CODES='US,CA,GB,FR,ES,IE,NL' \
 ruby app.rb
 
 # Go to http://localhost:4567
@@ -45,14 +45,15 @@ Some European institutions require an OAuth redirect authentication flow, where 
 # https://dashboard.plaid.com/account/keys
 #
 # PLAID_PRODUCTS is a comma-separated list of products to use when
-# initializing Link.
+# initializing Link, see https://plaid.com/docs/#item-product-access
+# for complete list.
 
 PLAID_CLIENT_ID='CLIENT_ID' \
 PLAID_SECRET='SECRET' \
 PLAID_PUBLIC_KEY='PUBLIC_KEY' \
 PLAID_ENV='sandbox' \
 PLAID_PRODUCTS='transactions' \
-PLAID_COUNTRY_CODES='GB' \
+PLAID_COUNTRY_CODES='GB,FR,ES,IE,NL' \
 PLAID_OAUTH_REDIRECT_URI='http://localhost:4567/oauth-response.html' \
 PLAID_OAUTH_NONCE='nice-and-long-nonce' \
 ruby app.rb
