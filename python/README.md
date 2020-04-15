@@ -23,12 +23,16 @@ pip install -r requirements.txt
 # initializing Link, see https://plaid.com/docs/#item-product-access
 # for complete list.
 
+# PLAID_COUNTRY_CODES is a comma-separated list of countries to use when
+# initializing Link, see plaid.com/docs/faq/#does-plaid-support-international-bank-accounts-
+# for a complete list
+
 PLAID_CLIENT_ID='CLIENT_ID' \
 PLAID_SECRET='SECRET' \
 PLAID_PUBLIC_KEY='PUBLIC_KEY' \
 PLAID_ENV='sandbox' \
 PLAID_PRODUCTS='transactions' \
-PLAID_COUNTRY_CODES='US,CA,GB,FR,ES,IE,NL' \
+PLAID_COUNTRY_CODES='US' \
 python server.py
 
 # Go to http://localhost:5000
