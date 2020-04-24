@@ -277,7 +277,7 @@
       env: '<%= ENV["PLAID_ENV"] %>',
       product: products,
       key: '<%= ENV["PLAID_PUBLIC_KEY"] %>',
-      countryCodes: '<%= ENV["PLAID_COUNTRY_CODES"] || "US,CA,GB,FR,ES,IE,NL" %>'.split(','),
+      countryCodes: '<%= ENV["PLAID_COUNTRY_CODES"] || "US" %>'.split(','),
     };
     var oauthRedirectUri = '<%= ENV["PLAID_OAUTH_REDIRECT_URI"] %>';
     if (oauthRedirectUri != '') {

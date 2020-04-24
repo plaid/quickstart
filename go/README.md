@@ -18,12 +18,16 @@ go build
 # initializing Link, see https://plaid.com/docs/#item-product-access
 # for complete list.
 
+# PLAID_COUNTRY_CODES is a comma-separated list of countries to use when
+# initializing Link, see plaid.com/docs/faq/#does-plaid-support-international-bank-accounts-
+# for a complete list
+
 APP_PORT=8000 \
 PLAID_CLIENT_ID=[CLIENT_ID] \
 PLAID_SECRET=[SECRET] \
 PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
 PLAID_PRODUCTS=[PRODUCTS] \
-PLAID_COUNTRY_CODES='US,CA,GB,FR,ES,IE,NL' \
+PLAID_COUNTRY_CODES='US' \
 go run server.go
 
 # Go to http://localhost:8000
