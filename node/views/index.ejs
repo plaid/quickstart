@@ -536,7 +536,7 @@
           balanceData.accounts.forEach(function(account, idx) {
             html += '<tr>';
             html += '<td>' + account.name + '</td>';
-            html += '<td>$' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</td>'
+            html += '<td>' + (account.balances.available != null ? account.balances.available : account.balances.current) + ' ' + account.balances.iso_currency_code + '</td>'
             html += '<td>' + account.subtype + '</td>';
             html += '<td>' + account.mask + '</td>';
             html += '</tr>';
