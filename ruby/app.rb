@@ -3,6 +3,7 @@ require 'date'
 require 'json'
 require 'plaid'
 require 'sinatra'
+require 'time'
 
 set :public_folder, File.dirname(__FILE__) + '/static'
 # set :port, ENV['PLAID_ENV'] || 4567
@@ -43,6 +44,23 @@ post '/get_access_token' do
 
   content_type :json
   exchange_token_response.to_json
+end
+
+post '/get_item_add_token' do
+  begin
+    item_add_token_response = client.item.add_token.create(
+      # In production, this must be a unique identifier for each user.
+      client_user_id: Time.now.utc.iso8601,
+    )
+    pretty_print_response(item_add_token_response)
+    content_type :json
+    { item_add_token: item_add_token_response.add_token }.to_json
+  rescue Plaid::PlaidAPIError => e
+    error_response = format_error(e)
+    pretty_print_response(error_response)
+    content_type :json
+    error_response.to_json
+  end
 end
 
 # Retrieve Transactions for an Item

@@ -95,6 +95,17 @@ def get_access_token():
   access_token = exchange_response['access_token']
   return jsonify(exchange_response)
 
+@app.route('/get_item_add_token', methods=['POST'])
+def get_item_add_token():
+    try:
+        item_add_token_response = client.Item.add_token.create({
+            'client_user_id': str(time.time())
+        })
+    except plaid.errors.PlaidError as e:
+        return jsonify(format_error(e))
+    pretty_print_response(item_add_token_response)
+    return jsonify(item_add_token_response)
+
 # Retrieve ACH or ETF account numbers for an Item
 # https://plaid.com/docs/#auth
 @app.route('/auth', methods=['GET'])

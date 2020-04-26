@@ -272,39 +272,68 @@
       $('#assets').show();
     }
 
-    var linkHandlerCommonOptions = {
-      apiVersion: 'v2',
-      clientName: 'Plaid Quickstart',
-      env: '{{ plaid_environment }}',
-      product: products,
-      key: '{{ plaid_public_key }}',
-      countryCodes: '{{ plaid_country_codes }}'.split(','),
-    };
-    var oauthRedirectUri = '{{ plaid_oauth_redirect_uri }}';
-    if (oauthRedirectUri != '') {
-      linkHandlerCommonOptions.oauthRedirectUri = oauthRedirectUri;
-    }
-    var oauthNonce = '{{ plaid_oauth_nonce }}';
-    if (oauthNonce != '') {
-      linkHandlerCommonOptions.oauthNonce = oauthNonce;
-    }
-    // This functionality is only relevant for the UK Payment Initiation product.
-    if (products.includes('payment_initiation')) {
-      $('.payment_initiation').show();
-      $.post('/set_payment_token', {}, function(data) {
-        var paymentToken = data.payment_token;
-        $('#payment_token').text(paymentToken);
+    var handler;
 
-        // In the case of payment_initiation product, we need to wait for
-        // payment token to be generated before the Link handler can be
-        // initialized.
+    // Create an item add token for passing into Link.
+    $.post('/get_item_add_token', {}, function(data) {
+      var linkHandlerCommonOptions = {
+        apiVersion: 'v2',
+        clientName: 'Plaid Quickstart',
+        env: '{{ plaid_environment }}',
+        product: products,
+        token: data.add_token,
+        countryCodes: '{{ plaid_country_codes }}'.split(','),
+      };
+      var oauthRedirectUri = '{{ plaid_oauth_redirect_uri }}';
+      if (oauthRedirectUri != '') {
+        linkHandlerCommonOptions.oauthRedirectUri = oauthRedirectUri;
+      }
+      var oauthNonce = '{{ plaid_oauth_nonce }}';
+      if (oauthNonce != '') {
+        linkHandlerCommonOptions.oauthNonce = oauthNonce;
+      }
+      if (linkHandlerCommonOptions.oauthNonce && linkHandlerCommonOptions.oauthRedirectUri) {
+        // For oauth, we need to store the item_add_token in sessionStorage so that we can fetch the
+        // token when we need to reinitialize Link after the redirect.
+        sessionStorage.setItem('item-add-token', data.add_token);
+      }
+      // This functionality is only relevant for the UK Payment Initiation product.
+      if (products.includes('payment_initiation')) {
+        $('.payment_initiation').show();
+        $.post('/set_payment_token', {}, function(data) {
+          var paymentToken = data.payment_token;
+          $('#payment_token').text(paymentToken);
+
+          // In the case of payment_initiation product, we need to wait for
+          // payment token to be generated before the Link handler can be
+          // initialized.
+          handler = Plaid.create({
+            ...linkHandlerCommonOptions,
+            paymentToken: paymentToken,
+            language: 'en',
+            onSuccess: function(public_token) {
+              // This public token exchange step is not relevant for the
+              // payment_initiation product and should be skipped.
+              $.post('/get_access_token', {
+                public_token: public_token
+              }, function(data) {
+                $('#container').fadeOut('fast', function() {
+                  $('#item_id').text(data.item_id);
+                  $('#access_token').text(data.access_token);
+                  $('#intro').hide();
+                  $('#app, #steps').fadeIn('slow');
+                });
+              });
+            },
+          });
+          $('#link-btn').attr('disabled', false);
+          $('.loading-indicator').hide();
+        });
+      } else {
         handler = Plaid.create({
           ...linkHandlerCommonOptions,
-          paymentToken: paymentToken,
-          language: 'en',
+          // webhook: 'https://your-domain.tld/plaid-webhook',
           onSuccess: function(public_token) {
-            // This public token exchange step is not relevant for the
-            // payment_initiation product and should be skipped.
             $.post('/get_access_token', {
               public_token: public_token
             }, function(data) {
@@ -319,27 +348,8 @@
         });
         $('#link-btn').attr('disabled', false);
         $('.loading-indicator').hide();
-      });
-    } else {
-      var handler = Plaid.create({
-        ...linkHandlerCommonOptions,
-        // webhook: 'https://your-domain.tld/plaid-webhook',
-        onSuccess: function(public_token) {
-          $.post('/get_access_token', {
-            public_token: public_token
-          }, function(data) {
-            $('#container').fadeOut('fast', function() {
-              $('#item_id').text(data.item_id);
-              $('#access_token').text(data.access_token);
-              $('#intro').hide();
-              $('#app, #steps').fadeIn('slow');
-            });
-          });
-        },
-      });
-      $('#link-btn').attr('disabled', false);
-      $('.loading-indicator').hide();
-    }
+      }
+    });
 
     var accessToken = qs('access_token');
     if (accessToken != null && accessToken != '') {

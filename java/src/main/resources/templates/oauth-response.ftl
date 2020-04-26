@@ -19,7 +19,6 @@
       clientName: 'Plaid Quickstart',
       env: '${plaidEnvironment}',
       product: products,
-      key: '${plaidPublicKey}',
       countryCodes: '${plaidCountryCodes}'.split(','),
     };
     var oauthNonce = '${plaidOAuthNonce}';
@@ -30,9 +29,16 @@
     if (oauthStateId == null || oauthStateId == '') {
       console.error('could not parse oauth_state_id from query parameters');
     }
+    // Depends on the item_add_token being stored in session storage 
+    // when Link is first initialized
+    var itemAddToken = sessionStorage.getItem('item-add-token');
+    if (itemAddToken == null || itemAddToken == '') {
+      console.error('could not fetch item-add-token from session storage');
+    }
     linkHandlerCommonOptions.oauthStateId = oauthStateId;
     var handler = Plaid.create({
       ...linkHandlerCommonOptions,
+      token: itemAddToken,
       oauthNonce: oauthNonce,
       oauthStateId: oauthStateId,
       onSuccess: function(public_token) {

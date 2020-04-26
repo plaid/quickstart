@@ -87,6 +87,28 @@ func getAccessToken(c *gin.Context) {
 	})
 }
 
+// The item add token is used to initial Link in normal item add mode.
+// Create this token before initializing Link. In production, this endpoint
+// should be authenticated.
+func getItemAddToken(c *gin.Context) {
+	itemAddToken := c.PostForm("item_add_token")
+	// In production, this should be a unique identifier for each user that opens Link
+	clientUserID := time.Now().String()
+	response, err := client.CreateItemAddToken(plaid.ItemAddTokenUserFields{ClientUserID: clientUserID})
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	itemAddToken = response.AddToken
+	fmt.Println("item add token: " + itemAddToken)
+
+	c.JSON(http.StatusOK, gin.H{
+		"item_add_token": itemAddToken,
+	})
+}
+
 // This functionality is only relevant for the UK Payment Initiation product.
 // Sets the payment token in memory on the server side. We generate a new
 // payment token so that the developer is not required to supply one.
@@ -282,6 +304,7 @@ func main() {
 		})
 	})
 
+	r.POST("/get_item_add_token", getItemAddToken)
 	r.POST("/set_access_token", getAccessToken)
 	r.POST("/set_payment_token", setPaymentToken)
 	r.GET("/auth", auth)

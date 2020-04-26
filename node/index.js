@@ -66,7 +66,6 @@ app.use(bodyParser.json());
 
 app.get('/', function(request, response, next) {
   response.render('index.ejs', {
-    PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
     PLAID_ENV: PLAID_ENV,
     PLAID_PRODUCTS: PLAID_PRODUCTS,
     PLAID_COUNTRY_CODES: PLAID_COUNTRY_CODES,
@@ -80,11 +79,32 @@ app.get('/', function(request, response, next) {
 // This is an endpoint defined for the OAuth flow to redirect to.
 app.get('/oauth-response.html', function(request, response, next) {
   response.render('oauth-response.ejs', {
-    PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
     PLAID_ENV: PLAID_ENV,
     PLAID_PRODUCTS: PLAID_PRODUCTS,
     PLAID_COUNTRY_CODES: PLAID_COUNTRY_CODES,
     PLAID_OAUTH_NONCE: PLAID_OAUTH_NONCE,
+  });
+});
+
+// Generates an item_add_token for initializing Link
+app.post('/get_item_add_token', function(request, response, next) {
+  // In production, this client_user_id must be a unique identifier for each user that accesses Link
+  const clientUserID = new Date().toString();
+
+  client.createItemAddToken({
+    user: { client_user_id: clientUserID },
+  }, (err, successResponse) => {
+    if (err != null) {
+      prettyPrintResponse(err);
+      return response.json({
+        error: err,
+      });
+    }
+
+    response.json({
+      item_add_token: successResponse.add_token,
+      error: null,
+    });
   });
 });
 
