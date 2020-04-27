@@ -95,10 +95,13 @@ def get_access_token():
   access_token = exchange_response['access_token']
   return jsonify(exchange_response)
 
+# Creates an item add token for initializing Link in normal item add mode.
+# In production, this endpoint should be authenticated.
 @app.route('/get_item_add_token', methods=['POST'])
 def get_item_add_token():
     try:
         item_add_token_response = client.Item.add_token.create({
+            # In production, this client_user_id must be a unique identifier for each user that accesses Link.
             'client_user_id': str(time.time())
         })
     except plaid.errors.PlaidError as e:

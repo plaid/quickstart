@@ -46,10 +46,12 @@ post '/get_access_token' do
   exchange_token_response.to_json
 end
 
+# Creates an item add token for initializing Link in normal item add mode.
+# In production, this endpoint should be authenticated.
 post '/get_item_add_token' do
   begin
     item_add_token_response = client.item.add_token.create(
-      # In production, this must be a unique identifier for each user.
+      # In production, this client_user_id must be a unique identifier for each user that accesses Link.
       client_user_id: Time.now.utc.iso8601,
     )
     pretty_print_response(item_add_token_response)

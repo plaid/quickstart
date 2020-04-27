@@ -87,12 +87,11 @@ func getAccessToken(c *gin.Context) {
 	})
 }
 
-// The item add token is used to initial Link in normal item add mode.
-// Create this token before initializing Link. In production, this endpoint
-// should be authenticated.
+// Creates an item add token for initializing Link in normal item add mode.
+// In production, this endpoint should be authenticated.
 func getItemAddToken(c *gin.Context) {
 	itemAddToken := c.PostForm("item_add_token")
-	// In production, this should be a unique identifier for each user that opens Link
+	// In production, this client_user_id must be a unique identifier for each user that accesses Link.
 	clientUserID := time.Now().String()
 	response, err := client.CreateItemAddToken(plaid.ItemAddTokenUserFields{ClientUserID: clientUserID})
 

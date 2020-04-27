@@ -138,7 +138,9 @@
     });
 
     $('#link-btn').on('click', function(e) {
-      handler.open();
+      if (handler != null) {
+        handler.open();
+      }
     });
 
     $('#get-accounts-btn').on('click', function(e) {

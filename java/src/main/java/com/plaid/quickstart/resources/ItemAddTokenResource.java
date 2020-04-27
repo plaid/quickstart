@@ -24,8 +24,11 @@ public class ItemAddTokenResource {
     this.plaidClient = plaidClient;
   }
 
+  // Creates an item add token for initializing Link in normal item add mode.
+  // In production, this endpoint should be authenticated.
   @POST
   public ItemAddTokenCreateResponse createItemAddToken() throws IOException {
+  // In production, this client_user_id must be a unique identifier for each user that accesses Link.
     String clientUserId = Long.toString((new Date()).getTime());
 
     Response<ItemAddTokenCreateResponse> itemAddTokenResponse = 

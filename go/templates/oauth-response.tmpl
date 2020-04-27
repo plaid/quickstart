@@ -19,7 +19,6 @@
       clientName: 'Plaid Quickstart',
       env: '{{ .plaid_environment }}',
       product: products,
-      key: '{{ .plaid_public_key }}',
       countryCodes: '{{ .plaid_country_codes }}'.split(','),
     };
     var oauthNonce = '{{ .plaid_oauth_nonce }}';

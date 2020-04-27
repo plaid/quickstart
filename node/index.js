@@ -86,9 +86,10 @@ app.get('/oauth-response.html', function(request, response, next) {
   });
 });
 
-// Generates an item_add_token for initializing Link
+// Creates an item add token for initializing Link in normal item add mode.
+// In production, this endpoint should be authenticated.
 app.post('/get_item_add_token', function(request, response, next) {
-  // In production, this client_user_id must be a unique identifier for each user that accesses Link
+  // In production, this client_user_id must be a unique identifier for each user that accesses Link.
   const clientUserID = new Date().toString();
 
   client.createItemAddToken({
