@@ -10,6 +10,14 @@ Here you'll find full example integration apps using our [**client libraries**][
 - [Python][python-example]
 - [Java][java-example]
 
+If [docker][] is available to you, you can quickly spin up an example using: `% make QUICKSTART=go up`
+
+To see the log output of the quickstart run: `% make QUICKSTART=go logs` (when done, quit using `CTRL-C`).
+
+To stop the quickstart use: `% make QUICKSTART=go stop`
+
+Replace `go` in the command examples above with the name of the quickstart you want to start, e.g. `python`.
+
 ![Plaid quickstart app](/assets/quickstart-screenshot.png)
 
 [quickstart]: https://plaid.com/docs/quickstart
@@ -19,3 +27,4 @@ Here you'll find full example integration apps using our [**client libraries**][
 [python-example]: /python
 [java-example]: /java
 [go-example]: /go
+[docker]: https://www.docker.com
