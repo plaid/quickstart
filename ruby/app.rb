@@ -5,7 +5,7 @@ require 'plaid'
 require 'sinatra'
 
 set :public_folder, File.dirname(__FILE__) + '/static'
-# set :port, ENV['PLAID_ENV'] || 4567
+set :port, ENV['APP_PORT'] || 4567
 
 client = Plaid::Client.new(env: ENV['PLAID_ENV'],
                            client_id: ENV['PLAID_CLIENT_ID'],
