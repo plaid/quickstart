@@ -260,14 +260,14 @@
     // Handles redirect from the oauth response page for the oauth flow.
     if (document.referrer != null && document.referrer.includes('http://localhost:5000/oauth-response.html')) {
       $('#container').fadeOut('fast', function() {
-        $('#item_id').text('{{ item_id }}');
-        $('#access_token').text('{{ access_token }}');
+        $('#item_id').text('{{ item_id }}'.trim();
+        $('#access_token').text('{{ access_token }}'.trim());
         $('#intro').hide();
         $('#app, #steps').fadeIn('slow');
       });
     }
 
-    var products = '{{ plaid_products }}'.split(',');
+    var products = '{{ plaid_products }}'.trim().split(',');
     if (products.includes('assets')) {
       $('#assets').show();
     }
@@ -275,16 +275,16 @@
     var linkHandlerCommonOptions = {
       apiVersion: 'v2',
       clientName: 'Plaid Quickstart',
-      env: '{{ plaid_environment }}',
+      env: '{{ plaid_environment }}'.trim(),
       product: products,
-      key: '{{ plaid_public_key }}',
-      countryCodes: '{{ plaid_country_codes }}'.split(','),
+      key: '{{ plaid_public_key }}'.trim(),
+      countryCodes: '{{ plaid_country_codes }}'.trim().split(','),
     };
-    var oauthRedirectUri = '{{ plaid_oauth_redirect_uri }}';
+    var oauthRedirectUri = '{{ plaid_oauth_redirect_uri }}'.trim();
     if (oauthRedirectUri != '') {
       linkHandlerCommonOptions.oauthRedirectUri = oauthRedirectUri;
     }
-    var oauthNonce = '{{ plaid_oauth_nonce }}';
+    var oauthNonce = '{{ plaid_oauth_nonce }}'.trim();
     if (oauthNonce != '') {
       linkHandlerCommonOptions.oauthNonce = oauthNonce;
     }

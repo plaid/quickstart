@@ -262,15 +262,15 @@
     // Handles redirect from the oauth response page for the oauth flow.
     if (document.referrer != null && document.referrer.includes('http://localhost:8000/oauth-response.html')) {
       $('#container').fadeOut('fast', function() {
-        $('#item_id').text('<%= ITEM_ID %>');
-        $('#access_token').text('<%= ACCESS_TOKEN %>');
+        $('#item_id').text('<%= ITEM_ID %>'.trim());
+        $('#access_token').text('<%= ACCESS_TOKEN %>'.trim());
         $('#intro').hide();
         $('#app, #steps').fadeIn('slow');
       });
     }
 
 
-    var products = '<%= PLAID_PRODUCTS %>'.split(',');
+    var products = '<%= PLAID_PRODUCTS %>'.trim().split(',');
     if (products.includes('assets')) {
       $('#assets').show();
     }
@@ -278,16 +278,16 @@
     var linkHandlerCommonOptions = {
       apiVersion: 'v2',
       clientName: 'Plaid Quickstart',
-      env: '<%= PLAID_ENV %>',
+      env: '<%= PLAID_ENV %>'.trim(),
       product: products,
-      key: '<%= PLAID_PUBLIC_KEY %>',
-      countryCodes: '<%= PLAID_COUNTRY_CODES %>'.split(','),
+      key: '<%= PLAID_PUBLIC_KEY %>'.trim(),
+      countryCodes: '<%= PLAID_COUNTRY_CODES %>'.trim().split(','),
     };
-    var oauthRedirectUri = '<%= PLAID_OAUTH_REDIRECT_URI %>';
+    var oauthRedirectUri = '<%= PLAID_OAUTH_REDIRECT_URI %>'.trim();
     if (oauthRedirectUri != '') {
       linkHandlerCommonOptions.oauthRedirectUri = oauthRedirectUri;
     }
-    var oauthNonce = '<%= PLAID_OAUTH_NONCE %>';
+    var oauthNonce = '<%= PLAID_OAUTH_NONCE %>'.trim();
     if (oauthNonce != '') {
       linkHandlerCommonOptions.oauthNonce = oauthNonce;
     }
