@@ -13,16 +13,16 @@
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
   (function($) {
-    var products = '{{ plaid_products }}'.split(',');
+    var products = '{{ plaid_products }}'.trim().split(',');
     var linkHandlerCommonOptions = {
       apiVersion: 'v2',
       clientName: 'Plaid Quickstart',
-      env: '{{ plaid_environment }}',
+      env: '{{ plaid_environment }}'.trim(),
       product: products,
-      key: '{{ plaid_public_key }}',
-      countryCodes: '{{ plaid_country_codes }}'.split(','),
+      key: '{{ plaid_public_key }}'.trim(),
+      countryCodes: '{{ plaid_country_codes }}'.trim().split(','),
     };
-    var oauthNonce = '{{ plaid_oauth_nonce }}';
+    var oauthNonce = '{{ plaid_oauth_nonce }}'.trim();
     if (oauthNonce == null || oauthNonce == '') {
       console.error('oauth_nonce should not be empty');
     }
