@@ -38,7 +38,7 @@ ruby app.rb
 Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should provide two additional configuration parameters, `PLAID_OAUTH_NONCE` and `PLAID_OAUTH_REDIRECT_URI`.
 
 ``` bash
-# You will need to allow the PLAID_OAUTH_REDIRECT_URI for
+# You will need to configure the PLAID_OAUTH_REDIRECT_URI for
 # your client ID through the Plaid developer dashboard at
 # https://dashboard.plaid.com/team/api.
 #
