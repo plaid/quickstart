@@ -2,25 +2,25 @@
 
 var util = require('util');
 
-var envvar = require('envvar');
+require("dotenv").config();
 var express = require('express');
 var bodyParser = require('body-parser');
 var moment = require('moment');
 var plaid = require('plaid');
 
-var APP_PORT = envvar.number('APP_PORT', 8000);
-var PLAID_CLIENT_ID = envvar.string('PLAID_CLIENT_ID');
-var PLAID_SECRET = envvar.string('PLAID_SECRET');
-var PLAID_PUBLIC_KEY = envvar.string('PLAID_PUBLIC_KEY');
-var PLAID_ENV = envvar.string('PLAID_ENV', 'sandbox');
+var APP_PORT = process.env.APP_PORT;
+var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
+var PLAID_SECRET = process.env.PLAID_SECRET;
+var PLAID_PUBLIC_KEY = process.env.PLAID_PUBLIC_KEY;
+var PLAID_ENV = process.env.PLAID_ENV;
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
-var PLAID_PRODUCTS = envvar.string('PLAID_PRODUCTS', 'transactions');
+var PLAID_PRODUCTS = process.env.PLAID_PRODUCTS;
 
 // PLAID_PRODUCTS is a comma-separated list of countries for which users
 // will be able to select institutions from.
-var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US');
+var PLAID_COUNTRY_CODES = process.env.PLAID_COUNTRY_CODES;
 
 // Parameters used for the OAuth redirect Link flow.
 //
@@ -29,11 +29,11 @@ var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US');
 // that the bank website should redirect to. You will need to whitelist
 // this redirect URI for your client ID through the Plaid developer dashboard
 // at https://dashboard.plaid.com/team/api.
-var PLAID_OAUTH_REDIRECT_URI = envvar.string('PLAID_OAUTH_REDIRECT_URI', '');
+var PLAID_OAUTH_REDIRECT_URI = process.env.PLAID_OAUTH_REDIRECT_URI;
 // Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
 // session. The nonce will be used to re-open Link upon completion of the OAuth
 // redirect. The nonce must be at least 16 characters long.
-var PLAID_OAUTH_NONCE = envvar.string('PLAID_OAUTH_NONCE', '');
+var PLAID_OAUTH_NONCE = process.env.PLAID_OAUTH_NONCE;
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
