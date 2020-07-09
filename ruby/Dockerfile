@@ -1,7 +1,7 @@
 FROM ruby:alpine
 
 WORKDIR /opt/app
-COPY . /opt/app
+COPY . .
 RUN bundle install
 
 EXPOSE 4567

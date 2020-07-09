@@ -1,7 +1,7 @@
 FROM node:alpine
 
 WORKDIR /opt/app
-COPY . /opt/app
+COPY . .
 RUN npm install
 
 EXPOSE 8000

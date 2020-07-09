@@ -1,7 +1,7 @@
 FROM golang:1.12 AS build
 
 WORKDIR /opt/src
-COPY . /opt/src
+COPY . .
 RUN go get -d -v ./...
 RUN go build -o quickstart
 
