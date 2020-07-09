@@ -10,7 +10,10 @@ Here you'll find full example integration apps using our [**client libraries**][
 - [Python][python-example]
 - [Java][java-example]
 
-If [docker][] is available to you, you can quickly spin up an example using: `% make QUICKSTART=go up`
+If [docker][] is available to you, you can quickly spin up an example using: `% make QUICKSTART=go up`.
+Be sure to have `PLAID_CLIENT_ID`, `PLAID_SECRET`, and `PLAID_PUBLIC_KEY` defined in your environment or
+replace the respective `${VARIABLES}` in the `x-environment` section in
+[`docker-compose.yml`](/docker-compose.yml) directly.
 
 To see the log output of the quickstart run: `% make QUICKSTART=go logs` (when done, quit using `CTRL-C`).
 
