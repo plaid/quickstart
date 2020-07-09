@@ -274,7 +274,7 @@
     var linkHandlerCommonOptions = {
       apiVersion: 'v2',
       clientName: 'Plaid Quickstart',
-      env: '<%= ENV["PLAID_ENV"] %>',
+      env: '<%= ENV["PLAID_ENV"] || "sandbox" %>',
       product: products,
       key: '<%= ENV["PLAID_PUBLIC_KEY"] %>',
       countryCodes: '<%= ENV["PLAID_COUNTRY_CODES"] || "US" %>'.split(','),
