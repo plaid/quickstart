@@ -26,8 +26,6 @@ services:
       << : *QUICKSTART_ENVIRONMENT
   python:
     build: ./python
-    volumes:
-      - ${PWD}/python:/opt/app
     ports: ["5000:5000"]
     environment:
       << : *QUICKSTART_ENVIRONMENT
