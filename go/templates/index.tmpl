@@ -391,7 +391,6 @@
 
     $('#get-identity-btn').on('click', function(e) {
       $.get('/identity', function(data) {
-        console.log(data)
         $('#get-identity-data').slideUp(function() {
           if (data.error != null) {
             displayError(this, data.error);
