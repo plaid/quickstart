@@ -6,4 +6,5 @@ RUN npm install
 
 EXPOSE 8000
 USER node
-ENTRYPOINT ["node", "index.js"]
+ENTRYPOINT ["node"]
+CMD ["index.js"]
