@@ -264,10 +264,13 @@ post '/set_payment_token' do
     create_recipient_response = client.payment_initiation.create_recipient(
       'Harry Potter',
       'GB33BUKB20201555555555',
-      street:      ['4 Privet Drive'],
-      city:        'Little Whinging',
-      postal_code: '11111',
-      country:     'GB'
+      {
+        street:      ['4 Privet Drive'],
+        city:        'Little Whinging',
+        postal_code: '11111',
+        country:     'GB'
+      },
+      account: '555555',
     )
     recipient_id = create_recipient_response.recipient_id
 
