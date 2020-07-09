@@ -14,6 +14,9 @@ If [docker][] is available to you, you can quickly spin up an example using: `% 
 Be sure to have `PLAID_CLIENT_ID`, `PLAID_SECRET`, and `PLAID_PUBLIC_KEY` defined in your environment or
 replace the respective `${VARIABLES}` in the `x-environment` section in
 [`docker-compose.yml`](/docker-compose.yml) directly.
+To further adjust quickstart to your use-case define `PLAID_PRODUCTS`, `PLAID_COUNTRY_CODES`,
+`PLAID_OAUTH_REDIRECT_URI`, `PLAID_OAUTH_NONCE` in your environment or set the respective
+`${VARIABLES}` in in the `x-environment` section in [`docker-compose.yml`](/docker-compose.yml) directly.
 
 To see the log output of the quickstart run: `% make QUICKSTART=go logs` (when done, quit using `CTRL-C`).
 
