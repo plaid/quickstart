@@ -1,0 +1,36 @@
+version: "3.4"
+x-environment: &QUICKSTART_ENVIRONMENT
+  PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
+  PLAID_SECRET: ${PLAID_SECRET}
+  PLAID_PUBLIC_KEY: ${PLAID_PUBLIC_KEY}
+  PLAID_PRODUCTS: transactions
+  PLAID_COUNTRY_CODES: US,CA
+  PLAID_OAUTH_REDIRECT_URI:
+  PLAID_OAUTH_NONCE:
+services:
+  go:
+    build:
+      context: ./go
+    ports: ["8000:8000"]
+    environment:
+      << : *QUICKSTART_ENVIRONMENT
+  java:
+    build: ./java
+    ports: ["8080:8080"]
+    environment:
+      << : *QUICKSTART_ENVIRONMENT
+  node:
+    build: ./node
+    ports: ["8000:8000"]
+    environment:
+      << : *QUICKSTART_ENVIRONMENT
+  python:
+    build: ./python
+    ports: ["5000:5000"]
+    environment:
+      << : *QUICKSTART_ENVIRONMENT
+  ruby:
+    build: ./ruby
+    ports: ["4567:4567"]
+    environment:
+      << : *QUICKSTART_ENVIRONMENT
