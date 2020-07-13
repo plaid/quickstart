@@ -301,9 +301,19 @@ var envMapping = map[string]plaid.Environment{
 }
 
 func createLinkToken(c *gin.Context) {
+	isOAuthParam := c.PostForm("is_oauth")
+	isOAuth := false
+	if isOAuthParam == "true" {
+		isOAuth = true
+	}
+
 	env := "sandbox"
 	countryCodes := strings.Split(PLAID_COUNTRY_CODES, ",")
 	products := strings.Split(PLAID_PRODUCTS, ",")
+	oAuthRedirectURI := ""
+	if isOAuth {
+		oAuthRedirectURI = PLAID_OAUTH_REDIRECT_URI
+	}
 	fmt.Println("args", map[string]interface{}{
 		"env":          env,
 		"countryCodes": countryCodes,
@@ -329,7 +339,7 @@ func createLinkToken(c *gin.Context) {
 		CountryCodes: countryCodes,
 		// Webhook:               "https://example.com/webhook",
 		Language:           "en",
-		RedirectUri:        PLAID_OAUTH_REDIRECT_URI,
+		RedirectUri:        oAuthRedirectURI,
 		AndroidPackageName: "",
 	})
 	if err != nil {

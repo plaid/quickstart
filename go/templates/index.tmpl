@@ -234,21 +234,6 @@
     if (products.includes('assets')) {
       $('#assets').show();
     }
-    var linkTokenCreateOptions = {
-      apiVersion: 'v2',
-      clientName: 'Plaid Quickstart',
-      products: products,
-      countryCodes: '{{ .plaid_country_codes }}'.split(','),
-    };
-    var oauthRedirectUri = '{{ .plaid_oauth_redirect_uri }}';
-    if (oauthRedirectUri != '') {
-      linkTokenCreateOptions.oauthRedirectUri = oauthRedirectUri;
-    }
-    var oauthNonce = '{{ .plaid_oauth_nonce }}';
-    if (oauthNonce != '') {
-      linkTokenCreateOptions.oauthNonce = oauthNonce;
-    }
-
     // This functionality is only relevant for the UK Payment Initiation product.
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
@@ -285,7 +270,7 @@
     } else {
       var linkAddToken = null;
       var handler = null;
-      $.post('/create_link_token', JSON.stringify(linkTokenCreateOptions), function(data){
+      $.post('/create_link_token', {}, function(data){
         linkAddToken = data.link_token;
         handler = Plaid.create({
           token: linkAddToken,
