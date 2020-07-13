@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +24,6 @@ func init() {
 var (
 	PLAID_CLIENT_ID     = os.Getenv("PLAID_CLIENT_ID")
 	PLAID_SECRET        = os.Getenv("PLAID_SECRET")
-	PLAID_PUBLIC_KEY    = os.Getenv("PLAID_PUBLIC_KEY")
 	PLAID_PRODUCTS      = os.Getenv("PLAID_PRODUCTS")
 	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
 	// Parameters used for the OAuth redirect Link flow.
@@ -45,15 +45,14 @@ var (
 	APP_PORT = os.Getenv("APP_PORT")
 )
 
-var clientOptions = plaid.ClientOptions{
-	PLAID_CLIENT_ID,
-	PLAID_SECRET,
-	PLAID_PUBLIC_KEY,
-	plaid.Sandbox, // Available environments are Sandbox, Development, and Production
-	&http.Client{},
+func createClient(environment plaid.Environment) (client *plaid.Client, err error) {
+	return plaid.NewClient(plaid.ClientOptions{
+		PLAID_CLIENT_ID,
+		PLAID_SECRET,
+		environment, // Available environments are Sandbox, Development, and Production
+		&http.Client{},
+	})
 }
-
-var client, err = plaid.NewClient(clientOptions)
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store.
@@ -68,14 +67,18 @@ var paymentID string
 
 func getAccessToken(c *gin.Context) {
 	publicToken := c.PostForm("public_token")
-	response, err := client.ExchangePublicToken(publicToken)
-	accessToken = response.AccessToken
-	itemID = response.ItemID
-
+	client, err := createClient(plaid.Sandbox)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	response, err := client.ExchangePublicToken(publicToken)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	accessToken = response.AccessToken
+	itemID = response.ItemID
 
 	fmt.Println("public token: " + publicToken)
 	fmt.Println("access token: " + accessToken)
@@ -92,12 +95,20 @@ func getAccessToken(c *gin.Context) {
 // payment token so that the developer is not required to supply one.
 // This makes the quickstart easier to use.
 func setPaymentToken(c *gin.Context) {
-	recipientCreateResp, err := client.CreatePaymentRecipient("Harry Potter", "GB33BUKB20201555555555", plaid.PaymentRecipientAddress{
-		Street:     []string{"4 Privet Drive"},
-		City:       "Little Whinging",
-		PostalCode: "11111",
-		Country:    "GB",
-	})
+	client, err := createClient(plaid.Sandbox)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	recipientCreateResp, err := client.CreatePaymentRecipient(
+		"Harry Potter",
+		"GB33BUKB20201555555555",
+		&plaid.PaymentRecipientAddress{
+			Street:     []string{"4 Privet Drive"},
+			City:       "Little Whinging",
+			PostalCode: "11111",
+			Country:    "GB",
+		})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -130,8 +141,12 @@ func setPaymentToken(c *gin.Context) {
 }
 
 func auth(c *gin.Context) {
+	client, err := createClient(plaid.Sandbox)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	response, err := client.GetAuth(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -144,8 +159,12 @@ func auth(c *gin.Context) {
 }
 
 func accounts(c *gin.Context) {
+	client, err := createClient(plaid.Sandbox)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	response, err := client.GetAccounts(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -157,8 +176,12 @@ func accounts(c *gin.Context) {
 }
 
 func balance(c *gin.Context) {
+	client, err := createClient(plaid.Sandbox)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	response, err := client.GetBalances(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -170,15 +193,18 @@ func balance(c *gin.Context) {
 }
 
 func item(c *gin.Context) {
+	client, err := createClient(plaid.Sandbox)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	response, err := client.GetItem(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	institution, err := client.GetInstitutionByID(response.Item.InstitutionID)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -191,8 +217,12 @@ func item(c *gin.Context) {
 }
 
 func identity(c *gin.Context) {
+	client, err := createClient(plaid.Sandbox)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	response, err := client.GetIdentity(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -204,6 +234,11 @@ func identity(c *gin.Context) {
 }
 
 func transactions(c *gin.Context) {
+	client, err := createClient(plaid.Sandbox)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	// pull transactions for the past 30 days
 	endDate := time.Now().Local().Format("2006-01-02")
 	startDate := time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02")
@@ -224,8 +259,12 @@ func transactions(c *gin.Context) {
 // This functionality is only relevant for the UK Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
 func payment(c *gin.Context) {
+	client, err := createClient(plaid.Sandbox)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	response, err := client.GetPayment(paymentID)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -237,6 +276,11 @@ func payment(c *gin.Context) {
 }
 
 func createPublicToken(c *gin.Context) {
+	client, err := createClient(plaid.Sandbox)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	// Create a one-time use public_token for the Item.
 	// This public_token can be used to initialize Link in update mode for a user
 	publicToken, err := client.CreatePublicToken(accessToken)
@@ -247,6 +291,54 @@ func createPublicToken(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"public_token": publicToken,
+	})
+}
+
+var envMapping = map[string]plaid.Environment{
+	"sandbox":     plaid.Sandbox,
+	"production":  plaid.Production,
+	"development": plaid.Development,
+}
+
+func createLinkToken(c *gin.Context) {
+	env := "sandbox"
+	countryCodes := strings.Split(PLAID_COUNTRY_CODES, ",")
+	products := strings.Split(PLAID_PRODUCTS, ",")
+	fmt.Println("args", map[string]interface{}{
+		"env":          env,
+		"countryCodes": countryCodes,
+		"products":     products,
+		"redirectURI":  PLAID_OAUTH_REDIRECT_URI,
+	})
+	// TODO: oauthNonce
+	mappedEnv, ok := envMapping[env]
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid environment. Valid environments are sandbox, production, an development"})
+	}
+	client, err := createClient(mappedEnv)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	resp, err := client.CreateLinkToken(plaid.LinkTokenConfigs{
+		User: &plaid.LinkTokenUser{
+			ClientUserID: "user-id",
+		},
+		ClientName:   "Plaid Quickstart",
+		Products:     products,
+		CountryCodes: countryCodes,
+		// Webhook:               "https://example.com/webhook",
+		Language:           "en",
+		RedirectUri:        PLAID_OAUTH_REDIRECT_URI,
+		AndroidPackageName: "",
+	})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"link_token": resp.LinkToken,
 	})
 }
 
@@ -261,21 +353,16 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"plaid_environment":        "sandbox", // Switch this environment
-			"plaid_public_key":         PLAID_PUBLIC_KEY,
-			"plaid_products":           PLAID_PRODUCTS,
-			"plaid_country_codes":      PLAID_COUNTRY_CODES,
-			"plaid_oauth_redirect_uri": PLAID_OAUTH_REDIRECT_URI,
-			"plaid_oauth_nonce":        PLAID_OAUTH_NONCE,
-			"item_id":                  itemID,
-			"access_token":             accessToken,
+			//"plaid_oauth_redirect_uri": PLAID_OAUTH_REDIRECT_URI,
+			//"plaid_oauth_nonce":        PLAID_OAUTH_NONCE,
+			"item_id":      itemID,
+			"access_token": accessToken,
 		})
 	})
 
 	r.GET("/oauth-response.html", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "oauth-response.tmpl", gin.H{
 			"plaid_environment":   "sandbox", // Switch this environment
-			"plaid_public_key":    PLAID_PUBLIC_KEY,
 			"plaid_products":      PLAID_PRODUCTS,
 			"plaid_country_codes": PLAID_COUNTRY_CODES,
 			"plaid_oauth_nonce":   PLAID_OAUTH_NONCE,
@@ -294,6 +381,7 @@ func main() {
 	r.POST("/transactions", transactions)
 	r.GET("/payment", payment)
 	r.GET("/create_public_token", createPublicToken)
+	r.POST("/create_link_token", createLinkToken)
 
 	r.Run(":" + APP_PORT)
 }

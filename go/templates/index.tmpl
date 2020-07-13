@@ -234,23 +234,21 @@
     if (products.includes('assets')) {
       $('#assets').show();
     }
-
-    var linkHandlerCommonOptions = {
+    var linkTokenCreateOptions = {
       apiVersion: 'v2',
       clientName: 'Plaid Quickstart',
-      env: '{{ .plaid_environment }}',
-      product: products,
-      key: '{{ .plaid_public_key }}',
+      products: products,
       countryCodes: '{{ .plaid_country_codes }}'.split(','),
     };
     var oauthRedirectUri = '{{ .plaid_oauth_redirect_uri }}';
     if (oauthRedirectUri != '') {
-      linkHandlerCommonOptions.oauthRedirectUri = oauthRedirectUri;
+      linkTokenCreateOptions.oauthRedirectUri = oauthRedirectUri;
     }
     var oauthNonce = '{{ .plaid_oauth_nonce }}';
     if (oauthNonce != '') {
-      linkHandlerCommonOptions.oauthNonce = oauthNonce;
+      linkTokenCreateOptions.oauthNonce = oauthNonce;
     }
+
     // This functionality is only relevant for the UK Payment Initiation product.
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
@@ -285,24 +283,29 @@
         $('.loading-indicator').hide();
       });
     } else {
-      var handler = Plaid.create({
-        ...linkHandlerCommonOptions,
-        // webhook: 'https://your-domain.tld/plaid-webhook',
-        onSuccess: function(public_token) {
-          $.post('/set_access_token', {
-            public_token: public_token
-          }, function(data) {
-            $('#container').fadeOut('fast', function() {
-              $('#item_id').text(data.item_id);
-              $('#access_token').text(data.access_token);
-              $('#intro').hide();
-              $('#app, #steps').fadeIn('slow');
+      var linkAddToken = null;
+      var handler = null;
+      $.post('/create_link_token', JSON.stringify(linkTokenCreateOptions), function(data){
+        linkAddToken = data.link_token;
+        handler = Plaid.create({
+          token: linkAddToken,
+          // webhook: 'https://your-domain.tld/plaid-webhook',
+          onSuccess: function(public_token) {
+            $.post('/set_access_token', {
+              public_token: public_token
+            }, function(data) {
+              $('#container').fadeOut('fast', function() {
+                $('#item_id').text(data.item_id);
+                $('#access_token').text(data.access_token);
+                $('#intro').hide();
+                $('#app, #steps').fadeIn('slow');
+              });
             });
-          });
-        },
+          },
+        });
+        $('#link-btn').attr('disabled', false);
+        $('.loading-indicator').hide();
       });
-      $('#link-btn').attr('disabled', false);
-      $('.loading-indicator').hide();
     }
 
     var accessToken = qs('access_token');
