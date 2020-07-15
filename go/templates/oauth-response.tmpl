@@ -13,11 +13,12 @@
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
   (function($) {
-    $.post('/create_link_token', { isOAuth: true }, function(data){
+    $.post('/create_link_token', { is_oauth: true }, function(data){
       linkAddToken = data.link_token;
       var handler = Plaid.create({
         token: linkAddToken,
         onSuccess: function(public_token) {
+            debugger;
           $.post('/set_access_token', {public_token: public_token}, function(data) {
             location.href = 'http://localhost:8000';
           });

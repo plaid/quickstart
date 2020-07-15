@@ -33,10 +33,10 @@ go run server.go
 ```
 
 ## The OAuth redirect flow
-Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should provide two additional configuration parameters, `PLAID_OAUTH_NONCE` and `PLAID_OAUTH_REDIRECT_URI`.
+Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should provide two additional configuration parameters, `PLAID_OAUTH_NONCE` and `PLAID_REDIRECT_URI`.
 
 ``` bash
-# You will need to configure the PLAID_OAUTH_REDIRECT_URI for
+# You will need to configure the PLAID_REDIRECT_URI for
 # your client ID through the Plaid developer dashboard at
 # https://dashboard.plaid.com/team/api.
 #
@@ -56,7 +56,7 @@ PLAID_SECRET=[SECRET] \
 PLAID_PUBLIC_KEY=[PUBLIC_KEY] \
 PLAID_PRODUCTS=[PRODUCTS] \
 PLAID_COUNTRY_CODES='GB,FR,ES,IE,NL' \
-PLAID_OAUTH_REDIRECT_URI='http://localhost:8000/oauth-response.html' \
+PLAID_REDIRECT_URI='http://localhost:8000/oauth-response.html' \
 PLAID_OAUTH_NONCE='nice-and-long-nonce' \
 go run server.go
 

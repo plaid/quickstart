@@ -28,16 +28,12 @@ var (
 	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
 	// Parameters used for the OAuth redirect Link flow.
 	//
-	// Set PLAID_OAUTH_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
+	// Set PLAID_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
 	// The OAuth redirect flow requires an endpoint on the developer's website
 	// that the bank website should redirect to. You will need to configure
 	// this redirect URI for your client ID through the Plaid developer dashboard
 	// at https://dashboard.plaid.com/team/api.
-	PLAID_OAUTH_REDIRECT_URI = os.Getenv("PLAID_OAUTH_REDIRECT_URI")
-	// Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
-	// session. The nonce will be used to re-open Link upon completion of the OAuth
-	// redirect. The nonce must be at least 16 characters long.
-	PLAID_OAUTH_NONCE = os.Getenv("PLAID_OAUTH_NONCE")
+	PLAID_REDIRECT_URI = os.Getenv("PLAID_REDIRECT_URI")
 
 	// Use 'sandbox' to test with fake credentials in Plaid's Sandbox environment
 	// Use `development` to test with real credentials while developing
@@ -310,15 +306,15 @@ func createLinkToken(c *gin.Context) {
 	env := "sandbox"
 	countryCodes := strings.Split(PLAID_COUNTRY_CODES, ",")
 	products := strings.Split(PLAID_PRODUCTS, ",")
-	oAuthRedirectURI := ""
+	redirectURI := ""
 	if isOAuth {
-		oAuthRedirectURI = PLAID_OAUTH_REDIRECT_URI
+		redirectURI = PLAID_REDIRECT_URI
 	}
 	fmt.Println("args", map[string]interface{}{
 		"env":          env,
 		"countryCodes": countryCodes,
 		"products":     products,
-		"redirectURI":  PLAID_OAUTH_REDIRECT_URI,
+		"redirectURI":  redirectURI,
 	})
 	// TODO: oauthNonce
 	mappedEnv, ok := envMapping[env]
@@ -337,10 +333,9 @@ func createLinkToken(c *gin.Context) {
 		ClientName:   "Plaid Quickstart",
 		Products:     products,
 		CountryCodes: countryCodes,
+		Language:     "en",
+		RedirectUri:  redirectURI,
 		// Webhook:               "https://example.com/webhook",
-		Language:           "en",
-		RedirectUri:        oAuthRedirectURI,
-		AndroidPackageName: "",
 	})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -363,7 +358,7 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			//"plaid_oauth_redirect_uri": PLAID_OAUTH_REDIRECT_URI,
+			//"PLAID_REDIRECT_URI": PLAID_REDIRECT_URI,
 			//"plaid_oauth_nonce":        PLAID_OAUTH_NONCE,
 			"item_id":      itemID,
 			"access_token": accessToken,
@@ -375,7 +370,6 @@ func main() {
 			"plaid_environment":   "sandbox", // Switch this environment
 			"plaid_products":      PLAID_PRODUCTS,
 			"plaid_country_codes": PLAID_COUNTRY_CODES,
-			"plaid_oauth_nonce":   PLAID_OAUTH_NONCE,
 		})
 	})
 
