@@ -237,7 +237,7 @@
     // This functionality is only relevant for the UK Payment Initiation product.
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
-      $.post('/set_payment_token', {}, function(data) {
+      $.post('/create_link_token_with_payment', {}, function(data) {
         console.log(data);
         var paymentToken = data.payment_token;
         $('#payment_token').text(paymentToken);
@@ -246,7 +246,7 @@
         // payment token to be generated before the Link handler can be
         // initialized.
         handler = Plaid.create({
-          ...linkHandlerCommonOptions,
+          token: data.link_token,
           paymentToken: paymentToken,
           language: 'en',
           onSuccess: function(public_token) {
@@ -268,14 +268,13 @@
         $('.loading-indicator').hide();
       });
     } else {
-      var linkAddToken = null;
       var handler = null;
       $.post('/create_link_token', {}, function(data){
-        linkAddToken = data.link_token;
-        handler = Plaid.create({
-          token: linkAddToken,
+          handler = Plaid.create({
+          token: data.link_token,
           // webhook: 'https://your-domain.tld/plaid-webhook',
           onSuccess: function(public_token) {
+            debugger;
             $.post('/set_access_token', {
               public_token: public_token
             }, function(data) {
@@ -337,6 +336,7 @@
     $('#get-auth-btn').on('click', function(e) {
       $.get('/auth', function(data) {
         $('#get-auth-data').slideUp(function() {
+          debugger;
           if (data.error != null) {
             displayError(this, data.error);
             return;
@@ -384,6 +384,7 @@
             displayError(this, data.error);
             return;
           }
+          var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
           var identityData = data.identity[0];
           var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
 
