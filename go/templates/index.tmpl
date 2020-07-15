@@ -274,7 +274,6 @@
           token: data.link_token,
           // webhook: 'https://your-domain.tld/plaid-webhook',
           onSuccess: function(public_token) {
-            debugger;
             $.post('/set_access_token', {
               public_token: public_token
             }, function(data) {
@@ -336,7 +335,6 @@
     $('#get-auth-btn').on('click', function(e) {
       $.get('/auth', function(data) {
         $('#get-auth-data').slideUp(function() {
-          debugger;
           if (data.error != null) {
             displayError(this, data.error);
             return;

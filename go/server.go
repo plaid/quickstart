@@ -62,9 +62,11 @@ var paymentToken string
 var paymentID string
 
 // For OAuth flows, the process looks as follows.
-// 1. create a link token with the redirectURI (as white listed at https://dashboard.plaid.com/team/api).
-// 2. Once the flow succeeds, redirectURI will be called with additional parameters (as dictated by OAuth standards and Plaid)
-// 3. link is re-initialized with the link token (from step 1) and the additional parameters from step 2.
+// 1. Create a link token with the redirectURI (as white listed at https://dashboard.plaid.com/team/api).
+// 2. Once the flow succeeds, Plaid Link will redirect to redirectURI with
+// additional parameters (as required by OAuth standards and Plaid)
+// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
+// from step 2.
 var lastLinkToken string
 
 func getAccessToken(c *gin.Context) {
@@ -93,9 +95,9 @@ func getAccessToken(c *gin.Context) {
 }
 
 // This functionality is only relevant for the UK Payment Initiation product.
-// Sets the payment token in memory on the server side. We generate a new
-// payment token so that the developer is not required to supply one.
-// This makes the quickstart easier to use.
+// Create a new payment token and link it to our link token. Thus, the payment
+// information will be associated with the link token, and will not have to be
+// passed in again when we initialize Plaid Link.
 func createLinkTokenWithPayment(c *gin.Context) {
 	client, err := createClient(plaid.Sandbox)
 	if err != nil {
@@ -115,9 +117,7 @@ func createLinkTokenWithPayment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	recipientID := recipientCreateResp.RecipientID
-
-	paymentCreateResp, err := client.CreatePayment(recipientID, "payment-ref", plaid.PaymentAmount{
+	paymentCreateResp, err := client.CreatePayment(recipientCreateResp.RecipientID, "payment-ref", plaid.PaymentAmount{
 		Currency: "GBP",
 		Value:    12.34,
 	})
@@ -336,7 +336,6 @@ func fetchLinkToken(paymentID string) (string, *httpError) {
 		"products":     products,
 		"redirectURI":  redirectURI,
 	})
-	// TODO: oauthNonce
 	mappedEnv, ok := envMapping[env]
 	if !ok {
 		return "", &httpError{errorCode: http.StatusBadRequest, error: "invalid environment. Valid environments are sandbox, production, an development"}
