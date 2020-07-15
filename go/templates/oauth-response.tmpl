@@ -13,18 +13,16 @@
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
   (function($) {
-    $.post('/link_token_for_session', function(data){
-      linkAddToken = data.link_token;
-      var handler = Plaid.create({
-        token: linkAddToken,
-        receivedRedirectUri: window.location.href,
-        onSuccess: function(public_token) {
-          $.post('/set_access_token', {public_token: public_token}, function(data) {
-            location.href = 'http://localhost:8000';
-          });
-        },
-      });
-      handler.open();
+    var linkToken = localStorage.getItem('link_token');
+    var handler = Plaid.create({
+      token: linkToken,
+      receivedRedirectUri: window.location.href,
+      onSuccess: function(public_token) {
+        $.post('/set_access_token', {public_token: public_token}, function(data) {
+          location.href = 'http://localhost:8000';
+        });
+      },
+    handler.open();
     });
   })(jQuery);
   </script>

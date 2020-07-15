@@ -61,14 +61,6 @@ var itemID string
 var paymentToken string
 var paymentID string
 
-// For OAuth flows, the process looks as follows.
-// 1. Create a link token with the redirectURI (as white listed at https://dashboard.plaid.com/team/api).
-// 2. Once the flow succeeds, Plaid Link will redirect to redirectURI with
-// additional parameters (as required by OAuth standards and Plaid)
-// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
-// from step 2.
-var lastLinkToken string
-
 func getAccessToken(c *gin.Context) {
 	publicToken := c.PostForm("public_token")
 	client, err := createClient(plaid.Sandbox)
@@ -141,9 +133,8 @@ func createLinkTokenWithPayment(c *gin.Context) {
 	if httpErr != nil {
 		c.JSON(httpErr.errorCode, gin.H{"error": httpErr.Error()})
 	}
-	lastLinkToken = linkToken
 	c.JSON(http.StatusOK, gin.H{
-		"link_token": lastLinkToken,
+		"link_token": linkToken,
 	})
 }
 
@@ -301,18 +292,11 @@ func createPublicToken(c *gin.Context) {
 	})
 }
 
-var envMapping = map[string]plaid.Environment{
-	"sandbox":     plaid.Sandbox,
-	"production":  plaid.Production,
-	"development": plaid.Development,
-}
-
 func createLinkToken(c *gin.Context) {
 	linkToken, err := fetchLinkToken("")
 	if err != nil {
 		c.JSON(err.errorCode, gin.H{"error": err.error})
 	}
-	lastLinkToken = linkToken
 	c.JSON(http.StatusOK, gin.H{"link_token": linkToken})
 }
 
@@ -326,21 +310,10 @@ func (httpError *httpError) Error() string {
 }
 
 func fetchLinkToken(paymentID string) (string, *httpError) {
-	env := "sandbox"
 	countryCodes := strings.Split(PLAID_COUNTRY_CODES, ",")
 	products := strings.Split(PLAID_PRODUCTS, ",")
 	redirectURI := PLAID_REDIRECT_URI
-	fmt.Println("args", map[string]interface{}{
-		"env":          env,
-		"countryCodes": countryCodes,
-		"products":     products,
-		"redirectURI":  redirectURI,
-	})
-	mappedEnv, ok := envMapping[env]
-	if !ok {
-		return "", &httpError{errorCode: http.StatusBadRequest, error: "invalid environment. Valid environments are sandbox, production, an development"}
-	}
-	client, err := createClient(mappedEnv)
+	client, err := createClient(plaid.Sandbox)
 	if err != nil {
 		return "", &httpError{
 			errorCode: http.StatusInternalServerError,
@@ -373,12 +346,6 @@ func fetchLinkToken(paymentID string) (string, *httpError) {
 	return resp.LinkToken, nil
 }
 
-func getLinkTokenForSession(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"link_token": lastLinkToken,
-	})
-}
-
 func main() {
 	if APP_PORT == "" {
 		APP_PORT = "8000"
@@ -396,10 +363,15 @@ func main() {
 		})
 	})
 
+	// For OAuth flows, the process looks as follows.
+	// 1. Create a link token with the redirectURI (as white listed at https://dashboard.plaid.com/team/api).
+	// 2. Once the flow succeeds, Plaid Link will redirect to redirectURI with
+	// additional parameters (as required by OAuth standards and Plaid)
+	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
+	// from step 2.
 	r.GET("/oauth-response.html", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "oauth-response.tmpl", gin.H{
 			"plaid_environment": "sandbox", // Switch this environment
-			"plaid_link_token":  lastLinkToken,
 		})
 	})
 
@@ -416,7 +388,6 @@ func main() {
 	r.GET("/payment", payment)
 	r.GET("/create_public_token", createPublicToken)
 	r.POST("/create_link_token", createLinkToken)
-	r.POST("/link_token_for_session", getLinkTokenForSession)
 
 	r.Run(":" + APP_PORT)
 }

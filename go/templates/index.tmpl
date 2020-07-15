@@ -221,7 +221,7 @@
   <script>
   (function($) {
     // Handles redirect from the oauth response page for the oauth flow.
-    if (document.referrer != null && document.referrer.includes('http://localhost:8000/oauth-response.html')) {
+    if (document.is a != null && document.referrer.includes('http://localhost:8000/oauth-response.html')) {
       $('#container').fadeOut('fast', function() {
         $('#item_id').text('{{ .item_id }}');
         $('#access_token').text('{{ .access_token }}');
@@ -242,9 +242,10 @@
         var paymentToken = data.payment_token;
         $('#payment_token').text(paymentToken);
 
+        localStorage.setItem('link_token', data.link_token);
         // In the case of payment_initiation product, we need to wait for
-        // payment token to be generated before the Link handler can be
-        // initialized.
+        // link token (with associated paymetn token) to be generated before the
+        // Link handler can be initialized.
         handler = Plaid.create({
           token: data.link_token,
           paymentToken: paymentToken,
@@ -270,6 +271,7 @@
     } else {
       var handler = null;
       $.post('/create_link_token', {}, function(data){
+          localStorage.setItem('link_token', data.link_token);
           handler = Plaid.create({
           token: data.link_token,
           // webhook: 'https://your-domain.tld/plaid-webhook',
