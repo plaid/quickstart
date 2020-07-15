@@ -221,7 +221,7 @@
   <script>
   (function($) {
     // Handles redirect from the oauth response page for the oauth flow.
-    if (document.is a != null && document.referrer.includes('http://localhost:8000/oauth-response.html')) {
+    if (document.referrer != null && document.referrer.includes('http://localhost:8000/oauth-response.html')) {
       $('#container').fadeOut('fast', function() {
         $('#item_id').text('{{ .item_id }}');
         $('#access_token').text('{{ .access_token }}');
