@@ -41,15 +41,12 @@ var (
 	APP_PORT = os.Getenv("APP_PORT")
 )
 
-func createClient(environment plaid.Environment) (client *plaid.Client) {
-	client, _ = plaid.NewClient(plaid.ClientOptions{
-		PLAID_CLIENT_ID,
-		PLAID_SECRET,
-		environment, // Available environments are Sandbox, Development, and Production
-		&http.Client{},
-	})
-	return client
-}
+var client, _ = plaid.NewClient(plaid.ClientOptions{
+	PLAID_CLIENT_ID,
+	PLAID_SECRET,
+	plaid.Sandbox, // Available environments are Sandbox, Development, and Production
+	&http.Client{},
+})
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store.
@@ -61,7 +58,6 @@ var itemID string
 // persistent data store.
 var paymentToken string
 var paymentID string
-var client = createClient(plaid.Sandbox)
 
 func getAccessToken(c *gin.Context) {
 	publicToken := c.PostForm("public_token")
