@@ -90,7 +90,7 @@ func getAccessToken(c *gin.Context) {
 // Create a new payment token and link it to our link token. Thus, the payment
 // information will be associated with the link token, and will not have to be
 // passed in again when we initialize Plaid Link.
-func createLinkTokenWithPayment(c *gin.Context) {
+func createLinkTokenForPayment(c *gin.Context) {
 	client, err := createClient(plaid.Sandbox)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
