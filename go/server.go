@@ -309,7 +309,8 @@ func (httpError *httpError) Error() string {
 	return httpError.error
 }
 
-func fetchLinkToken(paymentID string) (string, *httpError) {
+// createLinkToken creates a link token using the specified parameters
+func createLinkToken(paymentID string) (string, *httpError) {
 	countryCodes := strings.Split(PLAID_COUNTRY_CODES, ",")
 	products := strings.Split(PLAID_PRODUCTS, ",")
 	redirectURI := PLAID_REDIRECT_URI
