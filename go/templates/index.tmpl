@@ -233,9 +233,9 @@
       $('.payment_initiation').show();
       $.post('/create_link_token_for_payment', {}, function(data) {
         localStorage.setItem('link_token', data.link_token);
-        // In the case of payment_initiation product, we need to wait for
-        // link token (with associated payment token) to be generated before the
-        // Link handler can be initialized.
+        // In the case of payment_initiation product, we need to wait for a
+        // link token configured with payment initiation to be generated before
+        // the Link handler can be initialized.
         handler = Plaid.create({
           token: data.link_token,
           onSuccess: function(public_token) {
