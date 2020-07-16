@@ -32,7 +32,7 @@ go run server.go
 # Go to http://localhost:8000
 ```
 ### Link token creation and server-side configuration.
-The new way to initialize Plaid Link is to pass Plaid Link initialization
+The recommended way to initialize Plaid Link is to pass Plaid Link initialization
 parameters server-side to `link/token/create`. The server then returns the link token,
 which the client can then use to initialize Plaid Link.
 

@@ -129,7 +129,7 @@ func createLinkTokenForPayment(c *gin.Context) {
 	fmt.Println("payment token: " + paymentToken)
 	fmt.Println("payment id: " + paymentID)
 
-	linkToken, httpErr := fetchLinkToken(paymentID)
+	linkToken, httpErr := linkTokenCreate(paymentID)
 	if httpErr != nil {
 		c.JSON(httpErr.errorCode, gin.H{"error": httpErr.Error()})
 	}
@@ -293,7 +293,7 @@ func createPublicToken(c *gin.Context) {
 }
 
 func createLinkToken(c *gin.Context) {
-	linkToken, err := fetchLinkToken("")
+	linkToken, err := linkTokenCreate("")
 	if err != nil {
 		c.JSON(err.errorCode, gin.H{"error": err.error})
 	}
@@ -309,8 +309,8 @@ func (httpError *httpError) Error() string {
 	return httpError.error
 }
 
-// createLinkToken creates a link token using the specified parameters
-func createLinkToken(paymentID string) (string, *httpError) {
+// linkTokenCreate creates a link token using the specified parameters
+func linkTokenCreate(paymentID string) (string, *httpError) {
 	countryCodes := strings.Split(PLAID_COUNTRY_CODES, ",")
 	products := strings.Split(PLAID_PRODUCTS, ",")
 	redirectURI := PLAID_REDIRECT_URI
@@ -371,13 +371,11 @@ func main() {
 	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
 	// from step 2.
 	r.GET("/oauth-response.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "oauth-response.tmpl", gin.H{
-			"plaid_environment": "sandbox", // Switch this environment
-		})
+		c.HTML(http.StatusOK, "oauth-response.tmpl", gin.H{})
 	})
 
 	r.POST("/set_access_token", getAccessToken)
-	r.POST("/create_link_token_with_payment", createLinkTokenWithPayment)
+	r.POST("/create_link_token_with_payment", createLinkTokenForPayment)
 	r.GET("/auth", auth)
 	r.GET("/accounts", accounts)
 	r.GET("/balance", balance)

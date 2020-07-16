@@ -248,8 +248,6 @@
         // Link handler can be initialized.
         handler = Plaid.create({
           token: data.link_token,
-          paymentToken: paymentToken,
-          language: 'en',
           onSuccess: function(public_token) {
             // This public token exchange step is not relevant for the
             // payment_initiation product and should be skipped.
