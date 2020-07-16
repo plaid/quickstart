@@ -41,22 +41,24 @@ var (
 	APP_PORT = os.Getenv("APP_PORT")
 )
 
-var client, _ = plaid.NewClient(plaid.ClientOptions{
-	PLAID_CLIENT_ID,
-	PLAID_SECRET,
-	plaid.Sandbox, // Available environments are Sandbox, Development, and Production
-	&http.Client{},
-})
+var client = func() *plaid.Client {
+	client, err := plaid.NewClient(plaid.ClientOptions{
+		PLAID_CLIENT_ID,
+		PLAID_SECRET,
+		plaid.Sandbox, // Available environments are Sandbox, Development, and Production
+		&http.Client{},
+	})
+	if err != nil {
+		panic(fmt.Errorf("unexpected error while initializing plaid client %w", err))
+	}
+	return client
+}()
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store.
 var accessToken string
 var itemID string
 
-// The payment_token is only relevant for the UK Payment Initiation product.
-// We store the payment_token in memory - in production, store it in a secure
-// persistent data store.
-var paymentToken string
 var paymentID string
 
 func getAccessToken(c *gin.Context) {
@@ -106,18 +108,11 @@ func createLinkTokenForPayment(c *gin.Context) {
 		return
 	}
 	paymentID = paymentCreateResp.PaymentID
-
-	paymentTokenCreateResp, err := client.CreatePaymentToken(paymentID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	paymentToken = paymentTokenCreateResp.PaymentToken
-
-	fmt.Println("payment token: " + paymentToken)
 	fmt.Println("payment id: " + paymentID)
 
-	linkToken, httpErr := linkTokenCreate(paymentID)
+	linkToken, httpErr := linkTokenCreate(&plaid.PaymentInitiation{
+		PaymentID: paymentID,
+	})
 	if httpErr != nil {
 		c.JSON(httpErr.errorCode, gin.H{"error": httpErr.Error()})
 	}
@@ -241,7 +236,7 @@ func createPublicToken(c *gin.Context) {
 }
 
 func createLinkToken(c *gin.Context) {
-	linkToken, err := linkTokenCreate("")
+	linkToken, err := linkTokenCreate(nil)
 	if err != nil {
 		c.JSON(err.errorCode, gin.H{"error": err.error})
 	}
@@ -258,7 +253,9 @@ func (httpError *httpError) Error() string {
 }
 
 // linkTokenCreate creates a link token using the specified parameters
-func linkTokenCreate(paymentID string) (string, *httpError) {
+func linkTokenCreate(
+	paymentInitiation *plaid.PaymentInitiation,
+) (string, *httpError) {
 	countryCodes := strings.Split(PLAID_COUNTRY_CODES, ",")
 	products := strings.Split(PLAID_PRODUCTS, ",")
 	redirectURI := PLAID_REDIRECT_URI
@@ -266,17 +263,12 @@ func linkTokenCreate(paymentID string) (string, *httpError) {
 		User: &plaid.LinkTokenUser{
 			ClientUserID: "user-id",
 		},
-		ClientName:   "Plaid Quickstart",
-		Products:     products,
-		CountryCodes: countryCodes,
-		Language:     "en",
-		RedirectUri:  redirectURI,
-		// Webhook:               "https://example.com/webhook",
-	}
-	if len(paymentID) > 0 {
-		configs.PaymentInitiation = &plaid.PaymentInitiation{
-			PaymentID: paymentID,
-		}
+		ClientName:        "Plaid Quickstart",
+		Products:          products,
+		CountryCodes:      countryCodes,
+		Language:          "en",
+		RedirectUri:       redirectURI,
+		PaymentInitiation: paymentInitiation,
 	}
 	resp, err := client.CreateLinkToken(configs)
 	if err != nil {
@@ -329,5 +321,8 @@ func main() {
 	r.GET("/create_public_token", createPublicToken)
 	r.POST("/create_link_token", createLinkToken)
 
-	r.Run(":" + APP_PORT)
+	err := r.Run(":" + APP_PORT)
+	if err != nil {
+		panic("unable to start server")
+	}
 }

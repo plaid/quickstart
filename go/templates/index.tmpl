@@ -42,12 +42,6 @@
               <h3 class="item-overview__heading">access_token</h3>
               <p class="item-overview__id" id="access_token">••••••••hsakjsl</p>
             </div>
-            <!-- This functionality is only relevant for the UK Payment Initiation product. -->
-            <div class="payment_initiation item-overview__column" style='display:none;'>
-              <h3 class="item-overview__heading">payment_token</h3>
-              <p class="item-overview__id" id="payment_token">••••••••hsakjsl</p>
-            </div>
-
             <div style="clear: both"></div>
           </div>
 
@@ -238,13 +232,9 @@
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
       $.post('/create_link_token_for_payment', {}, function(data) {
-        console.log(data);
-        var paymentToken = data.payment_token;
-        $('#payment_token').text(paymentToken);
-
         localStorage.setItem('link_token', data.link_token);
         // In the case of payment_initiation product, we need to wait for
-        // link token (with associated paymetn token) to be generated before the
+        // link token (with associated payment token) to be generated before the
         // Link handler can be initialized.
         handler = Plaid.create({
           token: data.link_token,

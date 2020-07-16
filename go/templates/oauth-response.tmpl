@@ -20,10 +20,10 @@
       onSuccess: function(public_token) {
         $.post('/set_access_token', {public_token: public_token}, function(data) {
           location.href = 'http://localhost:8000';
-        });
+        })
       },
-    handler.open();
     });
+    handler.open();
   })(jQuery);
   </script>
 </body>
