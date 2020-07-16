@@ -375,7 +375,7 @@ func main() {
 	})
 
 	r.POST("/set_access_token", getAccessToken)
-	r.POST("/create_link_token_with_payment", createLinkTokenForPayment)
+	r.POST("/create_link_token_for_payment", createLinkTokenForPayment)
 	r.GET("/auth", auth)
 	r.GET("/accounts", accounts)
 	r.GET("/balance", balance)

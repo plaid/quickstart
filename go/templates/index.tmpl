@@ -237,7 +237,7 @@
     // This functionality is only relevant for the UK Payment Initiation product.
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
-      $.post('/create_link_token_with_payment', {}, function(data) {
+      $.post('/create_link_token_for_payment', {}, function(data) {
         console.log(data);
         var paymentToken = data.payment_token;
         $('#payment_token').text(paymentToken);
