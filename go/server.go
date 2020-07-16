@@ -41,13 +41,14 @@ var (
 	APP_PORT = os.Getenv("APP_PORT")
 )
 
-func createClient(environment plaid.Environment) (client *plaid.Client, err error) {
-	return plaid.NewClient(plaid.ClientOptions{
+func createClient(environment plaid.Environment) (client *plaid.Client) {
+	client, _ = plaid.NewClient(plaid.ClientOptions{
 		PLAID_CLIENT_ID,
 		PLAID_SECRET,
 		environment, // Available environments are Sandbox, Development, and Production
 		&http.Client{},
 	})
+	return client
 }
 
 // We store the access_token in memory - in production, store it in a secure
@@ -60,14 +61,10 @@ var itemID string
 // persistent data store.
 var paymentToken string
 var paymentID string
+var client = createClient(plaid.Sandbox)
 
 func getAccessToken(c *gin.Context) {
 	publicToken := c.PostForm("public_token")
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	response, err := client.ExchangePublicToken(publicToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -91,11 +88,6 @@ func getAccessToken(c *gin.Context) {
 // information will be associated with the link token, and will not have to be
 // passed in again when we initialize Plaid Link.
 func createLinkTokenForPayment(c *gin.Context) {
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	recipientCreateResp, err := client.CreatePaymentRecipient(
 		"Harry Potter",
 		"GB33BUKB20201555555555",
@@ -139,11 +131,6 @@ func createLinkTokenForPayment(c *gin.Context) {
 }
 
 func auth(c *gin.Context) {
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	response, err := client.GetAuth(accessToken)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -157,11 +144,6 @@ func auth(c *gin.Context) {
 }
 
 func accounts(c *gin.Context) {
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	response, err := client.GetAccounts(accessToken)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -174,11 +156,6 @@ func accounts(c *gin.Context) {
 }
 
 func balance(c *gin.Context) {
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	response, err := client.GetBalances(accessToken)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -191,11 +168,6 @@ func balance(c *gin.Context) {
 }
 
 func item(c *gin.Context) {
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	response, err := client.GetItem(accessToken)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -215,11 +187,6 @@ func item(c *gin.Context) {
 }
 
 func identity(c *gin.Context) {
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	response, err := client.GetIdentity(accessToken)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -232,11 +199,6 @@ func identity(c *gin.Context) {
 }
 
 func transactions(c *gin.Context) {
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	// pull transactions for the past 30 days
 	endDate := time.Now().Local().Format("2006-01-02")
 	startDate := time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02")
@@ -257,11 +219,6 @@ func transactions(c *gin.Context) {
 // This functionality is only relevant for the UK Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
 func payment(c *gin.Context) {
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	response, err := client.GetPayment(paymentID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -274,11 +231,6 @@ func payment(c *gin.Context) {
 }
 
 func createPublicToken(c *gin.Context) {
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	// Create a one-time use public_token for the Item.
 	// This public_token can be used to initialize Link in update mode for a user
 	publicToken, err := client.CreatePublicToken(accessToken)
@@ -314,13 +266,6 @@ func linkTokenCreate(paymentID string) (string, *httpError) {
 	countryCodes := strings.Split(PLAID_COUNTRY_CODES, ",")
 	products := strings.Split(PLAID_PRODUCTS, ",")
 	redirectURI := PLAID_REDIRECT_URI
-	client, err := createClient(plaid.Sandbox)
-	if err != nil {
-		return "", &httpError{
-			errorCode: http.StatusInternalServerError,
-			error:     err.Error(),
-		}
-	}
 	configs := plaid.LinkTokenConfigs{
 		User: &plaid.LinkTokenUser{
 			ClientUserID: "user-id",
