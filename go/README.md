@@ -36,7 +36,7 @@ The new way to initialize Plaid Link is to pass Plaid Link initialization
 parameters server-side to `link/token/create`. The server then returns the link token,
 which the client can then use to initialize Plaid Link.
 
-When the client initializes Plaid Link with the Plaid Link token, the Plaid Link
+When the client initializes Plaid Link with the link token, the Plaid Link
 initialization parameters associated with the Plaid Token will be applied.
 
 ## The OAuth redirect flow
