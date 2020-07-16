@@ -271,12 +271,12 @@
       $.post('/create_link_token', {}, function(data){
           localStorage.setItem('link_token', data.link_token);
           handler = Plaid.create({
-          token: data.link_token,
-          // webhook: 'https://your-domain.tld/plaid-webhook',
-          onSuccess: function(public_token) {
-            $.post('/set_access_token', {
-              public_token: public_token
-            }, function(data) {
+            token: data.link_token,
+            // webhook: 'https://your-domain.tld/plaid-webhook',
+            onSuccess: function(public_token) {
+              $.post('/set_access_token', {
+                public_token: public_token
+              }, function(data) {
               $('#container').fadeOut('fast', function() {
                 $('#item_id').text(data.item_id);
                 $('#access_token').text(data.access_token);
