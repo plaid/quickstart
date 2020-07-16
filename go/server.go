@@ -367,7 +367,7 @@ func main() {
 	// For OAuth flows, the process looks as follows.
 	// 1. Create a link token with the redirectURI (as white listed at https://dashboard.plaid.com/team/api).
 	// 2. Once the flow succeeds, Plaid Link will redirect to redirectURI with
-	// additional parameters (as required by OAuth standards and Plaid)
+	// additional parameters (as required by OAuth standards and Plaid).
 	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
 	// from step 2.
 	r.GET("/oauth-response.html", func(c *gin.Context) {
