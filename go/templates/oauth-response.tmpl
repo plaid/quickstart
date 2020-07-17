@@ -13,43 +13,18 @@
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
   (function($) {
-    var products = '{{ .plaid_products }}'.split(',');
-    var linkHandlerCommonOptions = {
-      apiVersion: 'v2',
-      clientName: 'Plaid Quickstart',
-      env: '{{ .plaid_environment }}',
-      product: products,
-      key: '{{ .plaid_public_key }}',
-      countryCodes: '{{ .plaid_country_codes }}'.split(','),
-    };
-    var oauthNonce = '{{ .plaid_oauth_nonce }}';
-    if (oauthNonce == null || oauthNonce == '') {
-      console.error('oauth_nonce should not be empty');
-    }
-    var oauthStateId = qs('oauth_state_id');
-    if (oauthStateId == null || oauthStateId == '') {
-      console.error('could not parse oauth_state_id from query parameters');
-    }
-    linkHandlerCommonOptions.oauthStateId = oauthStateId;
+    var linkToken = localStorage.getItem('link_token');
     var handler = Plaid.create({
-      ...linkHandlerCommonOptions,
-      oauthNonce: oauthNonce,
-      oauthStateId: oauthStateId,
+      token: linkToken,
+      receivedRedirectUri: window.location.href,
       onSuccess: function(public_token) {
         $.post('/set_access_token', {public_token: public_token}, function(data) {
           location.href = 'http://localhost:8000';
-        });
+        })
       },
     });
     handler.open();
-
   })(jQuery);
-
-  function qs(key) {
-    var match = location.search.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
-    return match && decodeURIComponent(match[1].replace(/\+/g, " "));
-  }
-
   </script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,21 +24,16 @@ func init() {
 var (
 	PLAID_CLIENT_ID     = os.Getenv("PLAID_CLIENT_ID")
 	PLAID_SECRET        = os.Getenv("PLAID_SECRET")
-	PLAID_PUBLIC_KEY    = os.Getenv("PLAID_PUBLIC_KEY")
 	PLAID_PRODUCTS      = os.Getenv("PLAID_PRODUCTS")
 	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
 	// Parameters used for the OAuth redirect Link flow.
 	//
-	// Set PLAID_OAUTH_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
+	// Set PLAID_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
 	// The OAuth redirect flow requires an endpoint on the developer's website
 	// that the bank website should redirect to. You will need to configure
 	// this redirect URI for your client ID through the Plaid developer dashboard
 	// at https://dashboard.plaid.com/team/api.
-	PLAID_OAUTH_REDIRECT_URI = os.Getenv("PLAID_OAUTH_REDIRECT_URI")
-	// Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
-	// session. The nonce will be used to re-open Link upon completion of the OAuth
-	// redirect. The nonce must be at least 16 characters long.
-	PLAID_OAUTH_NONCE = os.Getenv("PLAID_OAUTH_NONCE")
+	PLAID_REDIRECT_URI = os.Getenv("PLAID_REDIRECT_URI")
 
 	// Use 'sandbox' to test with fake credentials in Plaid's Sandbox environment
 	// Use `development` to test with real credentials while developing
@@ -45,37 +41,35 @@ var (
 	APP_PORT = os.Getenv("APP_PORT")
 )
 
-var clientOptions = plaid.ClientOptions{
-	PLAID_CLIENT_ID,
-	PLAID_SECRET,
-	PLAID_PUBLIC_KEY,
-	plaid.Sandbox, // Available environments are Sandbox, Development, and Production
-	&http.Client{},
-}
-
-var client, err = plaid.NewClient(clientOptions)
+var client = func() *plaid.Client {
+	client, err := plaid.NewClient(plaid.ClientOptions{
+		PLAID_CLIENT_ID,
+		PLAID_SECRET,
+		plaid.Sandbox, // Available environments are Sandbox, Development, and Production
+		&http.Client{},
+	})
+	if err != nil {
+		panic(fmt.Errorf("unexpected error while initializing plaid client %w", err))
+	}
+	return client
+}()
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store.
 var accessToken string
 var itemID string
 
-// The payment_token is only relevant for the UK Payment Initiation product.
-// We store the payment_token in memory - in production, store it in a secure
-// persistent data store.
-var paymentToken string
 var paymentID string
 
 func getAccessToken(c *gin.Context) {
 	publicToken := c.PostForm("public_token")
 	response, err := client.ExchangePublicToken(publicToken)
-	accessToken = response.AccessToken
-	itemID = response.ItemID
-
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	accessToken = response.AccessToken
+	itemID = response.ItemID
 
 	fmt.Println("public token: " + publicToken)
 	fmt.Println("access token: " + accessToken)
@@ -88,23 +82,24 @@ func getAccessToken(c *gin.Context) {
 }
 
 // This functionality is only relevant for the UK Payment Initiation product.
-// Sets the payment token in memory on the server side. We generate a new
-// payment token so that the developer is not required to supply one.
-// This makes the quickstart easier to use.
-func setPaymentToken(c *gin.Context) {
-	recipientCreateResp, err := client.CreatePaymentRecipient("Harry Potter", "GB33BUKB20201555555555", plaid.PaymentRecipientAddress{
-		Street:     []string{"4 Privet Drive"},
-		City:       "Little Whinging",
-		PostalCode: "11111",
-		Country:    "GB",
-	})
+// Creates a link token configured for payment initiation. The payment
+// information will be associated with the link token, and will not have to be
+// passed in again when we initialize Plaid Link.
+func createLinkTokenForPayment(c *gin.Context) {
+	recipientCreateResp, err := client.CreatePaymentRecipient(
+		"Harry Potter",
+		"GB33BUKB20201555555555",
+		&plaid.PaymentRecipientAddress{
+			Street:     []string{"4 Privet Drive"},
+			City:       "Little Whinging",
+			PostalCode: "11111",
+			Country:    "GB",
+		})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	recipientID := recipientCreateResp.RecipientID
-
-	paymentCreateResp, err := client.CreatePayment(recipientID, "payment-ref", plaid.PaymentAmount{
+	paymentCreateResp, err := client.CreatePayment(recipientCreateResp.RecipientID, "payment-ref", plaid.PaymentAmount{
 		Currency: "GBP",
 		Value:    12.34,
 	})
@@ -113,25 +108,21 @@ func setPaymentToken(c *gin.Context) {
 		return
 	}
 	paymentID = paymentCreateResp.PaymentID
-
-	paymentTokenCreateResp, err := client.CreatePaymentToken(paymentID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	paymentToken = paymentTokenCreateResp.PaymentToken
-
-	fmt.Println("payment token: " + paymentToken)
 	fmt.Println("payment id: " + paymentID)
 
+	linkToken, httpErr := linkTokenCreate(&plaid.PaymentInitiation{
+		PaymentID: paymentID,
+	})
+	if httpErr != nil {
+		c.JSON(httpErr.errorCode, gin.H{"error": httpErr.Error()})
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"payment_token": paymentToken,
+		"link_token": linkToken,
 	})
 }
 
 func auth(c *gin.Context) {
 	response, err := client.GetAuth(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -145,7 +136,6 @@ func auth(c *gin.Context) {
 
 func accounts(c *gin.Context) {
 	response, err := client.GetAccounts(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -158,7 +148,6 @@ func accounts(c *gin.Context) {
 
 func balance(c *gin.Context) {
 	response, err := client.GetBalances(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -171,14 +160,12 @@ func balance(c *gin.Context) {
 
 func item(c *gin.Context) {
 	response, err := client.GetItem(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	institution, err := client.GetInstitutionByID(response.Item.InstitutionID)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -192,7 +179,6 @@ func item(c *gin.Context) {
 
 func identity(c *gin.Context) {
 	response, err := client.GetIdentity(accessToken)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -225,7 +211,6 @@ func transactions(c *gin.Context) {
 // Retrieve Payment for a specified Payment ID
 func payment(c *gin.Context) {
 	response, err := client.GetPayment(paymentID)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -250,6 +235,52 @@ func createPublicToken(c *gin.Context) {
 	})
 }
 
+func createLinkToken(c *gin.Context) {
+	linkToken, err := linkTokenCreate(nil)
+	if err != nil {
+		c.JSON(err.errorCode, gin.H{"error": err.error})
+	}
+	c.JSON(http.StatusOK, gin.H{"link_token": linkToken})
+}
+
+type httpError struct {
+	errorCode int
+	error     string
+}
+
+func (httpError *httpError) Error() string {
+	return httpError.error
+}
+
+// linkTokenCreate creates a link token using the specified parameters
+func linkTokenCreate(
+	paymentInitiation *plaid.PaymentInitiation,
+) (string, *httpError) {
+	countryCodes := strings.Split(PLAID_COUNTRY_CODES, ",")
+	products := strings.Split(PLAID_PRODUCTS, ",")
+	redirectURI := PLAID_REDIRECT_URI
+	configs := plaid.LinkTokenConfigs{
+		User: &plaid.LinkTokenUser{
+			// This should correspond to a unique id for the current user.
+			ClientUserID: "user-id",
+		},
+		ClientName:        "Plaid Quickstart",
+		Products:          products,
+		CountryCodes:      countryCodes,
+		Language:          "en",
+		RedirectUri:       redirectURI,
+		PaymentInitiation: paymentInitiation,
+	}
+	resp, err := client.CreateLinkToken(configs)
+	if err != nil {
+		return "", &httpError{
+			errorCode: http.StatusBadRequest,
+			error:     err.Error(),
+		}
+	}
+	return resp.LinkToken, nil
+}
+
 func main() {
 	if APP_PORT == "" {
 		APP_PORT = "8000"
@@ -261,29 +292,24 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"plaid_environment":        "sandbox", // Switch this environment
-			"plaid_public_key":         PLAID_PUBLIC_KEY,
-			"plaid_products":           PLAID_PRODUCTS,
-			"plaid_country_codes":      PLAID_COUNTRY_CODES,
-			"plaid_oauth_redirect_uri": PLAID_OAUTH_REDIRECT_URI,
-			"plaid_oauth_nonce":        PLAID_OAUTH_NONCE,
-			"item_id":                  itemID,
-			"access_token":             accessToken,
+			"item_id":        itemID,
+			"access_token":   accessToken,
+			"plaid_products": PLAID_PRODUCTS,
 		})
 	})
 
+	// For OAuth flows, the process looks as follows.
+	// 1. Create a link token with the redirectURI (as white listed at https://dashboard.plaid.com/team/api).
+	// 2. Once the flow succeeds, Plaid Link will redirect to redirectURI with
+	// additional parameters (as required by OAuth standards and Plaid).
+	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
+	// from step 2.
 	r.GET("/oauth-response.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "oauth-response.tmpl", gin.H{
-			"plaid_environment":   "sandbox", // Switch this environment
-			"plaid_public_key":    PLAID_PUBLIC_KEY,
-			"plaid_products":      PLAID_PRODUCTS,
-			"plaid_country_codes": PLAID_COUNTRY_CODES,
-			"plaid_oauth_nonce":   PLAID_OAUTH_NONCE,
-		})
+		c.HTML(http.StatusOK, "oauth-response.tmpl", gin.H{})
 	})
 
 	r.POST("/set_access_token", getAccessToken)
-	r.POST("/set_payment_token", setPaymentToken)
+	r.POST("/create_link_token_for_payment", createLinkTokenForPayment)
 	r.GET("/auth", auth)
 	r.GET("/accounts", accounts)
 	r.GET("/balance", balance)
@@ -294,6 +320,10 @@ func main() {
 	r.POST("/transactions", transactions)
 	r.GET("/payment", payment)
 	r.GET("/create_public_token", createPublicToken)
+	r.POST("/create_link_token", createLinkToken)
 
-	r.Run(":" + APP_PORT)
+	err := r.Run(":" + APP_PORT)
+	if err != nil {
+		panic("unable to start server")
+	}
 }

@@ -42,12 +42,6 @@
               <h3 class="item-overview__heading">access_token</h3>
               <p class="item-overview__id" id="access_token">••••••••hsakjsl</p>
             </div>
-            <!-- This functionality is only relevant for the UK Payment Initiation product. -->
-            <div class="payment_initiation item-overview__column" style='display:none;'>
-              <h3 class="item-overview__heading">payment_token</h3>
-              <p class="item-overview__id" id="payment_token">••••••••hsakjsl</p>
-            </div>
-
             <div style="clear: both"></div>
           </div>
 
@@ -234,38 +228,16 @@
     if (products.includes('assets')) {
       $('#assets').show();
     }
-
-    var linkHandlerCommonOptions = {
-      apiVersion: 'v2',
-      clientName: 'Plaid Quickstart',
-      env: '{{ .plaid_environment }}',
-      product: products,
-      key: '{{ .plaid_public_key }}',
-      countryCodes: '{{ .plaid_country_codes }}'.split(','),
-    };
-    var oauthRedirectUri = '{{ .plaid_oauth_redirect_uri }}';
-    if (oauthRedirectUri != '') {
-      linkHandlerCommonOptions.oauthRedirectUri = oauthRedirectUri;
-    }
-    var oauthNonce = '{{ .plaid_oauth_nonce }}';
-    if (oauthNonce != '') {
-      linkHandlerCommonOptions.oauthNonce = oauthNonce;
-    }
     // This functionality is only relevant for the UK Payment Initiation product.
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
-      $.post('/set_payment_token', {}, function(data) {
-        console.log(data);
-        var paymentToken = data.payment_token;
-        $('#payment_token').text(paymentToken);
-
-        // In the case of payment_initiation product, we need to wait for
-        // payment token to be generated before the Link handler can be
-        // initialized.
+      $.post('/create_link_token_for_payment', {}, function(data) {
+        localStorage.setItem('link_token', data.link_token);
+        // In the case of payment_initiation product, we need to wait for a
+        // link token configured with payment initiation to be generated before
+        // the Link handler can be initialized.
         handler = Plaid.create({
-          ...linkHandlerCommonOptions,
-          paymentToken: paymentToken,
-          language: 'en',
+          token: data.link_token,
           onSuccess: function(public_token) {
             // This public token exchange step is not relevant for the
             // payment_initiation product and should be skipped.
@@ -285,24 +257,28 @@
         $('.loading-indicator').hide();
       });
     } else {
-      var handler = Plaid.create({
-        ...linkHandlerCommonOptions,
-        // webhook: 'https://your-domain.tld/plaid-webhook',
-        onSuccess: function(public_token) {
-          $.post('/set_access_token', {
-            public_token: public_token
-          }, function(data) {
-            $('#container').fadeOut('fast', function() {
-              $('#item_id').text(data.item_id);
-              $('#access_token').text(data.access_token);
-              $('#intro').hide();
-              $('#app, #steps').fadeIn('slow');
+      var handler = null;
+      $.post('/create_link_token', {}, function(data){
+          localStorage.setItem('link_token', data.link_token);
+          handler = Plaid.create({
+            token: data.link_token,
+            // webhook: 'https://your-domain.tld/plaid-webhook',
+            onSuccess: function(public_token) {
+              $.post('/set_access_token', {
+                public_token: public_token
+              }, function(data) {
+              $('#container').fadeOut('fast', function() {
+                $('#item_id').text(data.item_id);
+                $('#access_token').text(data.access_token);
+                $('#intro').hide();
+                $('#app, #steps').fadeIn('slow');
+              });
             });
-          });
-        },
+          },
+        });
+        $('#link-btn').attr('disabled', false);
+        $('.loading-indicator').hide();
       });
-      $('#link-btn').attr('disabled', false);
-      $('.loading-indicator').hide();
     }
 
     var accessToken = qs('access_token');
@@ -396,6 +372,7 @@
             displayError(this, data.error);
             return;
           }
+          var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
           var identityData = data.identity[0];
           var html = '<tr class="response-row response-row--is-identity"><td><strong>Names</strong></td><td><strong>Emails</strong></td><td><strong>Phone numbers</strong></td><td><strong>Addresses</strong></td></tr><tr class="response-row response-row--is-identity">';
 
