@@ -261,6 +261,7 @@ func linkTokenCreate(
 	redirectURI := PLAID_REDIRECT_URI
 	configs := plaid.LinkTokenConfigs{
 		User: &plaid.LinkTokenUser{
+			// This should correspond to a unique id for the current user.
 			ClientUserID: "user-id",
 		},
 		ClientName:        "Plaid Quickstart",
