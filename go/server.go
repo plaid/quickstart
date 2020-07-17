@@ -82,7 +82,7 @@ func getAccessToken(c *gin.Context) {
 }
 
 // This functionality is only relevant for the UK Payment Initiation product.
-// Create a new payment token and link it to our link token. Thus, the payment
+// Creates a link token configured for payment initiation. The payment
 // information will be associated with the link token, and will not have to be
 // passed in again when we initialize Plaid Link.
 func createLinkTokenForPayment(c *gin.Context) {
