@@ -16,7 +16,7 @@ import retrofit2.Response;
 @Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
-  private PlaidClient plaidClient;
+  private final PlaidClient plaidClient;
 
   public AuthResource(PlaidClient plaidClient) {
     this.plaidClient = plaidClient;

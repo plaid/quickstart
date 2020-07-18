@@ -22,9 +22,9 @@ import retrofit2.Response;
 @Path("/create_link_token_for_payment")
 @Produces(MediaType.APPLICATION_JSON)
 public class LinkTokenWithPaymentResource {
-  private PlaidClient plaidClient;
-  private List<String> plaidProducts;
-  private List<String> countryCodes;
+  private final PlaidClient plaidClient;
+  private final List<String> plaidProducts;
+  private final List<String> countryCodes;
 
   public LinkTokenWithPaymentResource(PlaidClient plaidClient, List<String> plaidProducts,
     List<String> countryCodes) {
@@ -33,18 +33,9 @@ public class LinkTokenWithPaymentResource {
     this.countryCodes = countryCodes;
   }
 
-  public static class LinkToken {
-    @JsonProperty
-    private String link_token;
-
-    public LinkToken(String linkToken) {
-      this.link_token = linkToken;
-    }
-  }
-
-  @POST public LinkToken getLinkToken() throws IOException {
+  @POST public LinkTokenResource.LinkToken getLinkToken() throws IOException {
     Response<RecipientCreateResponse> recipientResponse =
-      plaidClient.service().recipientCreate(new RecipientCreateRequest(
+      this.plaidClient.service().recipientCreate(new RecipientCreateRequest(
         "Harry Potter",
         "GB33BUKB20201555555555",
         new Address(Arrays.asList("4 Privet Drive"),
@@ -53,7 +44,7 @@ public class LinkTokenWithPaymentResource {
           "GB"))).execute();
 
     Response<PaymentCreateResponse> paymentCreateResponse =
-      plaidClient.service().paymentCreate(new PaymentCreateRequest(
+      this.plaidClient.service().paymentCreate(new PaymentCreateRequest(
         recipientResponse.body().getRecipientId(),
         "payment-ref",
         new Amount("GBP", 12.34)
@@ -62,15 +53,15 @@ public class LinkTokenWithPaymentResource {
     LinkTokenCreateRequest request = new LinkTokenCreateRequest(
       new LinkTokenCreateRequest.User("user-id"),
       "my client name",
-      plaidProducts,
+      this.plaidProducts,
       this.countryCodes,
       "en"
     ).withPaymentInitiation(new LinkTokenCreateRequest.PaymentInitiation(
       paymentId
     ));
     QuickstartApplication.paymentId = paymentId;
-    Response<LinkTokenCreateResponse> response = plaidClient.service().linkTokenCreate(request)
+    Response<LinkTokenCreateResponse> response = this.plaidClient.service().linkTokenCreate(request)
       .execute();
-    return new LinkToken(response.body().getLinkToken());
+    return new LinkTokenResource.LinkToken(response.body().getLinkToken());
   }
 }

@@ -15,9 +15,9 @@ import retrofit2.Response;
 @Path("/create_link_token")
 @Produces(MediaType.APPLICATION_JSON)
 public class LinkTokenResource {
-  private PlaidClient plaidClient;
-  private List<String> plaidProducts;
-  private List<String> countryCodes;
+  private final PlaidClient plaidClient;
+  private final List<String> plaidProducts;
+  private final List<String> countryCodes;
 
   public LinkTokenResource(PlaidClient plaidClient, List<String> plaidProducts,
     List<String> countryCodes) {
@@ -28,10 +28,10 @@ public class LinkTokenResource {
 
   public static class LinkToken {
     @JsonProperty
-    private String link_token;
+    private String linkToken;
 
     public LinkToken(String linkToken) {
-      this.link_token = linkToken;
+      this.linkToken = linkToken;
     }
   }
 
@@ -43,7 +43,7 @@ public class LinkTokenResource {
         plaidProducts,
         this.countryCodes,
         "en"
-        )).execute();
+      )).execute();
     return new LinkToken(response.body().getLinkToken());
   }
 }

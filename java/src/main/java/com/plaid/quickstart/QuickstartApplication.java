@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class QuickstartApplication extends Application<QuickstartConfiguration> {
-  private PlaidClient plaidClient;
   // We store the accessToken in memory - in production, store it in a secure
   // persistent data store.
   public static String accessToken;
@@ -51,7 +50,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     );
     bootstrap.addBundle(new AssetsBundle("/static/", "/static/"));
     bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/index.html", null, "index"));
-    bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/index.html", null, "index"));
+    bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/", null, "index"));
     bootstrap.addBundle(
       new AssetsBundle("/templates/oauth-response.html", "/oauth-response.html", null,
         "oauth-response"));
@@ -60,7 +59,8 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
   @Override
   public void run(final QuickstartConfiguration configuration,
     final Environment environment) {
-    plaidClient = PlaidClient.newBuilder()
+    // or equivalent, depending on which environment you're calling into
+    PlaidClient plaidClient = PlaidClient.newBuilder()
       .clientIdAndSecret(configuration.getPlaidClientID(), configuration.getPlaidSecret())
       .sandboxBaseUrl() // or equivalent, depending on which environment you're calling into
       .build();
@@ -74,7 +74,8 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new InfoResource(plaidProducts));
     environment.jersey().register(new ItemResource(plaidClient));
     environment.jersey().register(new LinkTokenResource(plaidClient, plaidProducts, countryCodes));
-    environment.jersey().register(new LinkTokenWithPaymentResource(plaidClient, plaidProducts, countryCodes));
+    environment.jersey()
+      .register(new LinkTokenWithPaymentResource(plaidClient, plaidProducts, countryCodes));
     environment.jersey().register(new PaymentInitiationResource(plaidClient));
     environment.jersey().register(new PublicTokenResource(plaidClient));
     environment.jersey().register(new TransactionsResource(plaidClient));

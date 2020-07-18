@@ -23,18 +23,18 @@ import retrofit2.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AccessTokenResource {
   private static final Logger LOG = LoggerFactory.getLogger(AccessTokenResource.class);
-
-  private PlaidClient plaidClient;
+  private final PlaidClient plaidClient;
 
   public AccessTokenResource(PlaidClient plaidClient) {
     this.plaidClient = plaidClient;
   }
 
   @POST
-  public InfoResource.A getAccessToken(@FormParam("public_token") String publicToken) throws IOException {
+  public InfoResource.InfoResponse getAccessToken(@FormParam("public_token") String publicToken)
+    throws IOException {
     Response<ItemPublicTokenExchangeResponse> itemResponse = plaidClient.service()
-        .itemPublicTokenExchange(new ItemPublicTokenExchangeRequest(publicToken))
-        .execute();
+      .itemPublicTokenExchange(new ItemPublicTokenExchangeRequest(publicToken))
+      .execute();
 
     // Ideally, we would store this somewhere more persistent
     QuickstartApplication.
@@ -44,6 +44,7 @@ public class AccessTokenResource {
     LOG.info("access token: " + QuickstartApplication.accessToken);
     LOG.info("item ID: " + itemResponse.body().getItemId());
 
-    return new InfoResource.A(Arrays.asList(), QuickstartApplication.accessToken, QuickstartApplication.itemID);
+    return new InfoResource.InfoResponse(Arrays.asList(), QuickstartApplication.accessToken,
+      QuickstartApplication.itemID);
   }
 }

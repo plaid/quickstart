@@ -18,12 +18,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import jersey.repackaged.com.google.common.base.Throwables;
 import retrofit2.Response;
 
 @Path("/transactions")
 @Produces(MediaType.APPLICATION_JSON)
 public class TransactionsResource {
-  private PlaidClient plaidClient;
+  private final PlaidClient plaidClient;
 
   public TransactionsResource(PlaidClient plaidClient) {
     this.plaidClient = plaidClient;
@@ -48,8 +49,8 @@ public class TransactionsResource {
         try {
           ErrorResponse errorResponse = plaidClient.parseError(response);
           Thread.sleep(3000);
-        } catch(InterruptedException e) {
-          // catch error
+        } catch (InterruptedException e) {
+          throw Throwables.propagate(e);
         }
       }
     }

@@ -16,7 +16,7 @@ import retrofit2.Response;
 @Path("/identity")
 @Produces(MediaType.APPLICATION_JSON)
 public class IdentityResource {
-  private PlaidClient plaidClient;
+  private final PlaidClient plaidClient;
 
   public IdentityResource(PlaidClient plaidClient) {
     this.plaidClient = plaidClient;

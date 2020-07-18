@@ -14,7 +14,7 @@ import retrofit2.Response;
 @Path("/balance")
 @Produces(MediaType.APPLICATION_JSON)
 public class BalanceResource {
-  private PlaidClient plaidClient;
+  private final PlaidClient plaidClient;
 
   public BalanceResource(PlaidClient plaidClient) {
     this.plaidClient = plaidClient;
@@ -25,7 +25,6 @@ public class BalanceResource {
     Response<AccountsBalanceGetResponse> accountsResponse = plaidClient.service()
       .accountsBalanceGet(new AccountsBalanceGetRequest(QuickstartApplication.accessToken))
       .execute();
-
     return accountsResponse.body();
   }
 }

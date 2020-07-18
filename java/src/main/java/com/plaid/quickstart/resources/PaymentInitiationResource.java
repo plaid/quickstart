@@ -26,7 +26,7 @@ import retrofit2.Response;
 public class PaymentInitiationResource {
   private static final Logger LOG = LoggerFactory.getLogger(PaymentInitiationResource.class);
 
-  private PlaidClient plaidClient;
+  private final PlaidClient plaidClient;
 
   public PaymentInitiationResource(PlaidClient plaidClient) {
     this.plaidClient = plaidClient;
@@ -43,19 +43,19 @@ public class PaymentInitiationResource {
         ErrorResponse errorResponse = plaidClient.parseError(paymentGetResponse);
         LOG.error("error: " + errorResponse);
       } catch (Exception e) {
-        LOG.error("error: " + e);
+        LOG.error("error", e);
       }
     }
 
     return new PaymentResponse(paymentGetResponse.body());
   }
 
-  private class PaymentResponse {
+  private static class PaymentResponse {
     @JsonProperty
-    private PaymentGetResponse payment;
+    private final PaymentGetResponse payment;
 
-    public PaymentResponse(PaymentGetResponse body) {
-      this.payment = body;
+    public PaymentResponse(PaymentGetResponse response) {
+      this.payment = response;
     }
   }
 }

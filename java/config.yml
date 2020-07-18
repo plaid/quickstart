@@ -16,3 +16,4 @@ server:
   admin_connectors:
     - type: http
       port: 8001
+  rootPath: '/api'

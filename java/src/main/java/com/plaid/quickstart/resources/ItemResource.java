@@ -24,7 +24,7 @@ import retrofit2.Response;
 @Path("/item")
 @Produces(MediaType.APPLICATION_JSON)
 public class ItemResource {
-  private PlaidClient plaidClient;
+  private final PlaidClient plaidClient;
 
   public ItemResource(PlaidClient plaidClient) {
     this.plaidClient = plaidClient;
@@ -37,7 +37,8 @@ public class ItemResource {
       .execute();
 
     Response<InstitutionsGetByIdResponse> institutionsResponse = plaidClient.service()
-      .institutionsGetById(new InstitutionsGetByIdRequest(itemResponse.body().getItem().getInstitutionId()))
+      .institutionsGetById(
+        new InstitutionsGetByIdRequest(itemResponse.body().getItem().getInstitutionId()))
       .execute();
 
     return new ItemResponse(

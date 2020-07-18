@@ -18,23 +18,24 @@ public class InfoResource {
     this.plaidProducts = plaidProducts;
   }
 
-  public static class A {
+  public static class InfoResponse {
     @JsonProperty
-    public String item_id;
+    private final String itemId;
     @JsonProperty
-    public String access_token;
+    private final String accessToken;
     @JsonProperty
-    public List<String> products;
+    private final List<String> products;
 
-    public A(List<String> plaidProducts, String accessToken, String itemID) {
+    public InfoResponse(List<String> plaidProducts, String accessToken, String itemID) {
       this.products = plaidProducts;
-      this.access_token = accessToken;
-      this.item_id = itemID;
+      this.accessToken = accessToken;
+      this.itemId = itemID;
     }
   }
 
   @POST
-  public A getInfo() throws IOException {
-    return new A(plaidProducts, QuickstartApplication.accessToken, QuickstartApplication.itemID);
+  public InfoResponse getInfo() {
+    return new InfoResponse(plaidProducts, QuickstartApplication.accessToken,
+      QuickstartApplication.itemID);
   }
 }
