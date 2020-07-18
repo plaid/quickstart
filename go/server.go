@@ -223,9 +223,9 @@ func payment(c *gin.Context) {
 
 func info(context *gin.Context) {
 	context.JSON(200, map[string]interface{}{
-		"item_id":        itemID,
-		"access_token":   accessToken,
-		"products": strings.Split(PLAID_PRODUCTS, ","),
+		"item_id":      itemID,
+		"access_token": accessToken,
+		"products":     strings.Split(PLAID_PRODUCTS, ","),
 	})
 }
 
@@ -295,12 +295,14 @@ func main() {
 	}
 
 	r := gin.Default()
-	r.LoadHTMLFiles("templates/index.tmpl", "templates/oauth-response.tmpl")
+	mainPage := "../html/index.html"
+	oauthPage := "../html/oauth-response.html"
+	r.LoadHTMLFiles(mainPage, oauthPage)
 	r.Static("/static", "./static")
 
 	r.POST("/info", info)
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{})
+		c.HTML(http.StatusOK, "index.html", gin.H{})
 	})
 
 	// For OAuth flows, the process looks as follows.
@@ -310,7 +312,7 @@ func main() {
 	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
 	// from step 2.
 	r.GET("/oauth-response.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "oauth-response.tmpl", gin.H{})
+		c.HTML(http.StatusOK, "oauth-response.html", gin.H{})
 	})
 
 	r.POST("/set_access_token", getAccessToken)

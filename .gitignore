@@ -45,3 +45,5 @@ go/quickstart
 
 # docker-compose
 docker-compose.local*.yml
+
+*.iml
