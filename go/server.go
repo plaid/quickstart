@@ -300,7 +300,7 @@ func main() {
 	r.LoadHTMLFiles(mainPage, oauthPage)
 	r.Static("/static", "../static")
 
-	r.POST("/info", info)
+	r.POST("/api/info", info)
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{})
 	})
