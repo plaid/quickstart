@@ -18,7 +18,7 @@
       token: linkToken,
       receivedRedirectUri: window.location.href,
       onSuccess: function(public_token) {
-        $.post('/set_access_token', {public_token: public_token}, function(data) {
+        $.post('/api/set_access_token', {public_token: public_token}, function(data) {
           location.href = 'http://localhost:8000';
         })
       },
