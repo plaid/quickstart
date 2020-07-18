@@ -213,18 +213,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script>
-  (function($) {
+  function render_page($, page_info) {
     // Handles redirect from the oauth response page for the oauth flow.
     if (document.referrer != null && document.referrer.includes('http://localhost:8000/oauth-response.html')) {
       $('#container').fadeOut('fast', function() {
-        $('#item_id').text('{{ .item_id }}');
-        $('#access_token').text('{{ .access_token }}');
+        $('#item_id').text(page_info.item_id);
+        $('#access_token').text(page_info.access_token);
         $('#intro').hide();
         $('#app, #steps').fadeIn('slow');
       });
     }
 
-    var products = '{{ .plaid_products }}'.split(',');
+    var products = page_info.products;
     if (products.includes('assets')) {
       $('#assets').show();
     }
@@ -539,8 +539,10 @@
         });
       });
     });
-
-  })(jQuery);
+  };
+  $.post('/info', {}, function(result) {
+    render_page(jQuery, result);
+  });
 
 function qs(key) {
     key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars

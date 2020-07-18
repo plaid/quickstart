@@ -221,6 +221,14 @@ func payment(c *gin.Context) {
 	})
 }
 
+func info(context *gin.Context) {
+	context.JSON(200, map[string]interface{}{
+		"item_id":        itemID,
+		"access_token":   accessToken,
+		"products": strings.Split(PLAID_PRODUCTS, ","),
+	})
+}
+
 func createPublicToken(c *gin.Context) {
 	// Create a one-time use public_token for the Item.
 	// This public_token can be used to initialize Link in update mode for a user
@@ -290,12 +298,9 @@ func main() {
 	r.LoadHTMLFiles("templates/index.tmpl", "templates/oauth-response.tmpl")
 	r.Static("/static", "./static")
 
+	r.POST("/info", info)
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"item_id":        itemID,
-			"access_token":   accessToken,
-			"plaid_products": PLAID_PRODUCTS,
-		})
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{})
 	})
 
 	// For OAuth flows, the process looks as follows.
