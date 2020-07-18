@@ -12,6 +12,7 @@ import com.plaid.client.response.ItemStatus;
 import com.plaid.client.response.TransactionsGetResponse;
 import com.plaid.quickstart.QuickstartApplication;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -28,7 +29,7 @@ public class TransactionsResource {
     this.plaidClient = plaidClient;
   }
 
-  @POST
+  @GET
   public TransactionsGetResponse getTransactions() throws IOException {
     String accessToken = QuickstartApplication.accessToken;
     Date startDate = new Date(System.currentTimeMillis() - 86400000L * 100);

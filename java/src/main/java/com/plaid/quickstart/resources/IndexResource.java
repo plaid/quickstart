@@ -3,6 +3,7 @@ package com.plaid.quickstart.resources;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.views.View;
 
+import java.io.File;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 

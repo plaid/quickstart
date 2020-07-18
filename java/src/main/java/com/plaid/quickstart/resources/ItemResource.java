@@ -13,6 +13,7 @@ import com.plaid.client.response.ItemStatus;
 import com.plaid.client.response.InstitutionsGetByIdResponse;
 import com.plaid.quickstart.QuickstartApplication;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -29,7 +30,7 @@ public class ItemResource {
     this.plaidClient = plaidClient;
   }
 
-  @POST
+  @GET
   public ItemResponse getItem() throws IOException {
     Response<ItemGetResponse> itemResponse = plaidClient.service()
       .itemGet(new ItemGetRequest(QuickstartApplication.accessToken))
