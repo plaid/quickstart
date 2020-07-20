@@ -221,6 +221,14 @@ func payment(c *gin.Context) {
 	})
 }
 
+func info(context *gin.Context) {
+	context.JSON(200, map[string]interface{}{
+		"item_id":      itemID,
+		"access_token": accessToken,
+		"products":     strings.Split(PLAID_PRODUCTS, ","),
+	})
+}
+
 func createPublicToken(c *gin.Context) {
 	// Create a one-time use public_token for the Item.
 	// This public_token can be used to initialize Link in update mode for a user
@@ -287,15 +295,14 @@ func main() {
 	}
 
 	r := gin.Default()
-	r.LoadHTMLFiles("templates/index.tmpl", "templates/oauth-response.tmpl")
-	r.Static("/static", "./static")
+	mainPage := "../html/index.html"
+	oauthPage := "../html/oauth-response.html"
+	r.LoadHTMLFiles(mainPage, oauthPage)
+	r.Static("/static", "../static")
 
+	r.POST("/api/info", info)
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"item_id":        itemID,
-			"access_token":   accessToken,
-			"plaid_products": PLAID_PRODUCTS,
-		})
+		c.HTML(http.StatusOK, "index.html", gin.H{})
 	})
 
 	// For OAuth flows, the process looks as follows.
@@ -305,22 +312,22 @@ func main() {
 	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
 	// from step 2.
 	r.GET("/oauth-response.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "oauth-response.tmpl", gin.H{})
+		c.HTML(http.StatusOK, "oauth-response.html", gin.H{})
 	})
 
-	r.POST("/set_access_token", getAccessToken)
-	r.POST("/create_link_token_for_payment", createLinkTokenForPayment)
-	r.GET("/auth", auth)
-	r.GET("/accounts", accounts)
-	r.GET("/balance", balance)
-	r.GET("/item", item)
-	r.POST("/item", item)
-	r.GET("/identity", identity)
-	r.GET("/transactions", transactions)
-	r.POST("/transactions", transactions)
-	r.GET("/payment", payment)
-	r.GET("/create_public_token", createPublicToken)
-	r.POST("/create_link_token", createLinkToken)
+	r.POST("/api/set_access_token", getAccessToken)
+	r.POST("/api/create_link_token_for_payment", createLinkTokenForPayment)
+	r.GET("/api/auth", auth)
+	r.GET("/api/accounts", accounts)
+	r.GET("/api/balance", balance)
+	r.GET("/api/item", item)
+	r.POST("/api/item", item)
+	r.GET("/api/identity", identity)
+	r.GET("/api/transactions", transactions)
+	r.POST("/api/transactions", transactions)
+	r.GET("/api/payment", payment)
+	r.GET("/api/create_public_token", createPublicToken)
+	r.POST("/api/create_link_token", createLinkToken)
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
