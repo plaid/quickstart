@@ -3,7 +3,6 @@ package com.plaid.quickstart;
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.*;
-import javax.validation.constraints.*;
 
 public class QuickstartConfiguration extends Configuration {
   @NotEmpty
@@ -11,9 +10,6 @@ public class QuickstartConfiguration extends Configuration {
 
   @NotEmpty
   private String plaidSecret;
-
-  @NotEmpty
-  private String plaidPublicKey;
 
   @NotEmpty
   private String plaidProducts;
@@ -28,12 +24,7 @@ public class QuickstartConfiguration extends Configuration {
   // that the bank website should redirect to. You will need to configure
   // this redirect URI for your client ID through the Plaid developer dashboard
   // at https://dashboard.plaid.com/team/api.
-  private String plaidOAuthRedirectUri;
-
-  // Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
-  // session. The nonce will be used to re-open Link upon completion of the OAuth
-  // redirect. The nonce must be at least 16 characters long.
-  private String plaidOAuthNonce;
+  private String plaidRedirectUri;
 
   @JsonProperty
   public String getPlaidClientID() {
@@ -43,11 +34,6 @@ public class QuickstartConfiguration extends Configuration {
   @JsonProperty
   public String getPlaidSecret() {
     return plaidSecret;
-  }
-
-  @JsonProperty
-  public String getPlaidPublicKey() {
-    return plaidPublicKey;
   }
 
   @JsonProperty
@@ -61,12 +47,7 @@ public class QuickstartConfiguration extends Configuration {
   }
 
   @JsonProperty
-  public String getPlaidOAuthRedirectUri() {
-    return plaidOAuthRedirectUri;
-  }
-
-  @JsonProperty
-  public String getPlaidOAuthNonce() {
-    return plaidOAuthNonce;
+  public String getPlaidRedirectUri() {
+    return plaidRedirectUri;
   }
 }

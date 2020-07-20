@@ -17,7 +17,7 @@ import retrofit2.Response;
 @Path("/create_public_token")
 @Produces(MediaType.APPLICATION_JSON)
 public class PublicTokenResource {
-  private PlaidClient plaidClient;
+  private final PlaidClient plaidClient;
 
   public PublicTokenResource(PlaidClient plaidClient) {
     this.plaidClient = plaidClient;

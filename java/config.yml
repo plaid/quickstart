@@ -3,10 +3,17 @@ logging:
   loggers:
     com.plaid: DEBUG
 
-plaidClientID: ${PLAID_CLIENT_ID}
-plaidPublicKey: ${PLAID_PUBLIC_KEY}
-plaidSecret: ${PLAID_SECRET}
-plaidProducts: ${PLAID_PRODUCTS}
-plaidCountryCodes: ${PLAID_COUNTRY_CODES}
-plaidOAuthRedirectUri: ${PLAID_OAUTH_REDIRECT_URI:-""}
-plaidOAuthNonce: ${PLAID_OAUTH_NONCE:-""}
+plaid_client_id: ${PLAID_CLIENT_ID}
+plaid_secret: ${PLAID_SECRET}
+plaid_products: ${PLAID_PRODUCTS}
+plaid_country_codes: ${PLAID_COUNTRY_CODES}
+plaid_redirect_uri: ${PLAID_REDIRECT_URI:-""}
+
+server:
+  application_connectors:
+    - type: http
+      port: 8000
+  admin_connectors:
+    - type: http
+      port: 8001
+  rootPath: '/api'

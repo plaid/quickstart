@@ -13,6 +13,7 @@ import com.plaid.client.response.ItemStatus;
 import com.plaid.client.response.InstitutionsGetByIdResponse;
 import com.plaid.quickstart.QuickstartApplication;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -23,20 +24,21 @@ import retrofit2.Response;
 @Path("/item")
 @Produces(MediaType.APPLICATION_JSON)
 public class ItemResource {
-  private PlaidClient plaidClient;
+  private final PlaidClient plaidClient;
 
   public ItemResource(PlaidClient plaidClient) {
     this.plaidClient = plaidClient;
   }
 
-  @POST
+  @GET
   public ItemResponse getItem() throws IOException {
     Response<ItemGetResponse> itemResponse = plaidClient.service()
       .itemGet(new ItemGetRequest(QuickstartApplication.accessToken))
       .execute();
 
     Response<InstitutionsGetByIdResponse> institutionsResponse = plaidClient.service()
-      .institutionsGetById(new InstitutionsGetByIdRequest(itemResponse.body().getItem().getInstitutionId()))
+      .institutionsGetById(
+        new InstitutionsGetByIdRequest(itemResponse.body().getItem().getInstitutionId()))
       .execute();
 
     return new ItemResponse(
