@@ -35,7 +35,7 @@ java -jar target/quickstart-1.0-SNAPSHOT.jar server config.yml
 ```
 
 ### Link token creation and server-side configuration.
-The recommended way to initialize Plaid Link is to pass Plaid Link initialization
+The [recommended way to initialize Plaid Link](https://plaid.com/docs/#create-link-token) is to pass Plaid Link initialization
 parameters server-side to `link/token/create`. The server then returns the link token,
 which the client can then use to initialize Plaid Link.
 
