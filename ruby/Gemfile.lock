@@ -1,0 +1,35 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    faraday (1.0.1)
+      multipart-post (>= 1.2, < 3)
+    faraday_middleware (1.0.0)
+      faraday (~> 1.0)
+    hashie (4.1.0)
+    multipart-post (2.1.1)
+    mustermann (1.1.1)
+      ruby2_keywords (~> 0.0.1)
+    plaid (11.0.0)
+      faraday
+      faraday_middleware
+      hashie (>= 3.4.3)
+    rack (2.2.3)
+    rack-protection (2.0.8.1)
+      rack
+    ruby2_keywords (0.0.2)
+    sinatra (2.0.8.1)
+      mustermann (~> 1.0)
+      rack (~> 2.0)
+      rack-protection (= 2.0.8.1)
+      tilt (~> 2.0)
+    tilt (2.0.10)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  plaid
+  sinatra
+
+BUNDLED WITH
+   1.17.2

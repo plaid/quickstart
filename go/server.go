@@ -221,6 +221,32 @@ func payment(c *gin.Context) {
 	})
 }
 
+func investmentTransactions(c *gin.Context) {
+	endDate := time.Now().Local().Format("2006-01-02")
+	startDate := time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02")
+	response, err := client.GetInvestmentTransactions(accessToken, startDate, endDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"investment_transactions": response,
+	})
+}
+
+func holdings(c *gin.Context) {
+	response, err := client.GetHoldings(accessToken)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"holdings": response,
+	})
+}
+
 func info(context *gin.Context) {
 	context.JSON(200, map[string]interface{}{
 		"item_id":      itemID,
@@ -328,6 +354,8 @@ func main() {
 	r.GET("/api/payment", payment)
 	r.GET("/api/create_public_token", createPublicToken)
 	r.POST("/api/create_link_token", createLinkToken)
+	r.GET("/api/investment_transactions", investmentTransactions)
+	r.GET("/api/holdings", holdings)
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
