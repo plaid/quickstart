@@ -34,8 +34,8 @@ bundle exec ruby app.rb
 ```
 
 ### Link token creation and server-side configuration.
-The recommended way to initialize Plaid Link is to pass Plaid Link initialization
-parameters server-side to `link/token/create`. The server then returns the link token,
+The recommended way to [initialize Plaid Link](https://plaid.com/docs/#create-link-token)
+is to pass Plaid Link initialization parameters server-side to `link/token/create`. The server then returns the link token,
 which the client can then use to initialize Plaid Link.
 
 When the client initializes Plaid Link with the link token, the Plaid Link
