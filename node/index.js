@@ -11,87 +11,151 @@ var plaid = require('plaid');
 var APP_PORT = envvar.number('APP_PORT', 8000);
 var PLAID_CLIENT_ID = envvar.string('PLAID_CLIENT_ID');
 var PLAID_SECRET = envvar.string('PLAID_SECRET');
-var PLAID_PUBLIC_KEY = envvar.string('PLAID_PUBLIC_KEY');
 var PLAID_ENV = envvar.string('PLAID_ENV', 'sandbox');
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
-var PLAID_PRODUCTS = envvar.string('PLAID_PRODUCTS', 'transactions');
+var PLAID_PRODUCTS = envvar.string('PLAID_PRODUCTS', 'transactions').split(',');
 
 // PLAID_PRODUCTS is a comma-separated list of countries for which users
 // will be able to select institutions from.
-var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US');
+var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US').split(',');
 
 // Parameters used for the OAuth redirect Link flow.
 //
-// Set PLAID_OAUTH_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
+// Set PLAID_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
 // The OAuth redirect flow requires an endpoint on the developer's website
 // that the bank website should redirect to. You will need to configure
 // this redirect URI for your client ID through the Plaid developer dashboard
 // at https://dashboard.plaid.com/team/api.
-var PLAID_OAUTH_REDIRECT_URI = envvar.string('PLAID_OAUTH_REDIRECT_URI', '');
-// Set PLAID_OAUTH_NONCE to a unique identifier such as a UUID for each Link
-// session. The nonce will be used to re-open Link upon completion of the OAuth
-// redirect. The nonce must be at least 16 characters long.
-var PLAID_OAUTH_NONCE = envvar.string('PLAID_OAUTH_NONCE', '');
+var PLAID_REDIRECT_URI = envvar.string('PLAID_REDIRECT_URI', '');
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
 var ACCESS_TOKEN = null;
 var PUBLIC_TOKEN = null;
 var ITEM_ID = null;
-// The payment_token is only relevant for the UK Payment Initiation product.
-// We store the payment_token in memory - in production, store it in a secure
+// The payment_id is only relevant for the UK Payment Initiation product.
+// We store the payment_id in memory - in production, store it in a secure
 // persistent data store
-var PAYMENT_TOKEN = null;
 var PAYMENT_ID = null;
 
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
-var client = new plaid.Client(
-  PLAID_CLIENT_ID,
-  PLAID_SECRET,
-  PLAID_PUBLIC_KEY,
-  plaid.environments[PLAID_ENV],
-  {version: '2019-05-29', clientApp: 'Plaid Quickstart'}
-);
+var client = new plaid.Client({
+  clientID: PLAID_CLIENT_ID,
+  secret: PLAID_SECRET,
+  env: plaid.environments[PLAID_ENV],
+  options: {
+    version: '2019-05-29',
+  }
+});
 
 var app = express();
 app.use(express.static('public'));
-app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
   extended: false
 }));
 app.use(bodyParser.json());
 
 app.get('/', function(request, response, next) {
-  response.render('index.ejs', {
-    PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
-    PLAID_ENV: PLAID_ENV,
-    PLAID_PRODUCTS: PLAID_PRODUCTS,
-    PLAID_COUNTRY_CODES: PLAID_COUNTRY_CODES,
-    PLAID_OAUTH_REDIRECT_URI: PLAID_OAUTH_REDIRECT_URI,
-    PLAID_OAUTH_NONCE: PLAID_OAUTH_NONCE,
-    ITEM_ID: ITEM_ID,
-    ACCESS_TOKEN: ACCESS_TOKEN,
-  });
+  response.sendFile('./views/index.html', { root: __dirname });
 });
 
 // This is an endpoint defined for the OAuth flow to redirect to.
 app.get('/oauth-response.html', function(request, response, next) {
-  response.render('oauth-response.ejs', {
-    PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
-    PLAID_ENV: PLAID_ENV,
-    PLAID_PRODUCTS: PLAID_PRODUCTS,
-    PLAID_COUNTRY_CODES: PLAID_COUNTRY_CODES,
-    PLAID_OAUTH_NONCE: PLAID_OAUTH_NONCE,
-  });
+  response.sendFile('./views/oauth-response.html', { root: __dirname });
+});
+
+app.post('/api/info', function(request, response, next) {
+  response.json({
+    item_id: ITEM_ID,
+    access_token: ACCESS_TOKEN,
+    products: PLAID_PRODUCTS
+  })
+});
+
+app.post('/api/create_link_token', function(request, response, next) {
+  client.createLinkToken(
+    {
+       'user': {
+         // This should correspond to a unique id for the current user.
+         'client_user_id': 'user-id',
+       },
+       'client_name': "Plaid Quickstart",
+       'products': PLAID_PRODUCTS,
+       'country_codes': PLAID_COUNTRY_CODES,
+       'language': "en",
+       'redirect_uri': PLAID_REDIRECT_URI,
+     }
+    , function(error, createTokenResponse) {
+      if (error != null) {
+        prettyPrintResponse(error);
+        return response.json({
+          error: error,
+        });
+      }
+      response.json(createTokenResponse);
+  })
+});
+
+app.post('/api/create_link_token_for_payment', function(request, response, next) {
+    client.createPaymentRecipient(
+      'Harry Potter',
+      'GB33BUKB20201555555555',
+      {
+        'street':      ['4 Privet Drive'],
+        'city':        'Little Whinging',
+        'postal_code': '11111',
+        'country':     'GB'
+      },
+      function(error, createRecipientResponse) {
+        var recipientId = createRecipientResponse.recipient_id
+
+        client.createPayment(
+          recipientId,
+          'payment_ref',
+          {
+            'value': 12.34,
+            'currency': 'GBP'
+          },
+          function(error, createPaymentResponse) {
+            prettyPrintResponse(createPaymentResponse)
+            var paymentId = createPaymentResponse.payment_id
+            PAYMENT_ID = paymentId;
+            client.createLinkToken(
+            {
+               'user': {
+                 // This should correspond to a unique id for the current user.
+                 'client_user_id': 'user-id',
+               },
+               'client_name': "Plaid Quickstart",
+               'products': PLAID_PRODUCTS,
+               'country_codes': PLAID_COUNTRY_CODES,
+               'language': "en",
+               'redirect_uri': PLAID_REDIRECT_URI,
+               'payment_initiation': {
+                  'payment_id': paymentId
+               }
+             }, function(error, createTokenResponse) {
+              if (error != null) {
+                prettyPrintResponse(error);
+                return response.json({
+                  error: error,
+                });
+              }
+              response.json(createTokenResponse);
+            })
+          }
+        )
+      }
+    )
 });
 
 // Exchange token flow - exchange a Link public_token for
 // an API access_token
 // https://plaid.com/docs/#exchange-token-flow
-app.post('/get_access_token', function(request, response, next) {
+app.post('/api/set_access_token', function(request, response, next) {
   PUBLIC_TOKEN = request.body.public_token;
   client.exchangePublicToken(PUBLIC_TOKEN, function(error, tokenResponse) {
     if (error != null) {
@@ -111,10 +175,39 @@ app.post('/get_access_token', function(request, response, next) {
   });
 });
 
+// Retrieve an Item's accounts
+// https://plaid.com/docs/#accounts
+app.get('/api/accounts', function(request, response, next) {
+  client.getAccounts(ACCESS_TOKEN, function(error, accountsResponse) {
+    if (error != null) {
+      prettyPrintResponse(error);
+      return response.json({
+        error: error,
+      });
+    }
+    prettyPrintResponse(accountsResponse);
+    response.json(accountsResponse);
+  });
+});
+
+// Retrieve ACH or ETF Auth data for an Item's accounts
+// https://plaid.com/docs/#auth
+app.get('/api/auth', function(request, response, next) {
+  client.getAuth(ACCESS_TOKEN, function(error, authResponse) {
+    if (error != null) {
+      prettyPrintResponse(error);
+      return response.json({
+        error: error,
+      });
+    }
+    prettyPrintResponse(authResponse);
+    response.json(authResponse);
+  });
+});
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
-app.get('/transactions', function(request, response, next) {
+app.get('/api/transactions', function(request, response, next) {
   // Pull transactions for the Item for the last 30 days
   var startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
   var endDate = moment().format('YYYY-MM-DD');
@@ -129,14 +222,14 @@ app.get('/transactions', function(request, response, next) {
       });
     } else {
       prettyPrintResponse(transactionsResponse);
-      response.json({error: null, transactions: transactionsResponse});
+      response.json(transactionsResponse);
     }
   });
 });
 
 // Retrieve Identity for an Item
 // https://plaid.com/docs/#identity
-app.get('/identity', function(request, response, next) {
+app.get('/api/identity', function(request, response, next) {
   client.getIdentity(ACCESS_TOKEN, function(error, identityResponse) {
     if (error != null) {
       prettyPrintResponse(error);
@@ -145,13 +238,13 @@ app.get('/identity', function(request, response, next) {
       });
     }
     prettyPrintResponse(identityResponse);
-    response.json({error: null, identity: identityResponse});
+    response.json({identity: identityResponse.accounts});
   });
 });
 
 // Retrieve real-time Balances for each of an Item's accounts
 // https://plaid.com/docs/#balance
-app.get('/balance', function(request, response, next) {
+app.get('/api/balance', function(request, response, next) {
   client.getBalance(ACCESS_TOKEN, function(error, balanceResponse) {
     if (error != null) {
       prettyPrintResponse(error);
@@ -160,43 +253,14 @@ app.get('/balance', function(request, response, next) {
       });
     }
     prettyPrintResponse(balanceResponse);
-    response.json({error: null, balance: balanceResponse});
+    response.json(balanceResponse);
   });
 });
 
-// Retrieve an Item's accounts
-// https://plaid.com/docs/#accounts
-app.get('/accounts', function(request, response, next) {
-  client.getAccounts(ACCESS_TOKEN, function(error, accountsResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error,
-      });
-    }
-    prettyPrintResponse(accountsResponse);
-    response.json({error: null, accounts: accountsResponse});
-  });
-});
-
-// Retrieve ACH or ETF Auth data for an Item's accounts
-// https://plaid.com/docs/#auth
-app.get('/auth', function(request, response, next) {
-  client.getAuth(ACCESS_TOKEN, function(error, authResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error,
-      });
-    }
-    prettyPrintResponse(authResponse);
-    response.json({error: null, auth: authResponse});
-  });
-});
 
 // Retrieve Holdings for an Item
 // https://plaid.com/docs/#investments
-app.get('/holdings', function(request, response, next) {
+app.get('/api/holdings', function(request, response, next) {
   client.getHoldings(ACCESS_TOKEN, function(error, holdingsResponse) {
     if (error != null) {
       prettyPrintResponse(error);
@@ -211,7 +275,7 @@ app.get('/holdings', function(request, response, next) {
 
 // Retrieve Investment Transactions for an Item
 // https://plaid.com/docs/#investments
-app.get('/investment_transactions', function(request, response, next) {
+app.get('/api/investment_transactions', function(request, response, next) {
   var startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
   var endDate = moment().format('YYYY-MM-DD');
   client.getInvestmentTransactions(ACCESS_TOKEN, startDate, endDate, function(error, investmentTransactionsResponse) {
@@ -230,7 +294,7 @@ app.get('/investment_transactions', function(request, response, next) {
 // Asset Report can contain up to 100 items, but for simplicity we're only
 // including one Item here.
 // https://plaid.com/docs/#assets
-app.get('/assets', function(request, response, next) {
+app.get('/api/assets', function(request, response, next) {
   // You can specify up to two years of transaction history for an Asset
   // Report.
   var daysRequested = 10;
@@ -271,7 +335,7 @@ app.get('/assets', function(request, response, next) {
 
 // This functionality is only relevant for the UK Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
-app.get('/payment_get', function(request, response, next) {
+app.get('/api/payment', function(request, response, next) {
   client.getPayment(PAYMENT_ID, function(error, paymentGetResponse) {
     if (error != null) {
       prettyPrintResponse(error);
@@ -286,7 +350,7 @@ app.get('/payment_get', function(request, response, next) {
 
 // Retrieve information about an Item
 // https://plaid.com/docs/#retrieve-item
-app.get('/item', function(request, response, next) {
+app.get('/api/item', function(request, response, next) {
   // Pull the Item - this includes information about available products,
   // billed products, webhook information, and more.
   client.getItem(ACCESS_TOKEN, function(error, itemResponse) {
@@ -379,48 +443,3 @@ var respondWithAssetReport = (
     }
   );
 };
-
-app.post('/set_access_token', function(request, response, next) {
-  ACCESS_TOKEN = request.body.access_token;
-  client.getItem(ACCESS_TOKEN, function(error, itemResponse) {
-    response.json({
-      item_id: itemResponse.item.item_id,
-      error: false,
-    });
-  });
-});
-
-// This functionality is only relevant for the UK Payment Initiation product.
-// Sets the payment token in memory on the server side. We generate a new
-// payment token so that the developer is not required to supply one.
-// This makes the quickstart easier to use.
-app.post('/set_payment_token', function(request, response, next) {
-  client.createPaymentRecipient(
-    'Harry Potter',
-    'GB33BUKB20201555555555',
-    {street: ['4 Privet Drive'], city: 'Little Whinging', postal_code: '11111', country: 'GB'},
-  ).then(function(createPaymentRecipientResponse) {
-    let recipientId = createPaymentRecipientResponse.recipient_id;
-
-    return client.createPayment(
-      recipientId,
-      'payment_ref',
-      {currency: 'GBP', value: 12.34},
-    ).then(function(createPaymentResponse) {
-      let paymentId = createPaymentResponse.payment_id;
-
-      return client.createPaymentToken(
-        paymentId,
-      ).then(function(createPaymentTokenResponse) {
-        let paymentToken = createPaymentTokenResponse.payment_token;
-        PAYMENT_TOKEN = paymentToken;
-        PAYMENT_ID = paymentId;
-        return response.json({error: null, paymentToken: paymentToken});
-      })
-    })
-  }).catch(function(error) {
-    prettyPrintResponse(error);
-    return response.json({ error: error });
-  });
-
-});
