@@ -177,6 +177,18 @@ func item(c *gin.Context) {
 	})
 }
 
+func identity(c *gin.Context) {
+	response, err := client.GetIdentity(accessToken)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"identity": response.Accounts,
+	})
+}
+
 func transactions(c *gin.Context) {
 	// pull transactions for the past 30 days
 	endDate := time.Now().Local().Format("2006-01-02")
@@ -192,18 +204,6 @@ func transactions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"accounts":     response.Accounts,
 		"transactions": response.Transactions,
-	})
-}
-
-func identity(c *gin.Context) {
-	response, err := client.GetIdentity(accessToken)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"identity": response.Accounts,
 	})
 }
 
@@ -356,7 +356,6 @@ func main() {
 	r.POST("/api/create_link_token", createLinkToken)
 	r.GET("/api/investment_transactions", investmentTransactions)
 	r.GET("/api/holdings", holdings)
-	r.GET("/api/assets", assets)
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
