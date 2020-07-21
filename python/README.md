@@ -1,8 +1,6 @@
-# Quickstart for plaid-java
+# Quickstart for plaid-python
 
 To run this application locally, first install it and then run either of the flows described below. Additionally, please also refer to the [Quickstart guide](https://plaid.com/docs/quickstart).
-
-This application requires java version >= 8.
 
 ## Installing the quickstart app
 ``` bash
