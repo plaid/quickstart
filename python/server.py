@@ -77,7 +77,7 @@ def info():
   })
 
 @app.route('/api/create_link_token_for_payment', methods=['POST'])
-def create_link_token():
+def create_link_token_for_payment():
   global payment_id
   try:
     create_recipient_response = client.PaymentInitiation.create_recipient(
@@ -124,7 +124,7 @@ def create_link_token():
     return jsonify(format_error(e))
 
 @app.route('/api/create_link_token', methods=['POST'])
-def create_link_token_for_payment():
+def create_link_token():
   try:
     response = client.LinkToken.create(
       {
