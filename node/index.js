@@ -75,6 +75,8 @@ app.post('/api/info', function(request, response, next) {
   })
 });
 
+// Create a link token with configs which we can then use to initialize Plaid Link client-side.
+// See https://plaid.com/docs/#create-link-token
 app.post('/api/create_link_token', function(request, response, next) {
   client.createLinkToken(
     {
@@ -99,6 +101,8 @@ app.post('/api/create_link_token', function(request, response, next) {
   })
 });
 
+// Create a link token with configs which we can then use to initialize Plaid Link client-side.
+// See https://plaid.com/docs/#payment-initiation-create-link-token-request
 app.post('/api/create_link_token_for_payment', function(request, response, next) {
     client.createPaymentRecipient(
       'Harry Potter',
