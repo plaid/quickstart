@@ -32,7 +32,7 @@ PLAID_COUNTRY_CODES = os.getenv('PLAID_COUNTRY_CODES', 'US').split(',')
 
 def empty_to_none(field):
   value = os.getenv(field)
-  if field is None or len(value) == 0:
+  if value is None or len(value) == 0:
     return None
   return field
 
