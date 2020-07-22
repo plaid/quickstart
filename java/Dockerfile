@@ -2,6 +2,8 @@ FROM maven:openjdk
 
 WORKDIR /opt/app
 COPY . .
+WORKDIR /opt/app/java
+
 RUN mvn clean package
 
 EXPOSE 8000

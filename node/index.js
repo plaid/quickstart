@@ -78,19 +78,22 @@ app.post('/api/info', function(request, response, next) {
 // Create a link token with configs which we can then use to initialize Plaid Link client-side.
 // See https://plaid.com/docs/#create-link-token
 app.post('/api/create_link_token', function(request, response, next) {
-  client.createLinkToken(
-    {
-       'user': {
-         // This should correspond to a unique id for the current user.
-         'client_user_id': 'user-id',
-       },
-       'client_name': "Plaid Quickstart",
-       'products': PLAID_PRODUCTS,
-       'country_codes': PLAID_COUNTRY_CODES,
-       'language': "en",
-       'redirect_uri': PLAID_REDIRECT_URI,
-     }
-    , function(error, createTokenResponse) {
+  const configs = {
+    'user': {
+      // This should correspond to a unique id for the current user.
+      'client_user_id': 'user-id',
+    },
+    'client_name': "Plaid Quickstart",
+    'products': PLAID_PRODUCTS,
+    'country_codes': PLAID_COUNTRY_CODES,
+    'language': "en",
+  }
+
+  if (PLAID_REDIRECT_URI !== '') {
+    configs.redirect_uri = PLAID_REDIRECT_URI;
+  }
+  
+  client.createLinkToken(configs, function(error, createTokenResponse) {
       if (error != null) {
         prettyPrintResponse(error);
         return response.json({
@@ -127,6 +130,22 @@ app.post('/api/create_link_token_for_payment', function(request, response, next)
             prettyPrintResponse(createPaymentResponse)
             var paymentId = createPaymentResponse.payment_id
             PAYMENT_ID = paymentId;
+            const configs = {
+              'user': {
+                // This should correspond to a unique id for the current user.
+                'client_user_id': 'user-id',
+              },
+              'client_name': "Plaid Quickstart",
+              'products': PLAID_PRODUCTS,
+              'country_codes': PLAID_COUNTRY_CODES,
+              'language': "en",
+              'payment_initiation': {
+                 'payment_id': paymentId
+              }
+            };
+            if (PLAID_REDIRECT_URI !== '') {
+              configs.redirect_uri = PLAID_REDIRECT_URI;
+            }
             client.createLinkToken(
             {
                'user': {
