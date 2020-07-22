@@ -17,7 +17,8 @@ replace the respective `${VARIABLES}` in the `x-environment` section in
 
 To further adjust the quickstart to your use-case, you can define `PLAID_PRODUCTS`, `PLAID_COUNTRY_CODES`,
 `PLAID_REDIRECT_URI` in your environment or set the respective `${VARIABLES}` in in the `x-environment`
-section in [`docker-compose.yml`](/docker-compose.yml) directly.
+section in [`docker-compose.yml`](/docker-compose.yml) directly. `PLAID_DIRECT_URI` is used for the
+OAuth redirect flow and the redirect URI needs to be added to the [allowed redirect URI list in Dashboard](https://dashboard.plaid.com/team/api).
 
 To see the log output of the quickstart run: `% make QUICKSTART=go logs` (when done, quit using `CTRL-C`).
 
