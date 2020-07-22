@@ -315,6 +315,10 @@ func linkTokenCreate(
 	return resp.LinkToken, nil
 }
 
+func assets(c *gin.Context) {
+	c.JSON(http.StatusBadRequest, gin.H{"error": "unfortunate the go client library does not support assets report creation yet."})
+}
+
 func main() {
 	if APP_PORT == "" {
 		APP_PORT = "8000"
@@ -356,6 +360,7 @@ func main() {
 	r.POST("/api/create_link_token", createLinkToken)
 	r.GET("/api/investment_transactions", investmentTransactions)
 	r.GET("/api/holdings", holdings)
+	r.GET("/api/assets", assets)
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {

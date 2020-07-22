@@ -28,7 +28,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  plaid
+  plaid (~> 11.0.0)
   sinatra
 
 BUNDLED WITH
