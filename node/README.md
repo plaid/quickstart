@@ -40,8 +40,12 @@ which the client can then use to initialize Plaid Link.
 When the client initializes Plaid Link with the link token, the Plaid Link
 initialization parameters associated with the Plaid Token will be applied.
 
+Note - If you want to use the [payment_initiation][payment-initiation] product, you
+will need to contact sales to get this product enabled.
+
 ## The OAuth redirect flow
-Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should provide an additional configuration parameters, `PLAID_REDIRECT_URI`.
+Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should provide an additional configuration parameters, `PLAID_REDIRECT_URI`. You will also need to make sure that you register
+this `PLAID_REDIRECT_URI` in the [Plaid dashboard][dashboard-api-section].
 
 ``` bash
 # You will need to configure the PLAID_REDIRECT_URI for
@@ -65,3 +69,6 @@ node index.js
 
 # Go to http://localhost:8000
 ```
+
+[dashboard-api-section]: https://dashboard.plaid.com/team/api
+[payment-initiation]: https://plaid.com/docs/#payment-initiation
