@@ -61,11 +61,20 @@ var itemID string
 
 var paymentID string
 
+func renderError(c *gin.Context, err error) {
+	if plaidError, ok := err.(plaid.Error); ok {
+		// Return 200 and allow the front end to render the error.
+		c.JSON(http.StatusOK, gin.H{"error": plaidError})
+		return
+	}
+	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+}
+
 func getAccessToken(c *gin.Context) {
 	publicToken := c.PostForm("public_token")
 	response, err := client.ExchangePublicToken(publicToken)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 	accessToken = response.AccessToken
@@ -96,7 +105,7 @@ func createLinkTokenForPayment(c *gin.Context) {
 			Country:    "GB",
 		})
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 	paymentCreateResp, err := client.CreatePayment(recipientCreateResp.RecipientID, "payment-ref", plaid.PaymentAmount{
@@ -104,17 +113,17 @@ func createLinkTokenForPayment(c *gin.Context) {
 		Value:    12.34,
 	})
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 	paymentID = paymentCreateResp.PaymentID
 	fmt.Println("payment id: " + paymentID)
 
-	linkToken, httpErr := linkTokenCreate(&plaid.PaymentInitiation{
+	linkToken, tokenCreateErr := linkTokenCreate(&plaid.PaymentInitiation{
 		PaymentID: paymentID,
 	})
-	if httpErr != nil {
-		c.JSON(httpErr.errorCode, gin.H{"error": httpErr.Error()})
+	if tokenCreateErr != nil {
+		renderError(c, tokenCreateErr)
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"link_token": linkToken,
@@ -124,7 +133,7 @@ func createLinkTokenForPayment(c *gin.Context) {
 func auth(c *gin.Context) {
 	response, err := client.GetAuth(accessToken)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -137,7 +146,7 @@ func auth(c *gin.Context) {
 func accounts(c *gin.Context) {
 	response, err := client.GetAccounts(accessToken)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -149,7 +158,7 @@ func accounts(c *gin.Context) {
 func balance(c *gin.Context) {
 	response, err := client.GetBalances(accessToken)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -161,13 +170,13 @@ func balance(c *gin.Context) {
 func item(c *gin.Context) {
 	response, err := client.GetItem(accessToken)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
 	institution, err := client.GetInstitutionByID(response.Item.InstitutionID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -180,7 +189,7 @@ func item(c *gin.Context) {
 func identity(c *gin.Context) {
 	response, err := client.GetIdentity(accessToken)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -197,7 +206,7 @@ func transactions(c *gin.Context) {
 	response, err := client.GetTransactions(accessToken, startDate, endDate)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -212,7 +221,7 @@ func transactions(c *gin.Context) {
 func payment(c *gin.Context) {
 	response, err := client.GetPayment(paymentID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -225,8 +234,9 @@ func investmentTransactions(c *gin.Context) {
 	endDate := time.Now().Local().Format("2006-01-02")
 	startDate := time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02")
 	response, err := client.GetInvestmentTransactions(accessToken, startDate, endDate)
+	fmt.Println("error", err)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -238,7 +248,7 @@ func investmentTransactions(c *gin.Context) {
 func holdings(c *gin.Context) {
 	response, err := client.GetHoldings(accessToken)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -260,7 +270,7 @@ func createPublicToken(c *gin.Context) {
 	// This public_token can be used to initialize Link in update mode for a user
 	publicToken, err := client.CreatePublicToken(accessToken)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		renderError(c, err)
 		return
 	}
 
@@ -272,7 +282,8 @@ func createPublicToken(c *gin.Context) {
 func createLinkToken(c *gin.Context) {
 	linkToken, err := linkTokenCreate(nil)
 	if err != nil {
-		c.JSON(err.errorCode, gin.H{"error": err.error})
+		renderError(c, err)
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"link_token": linkToken})
 }
