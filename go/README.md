@@ -43,7 +43,8 @@ initialization parameters associated with the Plaid Token will be applied.
 Some European institutions require an OAuth redirect authentication flow,
 where the end user is redirected to the bank’s website or mobile app to
 authenticate. For this flow, you should provide an additional parameter,
-`PLAID_REDIRECT_URI`.
+`PLAID_REDIRECT_URI`. This redirect URI must be added to the [allowed redirect URIs in the Dashboard](https://dashboard.plaid.com/team/api).
+s
 
 ``` bash
 # You will need to configure the PLAID_REDIRECT_URI for
