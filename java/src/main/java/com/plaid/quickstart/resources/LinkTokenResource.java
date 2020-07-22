@@ -1,4 +1,4 @@
-package com.plaid.quickstart;
+package com.plaid.quickstart.resources;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.plaid.client.PlaidClient;
@@ -18,12 +18,14 @@ public class LinkTokenResource {
   private final PlaidClient plaidClient;
   private final List<String> plaidProducts;
   private final List<String> countryCodes;
+  private final String redirectUri;
 
   public LinkTokenResource(PlaidClient plaidClient, List<String> plaidProducts,
-    List<String> countryCodes) {
+    List<String> countryCodes, String redirectUri) {
     this.plaidClient = plaidClient;
     this.plaidProducts = plaidProducts;
     this.countryCodes = countryCodes;
+    this.redirectUri = redirectUri;
   }
 
   public static class LinkToken {
@@ -37,13 +39,13 @@ public class LinkTokenResource {
 
   @POST public LinkToken getLinkToken() throws IOException {
     Response<LinkTokenCreateResponse> response =
-      plaidClient.service().linkTokenCreate(new LinkTokenCreateRequest(
+      this.plaidClient.service().linkTokenCreate(new LinkTokenCreateRequest(
         new LinkTokenCreateRequest.User("user-id"),
-        "my client name",
-        plaidProducts,
+        "Plaid Quickstart",
+        this.plaidProducts,
         this.countryCodes,
         "en"
-      )).execute();
+      ).withRedirectUri(this.redirectUri)).execute();
     return new LinkToken(response.body().getLinkToken());
   }
 }

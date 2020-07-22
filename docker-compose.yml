@@ -1,10 +1,11 @@
 version: "3.4"
 x-environment: &QUICKSTART_ENVIRONMENT
+  # These are read from .env file. The values in the .env file maybe overriden by shell envvars
   PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
   PLAID_SECRET: ${PLAID_SECRET}
-  PLAID_PRODUCTS: transactions
-  PLAID_COUNTRY_CODES: US,CA
-  PLAID_REDIRECT_URI:
+  PLAID_PRODUCTS: ${PLAID_PRODUCTS}
+  PLAID_COUNTRY_CODES: ${PLAID_COUNTRY_CODES}
+  PLAID_REDIRECT_URI: ${PLAID_REDIRECT_URI}
 services:
   go:
     build:
@@ -14,28 +15,28 @@ services:
     environment:
       << : *QUICKSTART_ENVIRONMENT
   java:
-    build: 
+    build:
       context: .
       dockerfile: ./java/Dockerfile
     ports: ["8000:8000"]
     environment:
       << : *QUICKSTART_ENVIRONMENT
   node:
-    build: 
+    build:
       context: .
       dockerfile: ./node/Dockerfile
     ports: ["8000:8000"]
     environment:
       << : *QUICKSTART_ENVIRONMENT
   python:
-    build: 
+    build:
       context: .
       dockerfile: ./python/Dockerfile
     ports: ["8000:8000"]
     environment:
       << : *QUICKSTART_ENVIRONMENT
   ruby:
-    build: 
+    build:
       context: .
       dockerfile: ./ruby/Dockerfile
     ports: ["8000:8000"]

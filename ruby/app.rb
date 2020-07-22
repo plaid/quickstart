@@ -266,16 +266,27 @@ post '/api/create_link_token' do
 	    products: ENV['PLAID_PRODUCTS'].split(','),
 	    country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
 	    language: "en",
-	    redirect_uri: ENV['PLAID_REDIRECT_URI'],
+	    redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI'),
     )
 
     content_type :json
     { link_token: response.link_token }.to_json
   rescue Plaid::PlaidAPIError => e
     error_response = format_error(e)
+
     pretty_print_response(error_response)
     content_type :json
     error_response.to_json
+  end
+end
+
+def nil_if_empty_envvar(field)
+  val = ENV[field]
+  puts "val #{val}"
+  if !val.nil? && val.length > 0
+    return val
+  else
+    return nil
   end
 end
 
@@ -314,7 +325,7 @@ post '/api/create_link_token_for_payment' do
 	    products: ENV['PLAID_PRODUCTS'].split(','),
 	    country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
 	    language: "en",
-	    redirect_uri: ENV['PLAID_REDIRECT_URI'],
+	    redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI'),
 	    payment_initiation: {
 	      payment_id: payment_id,
 	    },

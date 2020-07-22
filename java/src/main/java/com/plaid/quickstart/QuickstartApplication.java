@@ -11,6 +11,8 @@ import com.plaid.quickstart.resources.IdentityResource;
 import com.plaid.quickstart.resources.InfoResource;
 import com.plaid.quickstart.resources.InvestmentTransactionsResource;
 import com.plaid.quickstart.resources.ItemResource;
+import com.plaid.quickstart.resources.LinkTokenResource;
+import com.plaid.quickstart.resources.LinkTokenWithPaymentResource;
 import com.plaid.quickstart.resources.PaymentInitiationResource;
 import com.plaid.quickstart.resources.PublicTokenResource;
 import com.plaid.quickstart.resources.TransactionsResource;
@@ -68,6 +70,10 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
       .build();
     List<String> plaidProducts = Arrays.asList(configuration.getPlaidProducts().split(","));
     List<String> countryCodes = Arrays.asList(configuration.getPlaidCountryCodes().split(","));
+    String redirectUri = null;
+    if (configuration.getPlaidRedirectUri() != null && configuration.getPlaidRedirectUri().length() > 0) {
+      redirectUri = configuration.getPlaidRedirectUri();
+    }
     environment.jersey().register(new AccessTokenResource(plaidClient));
     environment.jersey().register(new AccountsResource(plaidClient));
     environment.jersey().register(new AuthResource(plaidClient));
@@ -77,8 +83,8 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new InfoResource(plaidProducts));
     environment.jersey().register(new InvestmentTransactionsResource(plaidClient));
     environment.jersey().register(new ItemResource(plaidClient));
-    environment.jersey().register(new LinkTokenResource(plaidClient, plaidProducts, countryCodes));
-    environment.jersey().register(new LinkTokenWithPaymentResource(plaidClient, plaidProducts, countryCodes));
+    environment.jersey().register(new LinkTokenResource(plaidClient, plaidProducts, countryCodes, redirectUri));
+    environment.jersey().register(new LinkTokenWithPaymentResource(plaidClient, plaidProducts, countryCodes, redirectUri));
     environment.jersey().register(new PaymentInitiationResource(plaidClient));
     environment.jersey().register(new PublicTokenResource(plaidClient));
     environment.jersey().register(new TransactionsResource(plaidClient));

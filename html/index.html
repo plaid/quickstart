@@ -317,7 +317,7 @@
     }
 
     var accessToken = qs('access_token');
-    if (accessToken != null && accessToken != '') {
+    if (accessToken != null && accessToken !== '') {
       $.post('/api/set_access_token', {
         access_token: accessToken
       }, function(data) {
@@ -374,7 +374,7 @@
             data.numbers.ach.forEach(function(achNumbers, idx) {
               // Find the account associated with this set of account and routing numbers
               var account = data.accounts.filter(function(a) {
-                return a.account_id == achNumbers.account_id;
+                return a.account_id === achNumbers.account_id;
               })[0];
               html += '<tr>';
               html += '<td>' + account.name + '</td>';
@@ -387,7 +387,7 @@
             data.numbers.eft.forEach(function(eftNumber, idx) {
               // Find the account associated with this set of account and routing numbers
               var account = data.accounts.filter(function(a) {
-                return a.account_id == eftNumber.account_id;
+                return a.account_id === eftNumber.account_id;
               })[0];
               html += '<tr>';
               html += '<td>' + account.name + '</td>';
@@ -444,16 +444,16 @@
     $('#get-item-btn').on('click', function(e) {
       $.get('/api/item', function(data) {
         $('#get-item-data').slideUp(function() {
-          if (data.error) {
+          if (data.error != null) {
             displayError(this, data.error);
-          } else {
-            var html = '';
-            html += '<tr><td>Institution name</td><td>' + data.institution.name + '</td></tr>';
-            html += '<tr><td>Billed products</td><td>' + data.item.billed_products.join(', ') + '</td></tr>';
-            html += '<tr><td>Available products</td><td>' + data.item.available_products.join(', ') + '</td></tr>';
-
-            $(this).html(html).slideDown();
+            return;
           }
+          var html = '';
+          html += '<tr><td>Institution name</td><td>' + data.institution.name + '</td></tr>';
+          html += '<tr><td>Billed products</td><td>' + data.item.billed_products.join(', ') + '</td></tr>';
+          html += '<tr><td>Available products</td><td>' + data.item.available_products.join(', ') + '</td></tr>';
+
+          $(this).html(html).slideDown();
         });
       });
     });
@@ -480,22 +480,22 @@
               $(this).html(errorHtml).slideDown();
             });
           });
-        } else {
-          $('#get-transactions-data').slideUp(function() {
-            var html = '<tr><td><strong>Name</strong></td><td><strong>Amount</strong></td><td><strong>Date</strong></td></tr>';
-            data.transactions.forEach(function(txn, idx) {
-              html += '<tr>';
-              html += '<td>' + txn.name + '</td>';
-              html += '<td>$' + txn.amount + '</td>';
-              html += '<td>' + txn.date + '</td>';
-              html += '</tr>';
-            });
-
-            $(this).slideUp(function() {
-              $(this).html(html).slideDown();
-            });
-          });
+          return;
         }
+        $('#get-transactions-data').slideUp(function () {
+          var html = '<tr><td><strong>Name</strong></td><td><strong>Amount</strong></td><td><strong>Date</strong></td></tr>';
+          data.transactions.forEach(function (txn, idx) {
+            html += '<tr>';
+            html += '<td>' + txn.name + '</td>';
+            html += '<td>$' + txn.amount + '</td>';
+            html += '<td>' + txn.date + '</td>';
+            html += '</tr>';
+          });
+
+          $(this).slideUp(function () {
+            $(this).html(html).slideDown();
+          });
+        });
       });
     });
 
@@ -640,7 +640,7 @@
         });
       });
     });
-  };
+  }
   $.post('/api/info', {}, function(result) {
     render_page(jQuery, result);
   });

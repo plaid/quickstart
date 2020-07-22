@@ -31,11 +31,10 @@ public class InvestmentTransactionsResource {
         new InvestmentsTransactionsGetRequest(QuickstartApplication.accessToken, startDate,
           endDate))
       .execute();
-
     return new InvestmentTransactionsResponse(accountsResponse.body());
   }
 
-  private class InvestmentTransactionsResponse {
+  private static class InvestmentTransactionsResponse {
     @JsonProperty
     private InvestmentsTransactionsGetResponse investmentTransactions;
 

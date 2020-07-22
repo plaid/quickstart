@@ -71,6 +71,12 @@
       <artifactId>jaxb-impl</artifactId>
       <version>2.2.11</version>
     </dependency>
+    <!-- need this to avoid some runtime warnings with glassfish -->
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+      <version>1.1.1</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

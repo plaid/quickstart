@@ -1,6 +1,5 @@
-package com.plaid.quickstart;
+package com.plaid.quickstart.resources;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.plaid.client.PlaidClient;
 import com.plaid.client.model.paymentinitiation.Address;
 import com.plaid.client.model.paymentinitiation.Amount;
@@ -10,6 +9,7 @@ import com.plaid.client.request.paymentinitiation.RecipientCreateRequest;
 import com.plaid.client.response.LinkTokenCreateResponse;
 import com.plaid.client.response.paymentinitiation.PaymentCreateResponse;
 import com.plaid.client.response.paymentinitiation.RecipientCreateResponse;
+import com.plaid.quickstart.QuickstartApplication;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -25,12 +25,14 @@ public class LinkTokenWithPaymentResource {
   private final PlaidClient plaidClient;
   private final List<String> plaidProducts;
   private final List<String> countryCodes;
+  private final String redirectUri;
 
   public LinkTokenWithPaymentResource(PlaidClient plaidClient, List<String> plaidProducts,
-    List<String> countryCodes) {
+    List<String> countryCodes, String redirectUri) {
     this.plaidClient = plaidClient;
     this.plaidProducts = plaidProducts;
     this.countryCodes = countryCodes;
+    this.redirectUri = redirectUri;
   }
 
   @POST public LinkTokenResource.LinkToken getLinkToken() throws IOException {
@@ -55,10 +57,11 @@ public class LinkTokenWithPaymentResource {
       "my client name",
       this.plaidProducts,
       this.countryCodes,
-      "en"
-    ).withPaymentInitiation(new LinkTokenCreateRequest.PaymentInitiation(
-      paymentId
-    ));
+      "en")
+      .withRedirectUri(this.redirectUri)
+      .withPaymentInitiation(new LinkTokenCreateRequest.PaymentInitiation(
+        paymentId
+      ));
     QuickstartApplication.paymentId = paymentId;
     Response<LinkTokenCreateResponse> response = this.plaidClient.service().linkTokenCreate(request)
       .execute();
