@@ -42,7 +42,7 @@ initialization parameters associated with the Plaid Token will be applied.
 Note - If you want to use the [Payment Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this product enabled.
 
 ## The OAuth redirect flow
-Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should provide an additional configuration parameters, `PLAID_REDIRECT_URI`. You will also need to make sure that you register
+Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should provide an additional configuration parameter, `PLAID_REDIRECT_URI`. You will also need to make sure that you register
 this `PLAID_REDIRECT_URI` in the [Plaid dashboard][dashboard-api-section].
 
 ``` bash
