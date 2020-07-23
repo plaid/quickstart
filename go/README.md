@@ -39,9 +39,7 @@ which the client can then use to initialize Plaid Link.
 When the client initializes Plaid Link with the link token, the Plaid Link
 initialization parameters associated with the Plaid Token will be applied.
 
-Note - If you want to use the [payment_initiation][payment-initiation] product, you
-will need to contact sales to get this product enabled.
-
+Note - If you want to use the [Payment Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this product enabled.
 ## The OAuth redirect flow
 Some European institutions require an OAuth redirect authentication flow,
 where the end user is redirected to the bank’s website or mobile app to
