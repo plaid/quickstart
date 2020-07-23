@@ -10,7 +10,7 @@ Here you'll find full example integration apps using our [**client libraries**][
 - [Python][python-example]
 - [Java][java-example]
 
-If [docker][] is available to you, you can quickly spin up an example using: `% make QUICKSTART=go up`.
+If [docker][docker] is available to you, you can quickly spin up an example using: `% make QUICKSTART=go up`.
 Be sure to have `PLAID_CLIENT_ID` and `PLAID_SECRET` defined in your environment or
 replace the respective `${VARIABLES}` in the `x-environment` section in
 [`docker-compose.yml`](/docker-compose.yml) directly.
@@ -30,7 +30,7 @@ To stop the quickstart use: `% make QUICKSTART=go stop`
 Replace `go` in the command examples above with the name of the quickstart you want to start, e.g. `python`.
 
 ![Plaid quickstart app](/assets/quickstart-screenshot.png)
-[contact-sales]: https://plaid.com/contact
+
 [quickstart]: https://plaid.com/docs/quickstart
 [libraries]: https://plaid.com/docs/libraries
 [payment-initiation]: https://plaid.com/docs/#payment-initiation
