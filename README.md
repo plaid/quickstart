@@ -19,6 +19,10 @@ To further adjust the quickstart to your use-case, you can define `PLAID_PRODUCT
 `PLAID_REDIRECT_URI` in your environment or set the respective `${VARIABLES}` in in the `x-environment`
 section in [`docker-compose.yml`](/docker-compose.yml) directly.
 
+Note - If you are attempting to test out the OAuth flow, you will need to register your
+`PLAID_REDIRECT_URI` in the [Plaid dashboard][dashboard-api-section]. Additionally, if you want to use
+the [Payment Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this product enabled.
+
 To see the log output of the quickstart run: `% make QUICKSTART=go logs` (when done, quit using `CTRL-C`).
 
 To stop the quickstart use: `% make QUICKSTART=go stop`
@@ -26,12 +30,14 @@ To stop the quickstart use: `% make QUICKSTART=go stop`
 Replace `go` in the command examples above with the name of the quickstart you want to start, e.g. `python`.
 
 ![Plaid quickstart app](/assets/quickstart-screenshot.png)
-
+[contact-sales]: https://plaid.com/contact
 [quickstart]: https://plaid.com/docs/quickstart
 [libraries]: https://plaid.com/docs/libraries
+[payment-initiation]: https://plaid.com/docs/#payment-initiation
 [node-example]: /node
 [ruby-example]: /ruby
 [python-example]: /python
 [java-example]: /java
 [go-example]: /go
 [docker]: https://www.docker.com
+[dashboard-api-section]: https://dashboard.plaid.com/team/api
