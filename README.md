@@ -30,7 +30,7 @@ To stop the quickstart use: `% make QUICKSTART=go stop`
 Replace `go` in the command examples above with the name of the quickstart you want to start, e.g. `python`.
 
 ![Plaid quickstart app](/assets/quickstart-screenshot.png)
-
+[contact-sales]: https://plaid.com/contact
 [quickstart]: https://plaid.com/docs/quickstart
 [libraries]: https://plaid.com/docs/libraries
 [payment-initiation]: https://plaid.com/docs/#payment-initiation
