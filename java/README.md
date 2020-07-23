@@ -42,7 +42,7 @@ When the client initializes Plaid Link with the link token, the Plaid Link
 initialization parameters associated with the Plaid Token will be applied.
 
 Note - If you want to use the [payment_initiation][payment-initiation] product, you
-will need to contact sales to get this product enabled.
+will need to [contact Sales][contact-sales] to get this product enabled.
 
 ## The OAuth redirect flow
 Some European institutions require an OAuth redirect authentication flow,
@@ -75,3 +75,4 @@ java -jar target/quickstart-1.0-SNAPSHOT.jar server config.yml
 
 [dashboard-api-section]: https://dashboard.plaid.com/team/api
 [payment-initiation]: https://plaid.com/docs/#payment-initiation
+[contact-sales]: https://plaid.com/contact
