@@ -258,15 +258,15 @@ end
 post '/api/create_link_token' do
   begin
     response = client.link_token.create(
-	    user: {
-	    	# This should correspond to a unique id for the current user.
-	    	client_user_id: "user-id",
-	    },
-	    client_name: "Plaid Quickstart",
-	    products: ENV['PLAID_PRODUCTS'].split(','),
-	    country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
-	    language: "en",
-	    redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI'),
+      user: {
+        # This should correspond to a unique id for the current user.
+        client_user_id: "user-id",
+      },
+      client_name: "Plaid Quickstart",
+      products: ENV['PLAID_PRODUCTS'].split(','),
+      country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
+      language: "en",
+      redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI'),
     )
 
     content_type :json
@@ -317,18 +317,18 @@ post '/api/create_link_token_for_payment' do
     )
     payment_id = create_payment_response.payment_id
     response = client.link_token.create(
-	    user: {
-	    	# This should correspond to a unique id for the current user.
-	    	client_user_id: "user-id",
-	    },
-	    client_name: "Plaid Quickstart",
-	    products: ENV['PLAID_PRODUCTS'].split(','),
-	    country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
-	    language: "en",
-	    redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI'),
-	    payment_initiation: {
-	      payment_id: payment_id,
-	    },
+      user: {
+        # This should correspond to a unique id for the current user.
+        client_user_id: "user-id",
+      },
+      client_name: "Plaid Quickstart",
+      products: ENV['PLAID_PRODUCTS'].split(','),
+      country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
+      language: "en",
+      redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI'),
+      payment_initiation: {
+        payment_id: payment_id,
+      },
     )
 
     content_type :json
@@ -342,7 +342,8 @@ post '/api/create_link_token_for_payment' do
 end
 
 def format_error(err)
-  { error: {
+  {
+    error: {
       error_code: err.error_code,
       error_message: err.error_message,
       error_type: err.error_type
