@@ -268,6 +268,11 @@
     if (products.includes('payment_initiation')) {
       $('.payment_initiation').show();
       $.post('/api/create_link_token_for_payment', {}, function(data) {
+        if (data.error != null) {
+            $('.loading-indicator').hide();
+            displayError($('#container'), data.error);
+            return;
+        }
         localStorage.setItem('link_token', data.link_token);
         // In the case of payment_initiation product, we need to wait for a
         // link token configured with payment initiation to be generated before
@@ -295,6 +300,11 @@
     } else {
       var handler = null;
       $.post('/api/create_link_token', {}, function(data){
+        if (data.error != null) {
+            $('.loading-indicator').hide();
+            displayError($('#container'), data.error);
+            return;
+        }
         localStorage.setItem('link_token', data.link_token);
         handler = Plaid.create({
           token: data.link_token,
