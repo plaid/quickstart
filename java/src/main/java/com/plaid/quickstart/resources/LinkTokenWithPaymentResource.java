@@ -36,14 +36,12 @@ public class LinkTokenWithPaymentResource {
   }
 
   @POST public LinkTokenResource.LinkToken getLinkToken() throws IOException {
+    RecipientCreateRequest recipientRequest = new RecipientCreateRequest(
+      "Harry Potter")
+      .withIban("GB33BUKB20201555555555")
+      .withAddress(new Address(Arrays.asList("4 Privet Drive"), "Little Whinging", "11111", "GB"));
     Response<RecipientCreateResponse> recipientResponse =
-      this.plaidClient.service().recipientCreate(new RecipientCreateRequest(
-        "Harry Potter",
-        "GB33BUKB20201555555555",
-        new Address(Arrays.asList("4 Privet Drive"),
-          "Little Whinging",
-          "11111",
-          "GB"))).execute();
+      this.plaidClient.service().recipientCreate(recipientRequest).execute();
 
     Response<PaymentCreateResponse> paymentCreateResponse =
       this.plaidClient.service().paymentCreate(new PaymentCreateRequest(
