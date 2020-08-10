@@ -63,11 +63,12 @@ this `PLAID_REDIRECT_URI` in the [Plaid dashboard][dashboard-api-section].
 
 PLAID_CLIENT_ID=[CLIENT_ID] \
 PLAID_SECRET=[SECRET] \
-PLAID_PRODUCTS=[PRODUCTS] \
+PLAID_PRODUCTS='transactions' \
+PLAID_ENV='sandbox' \
 PLAID_COUNTRY_CODES='GB,FR,ES,IE,NL' \
 PLAID_REDIRECT_URI='http://localhost:8000/oauth-response.html' \
-
 bundle exec ruby app.rb
+
 # Go to http://localhost:8000
 ```
 
