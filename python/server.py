@@ -34,7 +34,7 @@ def empty_to_none(field):
   value = os.getenv(field)
   if value is None or len(value) == 0:
     return None
-  return field
+  return value
 
 
 # Parameters used for the OAuth redirect Link flow.
