@@ -8,6 +8,7 @@ plaid_secret: ${PLAID_SECRET}
 plaid_products: ${PLAID_PRODUCTS}
 plaid_country_codes: ${PLAID_COUNTRY_CODES}
 plaid_redirect_uri: ${PLAID_REDIRECT_URI:-""}
+plaid_env: ${PLAID_ENV:-sandbox}
 
 server:
   application_connectors:
