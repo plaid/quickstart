@@ -18,12 +18,16 @@ func init() {
 	if PLAID_COUNTRY_CODES == "" {
 		PLAID_COUNTRY_CODES = "US"
 	}
+	if PLAID_ENV == "" {
+		PLAID_ENV = "sandbox"
+	}
 }
 
 // Fill with your Plaid API keys - https://dashboard.plaid.com/account/keys
 var (
 	PLAID_CLIENT_ID     = os.Getenv("PLAID_CLIENT_ID")
 	PLAID_SECRET        = os.Getenv("PLAID_SECRET")
+	PLAID_ENV           = os.Getenv("PLAID_ENV")
 	PLAID_PRODUCTS      = os.Getenv("PLAID_PRODUCTS")
 	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
 	// Parameters used for the OAuth redirect Link flow.
@@ -41,11 +45,17 @@ var (
 	APP_PORT = os.Getenv("APP_PORT")
 )
 
+var environments = map[string]plaid.Environment{
+	"sandbox": plaid.Sandbox,
+	"development": plaid.Development,
+	"production": plaid.Production,
+}
+
 var client = func() *plaid.Client {
 	client, err := plaid.NewClient(plaid.ClientOptions{
 		PLAID_CLIENT_ID,
 		PLAID_SECRET,
-		plaid.Sandbox, // Available environments are Sandbox, Development, and Production
+		environments[PLAID_ENV],
 		&http.Client{},
 	})
 	if err != nil {

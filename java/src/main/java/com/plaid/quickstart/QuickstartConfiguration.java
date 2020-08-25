@@ -12,6 +12,9 @@ public class QuickstartConfiguration extends Configuration {
   private String plaidSecret;
 
   @NotEmpty
+  private String plaidEnv;
+
+  @NotEmpty
   private String plaidProducts;
 
   @NotEmpty
@@ -34,6 +37,11 @@ public class QuickstartConfiguration extends Configuration {
   @JsonProperty
   public String getPlaidSecret() {
     return plaidSecret;
+  }
+
+  @JsonProperty
+  public String getPlaidEnv() {
+    return plaidEnv;
   }
 
   @JsonProperty

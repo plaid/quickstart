@@ -64,10 +64,22 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
   public void run(final QuickstartConfiguration configuration,
     final Environment environment) {
     // or equivalent, depending on which environment you're calling into
-    PlaidClient plaidClient = PlaidClient.newBuilder()
-      .clientIdAndSecret(configuration.getPlaidClientID(), configuration.getPlaidSecret())
-      .sandboxBaseUrl() // or equivalent, depending on which environment you're calling into
-      .build();
+    PlaidClient.Builder builder = PlaidClient.newBuilder()
+      .clientIdAndSecret(configuration.getPlaidClientID(), configuration.getPlaidSecret());
+    switch (configuration.getPlaidEnv()) {
+    case "sandbox":
+      builder = builder.sandboxBaseUrl();
+      break;
+    case "development":
+      builder = builder.developmentBaseUrl();
+      break;
+    case "production":
+      builder = builder.productionBaseUrl();
+      break;
+    default:
+      throw new IllegalArgumentException("unknown environment: " + configuration.getPlaidEnv());
+    }
+    PlaidClient plaidClient = builder.build();
     List<String> plaidProducts = Arrays.asList(configuration.getPlaidProducts().split(","));
     List<String> countryCodes = Arrays.asList(configuration.getPlaidCountryCodes().split(","));
     String redirectUri = null;
