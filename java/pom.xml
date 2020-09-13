@@ -80,67 +80,36 @@
   </dependencies>
   <build>
     <plugins>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.0.2</version>
         <executions>
-        <execution>
-        <id>copy-resources</id>
-        <phase>validate</phase>
-        <goals>
-          <goal>copy-resources</goal>
-        </goals>
-        <!-- copy templates and css into resources from root dir-->
-        <configuration>
-          <outputDirectory>src/main/resources</outputDirectory>
-          <resources>
-            <resource>
-              <targetPath>templates</targetPath>
-              <directory>../html/</directory>
-              <filtering>true</filtering>
-            </resource>
-            <resource>
-              <targetPath>static</targetPath>
-              <directory>../static/</directory>
-              <filtering>true</filtering>
-            </resource>
-          </resources>
-        </configuration>
-        </execution>
-        </executions>
-
-       <!-- <executions>
           <execution>
-            <id>copy-html</id>
-            <configuration>
-              <outputDirectory>src/main/resources/templates</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>../html/</directory>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>-->
-        <!--  <execution>
-            <id>copy-css</id>
-            <configuration>
-              <outputDirectory>src/main/resources/static2</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>../static/</directory>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>-->
-        <!--</executions>-->
-
-
+          <id>copy-resources</id>
+          <phase>validate</phase>
+          <goals>
+            <goal>copy-resources</goal>
+          </goals>
+          <!-- copy templates and css into resources from root dir-->
+          <configuration>
+            <outputDirectory>src/main/resources</outputDirectory>
+            <resources>
+              <resource>
+                <targetPath>templates</targetPath>
+                <directory>../html/</directory>
+                <filtering>true</filtering>
+              </resource>
+              <resource>
+                <targetPath>static</targetPath>
+                <directory>../static/</directory>
+                <filtering>true</filtering>
+              </resource>
+            </resources>
+          </configuration>
+          </execution>
+        </executions>
       </plugin>
-
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>2.4.3</version>
