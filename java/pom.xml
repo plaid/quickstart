@@ -86,27 +86,27 @@
         <version>3.0.2</version>
         <executions>
           <execution>
-          <id>copy-resources</id>
-          <phase>validate</phase>
-          <goals>
-            <goal>copy-resources</goal>
-          </goals>
-          <!-- copy templates and css into resources from root dir-->
-          <configuration>
-            <outputDirectory>src/main/resources</outputDirectory>
-            <resources>
-              <resource>
-                <targetPath>templates</targetPath>
-                <directory>../html/</directory>
-                <filtering>true</filtering>
-              </resource>
-              <resource>
-                <targetPath>static</targetPath>
-                <directory>../static/</directory>
-                <filtering>true</filtering>
-              </resource>
-            </resources>
-          </configuration>
+              <id>copy-resources</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <!-- copy templates and css into resources from root dir-->
+              <configuration>
+                <outputDirectory>src/main/resources</outputDirectory>
+                <resources>
+                  <resource>
+                    <targetPath>templates</targetPath>
+                    <directory>../html/</directory>
+                    <filtering>true</filtering>
+                  </resource>
+                  <resource>
+                    <targetPath>static</targetPath>
+                    <directory>../static/</directory>
+                    <filtering>true</filtering>
+                  </resource>
+                </resources>
+              </configuration>
           </execution>
         </executions>
       </plugin>
@@ -164,8 +164,6 @@
         </executions>
       </plugin>
     </plugins>
-
-  
   </build>
   <reporting>
     <plugins>
