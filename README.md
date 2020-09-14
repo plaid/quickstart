@@ -31,6 +31,7 @@ Note - To run this on a windows machine please use the following command when cl
 git clone -c core.symlinks=true https://github.com/plaid/quickstart
 ```
 
+## Further instructions
 To see the log output of the quickstart run: `% make QUICKSTART=go logs` (when done, quit using `CTRL-C`).
 
 To stop the quickstart use: `% make QUICKSTART=go stop`
