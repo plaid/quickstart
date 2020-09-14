@@ -23,10 +23,12 @@ Note - If you are attempting to test out the OAuth flow, you will need to regist
 `PLAID_REDIRECT_URI` in the [Plaid dashboard][dashboard-api-section]. Additionally, if you want to use
 the [Payment Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this product enabled.
 
+## Special instructions for Windows
+
 Note - To run this on a windows machine please use the following command when cloning the project
 
 ```
-git clone -c core.symlinks=true https://github.com/plaid/quickstart 
+git clone -c core.symlinks=true https://github.com/plaid/quickstart
 ```
 
 To see the log output of the quickstart run: `% make QUICKSTART=go logs` (when done, quit using `CTRL-C`).
