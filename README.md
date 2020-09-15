@@ -20,7 +20,8 @@ To further adjust the quickstart to your use-case, you can define `PLAID_PRODUCT
 section in [`docker-compose.yml`](/docker-compose.yml) directly.
 
 Note - If you are attempting to test out the OAuth flow, you will need to register your
-`PLAID_REDIRECT_URI` in the [Plaid dashboard][dashboard-api-section]. Additionally, if you want to use
+`PLAID_REDIRECT_URI` in the [Plaid dashboard][dashboard-api-section]. OAuth flows are only testable in the `sandbox`
+environment in this quickstart app due to an https `redirect_uri` being required in other environments. Additionally, if you want to use
 the [Payment Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this product enabled.
 
 ## Special instructions for Windows
