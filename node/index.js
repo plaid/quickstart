@@ -2,24 +2,24 @@
 
 var util = require('util');
 
-var envvar = require('envvar');
+require('dotenv').config();
 var express = require('express');
 var bodyParser = require('body-parser');
 var moment = require('moment');
 var plaid = require('plaid');
 
-var APP_PORT = envvar.number('APP_PORT', 8000);
-var PLAID_CLIENT_ID = envvar.string('PLAID_CLIENT_ID');
-var PLAID_SECRET = envvar.string('PLAID_SECRET');
-var PLAID_ENV = envvar.string('PLAID_ENV', 'sandbox');
+var APP_PORT = process.env.APP_PORT || 8000;
+var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
+var PLAID_SECRET = process.env.PLAID_SECRET;
+var PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
-var PLAID_PRODUCTS = envvar.string('PLAID_PRODUCTS', 'transactions').split(',');
+var PLAID_PRODUCTS = process.env.PLAID_PRODUCTS || 'transactions';
 
 // PLAID_PRODUCTS is a comma-separated list of countries for which users
 // will be able to select institutions from.
-var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US').split(',');
+var PLAID_COUNTRY_CODES = process.env.PLAID_COUNTRY_CODES || 'US';
 
 // Parameters used for the OAuth redirect Link flow.
 //
@@ -28,7 +28,7 @@ var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US').split(',');
 // that the bank website should redirect to. You will need to configure
 // this redirect URI for your client ID through the Plaid developer dashboard
 // at https://dashboard.plaid.com/team/api.
-var PLAID_REDIRECT_URI = envvar.string('PLAID_REDIRECT_URI', '');
+var PLAID_REDIRECT_URI = process.env.PLAID_REDIRECT_URI;
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
