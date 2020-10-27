@@ -1,12 +1,11 @@
 FROM node:alpine
+WORKDIR /opt/app/
 
-WORKDIR /opt/app
-COPY --chown=node:node . .
-WORKDIR /opt/app/node
+COPY package*.json /opt/app/
 
 RUN npm install
 
 EXPOSE 8000
-USER node
-ENTRYPOINT ["node"]
-CMD ["index.js"]
+RUN pwd
+RUN ls -la
+CMD ["npm", "start"]

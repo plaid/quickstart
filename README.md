@@ -10,6 +10,14 @@ Here you'll find full example integration apps using our [**client libraries**][
 - [Python][python-example]
 - [Java][java-example]
 
+## Recommended prerequisites
+
+We recommend using Docker and our Makefile to start up the quickstart.
+
+1. Install Docker from the Docker website: https://docs.docker.com/get-docker/
+
+2. Ensure `make` command is available at your command line (see Windows instructions).
+
 If [docker][docker] is available to you, you can quickly spin up an example using: `% make QUICKSTART=go up`.
 Be sure to have `PLAID_CLIENT_ID` and `PLAID_SECRET` defined in your environment or
 replace the respective `${VARIABLES}` in the `x-environment` section in
@@ -33,6 +41,7 @@ git clone -c core.symlinks=true https://github.com/plaid/quickstart
 ```
 
 ## Further instructions
+
 To see the log output of the quickstart run: `% make QUICKSTART=go logs` (when done, quit using `CTRL-C`).
 
 To stop the quickstart use: `% make QUICKSTART=go stop`

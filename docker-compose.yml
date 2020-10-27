@@ -1,4 +1,4 @@
-version: "3.4"
+version: "3.8"
 x-environment: &QUICKSTART_ENVIRONMENT
   # These are read from .env file. The values in the .env file maybe overriden by shell envvars
   PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
@@ -7,6 +7,7 @@ x-environment: &QUICKSTART_ENVIRONMENT
   PLAID_COUNTRY_CODES: ${PLAID_COUNTRY_CODES}
   PLAID_REDIRECT_URI: ${PLAID_REDIRECT_URI}
   PLAID_ENV: ${PLAID_ENV}
+
 services:
   go:
     build:
@@ -24,9 +25,24 @@ services:
       << : *QUICKSTART_ENVIRONMENT
   node:
     build:
-      context: .
-      dockerfile: ./node/Dockerfile
+      context: ./node
     ports: ["8000:8000"]
+    volumes:
+      - type: bind
+        volume:
+          nocopy: true
+        source: ./node
+        target: /opt/app
+      - type: bind
+        volume:
+          nocopy: true
+        source: ./html
+        target: /opt/app/views
+      - type: bind
+        volume:
+          nocopy: true
+        source: ./static
+        target: /opt/app/public/static
     environment:
       << : *QUICKSTART_ENVIRONMENT
   python:

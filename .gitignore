@@ -47,3 +47,4 @@ go/quickstart
 docker-compose.local*.yml
 
 *.iml
+.env
