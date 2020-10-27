@@ -1,11 +1,12 @@
+// read env vars from .env file
 require("dotenv").config();
 
-import util from "util";
-import envvar from "envvar";
-import express from "express";
-import bodyParser from "body-parser";
-import moment from "moment";
-import plaid from "plaid";
+const util = require("util");
+const envvar = require("envvar");
+const express = require("express");
+const bodyParser = require("body-parser");
+const moment = require("moment");
+const plaid = require("plaid");
 
 const APP_PORT = envvar.number("APP_PORT", 8000);
 const PLAID_CLIENT_ID = envvar.string("PLAID_CLIENT_ID");
