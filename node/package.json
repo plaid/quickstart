@@ -4,7 +4,7 @@
   "description": "A sample app and accompanying walkthrough for the Plaid API.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "developers@plaid.com",
