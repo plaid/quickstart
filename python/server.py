@@ -258,7 +258,7 @@ def get_assets():
       return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
 
   if asset_report_json == None:
-    return jsonify({'error': {'display_message': 'Timed out when polling for Asset Report', 'error_code': e.code, 'error_type': e.type } })
+    return jsonify({'error': {'display_message': 'Timed out when polling for Asset Report', 'error_code': '', 'error_type': '' } })
 
   asset_report_pdf = None
   try:
