@@ -30,7 +30,7 @@ var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US').split(',');
 // at https://dashboard.plaid.com/team/api.
 var PLAID_REDIRECT_URI = envvar.string('PLAID_REDIRECT_URI', '');
 
-// Parameter used for OAuth in Android. This should be the name of your app,
+// Parameter used for OAuth in Android. This should be the package name of your app,
 // e.g. com.plaid.linksample
 var PLAID_ANDROID_PACKAGE_NAME = envvar.string('PLAID_ANDROID_PACKAGE_NAME', '');
 
