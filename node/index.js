@@ -30,6 +30,10 @@ var PLAID_COUNTRY_CODES = envvar.string('PLAID_COUNTRY_CODES', 'US').split(',');
 // at https://dashboard.plaid.com/team/api.
 var PLAID_REDIRECT_URI = envvar.string('PLAID_REDIRECT_URI', '');
 
+// Parameter used for OAuth in Android. This should be the name of your app,
+// e.g. com.plaid.linksample
+var PLAID_ANDROID_PACKAGE_NAME = envvar.string('PLAID_ANDROID_PACKAGE_NAME', '');
+
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
 var ACCESS_TOKEN = null;
@@ -91,6 +95,10 @@ app.post('/api/create_link_token', function(request, response, next) {
 
   if (PLAID_REDIRECT_URI !== '') {
     configs.redirect_uri = PLAID_REDIRECT_URI;
+  }
+  
+  if (PLAID_ANDROID_PACKAGE_NAME !== '') {
+    configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME;
   }
   
   client.createLinkToken(configs, function(error, createTokenResponse) {
