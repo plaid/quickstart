@@ -12,16 +12,3 @@ up:
 		$(DOCKER_COMPOSE_YML) \
 		up --build \
 		$(QUICKSTART)
-
-.PHONY: logs
-logs:
-	$(DOCKER_COMPOSE) \
-		$@ --follow \
-		$(QUICKSTART)
-
-.PHONY: stop build
-stop build:
-	$(DOCKER_COMPOSE) \
-		$(DOCKER_COMPOSE_YML) \
-		$@ \
-		$(QUICKSTART)
