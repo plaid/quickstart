@@ -4,11 +4,26 @@ ifneq ("$(wildcard docker-compose.local.yml)","")
 DOCKER_COMPOSE_YML += --file docker-compose.local.yml
 endif
 
-QUICKSTART := node
+language := node
+SUCCESS_MESSAGE := "✅ $(language) quickstart is running. Use 'make language=$(language) logs' to tail logs."
 
 .PHONY: up
 up:
 	$(DOCKER_COMPOSE) \
 		$(DOCKER_COMPOSE_YML) \
-		up --build \
-		$(QUICKSTART)
+		$@ --build --detach --remove-orphans \
+		$(language)
+	@echo $(SUCCESS_MESSAGE)
+
+.PHONY: logs
+logs:
+	$(DOCKER_COMPOSE) \
+		$@ --follow \
+		$(language)
+
+.PHONY: stop build
+stop build:
+	$(DOCKER_COMPOSE) \
+		$(DOCKER_COMPOSE_YML) \
+		$@ \
+		$(language)

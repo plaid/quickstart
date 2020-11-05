@@ -4,6 +4,8 @@ This repository accompanies Plaid's [**quickstart guide**][quickstart].
 
 Here you'll find full example integration apps using our [**client libraries**][libraries]:
 
+![Plaid quickstart app](/assets/quickstart-screenshot.png)
+
 ## Table of contents
 
 <!-- toc -->
@@ -15,6 +17,9 @@ Here you'll find full example integration apps using our [**client libraries**][
   - [Run with Docker](#run-with-docker)
     - [Pre-requisites](#pre-requisites)
     - [Running](#running)
+      - [Start the container](#start-the-container)
+      - [View the logs](#view-the-logs)
+      - [Stop the container](#stop-the-container)
   - [Run without Docker](#run-without-docker)
     - [Pre-requisites](#pre-requisites-1)
     - [Running](#running-1)
@@ -45,7 +50,8 @@ $ cd quickstart
 
 #### Special instructions for Windows
 
-Note - because this repository makes use of symlinks, to run this on a windows machine please use the following command when cloning the project
+Note - because this repository makes use of symlinks, to run this on a windows machine please use
+the following command when cloning the project
 
 ```
 $ git clone -c core.symlinks=true https://github.com/plaid/quickstart
@@ -57,15 +63,22 @@ $ git clone -c core.symlinks=true https://github.com/plaid/quickstart
 $ cp .env.example .env
 ```
 
-Copy `.env.example` to a new file called `.env` and fill out the environment variables inside. At minimum `PLAID_CLIENT_ID` and `PLAID_SECRET` must be filled out. Get your Client ID and secrets from the dashboard: https://dashboard.plaid.com/account/keys
+Copy `.env.example` to a new file called `.env` and fill out the environment variables inside. At
+minimum `PLAID_CLIENT_ID` and `PLAID_SECRET` must be filled out. Get your Client ID and secrets from
+the dashboard: https://dashboard.plaid.com/account/keys
 
-> NOTE: `.env` files are a convenient local development tool. Never run a production application using an environment file with secrets in it.
+> NOTE: `.env` files are a convenient local development tool. Never run a production application
+> using an environment file with secrets in it.
 
 ## 3. Run the quickstart
 
-There are two ways to run the various language quickstarts in this repository. You can choose to use Docker, or if that is not familiar to you, you can simply run the quickstart code directly on your machine and skip to the [Run without Docker](#run-without-docker) section.
+There are two ways to run the various language quickstarts in this repository. You can choose to use
+Docker, or if that is not familiar to you, you can simply run the quickstart code directly on your
+machine and skip to the [Run without Docker](#run-without-docker) section.
 
-If you are using Windows and choose not to use Docker, this quickstart assumes you are using some sort of Unix-like environment on Windows, such as Cygwin or WSL. Scripts in this repo may rely on things such as `bash`, `grep`, `cat`, etc.
+If you are using Windows and choose not to use Docker, this quickstart assumes you are using some
+sort of Unix-like environment on Windows, such as Cygwin or WSL. Scripts in this repo may rely on
+things such as `bash`, `grep`, `cat`, etc.
 
 ### Run with Docker
 
@@ -77,37 +90,60 @@ If you are using Windows and choose not to use Docker, this quickstart assumes y
 
 #### Running
 
+There are three basic `make` commands available
+
+- `up`: builds and starts the container
+- `logs`: tails logs
+- `stop`: stops the container
+
+Each of these should be used with a `language` argument, which is one of `node`, `python`, `ruby`,
+`java`, or `go`. If unspecified, the default is `node`.
+
+##### Start the container
+
 ```
-make QUICKSTART=node up
+$ make up language=node
 ```
 
-The quickstart is now running on http://localhost:8000
+The quickstart is now running on http://localhost:8000.
 
-Replace `node` in the command above with the name of the quickstart language you want to start, e.g. `python`, `ruby`, `go`, or `java`.
+If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
+`.env` file, simply run `make up language=node` again to rebuild and restart the container.
 
-To further adjust the quickstart to your use-case, you can define `PLAID_PRODUCTS`, `PLAID_COUNTRY_CODES`,
-`PLAID_REDIRECT_URI`, etc in the `.env` file.
+##### View the logs
+
+```
+$ make logs language=node
+```
+
+##### Stop the container
+
+```
+$ make stop language=node
+```
 
 ### Run without Docker
 
 #### Pre-requisites
 
-- The language you intend to use is installed on your machine, e.g. `node`, or `ruby` is available at your command line.
+- The language you intend to use is installed on your machine and available at your command line.
+  This repo should generally work with active LTS versions of each language such as node >= 12,
+  python >= 3.8, ruby >= 2.6, etc.
 - Your environment variables populated in `.env`
 
 #### Running
 
-###### Node
+##### Node
 
 ```
-cd ./node
-npm install
-node index.js
+$ cd ./node
+$ npm install
+$ node index.js
 ```
 
 Open http://localhost:8000
 
-###### Python
+##### Python
 
 ```
 $ cd ./python
@@ -122,7 +158,7 @@ $ python server.py
 
 Open http://localhost:8000
 
-###### Ruby
+##### Ruby
 
 ```
 $ cd ./ruby
@@ -132,7 +168,7 @@ $ bundle exec ruby app.rb
 
 Open http://localhost:8000
 
-###### Go
+##### Go
 
 ```
 $ cd ./go
@@ -142,7 +178,7 @@ $ go run server.go
 
 Open http://localhost:8000
 
-###### Java
+##### Java
 
 ```
 $ cd ./java
@@ -154,17 +190,16 @@ Open http://localhost:8000
 
 ## Testing OAuth
 
-Some European institutions require an OAuth redirect authentication flow, where the end user is redirected to the bank’s website or mobile app to authenticate. For this flow, you should define an additional environment variable, `PLAID_REDIRECT_URI` in `.env`. You will also need to make sure that you register this `PLAID_REDIRECT_URI` in the [Plaid dashboard][dashboard-api-section].
+Some European institutions require an OAuth redirect authentication flow, where the end user is
+redirected to the bank’s website or mobile app to authenticate. For this flow, you should set
+`PLAID_REDIRECT_URI=http://localhost:8000/oauth-response.html` in `.env`. You will also need to
+register this localhost redirect URI in the [Plaid dashboard under Team Settings > API > Allowed
+redirect URIs][dashboard-api-section].
 
-If you are testing out the OAuth flow, you will need to register your
-`PLAID_REDIRECT_URI` in the [Plaid dashboard][dashboard-api-section]. OAuth flows are only testable in the `sandbox`
-environment in this quickstart app due to an https `redirect_uri` being required in other environments. Additionally, if you want to use
-the [Payment Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this product enabled.
-
-Note - If you want to use the [payment_initiation][payment-initiation] product, you
-will need to [contact Sales][contact-sales] to get this product enabled.
-
-![Plaid quickstart app](/assets/quickstart-screenshot.png)
+OAuth flows are only testable in the `sandbox` environment in this quickstart app due to an https
+`redirect_uri` being required in other environments. Additionally, if you want to use the [Payment
+Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this
+product enabled.
 
 [quickstart]: https://plaid.com/docs/quickstart
 [libraries]: https://plaid.com/docs/api/libraries
@@ -178,9 +213,4 @@ will need to [contact Sales][contact-sales] to get this product enabled.
 [dashboard-api-section]: https://dashboard.plaid.com/team/api
 [contact-sales]: https://plaid.com/contact
 
-[run-docker]: Run the quickstart with Docker
-[run-no-docker]: Run the quickstart without Docker
-
-```
-
-```
+[run-docker]: Run the quickstart with Docker [run-no-docker]: Run the quickstart without Docker

@@ -1,10 +1,17 @@
 FROM node:alpine
-WORKDIR /opt/app/
 
-COPY package*.json /opt/app/
+WORKDIR /opt/app
+RUN chown -R node:node /opt/app
+COPY --chown=node:node ./node/package*.json /opt/app/
 
+USER node
 RUN npm install
 
-EXPOSE 8000
+COPY --chown=node:node ./static/ ./public/static/
+COPY --chown=node:node ./html/ ./views/
 
-CMD ["npm", "start"]
+COPY --chown=node:node ./node/index.js ./
+
+EXPOSE 8000
+ENTRYPOINT ["node"]
+CMD ["index.js"]
