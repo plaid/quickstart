@@ -204,5 +204,3 @@ product enabled.
 [docker]: https://www.docker.com
 [dashboard-api-section]: https://dashboard.plaid.com/team/api
 [contact-sales]: https://plaid.com/contact
-
-[run-docker]: Run the quickstart with Docker [run-no-docker]: Run the quickstart without Docker
