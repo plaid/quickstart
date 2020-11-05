@@ -133,6 +133,8 @@ $ make stop language=node
 
 #### Running
 
+Once started with one of the commands below, the quickstart will be running on http://localhost:8000
+
 ##### Node
 
 ```
@@ -140,8 +142,6 @@ $ cd ./node
 $ npm install
 $ node index.js
 ```
-
-Open http://localhost:8000
 
 ##### Python
 
@@ -156,8 +156,6 @@ $ pip install -r requirements.txt
 $ python server.py
 ```
 
-Open http://localhost:8000
-
 ##### Ruby
 
 ```
@@ -165,8 +163,6 @@ $ cd ./ruby
 $ bundle
 $ bundle exec ruby app.rb
 ```
-
-Open http://localhost:8000
 
 ##### Go
 
@@ -176,8 +172,6 @@ $ go build
 $ go run server.go
 ```
 
-Open http://localhost:8000
-
 ##### Java
 
 ```
@@ -185,8 +179,6 @@ $ cd ./java
 $ mvn clean package
 $ ./start.sh
 ```
-
-Open http://localhost:8000
 
 ## Testing OAuth
 
