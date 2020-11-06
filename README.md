@@ -14,20 +14,20 @@ Here you'll find full example integration apps using our [**client libraries**][
   - [Special instructions for Windows](#special-instructions-for-windows)
 - [2. Set up your environment variables](#2-set-up-your-environment-variables)
 - [3. Run the quickstart](#3-run-the-quickstart)
-  - [Run with Docker](#run-with-docker)
+  - [Run without Docker](#run-without-docker)
     - [Pre-requisites](#pre-requisites)
     - [Running](#running)
-      - [Start the container](#start-the-container)
-      - [View the logs](#view-the-logs)
-      - [Stop the container](#stop-the-container)
-  - [Run without Docker](#run-without-docker)
-    - [Pre-requisites](#pre-requisites-1)
-    - [Running](#running-1)
       - [Node](#node)
       - [Python](#python)
       - [Ruby](#ruby)
       - [Go](#go)
       - [Java](#java)
+  - [Run with Docker](#run-with-docker)
+    - [Pre-requisites](#pre-requisites-1)
+    - [Running](#running-1)
+      - [Start the container](#start-the-container)
+      - [View the logs](#view-the-logs)
+      - [Stop the container](#stop-the-container)
 - [Testing OAuth](#testing-oauth)
 
 <!-- tocstop -->
@@ -72,55 +72,13 @@ the dashboard: https://dashboard.plaid.com/account/keys
 
 ## 3. Run the quickstart
 
-There are two ways to run the various language quickstarts in this repository. You can choose to use
-Docker, or if that is not familiar to you, you can simply run the quickstart code directly on your
-machine and skip to the [Run without Docker](#run-without-docker) section.
+There are two ways to run the various language quickstarts in this repository. You can simply run the
+code directly, or you can choose to use Docker. If you would like to use Docker, skip to the
+[Run with Docker](#run-with-docker) section.
 
 If you are using Windows and choose not to use Docker, this quickstart assumes you are using some
 sort of Unix-like environment on Windows, such as Cygwin or WSL. Scripts in this repo may rely on
 things such as `bash`, `grep`, `cat`, etc.
-
-### Run with Docker
-
-#### Pre-requisites
-
-- `make` available at your command line
-- Docker installed on your machine: https://docs.docker.com/get-docker/
-- Your environment variables populated in `.env`
-
-#### Running
-
-There are three basic `make` commands available
-
-- `up`: builds and starts the container
-- `logs`: tails logs
-- `stop`: stops the container
-
-Each of these should be used with a `language` argument, which is one of `node`, `python`, `ruby`,
-`java`, or `go`. If unspecified, the default is `node`.
-
-##### Start the container
-
-```
-$ make up language=node
-```
-
-The quickstart is now running on http://localhost:8000.
-
-If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
-`.env` file, simply run `make up language=node` again to rebuild and restart the container.
-
-##### View the logs
-
-```
-$ make logs language=node
-```
-
-##### Stop the container
-
-```
-$ make stop language=node
-```
 
 ### Run without Docker
 
@@ -178,6 +136,48 @@ $ go run server.go
 $ cd ./java
 $ mvn clean package
 $ ./start.sh
+```
+
+### Run with Docker
+
+#### Pre-requisites
+
+- `make` available at your command line
+- Docker installed on your machine: https://docs.docker.com/get-docker/
+- Your environment variables populated in `.env`
+
+#### Running
+
+There are three basic `make` commands available
+
+- `up`: builds and starts the container
+- `logs`: tails logs
+- `stop`: stops the container
+
+Each of these should be used with a `language` argument, which is one of `node`, `python`, `ruby`,
+`java`, or `go`. If unspecified, the default is `node`.
+
+##### Start the container
+
+```
+$ make up language=node
+```
+
+The quickstart is now running on http://localhost:8000.
+
+If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
+`.env` file, simply run `make up language=node` again to rebuild and restart the container.
+
+##### View the logs
+
+```
+$ make logs language=node
+```
+
+##### Stop the container
+
+```
+$ make stop language=node
 ```
 
 ## Testing OAuth

@@ -5,7 +5,7 @@ DOCKER_COMPOSE_YML += --file docker-compose.local.yml
 endif
 
 language := node
-SUCCESS_MESSAGE := "✅ $(language) quickstart is running. Use 'make language=$(language) logs' to tail logs."
+SUCCESS_MESSAGE := "✅ $(language) quickstart is runnin on http://localhost:8000"
 
 .PHONY: up
 up:
