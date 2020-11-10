@@ -34,6 +34,8 @@ PLAID_PRODUCTS='transactions' \
 PLAID_COUNTRY_CODES='US' \
 python server.py
 
+# If python3 is installed, change the last line of the above to python3 server.py
+
 # Go to http://localhost:8000
 ```
 
