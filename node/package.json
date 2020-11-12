@@ -4,6 +4,8 @@
   "description": "A sample app and accompanying walkthrough for the Plaid API.",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "watch": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "developers@plaid.com",
@@ -11,10 +13,12 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "1.18.x",
+    "dotenv": "^8.2.0",
     "ejs": "2.5.x",
     "envvar": "1.1.x",
     "express": "4.16.x",
     "moment": "2.22.x",
+    "nodemon": "^2.0.5",
     "plaid": "6.x.x"
   }
 }
