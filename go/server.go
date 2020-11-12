@@ -2,16 +2,51 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/plaid/plaid-go/plaid"
 )
 
+var (
+	PLAID_CLIENT_ID                   = ""
+	PLAID_SECRET                      = ""
+	PLAID_ENV                         = ""
+	PLAID_PRODUCTS                    = ""
+	PLAID_COUNTRY_CODES               = ""
+	PLAID_REDIRECT_URI                = ""
+	APP_PORT                          = ""
+	client              *plaid.Client = nil
+)
+
+var environments = map[string]plaid.Environment{
+	"sandbox":     plaid.Sandbox,
+	"development": plaid.Development,
+	"production":  plaid.Production,
+}
+
 func init() {
+	// load env vars from .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file. Did you copy .env.example to .env and fill it out?")
+	}
+
+	// set constants from env
+	PLAID_CLIENT_ID = os.Getenv("PLAID_CLIENT_ID")
+	PLAID_SECRET = os.Getenv("PLAID_SECRET")
+	PLAID_ENV = os.Getenv("PLAID_ENV")
+	PLAID_PRODUCTS = os.Getenv("PLAID_PRODUCTS")
+	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
+	PLAID_REDIRECT_URI = os.Getenv("PLAID_REDIRECT_URI")
+	APP_PORT = os.Getenv("APP_PORT")
+
+	// set defaults
 	if PLAID_PRODUCTS == "" {
 		PLAID_PRODUCTS = "transactions"
 	}
@@ -21,38 +56,18 @@ func init() {
 	if PLAID_ENV == "" {
 		PLAID_ENV = "sandbox"
 	}
-}
+	if APP_PORT == "" {
+		APP_PORT = "8000"
+	}
+	if PLAID_CLIENT_ID == "" {
+		log.Fatal("PLAID_CLIENT_ID is not set. Make sure to fill out the .env file")
+	}
+	if PLAID_SECRET == "" {
+		log.Fatal("PLAID_SECRET is not set. Make sure to fill out the .env file")
+	}
 
-// Fill with your Plaid API keys - https://dashboard.plaid.com/account/keys
-var (
-	PLAID_CLIENT_ID     = os.Getenv("PLAID_CLIENT_ID")
-	PLAID_SECRET        = os.Getenv("PLAID_SECRET")
-	PLAID_ENV           = os.Getenv("PLAID_ENV")
-	PLAID_PRODUCTS      = os.Getenv("PLAID_PRODUCTS")
-	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
-	// Parameters used for the OAuth redirect Link flow.
-	//
-	// Set PLAID_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
-	// The OAuth redirect flow requires an endpoint on the developer's website
-	// that the bank website should redirect to. You will need to configure
-	// this redirect URI for your client ID through the Plaid developer dashboard
-	// at https://dashboard.plaid.com/team/api.
-	PLAID_REDIRECT_URI = os.Getenv("PLAID_REDIRECT_URI")
-
-	// Use 'sandbox' to test with fake credentials in Plaid's Sandbox environment
-	// Use `development` to test with real credentials while developing
-	// Use `production` to go live with real users
-	APP_PORT = os.Getenv("APP_PORT")
-)
-
-var environments = map[string]plaid.Environment{
-	"sandbox": plaid.Sandbox,
-	"development": plaid.Development,
-	"production": plaid.Production,
-}
-
-var client = func() *plaid.Client {
-	client, err := plaid.NewClient(plaid.ClientOptions{
+	// create Plaid client
+	client, err = plaid.NewClient(plaid.ClientOptions{
 		PLAID_CLIENT_ID,
 		PLAID_SECRET,
 		environments[PLAID_ENV],
@@ -61,8 +76,52 @@ var client = func() *plaid.Client {
 	if err != nil {
 		panic(fmt.Errorf("unexpected error while initializing plaid client %w", err))
 	}
-	return client
-}()
+}
+
+func main() {
+	r := gin.Default()
+	mainPage := "../html/index.html"
+	oauthPage := "../html/oauth-response.html"
+	r.LoadHTMLFiles(mainPage, oauthPage)
+	r.Static("/static", "../static")
+
+	r.POST("/api/info", info)
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{})
+	})
+
+	// For OAuth flows, the process looks as follows.
+	// 1. Create a link token with the redirectURI (as white listed at https://dashboard.plaid.com/team/api).
+	// 2. Once the flow succeeds, Plaid Link will redirect to redirectURI with
+	// additional parameters (as required by OAuth standards and Plaid).
+	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
+	// from step 2.
+	r.GET("/oauth-response.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "oauth-response.html", gin.H{})
+	})
+
+	r.POST("/api/set_access_token", getAccessToken)
+	r.POST("/api/create_link_token_for_payment", createLinkTokenForPayment)
+	r.GET("/api/auth", auth)
+	r.GET("/api/accounts", accounts)
+	r.GET("/api/balance", balance)
+	r.GET("/api/item", item)
+	r.POST("/api/item", item)
+	r.GET("/api/identity", identity)
+	r.GET("/api/transactions", transactions)
+	r.POST("/api/transactions", transactions)
+	r.GET("/api/payment", payment)
+	r.GET("/api/create_public_token", createPublicToken)
+	r.POST("/api/create_link_token", createLinkToken)
+	r.GET("/api/investment_transactions", investmentTransactions)
+	r.GET("/api/holdings", holdings)
+	r.GET("/api/assets", assets)
+
+	err := r.Run(":" + APP_PORT)
+	if err != nil {
+		panic("unable to start server")
+	}
+}
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store.
@@ -328,6 +387,7 @@ func linkTokenCreate(
 	}
 	resp, err := client.CreateLinkToken(configs)
 	if err != nil {
+		panic(fmt.Errorf("unexpected error %w", err))
 		return "", &httpError{
 			errorCode: http.StatusBadRequest,
 			error:     err.Error(),
@@ -337,54 +397,5 @@ func linkTokenCreate(
 }
 
 func assets(c *gin.Context) {
-	c.JSON(http.StatusBadRequest, gin.H{"error": "unfortunate the go client library does not support assets report creation yet."})
-}
-
-func main() {
-	if APP_PORT == "" {
-		APP_PORT = "8000"
-	}
-
-	r := gin.Default()
-	mainPage := "../html/index.html"
-	oauthPage := "../html/oauth-response.html"
-	r.LoadHTMLFiles(mainPage, oauthPage)
-	r.Static("/static", "../static")
-
-	r.POST("/api/info", info)
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{})
-	})
-
-	// For OAuth flows, the process looks as follows.
-	// 1. Create a link token with the redirectURI (as white listed at https://dashboard.plaid.com/team/api).
-	// 2. Once the flow succeeds, Plaid Link will redirect to redirectURI with
-	// additional parameters (as required by OAuth standards and Plaid).
-	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
-	// from step 2.
-	r.GET("/oauth-response.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "oauth-response.html", gin.H{})
-	})
-
-	r.POST("/api/set_access_token", getAccessToken)
-	r.POST("/api/create_link_token_for_payment", createLinkTokenForPayment)
-	r.GET("/api/auth", auth)
-	r.GET("/api/accounts", accounts)
-	r.GET("/api/balance", balance)
-	r.GET("/api/item", item)
-	r.POST("/api/item", item)
-	r.GET("/api/identity", identity)
-	r.GET("/api/transactions", transactions)
-	r.POST("/api/transactions", transactions)
-	r.GET("/api/payment", payment)
-	r.GET("/api/create_public_token", createPublicToken)
-	r.POST("/api/create_link_token", createLinkToken)
-	r.GET("/api/investment_transactions", investmentTransactions)
-	r.GET("/api/holdings", holdings)
-	r.GET("/api/assets", assets)
-
-	err := r.Run(":" + APP_PORT)
-	if err != nil {
-		panic("unable to start server")
-	}
+	c.JSON(http.StatusBadRequest, gin.H{"error": "unfortunately the go client library does not support assets report creation yet."})
 }
