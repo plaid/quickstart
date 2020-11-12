@@ -1,3 +1,7 @@
+# Load env vars from .env file
+require 'dotenv'
+Dotenv.load
+
 require 'base64'
 require 'date'
 require 'json'
