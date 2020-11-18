@@ -154,30 +154,30 @@ There are three basic `make` commands available
 - `logs`: tails logs
 - `stop`: stops the container
 
-Each of these should be used with a `language` argument, which is one of `node`, `python`, `ruby`,
+Each of these should be used with a `lang` argument, which is one of `node`, `python`, `ruby`,
 `java`, or `go`. If unspecified, the default is `node`.
 
 ##### Start the container
 
 ```
-$ make up language=node
+$ make up lang=node
 ```
 
 The quickstart is now running on http://localhost:8000.
 
 If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
-`.env` file, simply run `make up language=node` again to rebuild and restart the container.
+`.env` file, simply run `make up lang=node` again to rebuild and restart the container.
 
 ##### View the logs
 
 ```
-$ make logs language=node
+$ make logs lang=node
 ```
 
 ##### Stop the container
 
 ```
-$ make stop language=node
+$ make stop lang=node
 ```
 
 ## Testing OAuth
