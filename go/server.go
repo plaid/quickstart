@@ -387,7 +387,6 @@ func linkTokenCreate(
 	}
 	resp, err := client.CreateLinkToken(configs)
 	if err != nil {
-		panic(fmt.Errorf("unexpected error %w", err))
 		return "", &httpError{
 			errorCode: http.StatusBadRequest,
 			error:     err.Error(),
