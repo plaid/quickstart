@@ -11,7 +11,7 @@ SUCCESS_MESSAGE := "✅ $(language) quickstart is running on http://localhost:80
 up:
 	$(DOCKER_COMPOSE) \
 		$(DOCKER_COMPOSE_YML) \
-		$@ --build --detach --remove-orphans \
+		$@ --build -d --remove-orphans \
 		$(language)
 	@echo $(SUCCESS_MESSAGE)
 
