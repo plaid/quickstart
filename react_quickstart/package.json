@@ -1,0 +1,44 @@
+{
+  "name": "woo_onboarding",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:8000",
+  "dependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "axios": "^0.21.1",
+    "body-parser": "1.18.x",
+    "ejs": "2.5.x",
+    "envvar": "1.1.x",
+    "express": "4.16.x",
+    "node-sass": "^4.0.0",
+    "plaid": "6.x.x",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-plaid-link": "^3.0.0",
+    "react-scripts": "3.4.3",
+    "recharts": "^2.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
