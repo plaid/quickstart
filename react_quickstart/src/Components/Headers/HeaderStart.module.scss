@@ -1,0 +1,75 @@
+.grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+}
+
+.title {
+  font-size: 50px;
+  margin-top: 76px;
+  margin-bottom: 0;
+}
+
+.subtitle {
+  margin-top: 0;
+  font-weight: normal;
+  margin-bottom: 20px;
+}
+
+.introPar {
+  height: 100px;
+  width: 80%;
+  font-size: 16px;
+  line-height: 24px;
+  margin: 20px 0;
+}
+.linkButton {
+  margin-top: 20px;
+}
+.itemText {
+  text-decoration: underline;
+}
+
+.itemAccessIds {
+  display: flex;
+  flex-direction: column;
+  height: 120px;
+  width: 100%;
+  box-shadow: 0 8px 8px 0 #ebebeb;
+  margin-top: 24px;
+}
+
+.id {
+  display: flex;
+  border: 1px solid #ebebeb;
+  height: 50%;
+  margin: 0;
+
+  &:last-child {
+    border-top: 0px;
+  }
+}
+
+.accessId {
+  border: 1px solid #ebebeb;
+  border-top: 0px;
+  height: 50%;
+  margin: 0;
+}
+
+.idText {
+  padding: 20px;
+  flex: 1;
+  font-weight: 600;
+}
+
+.tokenText {
+  padding: 20px;
+  flex: 6;
+}
+
+.requests {
+  margin-top: 56px;
+  font-size: 16px;
+}
