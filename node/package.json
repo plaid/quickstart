@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "A sample app and accompanying walkthrough for the Plaid API.",
   "main": "index.js",
+  "proxy": "http://localhost:8000",
   "scripts": {
     "start": "node index.js",
     "watch": "nodemon index.js",
