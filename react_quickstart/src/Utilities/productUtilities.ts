@@ -36,6 +36,10 @@ export interface DataItems {
   emails?: string;
   addresses?: string;
   phoneNumbers?: string;
+  error_type?: string;
+  error_code?: string;
+  error_message?: string;
+  display_message?: string | null;
 }
 
 export interface ACH {

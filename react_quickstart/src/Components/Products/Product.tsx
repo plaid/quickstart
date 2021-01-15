@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Button from "plaid-threads/Button";
 
 import Table from "../Table/Table";
+import Error from "../Error/Error";
 
 import {
   transformAuthData,
@@ -33,10 +34,10 @@ interface ACH {
 }
 
 interface Error {
-  error_type: string;
-  error_code: string;
-  error_message: string;
-  display_message: string | null;
+  error_type?: string;
+  error_code?: string;
+  error_message?: string;
+  display_message?: string | null;
 }
 
 type Data = Array<DataItems>;
@@ -44,7 +45,8 @@ type Data = Array<DataItems>;
 const Product = (props: Props) => {
   const [showTable, setShowTable] = useState(false);
   const [data, setData] = useState<Data>([]);
-  const [isError, setIsError] = useState(false);
+  const [isError, setIsError] = useState(true);
+  const [error, setError] = useState<Error>({ error_type: "none" });
 
   const displayError = (error: Error) => {};
 
@@ -53,7 +55,7 @@ const Product = (props: Props) => {
     const data = await response.json();
     if (data.error != null) {
       setIsError(true);
-      setData(data);
+      setError(data);
     }
     let final: Array<DataItems> = [];
     switch (props.product) {
@@ -127,6 +129,7 @@ const Product = (props: Props) => {
           identity={props.product === "identity"}
         />
       )}
+      {isError && <Error error={error} />}
     </>
   );
 };

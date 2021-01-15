@@ -1,6 +1,6 @@
 .productContainer {
   display: grid;
-  grid-template-columns: 15% 55% 30%;
+  grid-template-columns: 15% 50% 35%;
   width: 100%;
   border: 1px solid #ebebeb;
   border-bottom: 0px;
@@ -20,7 +20,7 @@
   border-radius: 2px;
   text-align: center;
   padding-top: 6px;
-  margin: 20px;
+  margin: 20px 0px 20px 35px;
 }
 .productContents {
   margin: 20px 30px;
@@ -44,7 +44,6 @@
 }
 
 .sendRequest {
-  margin: 20px;
-  margin-right: 20px !important;
+  margin: 20px 35px 20px 10px !important;
   width: 80%;
 }

@@ -1,0 +1,35 @@
+.errorTop {
+  width: 90%;
+  height: 1px;
+  border-top: 1px solid #ebebeb;
+}
+
+.errorContainer {
+  display: grid;
+  grid-template-columns: 15% 50% 35%;
+  width: 100%;
+  margin: 0;
+}
+
+.code {
+  height: 32px;
+  width: 72px;
+  border: 1px solid #f44e66;
+  border-radius: 2px;
+  text-align: center;
+  padding-top: 6px;
+  margin: 20px 0px 20px 35px;
+}
+
+.errorContents {
+  margin: 20px 30px;
+  font-size: 12px;
+}
+
+.errorTitle {
+  font-weight: 600;
+}
+.learnMore {
+  margin: 20px 35px 20px 10px !important;
+  width: 80%;
+}
