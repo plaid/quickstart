@@ -21,7 +21,7 @@ export interface Categories {
   field: string;
 }
 
-export interface DataItems {
+export interface DataItem {
   name?: string;
   email?: string;
   age?: number;
@@ -40,6 +40,13 @@ export interface DataItems {
   error_code?: string;
   error_message?: string;
   display_message?: string | null;
+  status_code?: number;
+  mask?: string;
+  subtype?: string;
+  quantity?: number;
+  price?: number;
+  value?: number;
+  type?: string;
 }
 
 export interface ACH {
@@ -48,7 +55,7 @@ export interface ACH {
   account_id: string;
 }
 
-export type Data = Array<DataItems>;
+export type Data = Array<DataItem>;
 
 export const transactionsCategories: Array<Categories> = [
   {
@@ -199,86 +206,94 @@ export const accountsCategories: Array<Categories> = [
 ];
 
 export const transformTransactionsData = (data: TransactionsGetResponse) => {
-  return data.transactions;
+  // const final: Array<DataItem> = [];
+  return data.transactions?.map((t) => {
+    const item: DataItem = {
+      name: t.name,
+      amount: t.amount,
+      date: t.date,
+    };
+    return item;
+  }) as Array<DataItem>;
 };
 
 export const transformAuthData = (data: AuthGetResponse) => {
-  const final: Array<DataItems> = [];
-  data.numbers!.ach!.forEach((achNumbers) => {
+  return data.numbers!.ach!.map((achNumbers) => {
     const account = data.accounts!.filter((a) => {
       return a.account_id === achNumbers.account_id;
     })[0];
-    const obj = {
+    return {
       name: account.name,
       balance: account.balances.available || account.balances.current,
       account: achNumbers.account,
       routing: achNumbers.routing,
     };
-    final.push(obj);
   });
-  return final;
 };
 
 export const transformIdentityData = (data: IdentityGetResponse) => {
-  const final: Array<DataItems> = [];
+  const final: Array<DataItem> = [];
   const identityData = data.accounts![0];
-  const owner = identityData.owners![0];
-  const names = owner.names?.map((name) => {
-    return name;
-  });
-  const emails = owner.emails?.map((email) => {
-    return email.data;
-  });
-  const phone = owner.phone_numbers?.map((phone) => {
-    return phone.data;
-  });
-  const addresses = owner.addresses?.map((address) => {
-    return `${address.data!.street} ${address.data!.city} ${
-      address.data!.region
-    } ${address.data!.postal_code}`;
-  });
-  const obj = {
-    names: names?.join(","),
-    emails: `${emails![0]},
-    ${emails![1]},
-    ${emails![2]}`,
+  identityData.owners!.forEach((owner) => {
+    const names = owner.names?.map((name) => {
+      return name;
+    });
+    const emails = owner.emails?.map((email) => {
+      return email.data;
+    });
+    const phone = owner.phone_numbers?.map((phone) => {
+      return phone.data;
+    });
+    const addresses = owner.addresses?.map((address) => {
+      return `${address.data!.street} ${address.data!.city} ${
+        address.data!.region
+      } ${address.data!.postal_code}`;
+    });
 
-    phoneNumbers: `${phone![0]}
-    ${phone![1]}
-    ${phone![2]}`,
-    addresses: `${addresses![0]}, 
-    ${addresses![1]}`,
-  };
-  final.push(obj);
+    const num = Math.max(
+      emails!.length,
+      names!.length,
+      phone!.length,
+      addresses!.length
+    );
+
+    for (let i = 0; i < num; i++) {
+      const obj = {
+        names: names![i] || "",
+        emails: emails![i] || "",
+        phoneNumbers: phone![i] || "",
+        addresses: addresses![i] || "",
+      };
+      final.push(obj);
+    }
+  });
 
   return final;
 };
 
 export const transformBalanceData = (data: AccountsGetResponse) => {
-  const final: Array<DataItems> = [];
   const balanceData = data.accounts;
-  balanceData!.forEach((account) => {
-    const obj = {
+  return balanceData!.map((account) => {
+    const obj: DataItem = {
       name: account.name,
       balance: account.balances.available || account.balances.current,
       subtype: account.subtype,
-      mask: account.mask,
+      mask: account.mask!,
     };
-    final.push(obj);
+
+    return obj;
   });
-  return final;
 };
 
 export const transformInvestmentsData = (
   data: InvestmentsHoldingsGetResponse
 ) => {
-  const final: Array<DataItems> = [];
+  const final: Array<DataItem> = [];
   const holdingsData = data.holdings!.sort(function (a, b) {
     if (a.account_id! > b.account_id!) return 1;
     return -1;
   });
-  console.log("holdingsdata", holdingsData);
-  holdingsData.forEach((holding, index) => {
+  return holdingsData.map((holding) => {
     const account = data.accounts!.filter(
       (acc) => acc.account_id === holding.account_id
     )[0];
@@ -287,90 +302,86 @@ export const transformInvestmentsData = (
     )[0];
     const value = holding.quantity! * security.close_price!;
 
-    const obj = {
-      mask: account.mask,
+    return {
+      mask: account.mask!,
       name: account.name,
       quantity: holding.quantity,
-      price: security.close_price,
+      price: security.close_price!,
       value: value,
     };
-    final.push(obj);
   });
-  return final;
 };
 
 export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
-  const final: Array<DataItems> = [];
+  const final: Array<DataItem> = [];
   const liabilitiesData = data.liabilities;
-  liabilitiesData?.credit?.forEach((credit) => {
+  const credit = liabilitiesData?.credit?.map((credit) => {
     const account = data.accounts!.filter(
       (acc) => acc.account_id === credit.account_id
     )[0];
-    const obj = {
+    const obj: DataItem = {
       name: account.name,
       type: "credit card",
-      date: credit.last_payment_date,
+      date: credit.last_payment_date!,
       amount: credit.last_payment_amount,
     };
-    final.push(obj);
+    return obj;
   });
 
-  liabilitiesData?.mortgage?.forEach((mortgage) => {
+  const mortgages = liabilitiesData?.mortgage?.map((mortgage) => {
     const account = data.accounts!.filter(
       (acc) => acc.account_id === mortgage.account_id
     )[0];
-    const obj = {
+    const obj: DataItem = {
       name: account.name,
       type: "mortgage",
       date: mortgage.last_payment_date!,
       amount: mortgage.last_payment_amount!,
     };
-    final.push(obj);
+    return obj;
   });
 
-  liabilitiesData?.student?.forEach((student) => {
+  const student = liabilitiesData?.student?.map((student) => {
     const account = data.accounts!.filter(
       (acc) => acc.account_id === student.account_id
     )[0];
-    const obj = {
+    const obj: DataItem = {
       name: account.name,
       type: "student loan",
       date: student.last_payment_date!,
       amount: student.last_payment_amount!,
     };
-    final.push(obj);
+    return obj;
   });
 
-  return final;
+  return credit!.concat(mortgages!).concat(student!);
 };
 
-export const transformItemData = (
-  itemResp: ItemGetResponse,
-  instResp: InstitutionsGetByIdResponse
-) => {
-  const final: Array<DataItems> = [];
+interface ItemData {
+  itemResponse: ItemGetResponse;
+  instRes: InstitutionsGetByIdResponse;
+}
 
-  const obj = {
-    name: instResp.institution!.name,
-    billed: itemResp.item?.billed_products?.join(","),
-    available: itemResp.item?.available_products?.join(","),
-  };
-  final.push(obj);
-
-  return final;
+export const transformItemData = (data: ItemData) => {
+  return [
+    {
+      name: data.instRes.institution!.name,
+      billed: data.itemResponse.item?.billed_products?.join(","),
+      available: data.itemResponse.item?.available_products?.join(","),
+    },
+  ];
 };
 
 export const transformAccountsData = (data: AccountsGetResponse) => {
-  const final: Array<DataItems> = [];
+  const final: Array<DataItem> = [];
   const accountsData = data.accounts;
-  accountsData!.forEach((account) => {
-    const obj = {
+  return accountsData!.map((account) => {
+    const obj: DataItem = {
       name: account.name,
       balance: account.balances.available || account.balances.current,
       subtype: account.subtype,
-      mask: account.mask,
+      mask: account.mask!,
     };
-    final.push(obj);
+    return obj;
   });
-  return final;
 };

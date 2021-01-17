@@ -7,13 +7,18 @@ import {
   identityCategories,
   balanceCategories,
   investmentsCategories,
+  liabilitiesCategories,
 } from "../../Utilities/productUtilities";
 import {
-  liabilitiesCategories,
   transformAuthData,
   transformTransactionsData,
+  transformBalanceData,
+  transformInvestmentsData,
+  transformIdentityData,
+  transformItemData,
+  transformLiabilitiesData,
+  transformAccountsData,
 } from "../../Utilities/productUtilities";
-
 import styles from "./Products.module.scss";
 
 export interface Categories {
@@ -37,6 +42,7 @@ const Products = () => {
           categories={authCategories}
           schema="/auth/get/"
           description="Retrieve account and routing numbers for checking and savings accounts."
+          transformData={transformAuthData}
         />
         <Product
           product="transactions"
@@ -44,6 +50,7 @@ const Products = () => {
           categories={transactionsCategories}
           schema="/transactions/get/"
           description="Retrieve transactions for credit and depository accounts."
+          transformData={transformTransactionsData}
         />
 
         <Product
@@ -53,6 +60,7 @@ const Products = () => {
           schema="/identity/get/"
           description="Retrieve Identity information on file with the bank. Reduce
         fraud by comparing user-submitted data to validate identity."
+          transformData={transformIdentityData}
         />
         <Product
           product="balance"
@@ -61,6 +69,7 @@ const Products = () => {
           schema="/accounts/balance/get/"
           description="Check balances in real time to prevent non-sufficient funds
         fees."
+          transformData={transformBalanceData}
         />
         <Product
           product="holdings"
@@ -70,6 +79,7 @@ const Products = () => {
           description="Retrieve investment holdings on file with the bank,
         brokerage, or investment institution. Analyze over-exposure
         to market segments."
+          transformData={transformInvestmentsData}
         />
         <Product
           product="liabilities"
@@ -77,6 +87,7 @@ const Products = () => {
           categories={liabilitiesCategories}
           schema="/liabilities/get/"
           description="Retrieve student loans, mortgages, and credit cards."
+          transformData={transformLiabilitiesData}
         />
       </div>
     </>

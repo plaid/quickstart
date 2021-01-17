@@ -1,3 +1,5 @@
+@import "~plaid-threads/scss/variables";
+
 .productContainer {
   display: grid;
   grid-template-columns: 15% 50% 35%;
@@ -14,12 +16,6 @@
 }
 
 .post {
-  height: 32px;
-  width: auto;
-  border: 1px solid #0a85ea;
-  border-radius: 2px;
-  text-align: center;
-  padding-top: 6px;
   margin: 20px 0px 20px 35px;
 }
 .productContents {
@@ -41,6 +37,7 @@
 }
 .productDescription {
   font-size: 12px;
+  line-height: normal;
 }
 
 .sendRequest {

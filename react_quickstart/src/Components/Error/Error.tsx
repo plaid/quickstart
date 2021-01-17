@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from "react";
 import Button from "plaid-threads/Button";
+import Note from "plaid-threads/Note";
 
-import { DataItems, Categories } from "../../Utilities/productUtilities";
+import {
+  DataItem as DataItem,
+  Categories,
+} from "../../Utilities/productUtilities";
 
 import styles from "./Error.module.scss";
 interface Props {
-  error: Errors | DataItems;
+  error: Errors | DataItem;
 }
 interface Errors {
   error_type: string;
   error_code: string;
   error_message: string;
   display_message: string | null;
+  status_code: number;
 }
 
-const errorObj = {
+const errorPaths: { [key: string]: string } = {
   ITEM_ERROR: "item",
   INSTITUTION_ERROR: "institution",
   API_ERROR: "api",
@@ -31,26 +36,43 @@ const errorObj = {
 };
 
 const Error = (props: Props) => {
+  const [path, setPath] = useState("");
+
+  useEffect(() => {
+    const errorType = props.error.error_type!;
+    const errorPath = errorPaths[errorType];
+
+    setPath(
+      `https://plaid.com/docs/errors/${errorPath}/#${props.error.error_code?.toLowerCase()}`
+    );
+  }, []);
+
   return (
     <>
       <div className={styles.errorTop}></div>
       <div className={styles.errorContainer}>
-        <div className={styles.code}>400</div>
+        <Note error className={styles.code}>
+          {props.error.status_code}
+        </Note>
         <div className={styles.errorContents}>
-          <div className={styles.errorCode}>
+          <div className={styles.errorItem}>
             <span className={styles.errorTitle}>Error code: </span>
-            <span className={styles.errorData}>PRODUCTS_NOT_SUPPORTED</span>
+            <span className={styles.errorData}>{props.error.error_code}</span>
           </div>
-          <div className={styles.errorType}>
+          <div className={styles.errorItem}>
             <span className={styles.errorTitle}>Type: </span>
-            <span className={styles.errorData}>ITEM_ERROR</span>
+            <span className={styles.errorData}>{props.error.error_type}</span>
           </div>
-          <div className={styles.errorMessage}>
+          <div className={styles.errorItem}>
             <span className={styles.errorTitle}>Message: </span>
-            <span className={styles.errorData}>some message here</span>
+            <span className={styles.errorData}>
+              {props.error.display_message == null
+                ? props.error.error_message
+                : props.error.display_message}
+            </span>
           </div>
         </div>
-        <Button small wide className={styles.learnMore}>
+        <Button small wide className={styles.learnMore} href={path}>
           Learn More
         </Button>
       </div>
@@ -58,24 +80,6 @@ const Error = (props: Props) => {
   );
 };
 
-// return (
-//     <table className={styles.dataTable}>
-//       <thead
-//         className={cx(styles.header, props.identity && styles.identityHeader)}
-//       >
-//         <tr
-//           className={cx(
-//             styles.headerRow,
-//             props.identity && styles.identityHeaderRow
-//           )}
-//         >
-//           {headers}
-//         </tr>
-//       </thead>
-//       <tbody className={styles.body}>{rows}</tbody>
-//     </table>
-//   );
-// };
 Error.displayName = "Error";
 
 export default Error;

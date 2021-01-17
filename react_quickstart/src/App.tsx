@@ -5,7 +5,6 @@ import Products from "./Components/Products/Products";
 import Items from "./Components/Items/Items";
 
 import styles from "./App.module.scss";
-import { ProductTransactions } from "plaid-threads";
 
 const App = () => {
   const [linkToken, setLinkToken] = useState<string | null>(null);
@@ -33,11 +32,9 @@ const App = () => {
           linkSuccess={linkSuccess}
           setLinkSuccess={setLinkSuccess}
         />
-
         {linkSuccess && (
           <>
             <Products />
-
             <Items />
           </>
         )}

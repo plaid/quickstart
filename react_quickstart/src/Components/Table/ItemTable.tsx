@@ -2,12 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 import cx from "classnames";
 
-import { DataItems, Categories } from "../../Utilities/productUtilities";
+import { DataItem, Categories } from "../../Utilities/productUtilities";
 
 import styles from "./Table.module.scss";
 
 interface Props {
-  data: Array<DataItems>;
+  data: Array<DataItem>;
   categories: Array<Categories>;
   identity?: boolean;
 }
@@ -27,7 +27,7 @@ const ItemTable = (props: Props) => {
     </th>
   ));
 
-  let rows = props.data.map((item: DataItems | any) => {
+  let rows = props.data.map((item: DataItem | any) => {
     return (
       <tr className={cx(styles.dataRows, props.identity && styles.idendityRow)}>
         {props.categories.map((category: Categories) => {

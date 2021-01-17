@@ -51,13 +51,7 @@ const LinkButton: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <Button
-        // className={cx(styles.linkBtn, hideButton && styles.hideBtn)}
-        type="button"
-        small
-        onClick={launchLink}
-        disabled={!ready}
-      >
+      <Button type="button" small onClick={launchLink} disabled={!ready}>
         Launch Link
       </Button>
     </>

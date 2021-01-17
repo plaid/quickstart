@@ -1,21 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Button from "plaid-threads/Button";
+import Note from "plaid-threads/Note";
 
 import Table from "../Table/Table";
 import Error from "../Error/Error";
 
-import {
-  transformAuthData,
-  transformTransactionsData,
-  transformBalanceData,
-  transformInvestmentsData,
-  transformIdentityData,
-  transformItemData,
-  transformLiabilitiesData,
-  transformAccountsData,
-} from "../../Utilities/productUtilities";
-
-import { DataItems, Categories } from "../../Utilities/productUtilities";
+import { DataItem, Categories } from "../../Utilities/productUtilities";
 
 import styles from "./Product.module.scss";
 
@@ -25,12 +15,7 @@ interface Props {
   categories: Array<Categories>;
   schema: string;
   description: string;
-}
-
-interface ACH {
-  account: string;
-  routing: string;
-  account_id: string;
+  transformData?: (arg: any) => Array<DataItem>;
 }
 
 interface Error {
@@ -40,68 +25,32 @@ interface Error {
   display_message?: string | null;
 }
 
-type Data = Array<DataItems>;
+type Data = Array<DataItem>;
 
 const Product = (props: Props) => {
   const [showTable, setShowTable] = useState(false);
-  const [data, setData] = useState<Data>([]);
-  const [isError, setIsError] = useState(true);
-  const [error, setError] = useState<Error>({ error_type: "none" });
-
-  const displayError = (error: Error) => {};
+  const [transformedData, setTransformedData] = useState<Data>([]);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<Error>({});
 
   const getData = async () => {
     const response = await fetch(`/api/${props.product}`, { method: "GET" });
     const data = await response.json();
     if (data.error != null) {
+      setError(data.error);
       setIsError(true);
-      setError(data);
+    } else {
+      setTransformedData(props.transformData!(data));
+      setShowTable(true);
     }
-    let final: Array<DataItems> = [];
-    switch (props.product) {
-      case "transactions":
-        setData(data.transactions);
-        break;
-      case "auth":
-        final = transformAuthData(data);
-        setData(final);
-        break;
-      case "identity":
-        final = transformIdentityData(data);
-        setData(final);
-        break;
-      case "balance":
-        final = transformBalanceData(data);
-        setData(final);
-        break;
-      case "holdings":
-        final = transformInvestmentsData(data);
-        setData(final);
-        break;
-      case "liabilities":
-        final = transformLiabilitiesData(data);
-        setData(final);
-        break;
-      case "item":
-        final = transformItemData(data.itemResponse, data.instRes);
-        setData(final);
-        break;
-      case "accounts":
-        final = transformAccountsData(data);
-        setData(final);
-        break;
-
-      default:
-        setData(data.transactions);
-    }
-
-    setShowTable(true);
   };
 
   return (
     <>
       <div className={styles.productContainer}>
-        <div className={styles.post}>POST</div>
+        <Note info className={styles.post}>
+          POST
+        </Note>
         <div className={styles.productContents}>
           <div className={styles.productHeader}>
             {props.name && (
@@ -112,6 +61,7 @@ const Product = (props: Props) => {
           <div className={styles.productDescription}>{props.description}</div>
         </div>
         <Button
+          type="button"
           small
           wide
           secondary
@@ -125,7 +75,7 @@ const Product = (props: Props) => {
       {showTable && (
         <Table
           categories={props.categories}
-          data={data}
+          data={transformedData}
           identity={props.product === "identity"}
         />
       )}

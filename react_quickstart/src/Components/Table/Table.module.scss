@@ -1,3 +1,5 @@
+@import "~plaid-threads/scss/variables";
+
 .app,
 .containers {
   width: 100%;
@@ -5,19 +7,16 @@
   margin: auto;
 }
 
-table {
-  width: 90%;
-  border-spacing: 0px;
-}
 .dataTable {
   width: 90%;
-  margin-bottom: 20px;
+  margin-bottom: 2 * $unit;
+  border-spacing: 0px;
 }
 .header {
   height: 50px;
 }
 .headerRow {
-  font-size: 12px;
+  font-size: 1.2rem;
   text-align: left;
   padding-bottom: 10px;
   height: 30px;
@@ -25,7 +24,8 @@ table {
 .headerField {
   border-top: 1px solid #ebebeb;
   border-bottom: 1px solid #111111;
-  padding: 15px 0;
+  // padding: 15px 0;
+  line-height: normal;
 }
 
 .body {
@@ -37,7 +37,7 @@ table {
   border-top: 1px solid #ebebeb;
   padding-left: 5px;
   font-size: 12px;
-  max-width: 250px;
+  max-width: 500px;
   vertical-align: top;
   padding-top: 15px;
 }
@@ -48,28 +48,52 @@ table {
 
 .identityHeaderRow {
   display: grid;
-  grid-template-columns: 13% 40% 20% 27%;
-  margin-right: 5px;
-  margin: auto;
-  padding-bottom: 0;
+  grid-template-columns: 16% 32% 12% 40%;
+  grid-gap: 5px;
+  // margin-right: 5px;
+  // margin: auto;
+  // padding-bottom: 0;
 }
 
 .idendityHeaderField {
   padding: 10px 0;
+  border-spacing: 0px;
 }
 
 .idendityDataRows {
   display: grid;
-  grid-template-columns: 13% 40% 20% 27%;
-  margin-right: 5px;
-  height: 100px;
-  margin: auto;
-  width: 100%;
+  grid-template-columns: 16% 32% 12% 40%;
+  grid-gap: 5px;
+  // margin-right: 5px;
+  // height: 100px;
+  // margin: auto;
+  // width: 100%;
+  height: 30px;
+  &:first-child {
+    margin-top: 20px;
+  }
+  &:first-child {
+    td {
+      padding: 20px 0 5px 0;
+      height: 30px;
+    }
+  }
+
+  &:last-child {
+    td {
+      padding: 0px 0 5px 0;
+      height: 30px;
+    }
+  }
 }
 
 .idendityDataField {
   padding-right: 5px;
-  padding-left: 5px;
+  // padding-left: 5px;
+  // border: 0px;
+  line-height: 15px;
+  padding: 10px 0 0 0;
   border: 0px;
-  line-height: 24px;
+  word-wrap: break-word;
+  vertical-align: center;
 }

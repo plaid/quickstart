@@ -1,3 +1,5 @@
+@import "~plaid-threads/scss/variables";
+
 .itemsContainer {
   width: 100%;
   border: 1px solid #ebebeb;
@@ -7,7 +9,7 @@
   flex-direction: column;
   margin: 0 20px 20px 20px;
   align-items: center;
-  box-shadow: 0 8px 8px 0 #ebebeb;
+  box-shadow: 0 $unit $unit 0 #ebebeb;
   margin-top: 20px;
 }
 
@@ -18,9 +20,9 @@
   height: 104px;
   color: #111111;
   font-family: Vaud;
-  font-size: 24px;
+  font-size: 3 * $unit;
   font-weight: 800;
-  letter-spacing: -0.29px;
+  // letter-spacing: -0.29px;
   line-height: 32px;
   padding-top: 35px;
   padding-left: 20px;

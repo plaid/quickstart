@@ -1,3 +1,4 @@
+@import "~plaid-threads/scss/variables";
 .errorTop {
   width: 90%;
   height: 1px;
@@ -12,18 +13,17 @@
 }
 
 .code {
-  height: 32px;
-  width: 72px;
-  border: 1px solid #f44e66;
-  border-radius: 2px;
-  text-align: center;
-  padding-top: 6px;
   margin: 20px 0px 20px 35px;
 }
 
 .errorContents {
   margin: 20px 30px;
   font-size: 12px;
+}
+
+.errorItem {
+  display: grid;
+  grid-template-columns: 2fr 5fr;
 }
 
 .errorTitle {
