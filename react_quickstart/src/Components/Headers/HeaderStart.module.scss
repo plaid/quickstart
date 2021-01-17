@@ -8,13 +8,17 @@
 }
 
 .title {
-  font-size: 50px;
+  font-size: 36px;
   margin-top: 76px;
   margin-bottom: 0;
+  font-weight: 800;
+  height: 48px;
+  line-height: 48px;
 }
 
 .subtitle {
   margin-top: 0;
+  font-size: 24px;
   font-weight: normal;
   margin-bottom: 20px;
 }
@@ -25,6 +29,7 @@
   font-size: 16px;
   line-height: 24px;
   margin: 20px 0;
+  height: auto;
 }
 .linkButton {
   margin-top: 20px;
