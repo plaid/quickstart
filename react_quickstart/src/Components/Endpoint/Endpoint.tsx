@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Button from "plaid-threads/Button";
 import Note from "plaid-threads/Note";
 
 import Table from "../Table/Table";
 import Error from "../Error/Error";
 
-import { DataItem, Categories } from "../../Utilities/productUtilities";
+import { DataItem, Categories } from "../../Utilities/dataUtilities";
 
-import styles from "./Product.module.scss";
+import styles from "./Endpoint.module.scss";
 
 interface Props {
-  product: string;
+  endpoint: string;
   name?: string | null;
   categories: Array<Categories>;
   schema: string;
@@ -27,14 +27,14 @@ interface Error {
 
 type Data = Array<DataItem>;
 
-const Product = (props: Props) => {
+const Endpoint = (props: Props) => {
   const [showTable, setShowTable] = useState(false);
   const [transformedData, setTransformedData] = useState<Data>([]);
   const [isError, setIsError] = useState(false);
   const [error, setError] = useState<Error>({});
 
   const getData = async () => {
-    const response = await fetch(`/api/${props.product}`, { method: "GET" });
+    const response = await fetch(`/api/${props.endpoint}`, { method: "GET" });
     const data = await response.json();
     if (data.error != null) {
       setError(data.error);
@@ -47,18 +47,18 @@ const Product = (props: Props) => {
 
   return (
     <>
-      <div className={styles.productContainer}>
+      <div className={styles.endpointContainer}>
         <Note info className={styles.post}>
           POST
         </Note>
-        <div className={styles.productContents}>
-          <div className={styles.productHeader}>
+        <div className={styles.endpointContents}>
+          <div className={styles.endpointHeader}>
             {props.name && (
-              <span className={styles.productName}>{props.name}</span>
+              <span className={styles.endpointName}>{props.name}</span>
             )}
             <span className={styles.schema}>{props.schema}</span>
           </div>
-          <div className={styles.productDescription}>{props.description}</div>
+          <div className={styles.endpointDescription}>{props.description}</div>
         </div>
         <Button
           type="button"
@@ -76,7 +76,7 @@ const Product = (props: Props) => {
         <Table
           categories={props.categories}
           data={transformedData}
-          identity={props.product === "identity"}
+          identity={props.endpoint === "identity"}
         />
       )}
       {isError && <Error error={error} />}
@@ -84,6 +84,6 @@ const Product = (props: Props) => {
   );
 };
 
-Product.displayName = "Product";
+Endpoint.displayName = "Endpoint";
 
-export default Product;
+export default Endpoint;

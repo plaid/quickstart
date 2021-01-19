@@ -2,28 +2,24 @@
 
 .productsContainer {
   width: 100%;
-  border: 1px solid #ebebeb;
+  border: 1px solid $black200;
   border-top: 0px;
   border-bottom: 0px;
   display: flex;
   flex-direction: column;
-  margin: 0 20px;
+  margin: 2 * $unit 0 0 0;
   align-items: center;
-  box-shadow: 0 8px 8px 0 #ebebeb;
-  margin-top: 20px;
+  box-shadow: $shadow-small;
 }
 
 .productsHeader {
   width: 100%;
-  border: 1px solid #ebebeb;
+  border: 1px solid $black200;
   border-bottom: 0px;
-  height: 104px;
-  color: #111111;
-  font-family: Vaud;
-  font-size: 24px;
+  height: 13 * $unit;
   font-weight: 800;
-  letter-spacing: -0.29px;
-  line-height: 32px;
-  padding-top: 35px;
-  padding-left: 20px;
+  padding-top: 5 * $unit;
+  padding-left: 5 * $unit;
+  margin-top: 0;
+  margin-bottom: 0;
 }

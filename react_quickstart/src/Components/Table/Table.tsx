@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import cx from "classnames";
 
-import { DataItem, Categories } from "../../Utilities/productUtilities";
+import { DataItem, Categories } from "../../Utilities/dataUtilities";
 
 import styles from "./Table.module.scss";
 
@@ -19,41 +19,16 @@ const formatter = new Intl.NumberFormat("en-US", {
 });
 
 const Table = (props: Props) => {
+  // regular table
   const headers = props.categories.map((category) => (
-    <th
-      className={cx(
-        styles.headerField,
-        props.identity && styles.idendityHeaderField
-      )}
-    >
-      {category.title}
-    </th>
+    <th className={styles.headerField}>{category.title}</th>
   ));
 
   let rows = props.data.map((item: DataItem | any) => {
     return (
-      <tr
-        className={cx(
-          styles.dataRows,
-          props.identity && styles.idendityDataRows
-        )}
-      >
+      <tr className={styles.dataRows}>
         {props.categories.map((category: Categories) => {
-          return (
-            <td
-              className={cx(
-                styles.dataField,
-                props.identity && styles.idendityDataField
-              )}
-            >
-              {category.field === "amount" ||
-              category.field === "balance" ||
-              category.field === "value" ||
-              category.field === "price"
-                ? formatter.format(item[category.field])
-                : item[category.field]}
-            </td>
-          );
+          return <td className={styles.dataField}>{item[category.field]}</td>;
         })}
       </tr>
     );
@@ -61,19 +36,39 @@ const Table = (props: Props) => {
 
   rows = rows.length < 8 ? rows : rows.slice(0, 8);
 
+  //identity table to accomodate odd data structure of identity product
+  const identittyHeaders = props.categories.map((category) => (
+    <span className={styles.identityHeader}>{category.title}</span>
+  ));
+
+  const idendityRows = props.data.map((item: DataItem | any) => {
+    return (
+      <div className={styles.identityDataRow}>
+        {props.categories.map((category: Categories) => {
+          return (
+            <span className={styles.idendityDataField}>
+              {item[category.field]}
+            </span>
+          );
+        })}
+      </div>
+    );
+  });
+
+  if (props.identity) {
+    return (
+      <div className={styles.identityTable}>
+        {" "}
+        <div className={styles.identityHeadersRow}>{identittyHeaders}</div>{" "}
+        <div className={styles.identityDataBody}>{idendityRows}</div>
+      </div>
+    );
+  }
+
   return (
     <table className={styles.dataTable}>
-      <thead
-        className={cx(styles.header, props.identity && styles.identityHeader)}
-      >
-        <tr
-          className={cx(
-            styles.headerRow,
-            props.identity && styles.identityHeaderRow
-          )}
-        >
-          {headers}
-        </tr>
+      <thead className={styles.header}>
+        <tr className={styles.headerRow}>{headers}</tr>
       </thead>
       <tbody className={styles.body}>{rows}</tbody>
     </table>

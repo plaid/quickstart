@@ -18,12 +18,12 @@ const HeaderStart = (props: Props) => {
   return (
     <div className={styles.grid}>
       {" "}
-      <h1 className={styles.title}>Plaid Quickstart</h1>
+      <h3 className={styles.title}>Plaid Quickstart</h3>
       {!props.linkSuccess && (
         <>
-          <h2 className={styles.subtitle}>
+          <h4 className={styles.subtitle}>
             A sample end-to-end integration with Plaid
-          </h2>
+          </h4>
           <p className={styles.introPar}>
             The Plaid flow begins when your user wants to connect their bank
             account to your app. Simulate this by clicking the button below to
@@ -45,18 +45,18 @@ const HeaderStart = (props: Props) => {
       )}
       {props.linkSuccess && (
         <>
-          <h2 className={styles.subtitle}>
+          <h4 className={styles.subtitle}>
             Congrats! By linking an account, you have created an{" "}
             <span className={styles.itemText}>Item</span>.
-          </h2>
-          <div className={styles.itemAccessIds}>
-            <p className={styles.id}>
-              <span className={styles.idText}>item_id</span>
+          </h4>
+          <div className={styles.itemAccessContainer}>
+            <p className={styles.itemAccessRow}>
+              <span className={styles.idName}>item_id</span>
               <span className={styles.tokenText}>{itemId}</span>
             </p>
 
-            <p className={styles.id}>
-              <span className={styles.idText}>asccess_token</span>
+            <p className={styles.itemAccessRow}>
+              <span className={styles.idName}>asccess_token</span>
               <span className={styles.tokenText}>{accessToken}</span>
             </p>
           </div>

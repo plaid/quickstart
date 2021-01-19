@@ -1,42 +1,41 @@
 @import "~plaid-threads/scss/variables";
-.errorTop {
-  width: 90%;
-  height: 1px;
-  border-top: 1px solid #ebebeb;
-}
 
-.errorContainer {
+.endpointContainer {
   display: grid;
   grid-template-columns: 15% 55% 30%;
   width: 100%;
-  margin: 0;
+  border: 1px solid $black200;
+  border-bottom: 0px;
 }
 
-.code {
+.post {
   margin: 2 * $unit 0px 2 * $unit 5 * $unit;
   font-size: 1.4rem;
 }
-
-.errorContents {
+.endpointContents {
   margin: 3 * $unit 4 * $unit;
   font-size: 1.2rem;
 }
 
-.errorItem {
-  display: grid;
-  grid-template-columns: 2fr 5fr;
+.endpointHeader {
   margin-bottom: $unit;
 }
 
-.errorTitle {
+.endpointName {
   font-weight: bold;
+  font-size: 2 * $unit;
+  padding-right: $unit;
+}
+
+.schema {
+  font-size: 2 * $unit;
+}
+.endpointDescription {
+  font-size: 1.2rem;
   line-height: normal;
 }
 
-.errorData {
-  line-height: normal;
-}
-.learnMore {
+.sendRequest {
   margin: 2 * $unit;
   width: 70%;
 }

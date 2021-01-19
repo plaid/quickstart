@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-import Product from "./Product";
+import Endpoint from "../Endpoint/Endpoint";
 import {
   transactionsCategories,
   authCategories,
@@ -8,17 +8,15 @@ import {
   balanceCategories,
   investmentsCategories,
   liabilitiesCategories,
-} from "../../Utilities/productUtilities";
+} from "../../Utilities/dataUtilities";
 import {
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
   transformInvestmentsData,
   transformIdentityData,
-  transformItemData,
   transformLiabilitiesData,
-  transformAccountsData,
-} from "../../Utilities/productUtilities";
+} from "../../Utilities/dataUtilities";
 import styles from "./Products.module.scss";
 
 export interface Categories {
@@ -34,18 +32,18 @@ const Products = () => {
   return (
     <>
       <div className={styles.productsContainer}>
-        <div className={styles.productsHeader}>Products</div>
+        <h4 className={styles.productsHeader}>Products</h4>
 
-        <Product
-          product="auth"
+        <Endpoint
+          endpoint="auth"
           name="Auth"
           categories={authCategories}
           schema="/auth/get/"
           description="Retrieve account and routing numbers for checking and savings accounts."
           transformData={transformAuthData}
         />
-        <Product
-          product="transactions"
+        <Endpoint
+          endpoint="transactions"
           name="Transactions"
           categories={transactionsCategories}
           schema="/transactions/get/"
@@ -53,8 +51,8 @@ const Products = () => {
           transformData={transformTransactionsData}
         />
 
-        <Product
-          product="identity"
+        <Endpoint
+          endpoint="identity"
           name="Identity"
           categories={identityCategories}
           schema="/identity/get/"
@@ -62,8 +60,8 @@ const Products = () => {
         fraud by comparing user-submitted data to validate identity."
           transformData={transformIdentityData}
         />
-        <Product
-          product="balance"
+        <Endpoint
+          endpoint="balance"
           name="Balance"
           categories={balanceCategories}
           schema="/accounts/balance/get/"
@@ -71,8 +69,8 @@ const Products = () => {
         fees."
           transformData={transformBalanceData}
         />
-        <Product
-          product="holdings"
+        <Endpoint
+          endpoint="holdings"
           name="Investments"
           categories={investmentsCategories}
           schema="/investments/holdings/get/"
@@ -81,8 +79,8 @@ const Products = () => {
         to market segments."
           transformData={transformInvestmentsData}
         />
-        <Product
-          product="liabilities"
+        <Endpoint
+          endpoint="liabilities"
           name="Liabilities"
           categories={liabilitiesCategories}
           schema="/liabilities/get/"

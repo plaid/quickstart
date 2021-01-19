@@ -51,7 +51,14 @@ const LinkButton: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <Button type="button" large onClick={launchLink} disabled={!ready}>
+      <Button
+        className={styles.launchLink}
+        type="button"
+        large
+        wide
+        onClick={launchLink}
+        disabled={!ready}
+      >
         Launch Link
       </Button>
     </>

@@ -40,9 +40,9 @@ const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || '';
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
-let ACCESS_TOKEN = null;
+let ACCESS_TOKEN = 'access-sandbox-858e1dc7-d66d-422e-b3c2-98aa84428e17';
 let PUBLIC_TOKEN = null;
-let ITEM_ID = null;
+let ITEM_ID = '8zd4BoJqrgfxPVrdklpJsR5NgR5PvetW9d8mQ';
 // The payment_id is only relevant for the UK Payment Initiation product.
 // We store the payment_id in memory - in production, store it in a secure
 // persistent data store

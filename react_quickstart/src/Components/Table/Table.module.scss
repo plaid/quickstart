@@ -1,99 +1,76 @@
 @import "~plaid-threads/scss/variables";
 
-.app,
-.containers {
-  width: 100%;
-  height: 100%;
-  margin: auto;
-}
-
 .dataTable {
   width: 90%;
-  margin-bottom: 2 * $unit;
+  margin-bottom: 3 * $unit;
   border-spacing: 0px;
 }
-.header {
-  height: 50px;
-}
+
 .headerRow {
   font-size: 1.2rem;
   text-align: left;
-  padding-bottom: 10px;
-  height: 30px;
-}
-.headerField {
-  border-top: 1px solid #ebebeb;
-  border-bottom: 1px solid #111111;
-  // padding: 15px 0;
-  line-height: normal;
+  padding-bottom: $unit;
+  height: 4 * $unit;
 }
 
-.body {
-  margin-top: 10px;
-}
-.dataField {
-  text-align: left;
-  overflow-wrap: break-word;
-  border-top: 1px solid #ebebeb;
-  padding-left: 5px;
-  font-size: 12px;
-  max-width: 500px;
-  vertical-align: top;
-  padding-top: 15px;
+.headerField {
+  border-top: 1px solid $black200;
+  border-bottom: 1px solid $black1000;
 }
 
 .dataRows {
-  height: 45px;
-}
-
-.identityHeaderRow {
-  display: grid;
-  grid-template-columns: 16% 32% 12% 40%;
-  grid-gap: 5px;
-  // margin-right: 5px;
-  // margin: auto;
-  // padding-bottom: 0;
-}
-
-.idendityHeaderField {
-  padding: 10px 0;
-  border-spacing: 0px;
-}
-
-.idendityDataRows {
-  display: grid;
-  grid-template-columns: 16% 32% 12% 40%;
-  grid-gap: 5px;
-  // margin-right: 5px;
-  // height: 100px;
-  // margin: auto;
-  // width: 100%;
-  height: 30px;
-  &:first-child {
-    margin-top: 20px;
-  }
+  height: 6 * $unit;
   &:first-child {
     td {
-      padding: 20px 0 5px 0;
-      height: 30px;
+      border-top: 0px;
     }
   }
-
   &:last-child {
-    td {
-      padding: 0px 0 5px 0;
-      height: 30px;
-    }
+    margin-bottom: 2 * $unit;
   }
 }
 
-.idendityDataField {
-  padding-right: 5px;
-  // padding-left: 5px;
-  // border: 0px;
-  line-height: 15px;
-  padding: 10px 0 0 0;
-  border: 0px;
+.dataField {
+  text-align: left;
+  overflow-wrap: break-word;
+  border-top: 1px solid $black200;
+  padding-left: $unit;
+  font-size: 1.2rem;
+  max-width: 63 * $unit;
+  vertical-align: top;
+  padding-top: 2 * $unit;
+}
+
+.identityTable {
+  width: 90%;
+  margin-bottom: 3 * $unit;
+  font-size: 1.2rem;
+  line-height: normal;
+}
+
+.identityHeadersRow {
+  display: grid;
+  grid-template-columns: 16% 32% 12% 40%;
+  grid-gap: $unit;
+  border-top: 1px solid $black200;
+  border-bottom: 1px solid $black1000;
+  font-weight: bold;
+}
+
+.identityHeader {
+  line-height: 2 * $unit;
+  position: relative;
+  bottom: 0;
+  padding: $unit 0 0.4rem 0;
+}
+
+.identityDataBody {
+  margin-top: 20px;
+}
+
+.identityDataRow {
+  display: grid;
+  grid-template-columns: 16% 32% 12% 40%;
   word-wrap: break-word;
-  vertical-align: center;
+  grid-gap: $unit;
 }

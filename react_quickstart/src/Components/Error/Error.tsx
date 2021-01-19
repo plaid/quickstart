@@ -5,7 +5,7 @@ import Note from "plaid-threads/Note";
 import {
   DataItem as DataItem,
   Categories,
-} from "../../Utilities/productUtilities";
+} from "../../Utilities/dataUtilities";
 
 import styles from "./Error.module.scss";
 interface Props {
@@ -49,7 +49,6 @@ const Error = (props: Props) => {
 
   return (
     <>
-      <div className={styles.errorTop}></div>
       <div className={styles.errorContainer}>
         <Note error className={styles.code}>
           {props.error.status_code}

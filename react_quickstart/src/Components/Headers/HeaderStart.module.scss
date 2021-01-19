@@ -5,51 +5,47 @@
   display: flex;
   flex-direction: column;
   margin: auto;
+  margin-bottom: 2 * $unit;
 }
 
 .title {
-  font-size: 36px;
-  margin-top: 76px;
+  margin-top: 9 * $unit;
   margin-bottom: 0;
   font-weight: 800;
-  height: 48px;
-  line-height: 48px;
+  height: 6 * $unit;
 }
 
 .subtitle {
   margin-top: 0;
-  font-size: 24px;
-  font-weight: normal;
-  margin-bottom: 20px;
+  margin-bottom: 3 * $unit;
 }
 
 .introPar {
-  height: 100px;
-  width: 80%;
-  font-size: 16px;
-  line-height: 24px;
-  margin: 20px 0;
-  height: auto;
+  width: 100%;
+  font-size: 2 * $unit;
+  margin: 2 * $unit 0;
 }
+
 .linkButton {
-  margin-top: 20px;
+  margin-top: 3 * $unit;
 }
+
 .itemText {
   text-decoration: underline;
 }
 
-.itemAccessIds {
+.itemAccessContainer {
   display: flex;
   flex-direction: column;
-  height: 120px;
+  height: 15 * $unit;
   width: 100%;
-  box-shadow: 0 8px 8px 0 #ebebeb;
-  margin-top: 24px;
+  box-shadow: $shadow-small;
+  margin-top: 3 * $unit;
 }
 
-.id {
+.itemAccessRow {
   display: flex;
-  border: 1px solid #ebebeb;
+  border: 1px solid $black200;
   height: 50%;
   margin: 0;
 
@@ -58,25 +54,18 @@
   }
 }
 
-.accessId {
-  border: 1px solid #ebebeb;
-  border-top: 0px;
-  height: 50%;
-  margin: 0;
-}
-
-.idText {
-  padding: 20px;
+.idName {
+  padding: 2 * $unit 5 * $unit;
   flex: 1;
-  font-weight: 600;
+  font-weight: bold;
 }
 
 .tokenText {
-  padding: 20px;
-  flex: 6;
+  padding: 2 * $unit 3 * $unit 2 * $unit 0;
+  flex: 4;
 }
 
 .requests {
-  margin-top: 56px;
-  font-size: 16px;
+  margin-top: 7 * $unit;
+  font-size: 2 * $unit;
 }

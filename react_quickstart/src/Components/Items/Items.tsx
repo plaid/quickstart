@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-import Product from "../Products/Product";
+import Endpoint from "../Endpoint/Endpoint";
 import {
   transformItemData,
   transformAccountsData,
-} from "../../Utilities/productUtilities";
+} from "../../Utilities/dataUtilities";
 import {
   itemCategories,
   accountsCategories,
-} from "../../Utilities/productUtilities";
+} from "../../Utilities/dataUtilities";
 
 import styles from "./Items.module.scss";
 
 const Items = () => (
   <>
     <div className={styles.itemsContainer}>
-      <div className={styles.itemsHeader}>Item Management</div>
-      <Product
-        product="item"
+      <h4 className={styles.itemsHeader}>Item Management</h4>
+      <Endpoint
+        endpoint="item"
         categories={itemCategories}
         schema="/item/get/"
         description="Retrieve information about an Item, like the institution,
@@ -26,8 +26,8 @@ const Items = () => (
         transformData={transformItemData}
       />
 
-      <Product
-        product="accounts"
+      <Endpoint
+        endpoint="accounts"
         schema="/accounts/get"
         categories={accountsCategories}
         description="Retrieve high-level information about all accounts associated with an item."

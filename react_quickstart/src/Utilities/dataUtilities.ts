@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   AuthGetResponse,
   TransactionsGetResponse,
@@ -26,9 +25,9 @@ export interface DataItem {
   email?: string;
   age?: number;
   gender?: string;
-  amount?: number;
+  amount?: string;
   date?: string;
-  balance?: number;
+  balance?: string;
   accounts?: string;
   router?: string;
   account?: string;
@@ -44,8 +43,8 @@ export interface DataItem {
   mask?: string;
   subtype?: string;
   quantity?: number;
-  price?: number;
-  value?: number;
+  price?: string;
+  value?: string;
   type?: string;
 }
 
@@ -205,18 +204,6 @@ export const accountsCategories: Array<Categories> = [
   },
 ];
 
-export const transformTransactionsData = (data: TransactionsGetResponse) => {
-  // const final: Array<DataItem> = [];
-  return data.transactions?.map((t) => {
-    const item: DataItem = {
-      name: t.name,
-      amount: t.amount,
-      date: t.date,
-    };
-    return item;
-  }) as Array<DataItem>;
-};
-
 export const transformAuthData = (data: AuthGetResponse) => {
   return data.numbers!.ach!.map((achNumbers) => {
     const account = data.accounts!.filter((a) => {
@@ -224,11 +211,24 @@ export const transformAuthData = (data: AuthGetResponse) => {
     })[0];
     return {
       name: account.name,
-      balance: account.balances.available || account.balances.current,
+      balance:
+        formatter.format(account.balances.available!) ||
+        formatter.format(account.balances.current!),
       account: achNumbers.account,
       routing: achNumbers.routing,
     };
   });
+};
+
+export const transformTransactionsData = (data: TransactionsGetResponse) => {
+  return data.transactions?.map((t) => {
+    const item: DataItem = {
+      name: t.name,
+      amount: formatter.format(t.amount!),
+      date: t.date,
+    };
+    return item;
+  }) as Array<DataItem>;
 };
 
 export const transformIdentityData = (data: IdentityGetResponse) => {
@@ -241,7 +241,7 @@ export const transformIdentityData = (data: IdentityGetResponse) => {
     const emails = owner.emails?.map((email) => {
       return email.data;
     });
-    const phone = owner.phone_numbers?.map((phone) => {
+    const phones = owner.phone_numbers?.map((phone) => {
       return phone.data;
     });
     const addresses = owner.addresses?.map((address) => {
@@ -253,7 +253,7 @@ export const transformIdentityData = (data: IdentityGetResponse) => {
     const num = Math.max(
       emails!.length,
       names!.length,
-      phone!.length,
+      phones!.length,
       addresses!.length
     );
 
@@ -261,7 +261,7 @@ export const transformIdentityData = (data: IdentityGetResponse) => {
       const obj = {
         names: names![i] || "",
         emails: emails![i] || "",
-        phoneNumbers: phone![i] || "",
+        phoneNumbers: phones![i] || "",
         addresses: addresses![i] || "",
       };
       final.push(obj);
@@ -276,11 +276,12 @@ export const transformBalanceData = (data: AccountsGetResponse) => {
   return balanceData!.map((account) => {
     const obj: DataItem = {
       name: account.name,
-      balance: account.balances.available || account.balances.current,
+      balance:
+        formatter.format(account.balances.available!) ||
+        formatter.format(account.balances.current!),
       subtype: account.subtype,
       mask: account.mask!,
     };
-
     return obj;
   });
 };
@@ -306,14 +307,13 @@ export const transformInvestmentsData = (
       mask: account.mask!,
       name: account.name,
       quantity: holding.quantity,
-      price: security.close_price!,
-      value: value,
+      price: formatter.format(security.close_price!),
+      value: formatter.format(value),
     };
   });
 };
 
 export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
-  const final: Array<DataItem> = [];
   const liabilitiesData = data.liabilities;
   const credit = liabilitiesData?.credit?.map((credit) => {
     const account = data.accounts!.filter(
@@ -323,7 +323,7 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
       name: account.name,
       type: "credit card",
       date: credit.last_payment_date!,
-      amount: credit.last_payment_amount,
+      amount: formatter.format(credit.last_payment_amount!),
     };
     return obj;
   });
@@ -336,7 +336,7 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
       name: account.name,
       type: "mortgage",
       date: mortgage.last_payment_date!,
-      amount: mortgage.last_payment_amount!,
+      amount: formatter.format(mortgage.last_payment_amount!),
     };
     return obj;
   });
@@ -349,7 +349,7 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
       name: account.name,
       type: "student loan",
       date: student.last_payment_date!,
-      amount: student.last_payment_amount!,
+      amount: formatter.format(student.last_payment_amount!),
     };
     return obj;
   });
@@ -373,12 +373,13 @@ export const transformItemData = (data: ItemData) => {
 };
 
 export const transformAccountsData = (data: AccountsGetResponse) => {
-  const final: Array<DataItem> = [];
   const accountsData = data.accounts;
   return accountsData!.map((account) => {
     const obj: DataItem = {
       name: account.name,
-      balance: account.balances.available || account.balances.current,
+      balance:
+        formatter.format(account.balances.available!) ||
+        formatter.format(account.balances.current!),
       subtype: account.subtype,
       mask: account.mask!,
     };
