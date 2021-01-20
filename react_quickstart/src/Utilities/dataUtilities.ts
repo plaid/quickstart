@@ -348,7 +348,7 @@ export const transformInvestmentsData = (data: InvestmentData) => {
 
     const obj: DataItem = {
       mask: account.mask!,
-      name: account.name!,
+      name: security.name!,
       quantity: holding.quantity!,
       price: formatter.format(security.close_price!),
       value: formatter.format(value!),
