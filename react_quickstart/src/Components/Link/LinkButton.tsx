@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
-import OauthLink from "./OathLink";
-
 import styles from "./LinkButton.module.scss";
 
 interface Props {
@@ -15,20 +13,20 @@ interface Props {
 }
 
 const LinkButton: React.FC<Props> = (props: Props) => {
-  const [isOauth, setIsOauth] = useState(false);
+  // const [isOauth, setIsOauth] = useState(false);
 
   const onSuccess = React.useCallback((public_token: string) => {
-    alert("success");
+    console.log("success");
     // send public_token to server
     const getToken = async () => {
       const response = await fetch("/api/set_access_token", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          public_token: public_token,
-        }),
+          public_token: public_token
+        })
       });
       const data = await response.json();
       props.setItemId(data.item_id);
@@ -38,33 +36,40 @@ const LinkButton: React.FC<Props> = (props: Props) => {
     props.setLinkSuccess(true);
   }, []);
 
+  let isOauth = false;
   let config: Parameters<typeof usePlaidLink>[0] = {
     token: props.linkToken,
     onSuccess,
     clientName: "hello world",
     env: "sandbox",
-    product: ["auth", "transactions"],
+    product: ["auth", "transactions"]
   };
 
+  if (window.location.href.includes("?oauth_state_id=")) {
+    // TODO: figure out how to delete this ts-ignore
+    // @ts-ignore
+    config.receivedRedirectUri = window.location.href;
+    isOauth = true;
+  }
+
   let { open, ready, error } = usePlaidLink(config);
+  console.log("usePlaidLink 1", window.Plaid);
 
   useEffect(() => {
-    if (
-      props.currentPath.slice(0, 34) === "http://localhost:3000/?oauth_state"
-    ) {
-      setIsOauth(true);
+    if (isOauth && ready) {
+      open();
     }
-  }, [ready, open]);
+  }, [ready, open, isOauth]);
 
-  if (isOauth) {
-    return (
-      <OauthLink
-        setLinkSuccess={props.setLinkSuccess}
-        setItemId={props.setItemId}
-        setAccessToken={props.setAccessToken}
-      />
-    );
-  }
+  // if (isOauth) {
+  //   return (
+  //     <OauthLink
+  //       setLinkSuccess={props.setLinkSuccess}
+  //       setItemId={props.setItemId}
+  //       setAccessToken={props.setAccessToken}
+  //     />
+  //   );
+  // }
 
   return (
     <>

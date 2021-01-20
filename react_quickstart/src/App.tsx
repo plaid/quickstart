@@ -12,15 +12,19 @@ const App = () => {
 
   const generateToken = async () => {
     const response = await fetch("/api/create_link_token", {
-      method: "POST",
+      method: "POST"
     });
     const data = await response.json();
-    localStorage.setItem("link_token", data.link_token);
-    console.log("set", data.link_token);
     setLinkToken(data.link_token);
+    localStorage.setItem("link_token", data.link_token);
   };
 
   useEffect(() => {
+    // do not generate a new token for oauth second Link open
+    if (window.location.href.includes("?oauth_state_id=")) {
+      setLinkToken(localStorage.getItem("link_token"));
+      return;
+    }
     generateToken();
   }, []);
 
