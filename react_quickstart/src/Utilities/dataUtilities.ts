@@ -268,9 +268,13 @@ export const transformTransactionsData = (
   });
 };
 
-export const transformIdentityData = (data: IdentityGetResponse) => {
+interface IdentityData {
+  identity: IdentityGetResponse["accounts"];
+}
+
+export const transformIdentityData = (data: IdentityData) => {
   const final: Array<DataItem> = [];
-  const identityData = data.accounts![0];
+  const identityData = data.identity![0];
   identityData.owners!.forEach((owner) => {
     const names = owner.names?.map((name) => {
       return name;
@@ -323,18 +327,21 @@ export const transformBalanceData = (data: AccountsGetResponse) => {
   });
 };
 
-export const transformInvestmentsData = (
-  data: InvestmentsHoldingsGetResponse
-) => {
-  const holdingsData = data.holdings!.sort(function (a, b) {
+interface InvestmentData {
+  error: null;
+  holdings: InvestmentsHoldingsGetResponse;
+}
+
+export const transformInvestmentsData = (data: InvestmentData) => {
+  const holdingsData = data.holdings.holdings!.sort(function (a, b) {
     if (a.account_id! > b.account_id!) return 1;
     return -1;
   });
   return holdingsData.map((holding) => {
-    const account = data.accounts!.filter(
+    const account = data.holdings.accounts!.filter(
       (acc) => acc.account_id === holding.account_id
     )[0];
-    const security = data.securities!.filter(
+    const security = data.holdings.securities!.filter(
       (sec) => sec.security_id === holding.security_id
     )[0];
     const value = holding.quantity! * security.close_price!;
@@ -395,16 +402,16 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
 };
 
 interface ItemData {
-  itemResponse: ItemGetResponse;
-  instRes: InstitutionsGetByIdResponse;
+  item: ItemGetResponse["item"];
+  institution: InstitutionsGetByIdResponse["institution"];
 }
 
 export const transformItemData = (data: ItemData): Array<DataItem> => {
   return [
     {
-      name: data.instRes.institution!.name!,
-      billed: data.itemResponse.item!.billed_products!.join(","),
-      available: data.itemResponse.item!.available_products!.join(","),
+      name: data.institution!.name!,
+      billed: data.item!.billed_products!.join(","),
+      available: data.item!.available_products!.join(","),
     },
   ];
 };

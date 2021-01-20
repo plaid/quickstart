@@ -71,14 +71,14 @@ const Products = () => {
         to market segments."
           transformData={transformInvestmentsData}
         />
-        <Endpoint
+        {/* <Endpoint
           endpoint="liabilities"
           name="Liabilities"
           categories={liabilitiesCategories}
           schema="/liabilities/get/"
           description="Retrieve student loans, mortgages, and credit cards."
           transformData={transformLiabilitiesData}
-        />
+        /> */}
       </div>
     </>
   );

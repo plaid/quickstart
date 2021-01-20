@@ -69,7 +69,7 @@ app.use(
 app.use(bodyParser.json());
 
 app.get('/', function (request, response, next) {
-  response.sendFile('./', { root: __dirname });
+  response.sendFile('./views/index.html', { root: __dirname });
 });
 
 // This is an endpoint defined for the OAuth flow to redirect to.
@@ -106,8 +106,6 @@ app.post('/api/create_link_token', function (request, response, next) {
   if (PLAID_ANDROID_PACKAGE_NAME !== '') {
     configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME;
   }
-
-  console.log(configs);
 
   client.createLinkToken(configs, function (error, createTokenResponse) {
     if (error != null) {
@@ -288,7 +286,7 @@ app.get('/api/identity', function (request, response, next) {
       });
     }
     prettyPrintResponse(identityResponse);
-    response.json(identityResponse);
+    response.json({ identity: identityResponse.accounts });
   });
 });
 
@@ -318,22 +316,7 @@ app.get('/api/holdings', function (request, response, next) {
       });
     }
     prettyPrintResponse(holdingsResponse);
-    response.json(holdingsResponse);
-  });
-});
-
-// Retrieve Liabilities for an Item
-// https://plaid.com/docs/#liabilities
-app.get('/api/liabilities', function (request, response, next) {
-  client.getLiabilities(ACCESS_TOKEN, function (error, liabilitiesResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error,
-      });
-    }
-    prettyPrintResponse(liabilitiesResponse);
-    response.json(liabilitiesResponse);
+    response.json({ error: null, holdings: holdingsResponse });
   });
 });
 
@@ -447,8 +430,8 @@ app.get('/api/item', function (request, response, next) {
         } else {
           prettyPrintResponse(itemResponse);
           response.json({
-            itemResponse,
-            instRes,
+            item: itemResponse.item,
+            institution: instRes.institution,
           });
         }
       },
