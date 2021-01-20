@@ -9,13 +9,14 @@
 .headerRow {
   font-size: 1.2rem;
   text-align: left;
-  padding-bottom: $unit;
   height: 4 * $unit;
 }
 
 .headerField {
   border-top: 1px solid $black200;
   border-bottom: 1px solid $black1000;
+  padding-top: 1.2rem;
+  padding-bottom: $unit;
 }
 
 .dataRows {
@@ -34,7 +35,6 @@
   text-align: left;
   overflow-wrap: break-word;
   border-top: 1px solid $black200;
-  padding-left: $unit;
   font-size: 1.2rem;
   max-width: 63 * $unit;
   vertical-align: top;

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
-import cx from "classnames";
-import axios from "axios";
+
+import OauthLink from "./OathLink";
 
 import styles from "./LinkButton.module.scss";
 
@@ -11,10 +11,14 @@ interface Props {
   setLinkSuccess: (arg: boolean) => void;
   setItemId: (arg: string) => void;
   setAccessToken: (arg: string) => void;
+  currentPath: string;
 }
 
 const LinkButton: React.FC<Props> = (props: Props) => {
+  const [isOauth, setIsOauth] = useState(false);
+
   const onSuccess = React.useCallback((public_token: string) => {
+    alert("success");
     // send public_token to server
     const getToken = async () => {
       const response = await fetch("/api/set_access_token", {
@@ -26,17 +30,15 @@ const LinkButton: React.FC<Props> = (props: Props) => {
           public_token: public_token,
         }),
       });
-
       const data = await response.json();
       props.setItemId(data.item_id);
       props.setAccessToken(data.access_token);
     };
     getToken();
-
     props.setLinkSuccess(true);
   }, []);
 
-  const config: Parameters<typeof usePlaidLink>[0] = {
+  let config: Parameters<typeof usePlaidLink>[0] = {
     token: props.linkToken,
     onSuccess,
     clientName: "hello world",
@@ -44,10 +46,25 @@ const LinkButton: React.FC<Props> = (props: Props) => {
     product: ["auth", "transactions"],
   };
 
-  const { open, ready, error } = usePlaidLink(config);
-  const launchLink = () => {
-    open();
-  };
+  let { open, ready, error } = usePlaidLink(config);
+
+  useEffect(() => {
+    if (
+      props.currentPath.slice(0, 34) === "http://localhost:3000/?oauth_state"
+    ) {
+      setIsOauth(true);
+    }
+  }, [ready, open]);
+
+  if (isOauth) {
+    return (
+      <OauthLink
+        setLinkSuccess={props.setLinkSuccess}
+        setItemId={props.setItemId}
+        setAccessToken={props.setAccessToken}
+      />
+    );
+  }
 
   return (
     <>
@@ -56,7 +73,7 @@ const LinkButton: React.FC<Props> = (props: Props) => {
         type="button"
         large
         wide
-        onClick={launchLink}
+        onClick={() => open()}
         disabled={!ready}
       >
         Launch Link

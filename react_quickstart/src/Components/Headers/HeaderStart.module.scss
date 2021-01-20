@@ -55,14 +55,18 @@
 }
 
 .idName {
-  padding: 2 * $unit 5 * $unit;
+  padding: 2 * $unit 3 * $unit 2 * $unit 5 * $unit;
   flex: 1;
   font-weight: bold;
+  font-family: "Inconsolata";
+  letter-spacing: -0.24px;
 }
 
 .tokenText {
   padding: 2 * $unit 3 * $unit 2 * $unit 0;
-  flex: 4;
+  flex: 5;
+  font-family: "Inconsolata";
+  letter-spacing: -0.24px;
 }
 
 .requests {

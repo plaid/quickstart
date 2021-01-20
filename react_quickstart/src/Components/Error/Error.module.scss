@@ -2,12 +2,12 @@
 .errorTop {
   width: 90%;
   height: 1px;
-  border-top: 1px solid #ebebeb;
+  border-top: 1px solid $black200;
 }
 
 .errorContainer {
   display: grid;
-  grid-template-columns: 15% 55% 30%;
+  grid-template-columns: 15% 57% 28%;
   width: 100%;
   margin: 0;
 }
@@ -35,7 +35,29 @@
 
 .errorData {
   line-height: normal;
+  font-family: "Inconsolata";
+  letter-spacing: 0.25px;
 }
+
+.errorCode {
+  display: inline-block;
+  position: relative;
+}
+
+.pinkBox {
+  position: absolute;
+  top: 50%;
+  height: 6px;
+  width: 100%;
+  background-color: #ffd7dc;
+  z-index: -1;
+}
+
+.errorMessage {
+  line-height: normal;
+  font-size: 1.1rem;
+}
+
 .learnMore {
   margin: 2 * $unit;
   width: 70%;

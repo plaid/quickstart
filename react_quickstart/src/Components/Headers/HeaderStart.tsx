@@ -10,6 +10,7 @@ interface Props {
   linkToken: string | null;
   linkSuccess: boolean;
   setLinkSuccess: (arg: boolean) => void;
+  currentPath: string;
 }
 const HeaderStart = (props: Props) => {
   const [itemId, setItemId] = useState("");
@@ -38,6 +39,7 @@ const HeaderStart = (props: Props) => {
                 linkToken={props.linkToken}
                 setItemId={setItemId}
                 setAccessToken={setAccessToken}
+                currentPath={props.currentPath}
               />
             )}
           </div>
@@ -56,7 +58,7 @@ const HeaderStart = (props: Props) => {
             </p>
 
             <p className={styles.itemAccessRow}>
-              <span className={styles.idName}>asccess_token</span>
+              <span className={styles.idName}>access_token</span>
               <span className={styles.tokenText}>{accessToken}</span>
             </p>
           </div>

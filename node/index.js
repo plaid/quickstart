@@ -40,9 +40,9 @@ const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || '';
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
-let ACCESS_TOKEN = 'access-sandbox-858e1dc7-d66d-422e-b3c2-98aa84428e17';
+let ACCESS_TOKEN = null;
 let PUBLIC_TOKEN = null;
-let ITEM_ID = '8zd4BoJqrgfxPVrdklpJsR5NgR5PvetW9d8mQ';
+let ITEM_ID = null;
 // The payment_id is only relevant for the UK Payment Initiation product.
 // We store the payment_id in memory - in production, store it in a secure
 // persistent data store
@@ -69,7 +69,7 @@ app.use(
 app.use(bodyParser.json());
 
 app.get('/', function (request, response, next) {
-  response.sendFile('./views/index.html', { root: __dirname });
+  response.sendFile('./', { root: __dirname });
 });
 
 // This is an endpoint defined for the OAuth flow to redirect to.
@@ -106,6 +106,8 @@ app.post('/api/create_link_token', function (request, response, next) {
   if (PLAID_ANDROID_PACKAGE_NAME !== '') {
     configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME;
   }
+
+  console.log(configs);
 
   client.createLinkToken(configs, function (error, createTokenResponse) {
     if (error != null) {

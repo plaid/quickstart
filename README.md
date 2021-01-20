@@ -91,7 +91,7 @@ things such as `bash`, `grep`, `cat`, etc.
 
 #### Running
 
-Once started with one of the commands below, the quickstart will be running on http://localhost:8000
+Once started with one of the commands below, the quickstart will be running on http://localhost:8000 for the backend and http://localhost:3000 for the frontend
 
 ##### Node
 
@@ -99,6 +99,12 @@ Once started with one of the commands below, the quickstart will be running on h
 $ cd ./node
 $ npm install
 $ node index.js
+
+open another terminal:
+
+$ cd ./node
+$ npm start
+
 ```
 
 ##### Python

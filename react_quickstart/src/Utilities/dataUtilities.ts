@@ -1,4 +1,5 @@
 import {
+  //types
   AuthGetResponse,
   TransactionsGetResponse,
   IdentityGetResponse,
@@ -10,6 +11,7 @@ import {
 } from "plaid/generated-code/api";
 
 const formatter = new Intl.NumberFormat("en-US", {
+  //should look like "$50" or "$50.34"
   style: "currency",
   currency: "USD",
   minimumFractionDigits: 0,
@@ -20,56 +22,73 @@ export interface Categories {
   field: string;
 }
 
-export interface DataItem {
-  name?: string;
-  email?: string;
-  age?: number;
-  gender?: string;
-  amount?: string;
-  date?: string;
-  balance?: string;
-  accounts?: string;
-  router?: string;
-  account?: string;
-  numbers?: Array<ACH>;
-  emails?: string;
-  addresses?: string;
-  phoneNumbers?: string;
+//interfaces for categories in each individual product
+interface AuthDataItem {
+  routing: string;
+  account: string;
+  balance: string;
+  name: string;
+}
+interface TransactionsDataItem {
+  amount: string;
+  date: string;
+  name: string;
+}
+
+interface IdentityDataItem {
+  addresses: string;
+  phoneNumbers: string;
+  emails: string;
+  names: string;
+}
+
+interface BalanceDataItem {
+  balance: string;
+  subtype: string;
+  mask: string;
+  name: string;
+}
+
+interface InvestmentsDataItem {
+  mask: string;
+  quantity: number;
+  price: string;
+  value: string;
+  name: string;
+}
+
+interface LiabilitiessDataItem {
+  amount: string;
+  date: string;
+  name: string;
+  type: string;
+}
+
+interface ItemDataItem {
+  billed: string;
+  available: string;
+  name: string;
+}
+
+export interface ErrorDataItem {
   error_type?: string;
   error_code?: string;
   error_message?: string;
   display_message?: string | null;
   status_code?: number;
-  mask?: string;
-  subtype?: string;
-  quantity?: number;
-  price?: string;
-  value?: string;
-  type?: string;
 }
 
-export interface ACH {
-  account: string;
-  routing: string;
-  account_id: string;
-}
+//all possible product data interfaces
+export type DataItem =
+  | AuthDataItem
+  | TransactionsDataItem
+  | IdentityDataItem
+  | BalanceDataItem
+  | InvestmentsDataItem
+  | LiabilitiessDataItem
+  | ItemDataItem;
 
 export type Data = Array<DataItem>;
-
-export const transactionsCategories: Array<Categories> = [
-  {
-    title: "Name",
-    field: "name",
-  },
-  {
-    title: "Amount",
-    field: "amount",
-  },
-  {
-    title: "Date",
-    field: "date",
-  },
-];
 
 export const authCategories: Array<Categories> = [
   {
@@ -87,6 +106,21 @@ export const authCategories: Array<Categories> = [
   {
     title: "Routing #",
     field: "routing",
+  },
+];
+
+export const transactionsCategories: Array<Categories> = [
+  {
+    title: "Name",
+    field: "name",
+  },
+  {
+    title: "Amount",
+    field: "amount",
+  },
+  {
+    title: "Date",
+    field: "date",
   },
 ];
 
@@ -209,26 +243,29 @@ export const transformAuthData = (data: AuthGetResponse) => {
     const account = data.accounts!.filter((a) => {
       return a.account_id === achNumbers.account_id;
     })[0];
-    return {
+    const obj: DataItem = {
       name: account.name,
       balance:
         formatter.format(account.balances.available!) ||
         formatter.format(account.balances.current!),
-      account: achNumbers.account,
-      routing: achNumbers.routing,
+      account: achNumbers.account!,
+      routing: achNumbers.routing!,
     };
+    return obj;
   });
 };
 
-export const transformTransactionsData = (data: TransactionsGetResponse) => {
-  return data.transactions?.map((t) => {
+export const transformTransactionsData = (
+  data: TransactionsGetResponse
+): Array<DataItem> => {
+  return data.transactions!.map((t) => {
     const item: DataItem = {
-      name: t.name,
+      name: t.name!,
       amount: formatter.format(t.amount!),
-      date: t.date,
+      date: t.date!,
     };
     return item;
-  }) as Array<DataItem>;
+  });
 };
 
 export const transformIdentityData = (data: IdentityGetResponse) => {
@@ -289,7 +326,6 @@ export const transformBalanceData = (data: AccountsGetResponse) => {
 export const transformInvestmentsData = (
   data: InvestmentsHoldingsGetResponse
 ) => {
-  const final: Array<DataItem> = [];
   const holdingsData = data.holdings!.sort(function (a, b) {
     if (a.account_id! > b.account_id!) return 1;
     return -1;
@@ -303,13 +339,14 @@ export const transformInvestmentsData = (
     )[0];
     const value = holding.quantity! * security.close_price!;
 
-    return {
+    const obj: DataItem = {
       mask: account.mask!,
-      name: account.name,
-      quantity: holding.quantity,
+      name: account.name!,
+      quantity: holding.quantity!,
       price: formatter.format(security.close_price!),
-      value: formatter.format(value),
+      value: formatter.format(value!),
     };
+    return obj;
   });
 };
 
@@ -362,12 +399,12 @@ interface ItemData {
   instRes: InstitutionsGetByIdResponse;
 }
 
-export const transformItemData = (data: ItemData) => {
+export const transformItemData = (data: ItemData): Array<DataItem> => {
   return [
     {
-      name: data.instRes.institution!.name,
-      billed: data.itemResponse.item?.billed_products?.join(","),
-      available: data.itemResponse.item?.available_products?.join(","),
+      name: data.instRes.institution!.name!,
+      billed: data.itemResponse.item!.billed_products!.join(","),
+      available: data.itemResponse.item!.available_products!.join(","),
     },
   ];
 };

@@ -17,16 +17,8 @@ import {
   transformIdentityData,
   transformLiabilitiesData,
 } from "../../Utilities/dataUtilities";
+
 import styles from "./Products.module.scss";
-
-export interface Categories {
-  title: string;
-  field: string;
-}
-
-interface ProdCategories {
-  transactions: Array<Categories>;
-}
 
 const Products = () => {
   return (

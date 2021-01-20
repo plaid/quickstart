@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Button from "plaid-threads/Button";
 import Note from "plaid-threads/Note";
+import cx from "classnames";
 
-import {
-  DataItem as DataItem,
-  Categories,
-} from "../../Utilities/dataUtilities";
+import { ErrorDataItem } from "../../Utilities/dataUtilities";
 
 import styles from "./Error.module.scss";
 interface Props {
-  error: Errors | DataItem;
-}
-interface Errors {
-  error_type: string;
-  error_code: string;
-  error_message: string;
-  display_message: string | null;
-  status_code: number;
+  error: ErrorDataItem;
 }
 
 const errorPaths: { [key: string]: string } = {
@@ -49,6 +40,7 @@ const Error = (props: Props) => {
 
   return (
     <>
+      <div className={styles.errorTop}></div>
       <div className={styles.errorContainer}>
         <Note error className={styles.code}>
           {props.error.status_code}
@@ -56,7 +48,12 @@ const Error = (props: Props) => {
         <div className={styles.errorContents}>
           <div className={styles.errorItem}>
             <span className={styles.errorTitle}>Error code: </span>
-            <span className={styles.errorData}>{props.error.error_code}</span>
+            <span className={styles.errorData}>
+              <div className={styles.errorCode}>
+                {props.error.error_code}
+                <div className={styles.pinkBox}></div>
+              </div>
+            </span>
           </div>
           <div className={styles.errorItem}>
             <span className={styles.errorTitle}>Type: </span>
@@ -64,7 +61,7 @@ const Error = (props: Props) => {
           </div>
           <div className={styles.errorItem}>
             <span className={styles.errorTitle}>Message: </span>
-            <span className={styles.errorData}>
+            <span className={styles.errorMessage}>
               {props.error.display_message == null
                 ? props.error.error_message
                 : props.error.display_message}

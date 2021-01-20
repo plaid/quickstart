@@ -5,7 +5,11 @@ import Note from "plaid-threads/Note";
 import Table from "../Table/Table";
 import Error from "../Error/Error";
 
-import { DataItem, Categories } from "../../Utilities/dataUtilities";
+import {
+  DataItem,
+  Categories,
+  ErrorDataItem,
+} from "../../Utilities/dataUtilities";
 
 import styles from "./Endpoint.module.scss";
 
@@ -18,20 +22,13 @@ interface Props {
   transformData?: (arg: any) => Array<DataItem>;
 }
 
-interface Error {
-  error_type?: string;
-  error_code?: string;
-  error_message?: string;
-  display_message?: string | null;
-}
-
 type Data = Array<DataItem>;
 
 const Endpoint = (props: Props) => {
   const [showTable, setShowTable] = useState(false);
   const [transformedData, setTransformedData] = useState<Data>([]);
   const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<Error>({});
+  const [error, setError] = useState<ErrorDataItem>({ error_type: "" });
 
   const getData = async () => {
     const response = await fetch(`/api/${props.endpoint}`, { method: "GET" });
@@ -40,7 +37,7 @@ const Endpoint = (props: Props) => {
       setError(data.error);
       setIsError(true);
     } else {
-      setTransformedData(props.transformData!(data));
+      setTransformedData(props.transformData!(data)); // put data in propeer format for each individual product
       setShowTable(true);
     }
   };
@@ -63,6 +60,7 @@ const Endpoint = (props: Props) => {
         <Button
           type="button"
           small
+          centered
           wide
           secondary
           className={styles.sendRequest}

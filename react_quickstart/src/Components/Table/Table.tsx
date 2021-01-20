@@ -24,17 +24,17 @@ const Table = (props: Props) => {
     <th className={styles.headerField}>{category.title}</th>
   ));
 
-  let rows = props.data.map((item: DataItem | any) => {
-    return (
-      <tr className={styles.dataRows}>
-        {props.categories.map((category: Categories) => {
-          return <td className={styles.dataField}>{item[category.field]}</td>;
-        })}
-      </tr>
-    );
-  });
-
-  rows = rows.length < 8 ? rows : rows.slice(0, 8);
+  let rows = props.data
+    .map((item: DataItem | any) => {
+      return (
+        <tr className={styles.dataRows}>
+          {props.categories.map((category: Categories) => {
+            return <td className={styles.dataField}>{item[category.field]}</td>;
+          })}
+        </tr>
+      );
+    })
+    .slice(0, 8);
 
   //identity table to accomodate odd data structure of identity product
   const identittyHeaders = props.categories.map((category) => (
@@ -58,7 +58,6 @@ const Table = (props: Props) => {
   if (props.identity) {
     return (
       <div className={styles.identityTable}>
-        {" "}
         <div className={styles.identityHeadersRow}>{identittyHeaders}</div>{" "}
         <div className={styles.identityDataBody}>{idendityRows}</div>
       </div>

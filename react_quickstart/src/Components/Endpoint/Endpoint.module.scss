@@ -2,7 +2,7 @@
 
 .endpointContainer {
   display: grid;
-  grid-template-columns: 15% 55% 30%;
+  grid-template-columns: 15% 57% 28%;
   width: 100%;
   border: 1px solid $black200;
   border-bottom: 0px;
@@ -29,6 +29,8 @@
 
 .schema {
   font-size: 2 * $unit;
+  font-family: "Inconsolata";
+  letter-spacing: -0.24px;
 }
 .endpointDescription {
   font-size: 1.2rem;

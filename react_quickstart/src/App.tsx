@@ -15,8 +15,8 @@ const App = () => {
       method: "POST",
     });
     const data = await response.json();
-    console.log(data);
-
+    localStorage.setItem("link_token", data.link_token);
+    console.log("set", data.link_token);
     setLinkToken(data.link_token);
   };
 
@@ -28,6 +28,7 @@ const App = () => {
     <div className={styles.App}>
       <div className={styles.container}>
         <HeaderStart
+          currentPath={window.location.href}
           linkToken={linkToken}
           linkSuccess={linkSuccess}
           setLinkSuccess={setLinkSuccess}
