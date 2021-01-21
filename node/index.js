@@ -120,33 +120,52 @@ app.post('/api/create_link_token', function (request, response, next) {
 
 // Create a link token with configs which we can then use to initialize Plaid Link client-side.
 // See https://plaid.com/docs/#payment-initiation-create-link-token-request
-app.post(
-  '/api/create_link_token_for_payment',
-  function (request, response, next) {
-    client.createPaymentRecipient(
-      'Harry Potter',
-      'GB33BUKB20201555555555',
-      {
-        street: ['4 Privet Drive'],
-        city: 'Little Whinging',
-        postal_code: '11111',
-        country: 'GB',
-      },
-      function (error, createRecipientResponse) {
-        const recipientId = createRecipientResponse.recipient_id;
+app.post('/api/create_link_token_for_payment', function (
+  request,
+  response,
+  next,
+) {
+  client.createPaymentRecipient(
+    'Harry Potter',
+    'GB33BUKB20201555555555',
+    {
+      street: ['4 Privet Drive'],
+      city: 'Little Whinging',
+      postal_code: '11111',
+      country: 'GB',
+    },
+    function (error, createRecipientResponse) {
+      const recipientId = createRecipientResponse.recipient_id;
 
-        client.createPayment(
-          recipientId,
-          'payment_ref',
-          {
-            value: 12.34,
-            currency: 'GBP',
-          },
-          function (error, createPaymentResponse) {
-            prettyPrintResponse(createPaymentResponse);
-            const paymentId = createPaymentResponse.payment_id;
-            PAYMENT_ID = paymentId;
-            const configs = {
+      client.createPayment(
+        recipientId,
+        'payment_ref',
+        {
+          value: 12.34,
+          currency: 'GBP',
+        },
+        function (error, createPaymentResponse) {
+          prettyPrintResponse(createPaymentResponse);
+          const paymentId = createPaymentResponse.payment_id;
+          PAYMENT_ID = paymentId;
+          const configs = {
+            user: {
+              // This should correspond to a unique id for the current user.
+              client_user_id: 'user-id',
+            },
+            client_name: 'Plaid Quickstart',
+            products: PLAID_PRODUCTS,
+            country_codes: PLAID_COUNTRY_CODES,
+            language: 'en',
+            payment_initiation: {
+              payment_id: paymentId,
+            },
+          };
+          if (PLAID_REDIRECT_URI !== '') {
+            configs.redirect_uri = PLAID_REDIRECT_URI;
+          }
+          client.createLinkToken(
+            {
               user: {
                 // This should correspond to a unique id for the current user.
                 client_user_id: 'user-id',
@@ -155,44 +174,26 @@ app.post(
               products: PLAID_PRODUCTS,
               country_codes: PLAID_COUNTRY_CODES,
               language: 'en',
+              redirect_uri: PLAID_REDIRECT_URI,
               payment_initiation: {
                 payment_id: paymentId,
               },
-            };
-            if (PLAID_REDIRECT_URI !== '') {
-              configs.redirect_uri = PLAID_REDIRECT_URI;
-            }
-            client.createLinkToken(
-              {
-                user: {
-                  // This should correspond to a unique id for the current user.
-                  client_user_id: 'user-id',
-                },
-                client_name: 'Plaid Quickstart',
-                products: PLAID_PRODUCTS,
-                country_codes: PLAID_COUNTRY_CODES,
-                language: 'en',
-                redirect_uri: PLAID_REDIRECT_URI,
-                payment_initiation: {
-                  payment_id: paymentId,
-                },
-              },
-              function (error, createTokenResponse) {
-                if (error != null) {
-                  prettyPrintResponse(error);
-                  return response.json({
-                    error,
-                  });
-                }
-                response.json(createTokenResponse);
-              },
-            );
-          },
-        );
-      },
-    );
-  },
-);
+            },
+            function (error, createTokenResponse) {
+              if (error != null) {
+                prettyPrintResponse(error);
+                return response.json({
+                  error,
+                });
+              }
+              response.json(createTokenResponse);
+            },
+          );
+        },
+      );
+    },
+  );
+});
 
 // Exchange token flow - exchange a Link public_token for
 // an API access_token
@@ -325,24 +326,22 @@ app.get('/api/holdings', function (request, response, next) {
 app.get('/api/investment_transactions', function (request, response, next) {
   const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
   const endDate = moment().format('YYYY-MM-DD');
-  client.getInvestmentTransactions(
-    ACCESS_TOKEN,
-    startDate,
-    endDate,
-    function (error, investmentTransactionsResponse) {
-      if (error != null) {
-        prettyPrintResponse(error);
-        return response.json({
-          error,
-        });
-      }
-      prettyPrintResponse(investmentTransactionsResponse);
-      response.json({
-        error: null,
-        investment_transactions: investmentTransactionsResponse,
+  client.getInvestmentTransactions(ACCESS_TOKEN, startDate, endDate, function (
+    error,
+    investmentTransactionsResponse,
+  ) {
+    if (error != null) {
+      prettyPrintResponse(error);
+      return response.json({
+        error,
       });
-    },
-  );
+    }
+    prettyPrintResponse(investmentTransactionsResponse);
+    response.json({
+      error: null,
+      investment_transactions: investmentTransactionsResponse,
+    });
+  });
 });
 
 // Create and then retrieve an Asset Report for one or more Items. Note that an
@@ -370,23 +369,21 @@ app.get('/api/assets', function (request, response, next) {
       email: 'alice@example.com',
     },
   };
-  client.createAssetReport(
-    [ACCESS_TOKEN],
-    daysRequested,
-    options,
-    function (error, assetReportCreateResponse) {
-      if (error != null) {
-        prettyPrintResponse(error);
-        return response.json({
-          error,
-        });
-      }
-      prettyPrintResponse(assetReportCreateResponse);
+  client.createAssetReport([ACCESS_TOKEN], daysRequested, options, function (
+    error,
+    assetReportCreateResponse,
+  ) {
+    if (error != null) {
+      prettyPrintResponse(error);
+      return response.json({
+        error,
+      });
+    }
+    prettyPrintResponse(assetReportCreateResponse);
 
-      const assetReportToken = assetReportCreateResponse.asset_report_token;
-      respondWithAssetReport(20, assetReportToken, client, response);
-    },
-  );
+    const assetReportToken = assetReportCreateResponse.asset_report_token;
+    respondWithAssetReport(20, assetReportToken, client, response);
+  });
 });
 
 // This functionality is only relevant for the UK Payment Initiation product.
@@ -417,25 +414,25 @@ app.get('/api/item', function (request, response, next) {
       });
     }
     // Also pull information about the institution
-    client.getInstitutionById(
-      itemResponse.item.institution_id,
-      function (err, instRes) {
-        if (err != null) {
-          const msg =
-            'Unable to pull institution information from the Plaid API.';
-          console.log(msg + '\n' + JSON.stringify(error));
-          return response.json({
-            error: msg,
-          });
-        } else {
-          prettyPrintResponse(itemResponse);
-          response.json({
-            item: itemResponse.item,
-            institution: instRes.institution,
-          });
-        }
-      },
-    );
+    client.getInstitutionById(itemResponse.item.institution_id, function (
+      err,
+      instRes,
+    ) {
+      if (err != null) {
+        const msg =
+          'Unable to pull institution information from the Plaid API.';
+        console.log(msg + '\n' + JSON.stringify(error));
+        return response.json({
+          error: msg,
+        });
+      } else {
+        prettyPrintResponse(itemResponse);
+        response.json({
+          item: itemResponse.item,
+          institution: instRes.institution,
+        });
+      }
+    });
   });
 });
 
@@ -443,7 +440,7 @@ const server = app.listen(APP_PORT, function () {
   console.log('plaid-quickstart server listening on port ' + APP_PORT);
 });
 
-const prettyPrintResponse = (response) => {
+const prettyPrintResponse = response => {
   console.log(util.inspect(response, { colors: true, depth: 4 }));
 };
 
@@ -464,47 +461,46 @@ const respondWithAssetReport = (
   }
 
   const includeInsights = false;
-  client.getAssetReport(
-    assetReportToken,
-    includeInsights,
-    function (error, assetReportGetResponse) {
-      if (error != null) {
-        prettyPrintResponse(error);
-        if (error.error_code == 'PRODUCT_NOT_READY') {
-          setTimeout(
-            () =>
-              respondWithAssetReport(
-                --numRetriesRemaining,
-                assetReportToken,
-                client,
-                response,
-              ),
-            1000,
-          );
-          return;
-        }
+  client.getAssetReport(assetReportToken, includeInsights, function (
+    error,
+    assetReportGetResponse,
+  ) {
+    if (error != null) {
+      prettyPrintResponse(error);
+      if (error.error_code == 'PRODUCT_NOT_READY') {
+        setTimeout(
+          () =>
+            respondWithAssetReport(
+              --numRetriesRemaining,
+              assetReportToken,
+              client,
+              response,
+            ),
+          1000,
+        );
+        return;
+      }
 
+      return response.json({
+        error,
+      });
+    }
+
+    client.getAssetReportPdf(assetReportToken, function (
+      error,
+      assetReportGetPdfResponse,
+    ) {
+      if (error != null) {
         return response.json({
           error,
         });
       }
 
-      client.getAssetReportPdf(
-        assetReportToken,
-        function (error, assetReportGetPdfResponse) {
-          if (error != null) {
-            return response.json({
-              error,
-            });
-          }
-
-          response.json({
-            error: null,
-            json: assetReportGetResponse.report,
-            pdf: assetReportGetPdfResponse.buffer.toString('base64'),
-          });
-        },
-      );
-    },
-  );
+      response.json({
+        error: null,
+        json: assetReportGetResponse.report,
+        pdf: assetReportGetPdfResponse.buffer.toString('base64'),
+      });
+    });
+  });
 };

@@ -16,7 +16,6 @@ const LinkButton: React.FC<Props> = (props: Props) => {
   // const [isOauth, setIsOauth] = useState(false);
 
   const onSuccess = React.useCallback((public_token: string) => {
-    console.log("success");
     // send public_token to server
     const getToken = async () => {
       const response = await fetch("/api/set_access_token", {
@@ -54,23 +53,12 @@ const LinkButton: React.FC<Props> = (props: Props) => {
   }
 
   let { open, ready, error } = usePlaidLink(config);
-  console.log("usePlaidLink 1", window.Plaid);
 
   useEffect(() => {
     if (isOauth && ready) {
       open();
     }
   }, [ready, open, isOauth]);
-
-  // if (isOauth) {
-  //   return (
-  //     <OauthLink
-  //       setLinkSuccess={props.setLinkSuccess}
-  //       setItemId={props.setItemId}
-  //       setAccessToken={props.setAccessToken}
-  //     />
-  //   );
-  // }
 
   return (
     <>

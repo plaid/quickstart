@@ -4,7 +4,7 @@ This repository accompanies Plaid's [**quickstart guide**][quickstart].
 
 Here you'll find full example integration apps using our [**client libraries**][libraries]:
 
-![Plaid quickstart app](/assets/quickstart-screenshot.png)
+![Plaid quickstart app](/assets/quickstart.jpeg)
 
 ## Table of contents
 
