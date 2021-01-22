@@ -70,7 +70,7 @@ the dashboard: https://dashboard.plaid.com/account/keys
 > NOTE: `.env` files are a convenient local development tool. Never run a production application
 > using an environment file with secrets in it.
 
-## 3. Run the quickstart
+## 3. Run the quickstart backend
 
 There are two ways to run the various language quickstarts in this repository. You can simply run the
 code directly, or you can choose to use Docker. If you would like to use Docker, skip to the
@@ -98,13 +98,7 @@ Once started with one of the commands below, the quickstart will be running on h
 ```
 $ cd ./node
 $ npm install
-$ node index.js
-
-open another terminal:
-
-$ cd ./node
-$ npm start
-
+$ ./start.sh
 ```
 
 ##### Python
@@ -117,7 +111,7 @@ $ cd ./python
 # source venv/bin/activate
 
 $ pip install -r requirements.txt
-$ python server.py
+$ $ ./start.sh
 ```
 
 ##### Ruby
@@ -125,7 +119,7 @@ $ python server.py
 ```
 $ cd ./ruby
 $ bundle
-$ bundle exec ruby app.rb
+$ $ ./start.sh
 ```
 
 ##### Go
@@ -133,7 +127,7 @@ $ bundle exec ruby app.rb
 ```
 $ cd ./go
 $ go build
-$ go run server.go
+$ $ ./start.sh
 ```
 
 ##### Java
@@ -142,6 +136,15 @@ $ go run server.go
 $ cd ./java
 $ mvn clean package
 $ ./start.sh
+```
+
+## 4. Run the quickstart frontend
+
+```
+$ cd ./frontend
+$ npm install
+$ npm start
+
 ```
 
 ### Run with Docker
@@ -169,7 +172,7 @@ Each of these should be used with a `language` argument, which is one of `node`,
 $ make up language=node
 ```
 
-The quickstart is now running on http://localhost:8000.
+The quickstart backend is now running on http://localhost:8000 and frontend on http://localhost:3000.
 
 If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
 `.env` file, simply run `make up language=node` again to rebuild and restart the container.
@@ -190,7 +193,7 @@ $ make stop language=node
 
 Some European institutions require an OAuth redirect authentication flow, where the end user is
 redirected to the bank’s website or mobile app to authenticate. For this flow, you should set
-`PLAID_REDIRECT_URI=http://localhost:8000/oauth-response.html` in `.env`. You will also need to
+`PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to
 register this localhost redirect URI in the [Plaid dashboard under Team Settings > API > Allowed
 redirect URIs][dashboard-api-section].
 

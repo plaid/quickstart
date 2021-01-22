@@ -9,7 +9,7 @@
 }
 
 .post {
-  margin: 2 * $unit 0px 2 * $unit 5 * $unit;
+  margin: 2 * $unit 0px 2 * $unit 3 * $unit;
   font-size: 1.4rem;
 }
 .endpointContents {
@@ -40,4 +40,5 @@
 .sendRequest {
   margin: 2 * $unit;
   width: 70%;
+  margin-left: 3 * $unit;
 }

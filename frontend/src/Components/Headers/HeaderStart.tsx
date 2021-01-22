@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import cx from "classnames";
+import Note from "plaid-threads/Note";
 
 import LinkButton from "../Link/LinkButton";
 
@@ -11,6 +12,7 @@ interface Props {
   linkSuccess: boolean;
   setLinkSuccess: (arg: boolean) => void;
   currentPath: string;
+  isError: boolean;
 }
 const HeaderStart = (props: Props) => {
   const [itemId, setItemId] = useState("");
@@ -33,6 +35,11 @@ const HeaderStart = (props: Props) => {
             to access their accounts via the Plaid API.
           </p>
           <div className={styles.linkButton}>
+            {props.isError && (
+              <Note error solid className={styles.runBackendError}>
+                No link token: please start the backend server
+              </Note>
+            )}
             {props.linkToken != null && !props.linkSuccess && (
               <LinkButton
                 setLinkSuccess={props.setLinkSuccess}

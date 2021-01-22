@@ -43,7 +43,7 @@ def empty_to_none(field):
 
 # Parameters used for the OAuth redirect Link flow.
 #
-# Set PLAID_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
+# Set PLAID_REDIRECT_URI to 'http://localhost:3000/'
 # The OAuth redirect flow requires an endpoint on the developer's website
 # that the bank website should redirect to. You will need to configure
 # this redirect URI for your client ID through the Plaid developer dashboard
@@ -55,18 +55,6 @@ client = plaid.Client(client_id=PLAID_CLIENT_ID,
                       environment=PLAID_ENV,
                       api_version='2019-05-29')
 
-@app.route('/')
-def index():
-  return render_template(
-    'index.html',
-  )
-
-# This is an endpoint defined for the OAuth flow to redirect to.
-@app.route('/oauth-response.html')
-def oauth_response():
-  return render_template(
-    'oauth-response.html',
-  )
 
 # We store the access_token in memory - in production, store it in a secure
 # persistent data store.

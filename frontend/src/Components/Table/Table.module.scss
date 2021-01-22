@@ -50,7 +50,8 @@
 
 .identityHeadersRow {
   display: grid;
-  grid-template-columns: 16% 32% 12% 40%;
+  // grid-template-columns: 16% 30% 14% 40%;
+  grid-template-columns: 25% 25% 25% 25%;
   grid-gap: $unit;
   border-top: 1px solid $black200;
   border-bottom: 1px solid $black1000;
@@ -70,7 +71,8 @@
 
 .identityDataRow {
   display: grid;
-  grid-template-columns: 16% 32% 12% 40%;
+  // grid-template-columns: 16% 30% 14% 40%;
+  grid-template-columns: 25% 25% 25% 25%;
   word-wrap: break-word;
   grid-gap: $unit;
 }

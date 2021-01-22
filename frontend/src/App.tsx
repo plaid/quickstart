@@ -9,14 +9,19 @@ import styles from "./App.module.scss";
 const App = () => {
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [linkSuccess, setLinkSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const generateToken = async () => {
     const response = await fetch("/api/create_link_token", {
-      method: "POST"
+      method: "POST",
     });
-    const data = await response.json();
-    setLinkToken(data.link_token);
-    localStorage.setItem("link_token", data.link_token);
+    if (response.status >= 200 && response.status <= 299) {
+      const data = await response.json();
+      if (data) setLinkToken(data.link_token);
+      localStorage.setItem("link_token", data.link_token);
+    } else {
+      setIsError(true);
+    }
   };
 
   useEffect(() => {
@@ -36,6 +41,7 @@ const App = () => {
           linkToken={linkToken}
           linkSuccess={linkSuccess}
           setLinkSuccess={setLinkSuccess}
+          isError={isError}
         />
         {linkSuccess && (
           <>

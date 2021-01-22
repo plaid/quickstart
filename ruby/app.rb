@@ -24,15 +24,6 @@ access_token = nil
 payment_id = nil
 item_id = nil
 
-get '/' do
-  File.read('../html/index.html')
-end
-
-# This is an endpoint defined for the OAuth flow to redirect to.
-get '/oauth-response.html' do
-  erb File.read('../html/oauth-response.html')
-end
-
 post '/api/info' do
   content_type :json
 

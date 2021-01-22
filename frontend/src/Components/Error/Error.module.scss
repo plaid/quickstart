@@ -13,7 +13,7 @@
 }
 
 .code {
-  margin: 2 * $unit 0px 2 * $unit 5 * $unit;
+  margin: 2 * $unit 0px 2 * $unit 3 * $unit;
   font-size: 1.4rem;
 }
 
@@ -60,5 +60,6 @@
 
 .learnMore {
   margin: 2 * $unit;
+  margin-left: 3 * $unit;
   width: 70%;
 }

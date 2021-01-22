@@ -286,7 +286,7 @@ export const transformIdentityData = (data: IdentityData) => {
       return phone.data;
     });
     const addresses = owner.addresses?.map((address) => {
-      return `${address.data!.street} ${address.data!.city} ${
+      return `${address.data!.street} ${address.data!.city}, ${
         address.data!.region
       } ${address.data!.postal_code}`;
     });
