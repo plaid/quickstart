@@ -21,11 +21,11 @@ const LinkButton: React.FC<Props> = (props: Props) => {
       const response = await fetch("/api/set_access_token", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          public_token: public_token
-        })
+          public_token: public_token,
+        }),
       });
       const data = await response.json();
       props.setItemId(data.item_id);
@@ -42,7 +42,7 @@ const LinkButton: React.FC<Props> = (props: Props) => {
     onSuccess,
     clientName: "hello world",
     env: "sandbox",
-    product: ["auth", "transactions"]
+    product: ["auth", "transactions"],
   };
 
   if (window.location.href.includes("?oauth_state_id=")) {
