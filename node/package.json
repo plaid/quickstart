@@ -1,56 +1,23 @@
 {
-  "name": "react_quickstart",
+  "name": "plaid-node-walkthrough",
   "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
-    "@types/jest": "^26.0.15",
-    "@types/node": "^12.0.0",
-    "@types/react": "^16.9.53",
-    "@types/react-dom": "^16.9.8",
-    "axios": "^0.21.1",
-    "classnames": "^2.2.6",
-    "envar": "^2.0.0",
-    "envvar": "^2.0.0",
-    "moment": "^2.29.1",
-    "node-sass": "^4.0.0",
-    "plaid": "^9.0.0-beta.3",
-    "plaid-threads": "^10.1.2",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-plaid-link": "^3.0.0",
-    "react-scripts": "4.0.1",
-    "typescript": "^4.0.3",
-    "web-vitals": "^0.2.4"
-  },
-  "proxy": "http://localhost:8000",
+  "description": "A sample app and accompanying walkthrough for the Plaid API.",
+  "main": "index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "node index.js",
+    "watch": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@types/classnames": "^2.2.11"
+  "author": "developers@plaid.com",
+  "repository": "https://github.com/plaid/quickstart",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "1.18.x",
+    "dotenv": "^8.2.0",
+    "ejs": "2.5.x",
+    "express": "4.16.x",
+    "moment": "2.22.x",
+    "nodemon": "^2.0.5",
+    "plaid": "6.x.x"
   }
 }
