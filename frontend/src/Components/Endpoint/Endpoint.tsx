@@ -8,7 +8,7 @@ import Error from "../Error/Error";
 import {
   DataItem,
   Categories,
-  ErrorDataItem,
+  ErrorDataItem
 } from "../../Utilities/dataUtilities";
 
 import styles from "./Endpoint.module.scss";
@@ -31,7 +31,10 @@ const Endpoint = (props: Props) => {
   const [error, setError] = useState<ErrorDataItem>({ error_type: "" });
 
   const getData = async () => {
-    const response = await fetch(`/api/${props.endpoint}`, { method: "GET" });
+    const response = await fetch(
+      `${process.env.REACT_APP_API_HOST}/api/${props.endpoint}`,
+      { method: "GET" }
+    );
     const data = await response.json();
     if (data.error != null) {
       setError(data.error);
