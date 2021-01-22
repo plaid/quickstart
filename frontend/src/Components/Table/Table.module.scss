@@ -17,6 +17,7 @@
   border-bottom: 1px solid $black1000;
   padding-top: 1.2rem;
   padding-bottom: $unit;
+  padding-left: $unit;
 }
 
 .dataRows {
@@ -39,6 +40,7 @@
   max-width: 25 * $unit;
   vertical-align: top;
   padding-top: 2 * $unit;
+  padding-left: $unit;
 }
 
 .identityTable {

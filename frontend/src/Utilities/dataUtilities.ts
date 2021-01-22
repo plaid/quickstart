@@ -410,8 +410,8 @@ export const transformItemData = (data: ItemData): Array<DataItem> => {
   return [
     {
       name: data.institution!.name!,
-      billed: data.item!.billed_products!.join(","),
-      available: data.item!.available_products!.join(","),
+      billed: data.item!.billed_products!.join(", "),
+      available: data.item!.available_products!.join(", "),
     },
   ];
 };
