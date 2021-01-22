@@ -9,6 +9,10 @@ x-environment: &QUICKSTART_ENVIRONMENT
   PLAID_ENV: ${PLAID_ENV}
 services:
   go:
+    networks:
+      - 'quickstart'
+    depends_on:
+      - 'frontend'
     build:
       context: .
       dockerfile: ./go/Dockerfile
@@ -16,6 +20,10 @@ services:
     environment:
       << : *QUICKSTART_ENVIRONMENT
   java:
+    networks:
+      - 'quickstart'
+    depends_on:
+      - 'frontend'
     build:
       context: .
       dockerfile: ./java/Dockerfile
@@ -23,6 +31,10 @@ services:
     environment:
       << : *QUICKSTART_ENVIRONMENT
   node:
+    networks:
+      - 'quickstart'
+    depends_on:
+      - 'frontend'
     build:
       context: .
       dockerfile: ./node/Dockerfile
@@ -30,6 +42,10 @@ services:
     environment:
       << : *QUICKSTART_ENVIRONMENT
   python:
+    networks:
+      - 'quickstart'
+    depends_on:
+      - 'frontend'
     build:
       context: .
       dockerfile: ./python/Dockerfile
@@ -37,9 +53,25 @@ services:
     environment:
       << : *QUICKSTART_ENVIRONMENT
   ruby:
+    networks:
+      - 'quickstart'
+    depends_on:
+      - 'frontend'
     build:
       context: .
       dockerfile: ./ruby/Dockerfile
     ports: ["8000:8000"]
     environment:
       << : *QUICKSTART_ENVIRONMENT
+  frontend:
+    environment:
+      - REACT_APP_API_HOST
+    networks:
+      - 'quickstart'
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    ports: ["3000:3000"]
+networks:
+  quickstart:
+    name: quickstart
