@@ -1,5 +1,5 @@
 # pull official base image
-FROM node:alpine
+FROM node:lts-alpine
 
 # set working directory
 WORKDIR /app
