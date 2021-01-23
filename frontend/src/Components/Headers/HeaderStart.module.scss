@@ -38,7 +38,7 @@
 .itemAccessContainer {
   display: flex;
   flex-direction: column;
-  height: 15 * $unit;
+  height: auto;
   width: 100%;
   box-shadow: $shadow-small;
   margin-top: 3 * $unit;

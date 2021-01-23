@@ -11,6 +11,8 @@ interface Props {
   linkToken: string | null;
   linkSuccess: boolean;
   setLinkSuccess: (arg: boolean) => void;
+  setIsItemAccess: (arg: boolean) => void;
+  isItemAccess: boolean;
   currentPath: string;
   isError: boolean;
 }
@@ -47,6 +49,7 @@ const HeaderStart = (props: Props) => {
                 setItemId={setItemId}
                 setAccessToken={setAccessToken}
                 currentPath={props.currentPath}
+                setIsItemAccess={props.setIsItemAccess}
               />
             )}
           </div>
@@ -54,10 +57,18 @@ const HeaderStart = (props: Props) => {
       )}
       {props.linkSuccess && (
         <>
-          <h4 className={styles.subtitle}>
-            Congrats! By linking an account, you have created an{" "}
-            <span className={styles.itemText}>Item</span>.
-          </h4>
+          {props.isItemAccess && (
+            <h4 className={styles.subtitle}>
+              Congrats! By linking an account, you have created an{" "}
+              <span className={styles.itemText}>Item</span>.
+            </h4>
+          )}
+          {!props.isItemAccess && (
+            <h4 className={styles.subtitle}>
+              Unable to create an <span className={styles.itemText}>Item</span>.
+              Please check your backend server
+            </h4>
+          )}
           <div className={styles.itemAccessContainer}>
             <p className={styles.itemAccessRow}>
               <span className={styles.idName}>item_id</span>
@@ -69,10 +80,12 @@ const HeaderStart = (props: Props) => {
               <span className={styles.tokenText}>{accessToken}</span>
             </p>
           </div>
-          <p className={styles.requests}>
-            Now that you have an access token, you can make all of the following
-            requests:
-          </p>
+          {props.isItemAccess && (
+            <p className={styles.requests}>
+              Now that you have an access token, you can make all of the
+              following requests:
+            </p>
+          )}
         </>
       )}
     </div>

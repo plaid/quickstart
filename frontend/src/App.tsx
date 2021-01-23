@@ -10,6 +10,7 @@ const App = () => {
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [linkSuccess, setLinkSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isItemAccess, setIsItemAccess] = useState(false);
 
   const generateToken = async () => {
     const response = await fetch("/api/create_link_token", {
@@ -41,9 +42,11 @@ const App = () => {
           linkToken={linkToken}
           linkSuccess={linkSuccess}
           setLinkSuccess={setLinkSuccess}
+          setIsItemAccess={setIsItemAccess}
+          isItemAccess={isItemAccess}
           isError={isError}
         />
-        {linkSuccess && (
+        {linkSuccess && isItemAccess && (
           <>
             <Products />
             <Items />

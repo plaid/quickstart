@@ -9,6 +9,7 @@ interface Props {
   setLinkSuccess: (arg: boolean) => void;
   setItemId: (arg: string) => void;
   setAccessToken: (arg: string) => void;
+  setIsItemAccess: (arg: boolean) => void;
   currentPath: string;
 }
 
@@ -27,12 +28,20 @@ const LinkButton: React.FC<Props> = (props: Props) => {
           public_token: public_token,
         }),
       });
-      const data = await response.json();
-      props.setItemId(data.item_id);
-      props.setAccessToken(data.access_token);
+      if (response.status >= 200 && response.status <= 200) {
+        const data = await response.json();
+        props.setItemId(data.item_id);
+        props.setAccessToken(data.access_token);
+        props.setIsItemAccess(true);
+      } else {
+        props.setItemId("Error: no item_id retrieved");
+        props.setAccessToken("Error: no access_token retrieved");
+        props.setIsItemAccess(false);
+      }
     };
     getToken();
     props.setLinkSuccess(true);
+
     window.history.pushState("", "", "/");
   }, []);
 
