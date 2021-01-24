@@ -7,9 +7,8 @@ import Items from "./Components/Items/Items";
 import styles from "./App.module.scss";
 
 const App = () => {
-  const [linkToken, setLinkToken] = useState<string | null>(null);
+  const [linkToken, setLinkToken] = useState<string | null>("");
   const [linkSuccess, setLinkSuccess] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [isItemAccess, setIsItemAccess] = useState(false);
 
   const generateToken = async () => {
@@ -19,14 +18,15 @@ const App = () => {
     if (response.status >= 200 && response.status <= 299) {
       const data = await response.json();
       if (data) setLinkToken(data.link_token);
-      localStorage.setItem("link_token", data.link_token);
+      localStorage.setItem("link_token", data.link_token); //to use later for Oauth
     } else {
-      setIsError(true);
+      setLinkToken(null);
     }
   };
 
   useEffect(() => {
-    // do not generate a new token for oauth second Link open
+    // do not generate a new token for oauth second Link open; instead
+    //setLinkTokean from first Link open that was set in local storage
     if (window.location.href.includes("?oauth_state_id=")) {
       setLinkToken(localStorage.getItem("link_token"));
       return;
@@ -44,7 +44,6 @@ const App = () => {
           setLinkSuccess={setLinkSuccess}
           setIsItemAccess={setIsItemAccess}
           isItemAccess={isItemAccess}
-          isError={isError}
         />
         {linkSuccess && isItemAccess && (
           <>

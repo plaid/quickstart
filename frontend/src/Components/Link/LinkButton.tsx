@@ -28,7 +28,7 @@ const LinkButton: React.FC<Props> = (props: Props) => {
           public_token: public_token,
         }),
       });
-      if (response.status >= 200 && response.status <= 200) {
+      if (response.status >= 200 && response.status <= 299) {
         const data = await response.json();
         props.setItemId(data.item_id);
         props.setAccessToken(data.access_token);

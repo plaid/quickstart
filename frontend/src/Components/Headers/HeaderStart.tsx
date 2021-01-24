@@ -14,7 +14,6 @@ interface Props {
   setIsItemAccess: (arg: boolean) => void;
   isItemAccess: boolean;
   currentPath: string;
-  isError: boolean;
 }
 const HeaderStart = (props: Props) => {
   const [itemId, setItemId] = useState("");
@@ -36,13 +35,14 @@ const HeaderStart = (props: Props) => {
             interact with in order to link their accounts to Plaid and allow you
             to access their accounts via the Plaid API.
           </p>
-          <div className={styles.linkButton}>
-            {props.isError && (
-              <Note error solid className={styles.runBackendError}>
-                No link token: please start the backend server
-              </Note>
-            )}
-            {props.linkToken != null && !props.linkSuccess && (
+          {props.linkToken == null && (
+            <Note error solid className={styles.runBackendError}>
+              No link token: please start the backend server with your Client ID
+              and Secret
+            </Note>
+          )}
+          {props.linkToken != null && (
+            <div className={styles.linkButton}>
               <LinkButton
                 setLinkSuccess={props.setLinkSuccess}
                 linkToken={props.linkToken}
@@ -51,8 +51,8 @@ const HeaderStart = (props: Props) => {
                 currentPath={props.currentPath}
                 setIsItemAccess={props.setIsItemAccess}
               />
-            )}
-          </div>
+            </div>
+          )}
         </>
       )}
       {props.linkSuccess && (
