@@ -10,6 +10,10 @@ require 'sinatra'
 
 set :port, ENV['APP_PORT'] || 8000
 
+# disable CSRF warning on localhost due to usage of local /api proxy in react app.
+# delete this for a production application.
+set :protection, :except => [:json_csrf]
+
 client = Plaid::Client.new(env: ENV['PLAID_ENV'] || 'sandbox',
                            client_id: ENV['PLAID_CLIENT_ID'],
                            secret: ENV['PLAID_SECRET'])
