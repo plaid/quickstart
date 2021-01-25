@@ -9,7 +9,7 @@ import styles from "./Table.module.scss";
 interface Props {
   data: Array<DataItem>;
   categories: Array<Categories>;
-  identity?: boolean;
+  identity: boolean;
 }
 
 const formatter = new Intl.NumberFormat("en-US", {

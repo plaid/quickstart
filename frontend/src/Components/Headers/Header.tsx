@@ -3,9 +3,9 @@ import ReactDOM from "react-dom";
 import cx from "classnames";
 import Note from "plaid-threads/Note";
 
-import LinkButton from "../Link/LinkButton";
+import Link from "../Link/Link";
 
-import styles from "./HeaderStart.module.scss";
+import styles from "./Header.module.scss";
 
 interface Props {
   linkToken: string | null;
@@ -15,7 +15,7 @@ interface Props {
   isItemAccess: boolean;
   currentPath: string;
 }
-const HeaderStart = (props: Props) => {
+const Header = (props: Props) => {
   const [itemId, setItemId] = useState("");
   const [accessToken, setAccessToken] = useState("");
 
@@ -43,7 +43,7 @@ const HeaderStart = (props: Props) => {
           )}
           {props.linkToken != null && (
             <div className={styles.linkButton}>
-              <LinkButton
+              <Link
                 setLinkSuccess={props.setLinkSuccess}
                 linkToken={props.linkToken}
                 setItemId={setItemId}
@@ -92,6 +92,6 @@ const HeaderStart = (props: Props) => {
   );
 };
 
-HeaderStart.displayName = "HeaderStart";
+Header.displayName = "Header";
 
-export default HeaderStart;
+export default Header;

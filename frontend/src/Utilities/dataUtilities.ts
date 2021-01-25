@@ -71,11 +71,11 @@ interface ItemDataItem {
 }
 
 export interface ErrorDataItem {
-  error_type?: string;
-  error_code?: string;
-  error_message?: string;
-  display_message?: string | null;
-  status_code?: number;
+  error_type: string;
+  error_code: string;
+  error_message: string;
+  display_message: string | null;
+  status_code: number | null;
 }
 
 //all possible product data interfaces

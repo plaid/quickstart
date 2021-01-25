@@ -25,7 +25,6 @@ const Items = () => (
         information."
         transformData={transformItemData}
       />
-
       <Endpoint
         endpoint="accounts"
         schema="/accounts/get"

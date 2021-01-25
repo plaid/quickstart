@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import HeaderStart from "./Components/Headers/HeaderStart";
+import Header from "./Components/Headers/Header";
 import Products from "./Components/Products/Products";
 import Items from "./Components/Items/Items";
 
@@ -37,7 +37,7 @@ const App = () => {
   return (
     <div className={styles.App}>
       <div className={styles.container}>
-        <HeaderStart
+        <Header
           currentPath={window.location.href}
           linkToken={linkToken}
           linkSuccess={linkSuccess}

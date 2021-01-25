@@ -7,7 +7,6 @@ import {
   identityCategories,
   balanceCategories,
   investmentsCategories,
-  liabilitiesCategories,
 } from "../../Utilities/dataUtilities";
 import {
   transformAuthData,
@@ -15,7 +14,6 @@ import {
   transformBalanceData,
   transformInvestmentsData,
   transformIdentityData,
-  transformLiabilitiesData,
 } from "../../Utilities/dataUtilities";
 
 import styles from "./Products.module.scss";
@@ -42,7 +40,6 @@ const Products = () => {
           description="Retrieve transactions for credit and depository accounts."
           transformData={transformTransactionsData}
         />
-
         <Endpoint
           endpoint="identity"
           name="Identity"
@@ -71,14 +68,6 @@ const Products = () => {
         to market segments."
           transformData={transformInvestmentsData}
         />
-        {/* <Endpoint
-          endpoint="liabilities"
-          name="Liabilities"
-          categories={liabilitiesCategories}
-          schema="/liabilities/get/"
-          description="Retrieve student loans, mortgages, and credit cards."
-          transformData={transformLiabilitiesData}
-        /> */}
       </div>
     </>
   );

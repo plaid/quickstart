@@ -9,6 +9,7 @@ import {
   DataItem,
   Categories,
   ErrorDataItem,
+  Data,
 } from "../../Utilities/dataUtilities";
 
 import styles from "./Endpoint.module.scss";
@@ -19,16 +20,20 @@ interface Props {
   categories: Array<Categories>;
   schema: string;
   description: string;
-  transformData?: (arg: any) => Array<DataItem>;
+  transformData: (arg: any) => Array<DataItem>;
 }
-
-type Data = Array<DataItem>;
 
 const Endpoint = (props: Props) => {
   const [showTable, setShowTable] = useState(false);
   const [transformedData, setTransformedData] = useState<Data>([]);
   const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<ErrorDataItem>({ error_type: "" });
+  const [error, setError] = useState<ErrorDataItem>({
+    error_type: "",
+    error_code: "",
+    error_message: "",
+    display_message: "",
+    status_code: null,
+  });
 
   const getData = async () => {
     const response = await fetch(`/api/${props.endpoint}`, { method: "GET" });
@@ -37,7 +42,7 @@ const Endpoint = (props: Props) => {
       setError(data.error);
       setIsError(true);
     } else {
-      setTransformedData(props.transformData!(data)); // put data in propeer format for each individual product
+      setTransformedData(props.transformData(data)); // put data in propeer format for each individual product
       setShowTable(true);
     }
   };

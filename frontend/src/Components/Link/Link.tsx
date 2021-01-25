@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
-import styles from "./LinkButton.module.scss";
+import styles from "./Link.module.scss";
 
 interface Props {
   linkToken: string;
@@ -13,7 +13,7 @@ interface Props {
   currentPath: string;
 }
 
-const LinkButton: React.FC<Props> = (props: Props) => {
+const Link: React.FC<Props> = (props: Props) => {
   // const [isOauth, setIsOauth] = useState(false);
 
   const onSuccess = React.useCallback((public_token: string, metadata) => {
@@ -78,6 +78,6 @@ const LinkButton: React.FC<Props> = (props: Props) => {
   );
 };
 
-LinkButton.displayName = "LinkButton";
+Link.displayName = "Link";
 
-export default LinkButton;
+export default Link;

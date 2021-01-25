@@ -1,6 +1,5 @@
 $threads-font-path: "~plaid-threads/fonts";
 @import "~plaid-threads/scss/typography";
-
 @import "~plaid-threads/scss/variables";
 
 * {
@@ -11,20 +10,12 @@ $threads-font-path: "~plaid-threads/fonts";
   position: absolute;
   height: 100vh;
   width: 100vw;
-  box-sizing: border-box;
 }
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 70 * $unit;
-
   width: 40%;
   margin: auto;
-}
-
-.subheader {
-  font-size: 36px;
-
-  margin-bottom: 25px;
 }
