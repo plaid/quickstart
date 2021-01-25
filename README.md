@@ -91,7 +91,7 @@ things such as `bash`, `grep`, `cat`, etc.
 
 #### Running
 
-Once started with one of the commands below, the quickstart will be running on http://localhost:8000 for the backend and http://localhost:3000 for the frontend
+Once started with one of the commands below, the quickstart will be running on http://localhost:8000 for the backend. Enter the additional commands in step 4 to run the frontend which will run on http://localhost:3000.
 
 ##### Node
 
