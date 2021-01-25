@@ -67,7 +67,13 @@ const Error = (props: Props) => {
             </span>
           </div>
         </div>
-        <Button small wide className={styles.learnMore} href={path}>
+        <Button
+          small
+          wide
+          className={styles.learnMore}
+          target="_blank"
+          href={path}
+        >
           Learn More
         </Button>
       </div>

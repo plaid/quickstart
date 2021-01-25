@@ -60,7 +60,6 @@ const client = new plaid.Client({
 });
 
 const app = express();
-// app.use(express.static('public'));
 app.use(
   bodyParser.urlencoded({
     extended: false,

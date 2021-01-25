@@ -276,16 +276,16 @@ export const transformIdentityData = (data: IdentityData) => {
   const final: Array<DataItem> = [];
   const identityData = data.identity![0];
   identityData.owners!.forEach((owner) => {
-    const names = owner.names?.map((name) => {
+    const names = owner.names!.map((name) => {
       return name;
     });
-    const emails = owner.emails?.map((email) => {
+    const emails = owner.emails!.map((email) => {
       return email.data;
     });
-    const phones = owner.phone_numbers?.map((phone) => {
+    const phones = owner.phone_numbers!.map((phone) => {
       return phone.data;
     });
-    const addresses = owner.addresses?.map((address) => {
+    const addresses = owner.addresses!.map((address) => {
       return `${address.data!.street} ${address.data!.city}, ${
         address.data!.region
       } ${address.data!.postal_code}`;

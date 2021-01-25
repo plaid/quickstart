@@ -84,9 +84,7 @@ func main() {
 	r := gin.Default()
 
 	r.POST("/api/info", info)
-	// r.GET("/", func(c *gin.Context) {
-	// 	c.HTML(http.StatusOK, "index.html", gin.H{})
-	// })
+	
 
 	// For OAuth flows, the process looks as follows.
 	// 1. Create a link token with the redirectURI (as white listed at https://dashboard.plaid.com/team/api).
@@ -94,9 +92,7 @@ func main() {
 	// additional parameters (as required by OAuth standards and Plaid).
 	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
 	// from step 2.
-	// r.GET("/oauth-response.html", func(c *gin.Context) {
-	// 	c.HTML(http.StatusOK, "oauth-response.html", gin.H{})
-	// })
+	
 
 	r.POST("/api/set_access_token", getAccessToken)
 	r.POST("/api/create_link_token_for_payment", createLinkTokenForPayment)

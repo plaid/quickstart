@@ -7,9 +7,6 @@ COPY --chown=node:node ./node/package*.json /opt/app/
 USER node
 RUN npm install
 
-# COPY --chown=node:node ./static/ ./public/static/
-# COPY --chown=node:node ./html/ ./views/
-
 COPY --chown=node:node ./node/index.js ./
 
 EXPOSE 8000

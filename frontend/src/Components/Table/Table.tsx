@@ -38,7 +38,7 @@ const Table = (props: Props) => {
       <div className={styles.identityDataRow}>
         {props.categories.map((category: Categories) => {
           return (
-            <span className={styles.idendityDataField}>
+            <span className={styles.identityDataField}>
               {item[category.field]}
             </span>
           );
