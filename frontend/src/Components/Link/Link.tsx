@@ -22,11 +22,9 @@ const Link: React.FC<Props> = (props: Props) => {
       const response = await fetch("/api/set_access_token", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
         },
-        body: JSON.stringify({
-          public_token: public_token,
-        }),
+        body: `public_token=${public_token}`
       });
       if (!response.ok) {
         props.setItemId(`no item_id retrieved`);
@@ -51,7 +49,7 @@ const Link: React.FC<Props> = (props: Props) => {
     onSuccess,
     clientName: "hello world",
     env: "sandbox",
-    product: ["auth", "transactions"],
+    product: ["auth", "transactions"]
   };
 
   if (window.location.href.includes("?oauth_state_id=")) {
