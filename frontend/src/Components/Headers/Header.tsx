@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import ReactDOM from "react-dom";
-import cx from "classnames";
 import Note from "plaid-threads/Note";
 
 import Link from "../Link/Link";
@@ -35,6 +33,7 @@ const Header = (props: Props) => {
             interact with in order to link their accounts to Plaid and allow you
             to access their accounts via the Plaid API.
           </p>
+          {/* message if backend is not running and there is no link token */}
           {props.linkToken == null && (
             <Note error solid className={styles.runBackendError}>
               No link token: please start the backend server with your Client ID

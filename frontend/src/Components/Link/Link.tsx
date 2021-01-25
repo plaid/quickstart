@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
-import styles from "./Link.module.scss";
+import styles from "./LinkButton.module.scss";
 
 interface Props {
   linkToken: string;
