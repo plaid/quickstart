@@ -29,11 +29,11 @@ const Table = (props: Props) => {
     .slice(0, 8);
 
   //identity table to accomodate odd data structure of identity product
-  const identittyHeaders = props.categories.map((category) => (
+  const identityHeaders = props.categories.map((category) => (
     <span className={styles.identityHeader}>{category.title}</span>
   ));
 
-  const idendityRows = props.data.map((item: DataItem | any) => {
+  const identityRows = props.data.map((item: DataItem | any) => {
     return (
       <div className={styles.identityDataRow}>
         {props.categories.map((category: Categories) => {
@@ -50,8 +50,8 @@ const Table = (props: Props) => {
   if (props.identity) {
     return (
       <div className={styles.identityTable}>
-        <div className={styles.identityHeadersRow}>{identittyHeaders}</div>{" "}
-        <div className={styles.identityDataBody}>{idendityRows}</div>
+        <div className={styles.identityHeadersRow}>{identityHeaders}</div>{" "}
+        <div className={styles.identityDataBody}>{identityRows}</div>
       </div>
     );
   }

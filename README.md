@@ -111,7 +111,7 @@ $ cd ./python
 # source venv/bin/activate
 
 $ pip install -r requirements.txt
-$ $ ./start.sh
+$ ./start.sh
 ```
 
 ##### Ruby
@@ -119,7 +119,7 @@ $ $ ./start.sh
 ```
 $ cd ./ruby
 $ bundle
-$ $ ./start.sh
+$ ./start.sh
 ```
 
 ##### Go
@@ -127,7 +127,7 @@ $ $ ./start.sh
 ```
 $ cd ./go
 $ go build
-$ $ ./start.sh
+$ ./start.sh
 ```
 
 ##### Java

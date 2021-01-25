@@ -34,8 +34,10 @@ const Endpoint = (props: Props) => {
     display_message: "",
     status_code: null,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const getData = async () => {
+    setIsLoading(true);
     const response = await fetch(`/api/${props.endpoint}`, { method: "GET" });
     const data = await response.json();
     if (data.error != null) {
@@ -45,6 +47,7 @@ const Endpoint = (props: Props) => {
       setTransformedData(props.transformData(data)); // put data in propeer format for each individual product
       setShowTable(true);
     }
+    setIsLoading(false);
   };
 
   return (
@@ -71,8 +74,8 @@ const Endpoint = (props: Props) => {
           className={styles.sendRequest}
           onClick={getData}
         >
-          {" "}
-          Send Request
+          {!isLoading && `Send Request`}
+          {isLoading && `Loading...`}
         </Button>
       </div>
       {showTable && (
