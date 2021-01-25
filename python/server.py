@@ -55,18 +55,6 @@ client = plaid.Client(client_id=PLAID_CLIENT_ID,
                       environment=PLAID_ENV,
                       api_version='2019-05-29')
 
-# @app.route('/')
-# def index():
-#   return render_template(
-#     'index.html',
-#   )
-
-# # This is an endpoint defined for the OAuth flow to redirect to.
-# @app.route('/oauth-response.html')
-# def oauth_response():
-#   return render_template(
-#     'oauth-response.html',
-#   )
 
 # We store the access_token in memory - in production, store it in a secure
 # persistent data store.

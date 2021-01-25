@@ -82,10 +82,6 @@ func init() {
 
 func main() {
 	r := gin.Default()
-	// mainPage := "../html/index.html"
-	// oauthPage := "../html/oauth-response.html"
-	// r.LoadHTMLFiles(mainPage, oauthPage)
-	// r.Static("/static", "../static")
 
 	r.POST("/api/info", info)
 	// r.GET("/", func(c *gin.Context) {

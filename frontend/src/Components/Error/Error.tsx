@@ -35,7 +35,7 @@ const Error = (props: Props) => {
     setPath(
       `https://plaid.com/docs/errors/${errorPath}/#${props.error.error_code?.toLowerCase()}`
     );
-  }, []);
+  }, [props.error]);
 
   return (
     <>

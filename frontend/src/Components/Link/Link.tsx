@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
-
-import styles from "./LinkButton.module.scss";
 
 interface Props {
   linkToken: string;
@@ -16,32 +14,35 @@ interface Props {
 const Link: React.FC<Props> = (props: Props) => {
   // const [isOauth, setIsOauth] = useState(false);
 
-  const onSuccess = React.useCallback((public_token: string, metadata) => {
-    // send public_token to server
-    const setToken = async () => {
-      const response = await fetch("/api/set_access_token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-        },
-        body: `public_token=${public_token}`
-      });
-      if (!response.ok) {
-        props.setItemId(`no item_id retrieved`);
-        props.setAccessToken(`no access_token retrieved`);
-        props.setIsItemAccess(false);
-      } else {
-        const data = await response.json();
-        props.setItemId(data.item_id);
-        props.setAccessToken(data.access_token);
-        props.setIsItemAccess(true);
-      }
-    };
-    setToken();
-    props.setLinkSuccess(true);
+  const onSuccess = React.useCallback(
+    (public_token: string) => {
+      // send public_token to server
+      const setToken = async () => {
+        const response = await fetch("/api/set_access_token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+          },
+          body: `public_token=${public_token}`,
+        });
+        if (!response.ok) {
+          props.setItemId(`no item_id retrieved`);
+          props.setAccessToken(`no access_token retrieved`);
+          props.setIsItemAccess(false);
+        } else {
+          const data = await response.json();
+          props.setItemId(data.item_id);
+          props.setAccessToken(data.access_token);
+          props.setIsItemAccess(true);
+        }
+      };
+      setToken();
+      props.setLinkSuccess(true);
 
-    window.history.pushState("", "", "/");
-  }, []);
+      window.history.pushState("", "", "/");
+    },
+    [props]
+  );
 
   let isOauth = false;
   const config: Parameters<typeof usePlaidLink>[0] = {
@@ -49,7 +50,7 @@ const Link: React.FC<Props> = (props: Props) => {
     onSuccess,
     clientName: "hello world",
     env: "sandbox",
-    product: ["auth", "transactions"]
+    product: ["auth", "transactions"],
   };
 
   if (window.location.href.includes("?oauth_state_id=")) {
@@ -59,7 +60,7 @@ const Link: React.FC<Props> = (props: Props) => {
     isOauth = true;
   }
 
-  const { open, ready, error } = usePlaidLink(config);
+  const { open, ready } = usePlaidLink(config);
 
   useEffect(() => {
     if (isOauth && ready) {

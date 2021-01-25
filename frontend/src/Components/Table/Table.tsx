@@ -1,6 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
-import cx from "classnames";
 
 import { DataItem, Categories } from "../../Utilities/dataUtilities";
 
@@ -11,12 +9,6 @@ interface Props {
   categories: Array<Categories>;
   identity: boolean;
 }
-
-const formatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 0,
-});
 
 const Table = (props: Props) => {
   // regular table
