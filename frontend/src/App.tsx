@@ -15,12 +15,12 @@ const App = () => {
     const response = await fetch("/api/create_link_token", {
       method: "POST",
     });
-    if (response.status >= 200 && response.status <= 299) {
+    if (!response.ok) {
+      setLinkToken(null);
+    } else {
       const data = await response.json();
       if (data) setLinkToken(data.link_token);
       localStorage.setItem("link_token", data.link_token); //to use later for Oauth
-    } else {
-      setLinkToken(null);
     }
   };
 

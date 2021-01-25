@@ -16,9 +16,9 @@ interface Props {
 const LinkButton: React.FC<Props> = (props: Props) => {
   // const [isOauth, setIsOauth] = useState(false);
 
-  const onSuccess = React.useCallback((public_token: string) => {
+  const onSuccess = React.useCallback((public_token: string, metadata) => {
     // send public_token to server
-    const getToken = async () => {
+    const setToken = async () => {
       const response = await fetch("/api/set_access_token", {
         method: "POST",
         headers: {
@@ -28,25 +28,25 @@ const LinkButton: React.FC<Props> = (props: Props) => {
           public_token: public_token,
         }),
       });
-      if (response.status >= 200 && response.status <= 299) {
+      if (!response.ok) {
+        props.setItemId(`no item_id retrieved`);
+        props.setAccessToken(`no access_token retrieved`);
+        props.setIsItemAccess(false);
+      } else {
         const data = await response.json();
         props.setItemId(data.item_id);
         props.setAccessToken(data.access_token);
         props.setIsItemAccess(true);
-      } else {
-        props.setItemId("Error: no item_id retrieved");
-        props.setAccessToken("Error: no access_token retrieved");
-        props.setIsItemAccess(false);
       }
     };
-    getToken();
+    setToken();
     props.setLinkSuccess(true);
 
     window.history.pushState("", "", "/");
   }, []);
 
   let isOauth = false;
-  let config: Parameters<typeof usePlaidLink>[0] = {
+  const config: Parameters<typeof usePlaidLink>[0] = {
     token: props.linkToken,
     onSuccess,
     clientName: "hello world",
@@ -61,7 +61,7 @@ const LinkButton: React.FC<Props> = (props: Props) => {
     isOauth = true;
   }
 
-  let { open, ready, error } = usePlaidLink(config);
+  const { open, ready, error } = usePlaidLink(config);
 
   useEffect(() => {
     if (isOauth && ready) {
