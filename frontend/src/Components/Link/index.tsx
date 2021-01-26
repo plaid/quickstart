@@ -12,8 +12,6 @@ interface Props {
 }
 
 const Link: React.FC<Props> = (props: Props) => {
-  // const [isOauth, setIsOauth] = useState(false);
-
   const onSuccess = React.useCallback(
     (public_token: string) => {
       // send public_token to server
@@ -69,11 +67,9 @@ const Link: React.FC<Props> = (props: Props) => {
   }, [ready, open, isOauth]);
 
   return (
-    <>
-      <Button type="button" large onClick={() => open()} disabled={!ready}>
-        Launch Link
-      </Button>
-    </>
+    <Button type="button" large onClick={() => open()} disabled={!ready}>
+      Launch Link
+    </Button>
   );
 };
 

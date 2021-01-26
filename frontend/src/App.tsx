@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
 
-import Header from "./Components/Headers/Header";
-import Products from "./Components/Products/Products";
-import Items from "./Components/Items/Items";
+import Header from "./Components/Headers";
+import Products from "./Components/Types/Products";
+import Items from "./Components/Types/Items";
+
+import Context from "./Context";
+import DocsProvider from "./Context";
 
 import styles from "./App.module.scss";
 
 const App = () => {
-  const [linkToken, setLinkToken] = useState<string | null>("");
+  const [linkToken, setLinkToken] = useState<string | null>(null);
   const [linkSuccess, setLinkSuccess] = useState(false);
   const [isItemAccess, setIsItemAccess] = useState(false);
+  const [context, setContext] = useState(Context);
 
   const generateToken = async () => {
     const response = await fetch("/api/create_link_token", {
@@ -25,8 +29,9 @@ const App = () => {
   };
 
   useEffect(() => {
-    // do not generate a new token for oauth second Link open; instead
-    //setLinkTokean from first Link open that was set in local storage
+    console.log(context.linkSuccess);
+    // do not generate a new token for OAuth redirect; instead
+    // setLinkToken from localStorage
     if (window.location.href.includes("?oauth_state_id=")) {
       setLinkToken(localStorage.getItem("link_token"));
       return;
@@ -35,24 +40,27 @@ const App = () => {
   }, []);
 
   return (
-    <div className={styles.App}>
-      <div className={styles.container}>
-        <Header
-          currentPath={window.location.href}
-          linkToken={linkToken}
-          linkSuccess={linkSuccess}
-          setLinkSuccess={setLinkSuccess}
-          setIsItemAccess={setIsItemAccess}
-          isItemAccess={isItemAccess}
-        />
-        {linkSuccess && isItemAccess && (
-          <>
-            <Products />
-            <Items />
-          </>
-        )}
+    // @ts-ignore
+    <DocsProvider>
+      <div className={styles.App}>
+        <div className={styles.container}>
+          <Header
+            currentPath={window.location.href}
+            linkToken={linkToken}
+            linkSuccess={linkSuccess}
+            setLinkSuccess={setLinkSuccess}
+            setIsItemAccess={setIsItemAccess}
+            isItemAccess={isItemAccess}
+          />
+          {linkSuccess && isItemAccess && (
+            <>
+              <Products />
+              <Items />
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </DocsProvider>
   );
 };
 

@@ -28,7 +28,6 @@
 
 .linkButton {
   margin-top: 3 * $unit;
-  width: 200px;
 }
 
 .itemText {
@@ -59,15 +58,13 @@
   padding: 2 * $unit 3 * $unit 2 * $unit 5 * $unit;
   flex: 1;
   font-weight: bold;
-  font-family: "Inconsolata";
-  letter-spacing: -0.24px;
+  font-family: $font-stack-monospace;
 }
 
 .tokenText {
   padding: 2 * $unit 3 * $unit 2 * $unit 0;
   flex: 5;
-  font-family: "Inconsolata";
-  letter-spacing: -0.24px;
+  font-family: $font-stack-monospace;
 }
 
 .requests {

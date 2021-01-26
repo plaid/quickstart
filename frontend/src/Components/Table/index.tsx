@@ -1,8 +1,8 @@
 import React from "react";
 
-import { DataItem, Categories } from "../../Utilities/dataUtilities";
+import { DataItem, Categories } from "../../dataUtilities";
 
-import styles from "./Table.module.scss";
+import styles from "./index.module.scss";
 
 interface Props {
   data: Array<DataItem>;

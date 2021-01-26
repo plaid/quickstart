@@ -12,6 +12,7 @@
   margin: 2 * $unit 0px 2 * $unit 3 * $unit;
   font-size: 1.4rem;
 }
+
 .endpointContents {
   margin: 3 * $unit 4 * $unit;
   font-size: 1.2rem;
@@ -29,9 +30,10 @@
 
 .schema {
   font-size: 2 * $unit;
-  font-family: "Inconsolata";
+  font-family: $font-stack-monospace;
   letter-spacing: -0.24px;
 }
+
 .endpointDescription {
   font-size: 1.2rem;
   line-height: normal;

@@ -52,7 +52,6 @@
 
 .identityHeadersRow {
   display: grid;
-  // grid-template-columns: 16% 30% 14% 40%;
   grid-template-columns: 25% 25% 25% 25%;
   grid-gap: $unit;
   border-top: 1px solid $black200;
@@ -68,12 +67,11 @@
 }
 
 .identityDataBody {
-  margin-top: 20px;
+  margin-top: 2 * $unit;
 }
 
 .identityDataRow {
   display: grid;
-  // grid-template-columns: 16% 30% 14% 40%;
   grid-template-columns: 25% 25% 25% 25%;
   word-wrap: break-word;
   grid-gap: $unit;

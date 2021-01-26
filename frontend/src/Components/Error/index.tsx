@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import Button from "plaid-threads/Button";
 import Note from "plaid-threads/Note";
 
-import { ErrorDataItem } from "../../Utilities/dataUtilities";
+import { ErrorDataItem } from "../../dataUtilities";
 
-import styles from "./Error.module.scss";
+import styles from "./index.module.scss";
+
 interface Props {
   error: ErrorDataItem;
 }
@@ -42,7 +43,7 @@ const Error = (props: Props) => {
       <div className={styles.errorTop}></div>
       <div className={styles.errorContainer}>
         <Note error className={styles.code}>
-          {props.error.status_code}
+          <code>{props.error.status_code}</code>
         </Note>
         <div className={styles.errorContents}>
           <div className={styles.errorItem}>

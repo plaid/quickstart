@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Note from "plaid-threads/Note";
+import { Context } from "../../Context";
 
-import Link from "../Link/Link";
+import Link from "../Link";
 
-import styles from "./Header.module.scss";
+import styles from "./index.module.scss";
 
 interface Props {
   linkToken: string | null;
@@ -13,13 +14,17 @@ interface Props {
   isItemAccess: boolean;
   currentPath: string;
 }
+
+const { testBoolean } = useContext(Context);
+
 const Header = (props: Props) => {
   const [itemId, setItemId] = useState("");
   const [accessToken, setAccessToken] = useState("");
 
+  console.log("test", testBoolean);
+
   return (
     <div className={styles.grid}>
-      {" "}
       <h3 className={styles.title}>Plaid Quickstart</h3>
       {!props.linkSuccess && (
         <>
@@ -36,8 +41,8 @@ const Header = (props: Props) => {
           {/* message if backend is not running and there is no link token */}
           {props.linkToken == null && (
             <Note error solid className={styles.runBackendError}>
-              No link token: please start the backend server with your Client ID
-              and Secret
+              Unable to fetch link_token: please make sure your backend server
+              is running.
             </Note>
           )}
           {props.linkToken != null && (

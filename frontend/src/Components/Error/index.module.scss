@@ -14,7 +14,6 @@
 
 .code {
   margin: 2 * $unit 0px 2 * $unit 3 * $unit;
-  font-size: 1.4rem;
 }
 
 .errorContents {
@@ -35,7 +34,7 @@
 
 .errorData {
   line-height: normal;
-  font-family: "Inconsolata";
+  font-family: $font-stack-monospace;
   letter-spacing: 0.25px;
 }
 
@@ -49,7 +48,7 @@
   top: 50%;
   height: 6px;
   width: 100%;
-  background-color: #ffd7dc;
+  background-color: $red200;
   z-index: -1;
 }
 

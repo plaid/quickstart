@@ -7,15 +7,15 @@ $threads-font-path: "~plaid-threads/fonts";
 }
 
 .App {
-  position: absolute;
   height: 100vh;
   width: 100vw;
 }
+
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 70 * $unit;
-  max-width: 700px;
-  margin: auto;
+  max-width: 84 * $unit;
+  margin: 0 auto;
 }
