@@ -29,7 +29,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    console.log(context.linkSuccess);
+    // console.log(context.linkSuccess);
     // do not generate a new token for OAuth redirect; instead
     // setLinkToken from localStorage
     if (window.location.href.includes("?oauth_state_id=")) {

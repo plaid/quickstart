@@ -19,7 +19,7 @@ export const DocsProvider: React.FC<{
 }> = (props) => {
   return (
     // @ts-ignore
-    <Context.Provider value={{ ...context }}>{props.children}</Context.Provider>
+    <Context.Provider value={...context}>{props.children}</Context.Provider>
   );
 };
 

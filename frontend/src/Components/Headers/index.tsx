@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import Note from "plaid-threads/Note";
-import { Context } from "../../Context";
+import Context from "../../Context";
 
 import Link from "../Link";
 
@@ -15,13 +15,10 @@ interface Props {
   currentPath: string;
 }
 
-const { testBoolean } = useContext(Context);
-
 const Header = (props: Props) => {
   const [itemId, setItemId] = useState("");
   const [accessToken, setAccessToken] = useState("");
-
-  console.log("test", testBoolean);
+  const [context, setContext] = useContext(Context);
 
   return (
     <div className={styles.grid}>
