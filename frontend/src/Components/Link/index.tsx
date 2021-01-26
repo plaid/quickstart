@@ -1,17 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
+import Context from "../../Context";
+
 interface Props {
-  linkToken: string;
-  setLinkSuccess: (arg: boolean) => void;
-  setItemId: (arg: string) => void;
-  setAccessToken: (arg: string) => void;
-  setIsItemAccess: (arg: boolean) => void;
   currentPath: string;
 }
 
 const Link: React.FC<Props> = (props: Props) => {
+  const {
+    itemId,
+    accessToken,
+    linkToken,
+    linkSuccess,
+    isItemAccess,
+    dispatch,
+  } = useContext(Context);
+
   const onSuccess = React.useCallback(
     (public_token: string) => {
       // send public_token to server
@@ -24,19 +30,27 @@ const Link: React.FC<Props> = (props: Props) => {
           body: `public_token=${public_token}`,
         });
         if (!response.ok) {
-          props.setItemId(`no item_id retrieved`);
-          props.setAccessToken(`no access_token retrieved`);
-          props.setIsItemAccess(false);
+          dispatch({
+            type: "SET_STATE",
+            state: { itemId: `no item_id retrieved` },
+          });
+          dispatch({
+            type: "SET_STATE",
+            state: { accessToken: `no access_token retrieved` },
+          });
+          dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
         } else {
           const data = await response.json();
-          props.setItemId(data.item_id);
-          props.setAccessToken(data.access_token);
-          props.setIsItemAccess(true);
+          dispatch({ type: "SET_STATE", state: { itemId: data.item_id } });
+          dispatch({
+            type: "SET_STATE",
+            state: { accessToken: data.access_token },
+          });
+          dispatch({ type: "SET_STATE", state: { isItemAccess: true } });
         }
       };
       setToken();
-      props.setLinkSuccess(true);
-
+      dispatch({ type: "SET_STATE", state: { linkSuccess: true } });
       window.history.pushState("", "", "/");
     },
     [props]
@@ -44,7 +58,7 @@ const Link: React.FC<Props> = (props: Props) => {
 
   let isOauth = false;
   const config: Parameters<typeof usePlaidLink>[0] = {
-    token: props.linkToken,
+    token: linkToken!,
     onSuccess,
     clientName: "hello world",
     env: "sandbox",

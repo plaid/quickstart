@@ -1,6 +1,7 @@
 import React from "react";
 
 import { DataItem, Categories } from "../../dataUtilities";
+import Context from "../../Context";
 
 import styles from "./index.module.scss";
 
