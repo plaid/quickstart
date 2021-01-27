@@ -39,15 +39,15 @@ const Link: React.FC<Props> = (props: Props) => {
             state: { accessToken: `no access_token retrieved` },
           });
           dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
-        } else {
-          const data = await response.json();
-          dispatch({ type: "SET_STATE", state: { itemId: data.item_id } });
-          dispatch({
-            type: "SET_STATE",
-            state: { accessToken: data.access_token },
-          });
-          dispatch({ type: "SET_STATE", state: { isItemAccess: true } });
+          return;
         }
+        const data = await response.json();
+        dispatch({ type: "SET_STATE", state: { itemId: data.item_id } });
+        dispatch({
+          type: "SET_STATE",
+          state: { accessToken: data.access_token },
+        });
+        dispatch({ type: "SET_STATE", state: { isItemAccess: true } });
       };
       setToken();
       dispatch({ type: "SET_STATE", state: { linkSuccess: true } });

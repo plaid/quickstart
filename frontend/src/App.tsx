@@ -16,13 +16,13 @@ const App = () => {
     });
     if (!response.ok) {
       dispatch({ type: "SET_STATE", state: { linkToken: null } });
-    } else {
-      const data = await response.json();
-      if (data) {
-        dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
-      }
-      localStorage.setItem("link_token", data.link_token); //to use later for Oauth
+      return;
     }
+    const data = await response.json();
+    if (data) {
+      dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
+    }
+    localStorage.setItem("link_token", data.link_token); //to use later for Oauth
   };
 
   useEffect(() => {

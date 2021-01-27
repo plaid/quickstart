@@ -36,7 +36,7 @@
 
 .endpointDescription {
   font-size: 1.2rem;
-  line-height: normal;
+  line-height: 2 * $unit;
 }
 
 .sendRequest {

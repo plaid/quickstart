@@ -11,7 +11,6 @@ interface Props {
 }
 
 const Header = (props: Props) => {
-  // @ts-ignore
   const {
     itemId,
     accessToken,

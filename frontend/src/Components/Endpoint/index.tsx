@@ -4,7 +4,6 @@ import Note from "plaid-threads/Note";
 
 import Table from "../Table";
 import Error from "../Error";
-
 import { DataItem, Categories, ErrorDataItem, Data } from "../../dataUtilities";
 
 import styles from "./index.module.scss";

@@ -17,15 +17,13 @@ const Table = (props: Props) => {
   ));
 
   let rows = props.data
-    .map((item: DataItem | any) => {
-      return (
-        <tr className={styles.dataRows}>
-          {props.categories.map((category: Categories) => {
-            return <td className={styles.dataField}>{item[category.field]}</td>;
-          })}
-        </tr>
-      );
-    })
+    .map((item: DataItem | any) => (
+      <tr className={styles.dataRows}>
+        {props.categories.map((category: Categories) => (
+          <td className={styles.dataField}>{item[category.field]}</td>
+        ))}
+      </tr>
+    ))
     .slice(0, 8);
 
   //identity table to accomodate odd data structure of identity product
@@ -36,13 +34,11 @@ const Table = (props: Props) => {
   const identityRows = props.data.map((item: DataItem | any) => {
     return (
       <div className={styles.identityDataRow}>
-        {props.categories.map((category: Categories) => {
-          return (
-            <span className={styles.identityDataField}>
-              {item[category.field]}
-            </span>
-          );
-        })}
+        {props.categories.map((category: Categories) => (
+          <span className={styles.identityDataField}>
+            {item[category.field]}
+          </span>
+        ))}
       </div>
     );
   });
