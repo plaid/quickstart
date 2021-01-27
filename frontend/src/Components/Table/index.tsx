@@ -11,6 +11,7 @@ interface Props {
 }
 
 const Table = (props: Props) => {
+  const maxRows = 15;
   // regular table
   const headers = props.categories.map((category) => (
     <th className={styles.headerField}>{category.title}</th>
@@ -24,7 +25,7 @@ const Table = (props: Props) => {
         ))}
       </tr>
     ))
-    .slice(0, 8);
+    .slice(0, maxRows);
 
   //identity table to accomodate odd data structure of identity product
   const identityHeaders = props.categories.map((category) => (
