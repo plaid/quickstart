@@ -1,7 +1,7 @@
 import React from "react";
 
 import Endpoint from "../Endpoint";
-import TypeContainer from "./TypeContainer";
+import ProductTypesContainer from "./ProductTypesContainer";
 import {
   transactionsCategories,
   authCategories,
@@ -17,7 +17,7 @@ import {
 
 const Products = () => {
   return (
-    <TypeContainer title="Products">
+    <ProductTypesContainer productType="Products">
       <Endpoint
         endpoint="auth"
         name="Auth"
@@ -62,7 +62,7 @@ const Products = () => {
         to market segments."
         transformData={transformInvestmentsData}
       />
-    </TypeContainer>
+    </ProductTypesContainer>
   );
 };
 

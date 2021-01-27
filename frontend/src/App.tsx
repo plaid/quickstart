@@ -1,8 +1,8 @@
 import React, { useEffect, useContext } from "react";
 
 import Header from "./Components/Headers";
-import Products from "./Components/Types/Products";
-import Items from "./Components/Types/Items";
+import Products from "./Components/ProductTypes/Products";
+import Items from "./Components/ProductTypes/Items";
 import Context from "./Context";
 
 import styles from "./App.module.scss";

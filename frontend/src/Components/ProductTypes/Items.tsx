@@ -1,7 +1,7 @@
 import React from "react";
 
 import Endpoint from "../Endpoint";
-import TypeContainer from "./TypeContainer";
+import ProductTypesContainer from "./ProductTypesContainer";
 import {
   transformItemData,
   transformAccountsData,
@@ -9,11 +9,9 @@ import {
   accountsCategories,
 } from "../../dataUtilities";
 
-import styles from "./index.module.scss";
-
 const Items = () => (
   <>
-    <TypeContainer title="Item Management">
+    <ProductTypesContainer productType="Item Management">
       <Endpoint
         endpoint="item"
         categories={itemCategories}
@@ -30,7 +28,7 @@ const Items = () => (
         description="Retrieve high-level information about all accounts associated with an item."
         transformData={transformAccountsData}
       />
-    </TypeContainer>
+    </ProductTypesContainer>
   </>
 );
 
