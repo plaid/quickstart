@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import Note from "plaid-threads/Note";
+import InlineLink from "plaid-threads/InlineLink";
 
 import Link from "../Link";
 import Context from "../../Context";
@@ -54,7 +55,13 @@ const Header = (props: Props) => {
           {isItemAccess && (
             <h4 className={styles.subtitle}>
               Congrats! By linking an account, you have created an{" "}
-              <span className={styles.itemText}>Item</span>.
+              <InlineLink
+                href="http://plaid.com/docs/quickstart/glossary/#item"
+                target="_blank"
+              >
+                Item
+              </InlineLink>
+              .
             </h4>
           )}
           {!isItemAccess && (
