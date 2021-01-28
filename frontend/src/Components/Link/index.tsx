@@ -5,14 +5,7 @@ import Button from "plaid-threads/Button";
 import Context from "../../Context";
 
 const Link = () => {
-  const {
-    itemId,
-    accessToken,
-    linkToken,
-    linkSuccess,
-    isItemAccess,
-    dispatch,
-  } = useContext(Context);
+  const { linkToken, dispatch } = useContext(Context);
 
   const onSuccess = React.useCallback((public_token: string) => {
     // send public_token to server

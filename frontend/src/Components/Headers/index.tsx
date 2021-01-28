@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import Note from "plaid-threads/Note";
 import InlineLink from "plaid-threads/InlineLink";
 
