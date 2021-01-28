@@ -8,12 +8,10 @@ interface Props {
 }
 
 const TypeContainer: React.FC<Props> = (props) => (
-  <>
-    <div className={styles.container}>
-      <h4 className={styles.header}>{props.productType}</h4>
-      {props.children}
-    </div>
-  </>
+  <div className={styles.container}>
+    <h4 className={styles.header}>{props.productType}</h4>
+    {props.children}
+  </div>
 );
 
 TypeContainer.displayName = "TypeContainer";

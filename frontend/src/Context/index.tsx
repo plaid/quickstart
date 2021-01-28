@@ -12,7 +12,7 @@ interface QuickstartState {
 const initialState: QuickstartState = {
   linkSuccess: false,
   isItemAccess: false,
-  linkToken: "", //don't set to null or error message will show up briefly when site loads
+  linkToken: "", // Don't set to null or error message will show up briefly when site loads
   accessToken: null,
   itemId: null,
   isError: false,
@@ -39,10 +39,13 @@ export const QuickstartProvider: React.FC<{ children: ReactNode }> = (
     state: QuickstartState,
     action: QuickstartAction
   ): QuickstartState => {
-    if (action.type === "SET_STATE") {
-      return { ...state, ...action.state };
+    switch (action.type) {
+      case "SET_STATE":
+        return { ...state, ...action.state };
+        break;
+      default:
+        return { ...state };
     }
-    return { ...state };
   };
   const [state, dispatch] = useReducer(reducer, initialState);
   return <Provider value={{ ...state, dispatch }}>{props.children}</Provider>;

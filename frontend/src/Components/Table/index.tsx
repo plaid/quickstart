@@ -1,6 +1,7 @@
 import React from "react";
 
 import { DataItem, Categories } from "../../dataUtilities";
+import Identity from "./Identity";
 
 import styles from "./index.module.scss";
 
@@ -27,33 +28,9 @@ const Table = (props: Props) => {
     ))
     .slice(0, maxRows);
 
-  //identity table to accomodate odd data structure of identity product
-  const identityHeaders = props.categories.map((category) => (
-    <span className={styles.identityHeader}>{category.title}</span>
-  ));
-
-  const identityRows = props.data.map((item: DataItem | any) => {
-    return (
-      <div className={styles.identityDataRow}>
-        {props.categories.map((category: Categories) => (
-          <span className={styles.identityDataField}>
-            {item[category.field]}
-          </span>
-        ))}
-      </div>
-    );
-  });
-
-  if (props.identity) {
-    return (
-      <div className={styles.identityTable}>
-        <div className={styles.identityHeadersRow}>{identityHeaders}</div>{" "}
-        <div className={styles.identityDataBody}>{identityRows}</div>
-      </div>
-    );
-  }
-
-  return (
+  return props.identity ? (
+    <Identity data={props.data} categories={props.categories} />
+  ) : (
     <table className={styles.dataTable}>
       <thead className={styles.header}>
         <tr className={styles.headerRow}>{headers}</tr>
