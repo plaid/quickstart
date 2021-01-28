@@ -36,7 +36,7 @@ const App = () => {
       return;
     }
     generateToken();
-  }, [dispatch, generateToken]);
+  }, []);
 
   return (
     <div className={styles.App}>
