@@ -4,11 +4,7 @@ import Button from "plaid-threads/Button";
 
 import Context from "../../Context";
 
-interface Props {
-  currentPath: string;
-}
-
-const Link: React.FC<Props> = (props: Props) => {
+const Link = () => {
   const {
     itemId,
     accessToken,
@@ -18,43 +14,40 @@ const Link: React.FC<Props> = (props: Props) => {
     dispatch,
   } = useContext(Context);
 
-  const onSuccess = React.useCallback(
-    (public_token: string) => {
-      // send public_token to server
-      const setToken = async () => {
-        const response = await fetch("/api/set_access_token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-          },
-          body: `public_token=${public_token}`,
-        });
-        if (!response.ok) {
-          dispatch({
-            type: "SET_STATE",
-            state: { itemId: `no item_id retrieved` },
-          });
-          dispatch({
-            type: "SET_STATE",
-            state: { accessToken: `no access_token retrieved` },
-          });
-          dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
-          return;
-        }
-        const data = await response.json();
-        dispatch({ type: "SET_STATE", state: { itemId: data.item_id } });
+  const onSuccess = React.useCallback((public_token: string) => {
+    // send public_token to server
+    const setToken = async () => {
+      const response = await fetch("/api/set_access_token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        },
+        body: `public_token=${public_token}`,
+      });
+      if (!response.ok) {
         dispatch({
           type: "SET_STATE",
-          state: { accessToken: data.access_token },
+          state: { itemId: `no item_id retrieved` },
         });
-        dispatch({ type: "SET_STATE", state: { isItemAccess: true } });
-      };
-      setToken();
-      dispatch({ type: "SET_STATE", state: { linkSuccess: true } });
-      window.history.pushState("", "", "/");
-    },
-    [props]
-  );
+        dispatch({
+          type: "SET_STATE",
+          state: { accessToken: `no access_token retrieved` },
+        });
+        dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
+        return;
+      }
+      const data = await response.json();
+      dispatch({ type: "SET_STATE", state: { itemId: data.item_id } });
+      dispatch({
+        type: "SET_STATE",
+        state: { accessToken: data.access_token },
+      });
+      dispatch({ type: "SET_STATE", state: { isItemAccess: true } });
+    };
+    setToken();
+    dispatch({ type: "SET_STATE", state: { linkSuccess: true } });
+    window.history.pushState("", "", "/");
+  }, []);
 
   let isOauth = false;
   const config: Parameters<typeof usePlaidLink>[0] = {

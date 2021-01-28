@@ -7,11 +7,7 @@ import Context from "../../Context";
 
 import styles from "./index.module.scss";
 
-interface Props {
-  currentPath: string;
-}
-
-const Header = (props: Props) => {
+const Header = () => {
   const {
     itemId,
     accessToken,
@@ -45,7 +41,7 @@ const Header = (props: Props) => {
           )}
           {linkToken != null && (
             <div className={styles.linkButton}>
-              <Link currentPath={props.currentPath} />
+              <Link />
             </div>
           )}
         </>

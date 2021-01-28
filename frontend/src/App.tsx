@@ -41,7 +41,7 @@ const App = () => {
   return (
     <div className={styles.App}>
       <div className={styles.container}>
-        <Header currentPath={window.location.href} />
+        <Header />
         {linkSuccess && isItemAccess && (
           <>
             <Products />

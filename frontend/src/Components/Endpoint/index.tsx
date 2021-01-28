@@ -10,7 +10,7 @@ import styles from "./index.module.scss";
 
 interface Props {
   endpoint: string;
-  name?: string | null;
+  name?: string;
   categories: Array<Categories>;
   schema: string;
   description: string;
@@ -45,7 +45,7 @@ const Endpoint = (props: Props) => {
         </Note>
         <div className={styles.endpointContents}>
           <div className={styles.endpointHeader}>
-            {props.name && (
+            {props.name != null && (
               <span className={styles.endpointName}>{props.name}</span>
             )}
             <span className={styles.schema}>{props.schema}</span>
@@ -60,8 +60,7 @@ const Endpoint = (props: Props) => {
           className={styles.sendRequest}
           onClick={getData}
         >
-          {!isLoading && `Send Request`}
-          {isLoading && `Loading...`}
+          {isLoading ? "Loading..." : `Send Request`}
         </Button>
       </div>
       {showTable && (
