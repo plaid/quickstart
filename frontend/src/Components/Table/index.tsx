@@ -8,7 +8,7 @@ import styles from "./index.module.scss";
 interface Props {
   data: Array<DataItem>;
   categories: Array<Categories>;
-  identity: boolean;
+  isIdentity: boolean;
 }
 
 const Table = (props: Props) => {
@@ -18,7 +18,7 @@ const Table = (props: Props) => {
     <th className={styles.headerField}>{category.title}</th>
   ));
 
-  let rows = props.data
+  const rows = props.data
     .map((item: DataItem | any) => (
       <tr className={styles.dataRows}>
         {props.categories.map((category: Categories) => (
@@ -28,7 +28,7 @@ const Table = (props: Props) => {
     ))
     .slice(0, maxRows);
 
-  return props.identity ? (
+  return props.isIdentity ? (
     <Identity data={props.data} categories={props.categories} />
   ) : (
     <table className={styles.dataTable}>

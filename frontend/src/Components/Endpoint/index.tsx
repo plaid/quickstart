@@ -67,7 +67,7 @@ const Endpoint = (props: Props) => {
         <Table
           categories={props.categories}
           data={transformedData}
-          identity={props.endpoint === "identity"}
+          isIdentity={props.endpoint === "identity"}
         />
       )}
       {error != null && <Error error={error} />}

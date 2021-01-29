@@ -46,9 +46,6 @@ const Link = () => {
   const config: Parameters<typeof usePlaidLink>[0] = {
     token: linkToken!,
     onSuccess,
-    clientName: "hello world",
-    env: "sandbox",
-    product: ["auth", "transactions"],
   };
 
   if (window.location.href.includes("?oauth_state_id=")) {
