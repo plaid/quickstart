@@ -20,22 +20,23 @@ const Link = () => {
       if (!response.ok) {
         dispatch({
           type: "SET_STATE",
-          state: { itemId: `no item_id retrieved` },
+          state: {
+            itemId: `no item_id retrieved`,
+            accessToken: `no access_token retrieved`,
+            isItemAccess: false,
+          },
         });
-        dispatch({
-          type: "SET_STATE",
-          state: { accessToken: `no access_token retrieved` },
-        });
-        dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
         return;
       }
       const data = await response.json();
-      dispatch({ type: "SET_STATE", state: { itemId: data.item_id } });
       dispatch({
         type: "SET_STATE",
-        state: { accessToken: data.access_token },
+        state: {
+          itemId: data.item_id,
+          accessToken: data.access_token,
+          isItemAccess: true,
+        },
       });
-      dispatch({ type: "SET_STATE", state: { isItemAccess: true } });
     };
     setToken();
     dispatch({ type: "SET_STATE", state: { linkSuccess: true } });

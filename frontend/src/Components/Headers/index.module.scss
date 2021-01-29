@@ -37,6 +37,7 @@
   width: 100%;
   box-shadow: $shadow-small;
   margin-top: 3 * $unit;
+  border-radius: 2px;
 }
 
 .itemAccessRow {
@@ -68,6 +69,6 @@
   font-size: 2 * $unit;
 }
 
-.runBackendError {
+.error {
   width: 100%;
 }

@@ -4,8 +4,7 @@
   display: grid;
   grid-template-columns: 15% 57% 28%;
   width: 100%;
-  border: 1px solid $black200;
-  border-bottom: 0px;
+  border-top: 1px solid $black200;
 }
 
 .post {

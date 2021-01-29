@@ -20,7 +20,7 @@ const Header = () => {
     <div className={styles.grid}>
       <h3 className={styles.title}>Plaid Quickstart</h3>
 
-      {!linkSuccess && (
+      {!linkSuccess ? (
         <>
           <h4 className={styles.subtitle}>
             A sample end-to-end integration with Plaid
@@ -33,22 +33,20 @@ const Header = () => {
             to access their accounts via the Plaid API.
           </p>
           {/* message if backend is not running and there is no link token */}
-          {linkToken == null && (
-            <Note error solid className={styles.runBackendError}>
+          {linkToken == null ? (
+            <Note error solid className={styles.error}>
               Unable to fetch link_token: please make sure your backend server
               is running.
             </Note>
-          )}
-          {linkToken != null && (
+          ) : (
             <div className={styles.linkButton}>
               <Link />
             </div>
           )}
         </>
-      )}
-      {linkSuccess && (
+      ) : (
         <>
-          {isItemAccess && (
+          {isItemAccess ? (
             <h4 className={styles.subtitle}>
               Congrats! By linking an account, you have created an{" "}
               <InlineLink
@@ -59,11 +57,11 @@ const Header = () => {
               </InlineLink>
               .
             </h4>
-          )}
-          {!isItemAccess && (
+          ) : (
             <h4 className={styles.subtitle}>
-              Unable to create an <span className={styles.itemText}>Item</span>.
-              Please check your backend server
+              <Note error solid className={styles.error}>
+                Unable to create an item. Please check your backend server
+              </Note>
             </h4>
           )}
           <div className={styles.itemAccessContainer}>
@@ -79,7 +77,7 @@ const Header = () => {
           </div>
           {isItemAccess && (
             <p className={styles.requests}>
-              Now that you have an access token, you can make all of the
+              Now that you have an access_token, you can make all of the
               following requests:
             </p>
           )}
