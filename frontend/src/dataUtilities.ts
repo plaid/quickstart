@@ -1,5 +1,4 @@
 import {
-  //types
   AuthGetResponse,
   TransactionsGetResponse,
   IdentityGetResponse,
