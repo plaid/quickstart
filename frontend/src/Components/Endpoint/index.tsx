@@ -60,7 +60,7 @@ const Endpoint = (props: Props) => {
           className={styles.sendRequest}
           onClick={getData}
         >
-          {isLoading ? "Loading..." : `Send Request`}
+          {isLoading ? "Loading..." : `Send request`}
         </Button>
       </div>
       {showTable && (

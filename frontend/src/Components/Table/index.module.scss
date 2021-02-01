@@ -4,10 +4,11 @@
   width: 90%;
   margin-bottom: 3 * $unit;
   border-spacing: 0px;
+  font-size: 1.4rem;
 }
 
 .headerRow {
-  font-size: 1.2rem;
+
   text-align: left;
   height: 4 * $unit;
 }
@@ -36,7 +37,6 @@
   text-align: left;
   overflow-wrap: break-word;
   border-top: 1px solid $black200;
-  font-size: 1.2rem;
   max-width: 25 * $unit;
   vertical-align: top;
   padding-top: 2 * $unit;

@@ -11,16 +11,18 @@
   grid-template-columns: 15% 57% 28%;
   width: 100%;
   margin: 0;
+  font-size: 1.4rem;
 }
 
 .code {
   margin: 2 * $unit 0px 2 * $unit 3 * $unit;
   font: $font-stack-monospace;
+  font-size: 1.4rem;
 }
 
 .errorContents {
   margin: 3 * $unit 4 * $unit;
-  font-size: 1.2rem;
+ 
 }
 
 .errorItem {
@@ -56,7 +58,6 @@
 
 .errorMessage {
   line-height: normal;
-  font-size: 1.1rem;
 }
 
 .learnMore {

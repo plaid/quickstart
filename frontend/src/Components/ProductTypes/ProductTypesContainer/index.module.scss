@@ -8,12 +8,11 @@
   flex-direction: column;
   align-items: center;
   box-shadow: $shadow-small;
-  margin: 3 * $unit 0 3 * $unit 0;
+  margin: 0 0 3 * $unit 0;
 }
 
 .header {
   width: 100%;
-  border: 1px solid $black200;
   border-bottom: 0px;
   height: 13 * $unit;
   font-weight: 800;

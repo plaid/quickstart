@@ -75,7 +75,7 @@ const Error = (props: Props) => {
           target="_blank"
           href={path}
         >
-          Learn More
+          Learn more
         </Button>
       </div>
     </>
