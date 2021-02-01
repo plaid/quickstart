@@ -1,6 +1,6 @@
 version: "3.4"
-x-environment: &QUICKSTART_ENVIRONMENT
-  # These are read from .env file. The values in the .env file maybe overriden by shell envvars
+x-environment:
+  &QUICKSTART_ENVIRONMENT # These are read from .env file. The values in the .env file maybe overriden by shell envvars
   PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
   PLAID_SECRET: ${PLAID_SECRET}
   PLAID_PRODUCTS: ${PLAID_PRODUCTS}
@@ -10,64 +10,64 @@ x-environment: &QUICKSTART_ENVIRONMENT
 services:
   go:
     networks:
-      - 'quickstart'
+      - "quickstart"
     depends_on:
-      - 'frontend'
+      - "frontend"
     build:
       context: .
       dockerfile: ./go/Dockerfile
     ports: ["8000:8000"]
     environment:
-      << : *QUICKSTART_ENVIRONMENT
+      <<: *QUICKSTART_ENVIRONMENT
   java:
     networks:
-      - 'quickstart'
+      - "quickstart"
     depends_on:
-      - 'frontend'
+      - "frontend"
     build:
       context: .
       dockerfile: ./java/Dockerfile
     ports: ["8000:8000"]
     environment:
-      << : *QUICKSTART_ENVIRONMENT
+      <<: *QUICKSTART_ENVIRONMENT
   node:
     networks:
-      - 'quickstart'
+      - "quickstart"
     depends_on:
-      - 'frontend'
+      - "frontend"
     build:
       context: .
       dockerfile: ./node/Dockerfile
     ports: ["8000:8000"]
     environment:
-      << : *QUICKSTART_ENVIRONMENT
+      <<: *QUICKSTART_ENVIRONMENT
   python:
     networks:
-      - 'quickstart'
+      - "quickstart"
     depends_on:
-      - 'frontend'
+      - "frontend"
     build:
       context: .
       dockerfile: ./python/Dockerfile
     ports: ["8000:8000"]
     environment:
-      << : *QUICKSTART_ENVIRONMENT
+      <<: *QUICKSTART_ENVIRONMENT
   ruby:
     networks:
-      - 'quickstart'
-    depends_on:
-      - 'frontend'
+      - "quickstart"
+    # depends_on:
+    #   - 'frontend'
     build:
       context: .
       dockerfile: ./ruby/Dockerfile
     ports: ["8000:8000"]
     environment:
-      << : *QUICKSTART_ENVIRONMENT
+      <<: *QUICKSTART_ENVIRONMENT
   frontend:
     environment:
       - REACT_APP_API_HOST
     networks:
-      - 'quickstart'
+      - "quickstart"
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
