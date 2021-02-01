@@ -55,8 +55,8 @@ services:
   ruby:
     networks:
       - "quickstart"
-    # depends_on:
-    #   - 'frontend'
+    depends_on:
+      - "frontend"
     build:
       context: .
       dockerfile: ./ruby/Dockerfile
