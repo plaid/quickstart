@@ -36,7 +36,7 @@ const Header = () => {
           {linkToken == null ? (
             <Note error solid className={styles.error}>
               Unable to fetch link_token: please make sure your backend server
-              is running.
+              is running and that your .env file has been configured with your PLAID_CLIENT_ID and PLAID_SECRET.
             </Note>
           ) : 
           linkToken===""?(<div className={styles.linkButton}>
