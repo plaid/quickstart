@@ -38,7 +38,11 @@ const Header = () => {
               Unable to fetch link_token: please make sure your backend server
               is running.
             </Note>
-          ) : (
+          ) : 
+          linkToken===""?(<div className={styles.linkButton}>
+            <Note>Loading...</Note>
+          </div>):
+          (
             <div className={styles.linkButton}>
               <Link />
             </div>
