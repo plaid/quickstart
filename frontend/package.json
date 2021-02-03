@@ -11,7 +11,7 @@
     "@types/react-dom": "^16.9.8",
     "classnames": "^2.2.6",
     "node-sass": "^4.0.0",
-    "plaid": "^9.0.0-beta.3",
+    "plaid": "^9.0.0-beta.4",
     "plaid-threads": "^11.0.0-beta.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

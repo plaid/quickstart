@@ -7,7 +7,7 @@ import {
   ItemGetResponse,
   InstitutionsGetByIdResponse,
   LiabilitiesGetResponse,
-} from "plaid/generated-code/api";
+} from "plaid/dist/api.d";
 
 const formatter = new Intl.NumberFormat("en-US", {
   //should look like "$50" or "$50.34"
@@ -43,7 +43,7 @@ interface IdentityDataItem {
 
 interface BalanceDataItem {
   balance: string;
-  subtype: string;
+  subtype: string | null;
   mask: string;
   name: string;
 }
@@ -238,10 +238,11 @@ export const accountsCategories: Array<Categories> = [
 ];
 
 export const transformAuthData = (data: AuthGetResponse) => {
-  return data.numbers!.ach!.map((achNumbers) => {
+  return data.numbers.ach!.map((achNumbers) => {
     const account = data.accounts!.filter((a) => {
       return a.account_id === achNumbers.account_id;
     })[0];
+    console.log(data.accounts);
     const obj: DataItem = {
       name: account.name,
       balance:
@@ -261,7 +262,7 @@ export const transformTransactionsData = (
     const item: DataItem = {
       name: t.name!,
       amount: formatter.format(t.amount!),
-      date: t.date!,
+      date: t.date,
     };
     return item;
   });
@@ -274,35 +275,33 @@ interface IdentityData {
 export const transformIdentityData = (data: IdentityData) => {
   const final: Array<DataItem> = [];
   const identityData = data.identity![0];
-  identityData.owners!.forEach((owner) => {
-    const names = owner.names!.map((name) => {
+  identityData.owners.forEach((owner) => {
+    const names = owner.names.map((name) => {
       return name;
     });
-    const emails = owner.emails!.map((email) => {
+    const emails = owner.emails.map((email) => {
       return email.data;
     });
-    const phones = owner.phone_numbers!.map((phone) => {
+    const phones = owner.phone_numbers.map((phone) => {
       return phone.data;
     });
-    const addresses = owner.addresses!.map((address) => {
-      return `${address.data!.street} ${address.data!.city}, ${
-        address.data!.region
-      } ${address.data!.postal_code}`;
+    const addresses = owner.addresses.map((address) => {
+      return `${address.data.street} ${address.data.city}, ${address.data.region} ${address.data.postal_code}`;
     });
 
     const num = Math.max(
-      emails!.length,
-      names!.length,
-      phones!.length,
-      addresses!.length
+      emails.length,
+      names.length,
+      phones.length,
+      addresses.length
     );
 
     for (let i = 0; i < num; i++) {
       const obj = {
-        names: names![i] || "",
-        emails: emails![i] || "",
-        phoneNumbers: phones![i] || "",
-        addresses: addresses![i] || "",
+        names: names[i] || "",
+        emails: emails[i] || "",
+        phoneNumbers: phones[i] || "",
+        addresses: addresses[i] || "",
       };
       final.push(obj);
     }
@@ -313,7 +312,7 @@ export const transformIdentityData = (data: IdentityData) => {
 
 export const transformBalanceData = (data: AccountsGetResponse) => {
   const balanceData = data.accounts;
-  return balanceData!.map((account) => {
+  return balanceData.map((account) => {
     const obj: DataItem = {
       name: account.name,
       balance:
@@ -333,7 +332,7 @@ interface InvestmentData {
 
 export const transformInvestmentsData = (data: InvestmentData) => {
   const holdingsData = data.holdings.holdings!.sort(function (a, b) {
-    if (a.account_id! > b.account_id!) return 1;
+    if (a.account_id > b.account_id) return 1;
     return -1;
   });
   return holdingsData.map((holding) => {
@@ -343,14 +342,14 @@ export const transformInvestmentsData = (data: InvestmentData) => {
     const security = data.holdings.securities!.filter(
       (sec) => sec.security_id === holding.security_id
     )[0];
-    const value = holding.quantity! * security.close_price!;
+    const value = holding.quantity * security.close_price!;
 
     const obj: DataItem = {
       mask: account.mask!,
       name: security.name!,
-      quantity: holding.quantity!,
+      quantity: holding.quantity,
       price: formatter.format(security.close_price!),
-      value: formatter.format(value!),
+      value: formatter.format(value),
     };
     return obj;
   });
@@ -358,21 +357,21 @@ export const transformInvestmentsData = (data: InvestmentData) => {
 
 export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
   const liabilitiesData = data.liabilities;
-  const credit = liabilitiesData?.credit?.map((credit) => {
-    const account = data.accounts!.filter(
+  const credit = liabilitiesData.credit!.map((credit) => {
+    const account = data.accounts.filter(
       (acc) => acc.account_id === credit.account_id
     )[0];
     const obj: DataItem = {
       name: account.name,
       type: "credit card",
-      date: credit.last_payment_date!,
-      amount: formatter.format(credit.last_payment_amount!),
+      date: credit.last_payment_date,
+      amount: formatter.format(credit.last_payment_amount),
     };
     return obj;
   });
 
-  const mortgages = liabilitiesData?.mortgage?.map((mortgage) => {
-    const account = data.accounts!.filter(
+  const mortgages = liabilitiesData.mortgage?.map((mortgage) => {
+    const account = data.accounts.filter(
       (acc) => acc.account_id === mortgage.account_id
     )[0];
     const obj: DataItem = {
@@ -384,8 +383,8 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
     return obj;
   });
 
-  const student = liabilitiesData?.student?.map((student) => {
-    const account = data.accounts!.filter(
+  const student = liabilitiesData.student?.map((student) => {
+    const account = data.accounts.filter(
       (acc) => acc.account_id === student.account_id
     )[0];
     const obj: DataItem = {
@@ -408,16 +407,16 @@ interface ItemData {
 export const transformItemData = (data: ItemData): Array<DataItem> => {
   return [
     {
-      name: data.institution!.name!,
-      billed: data.item!.billed_products!.join(", "),
-      available: data.item!.available_products!.join(", "),
+      name: data.institution.name,
+      billed: data.item.billed_products.join(", "),
+      available: data.item.available_products.join(", "),
     },
   ];
 };
 
 export const transformAccountsData = (data: AccountsGetResponse) => {
   const accountsData = data.accounts;
-  return accountsData!.map((account) => {
+  return accountsData.map((account) => {
     const obj: DataItem = {
       name: account.name,
       balance:
