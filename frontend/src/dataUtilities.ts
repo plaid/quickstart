@@ -242,7 +242,6 @@ export const transformAuthData = (data: AuthGetResponse) => {
     const account = data.accounts!.filter((a) => {
       return a.account_id === achNumbers.account_id;
     })[0];
-    console.log(data.accounts);
     const obj: DataItem = {
       name: account.name,
       balance:
