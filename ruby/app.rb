@@ -10,6 +10,10 @@ require 'sinatra'
 
 set :port, ENV['APP_PORT'] || 8000
 
+# disable CSRF warning on localhost due to usage of local /api proxy in react app.
+# delete this for a production application.
+set :protection, :except => [:json_csrf]
+
 client = Plaid::Client.new(env: ENV['PLAID_ENV'] || 'sandbox',
                            client_id: ENV['PLAID_CLIENT_ID'],
                            secret: ENV['PLAID_SECRET'])
@@ -23,15 +27,6 @@ access_token = nil
 
 payment_id = nil
 item_id = nil
-
-get '/' do
-  File.read('../html/index.html')
-end
-
-# This is an endpoint defined for the OAuth flow to redirect to.
-get '/oauth-response.html' do
-  erb File.read('../html/oauth-response.html')
-end
 
 post '/api/info' do
   content_type :json

@@ -1,0 +1,16 @@
+$threads-font-path: "~plaid-threads/fonts";
+@import "~plaid-threads/scss/typography";
+@import "~plaid-threads/scss/variables";
+
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70 * $unit;
+  max-width: 84 * $unit;
+  margin: 0 auto;
+}

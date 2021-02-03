@@ -5,10 +5,11 @@ DOCKER_COMPOSE_YML += --file docker-compose.local.yml
 endif
 
 language := node
-SUCCESS_MESSAGE := "✅ $(language) quickstart is running on http://localhost:8000"
+SUCCESS_MESSAGE := "✅ $(language) quickstart is running on http://localhost:3000"
 
 .PHONY: up
 up:
+	REACT_APP_API_HOST=http://$(language):8000 \
 	$(DOCKER_COMPOSE) \
 		$(DOCKER_COMPOSE_YML) \
 		$@ --build --detach --remove-orphans \
@@ -19,11 +20,12 @@ up:
 logs:
 	$(DOCKER_COMPOSE) \
 		$@ --follow \
-		$(language)
+		$(language) frontend
 
 .PHONY: stop build
 stop build:
 	$(DOCKER_COMPOSE) \
 		$(DOCKER_COMPOSE_YML) \
 		$@ \
-		$(language)
+		$(language) frontend
+

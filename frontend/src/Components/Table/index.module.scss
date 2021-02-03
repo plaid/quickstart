@@ -1,0 +1,44 @@
+@import "~plaid-threads/scss/variables";
+
+.dataTable {
+  width: 90%;
+  margin-bottom: 3 * $unit;
+  border-spacing: 0px;
+  font-size: 1.4rem;
+}
+
+.headerRow {
+
+  text-align: left;
+  height: 4 * $unit;
+}
+
+.headerField {
+  border-top: 1px solid $black200;
+  border-bottom: 1px solid $black1000;
+  padding-top: 1.2rem;
+  padding-bottom: $unit;
+  padding-left: $unit;
+}
+
+.dataRows {
+  height: 6 * $unit;
+  &:first-child {
+    td {
+      border-top: 0px;
+    }
+  }
+  &:last-child {
+    margin-bottom: 2 * $unit;
+  }
+}
+
+.dataField {
+  text-align: left;
+  overflow-wrap: break-word;
+  border-top: 1px solid $black200;
+  max-width: 25 * $unit;
+  vertical-align: top;
+  padding-top: 2 * $unit;
+  padding-left: $unit;
+}

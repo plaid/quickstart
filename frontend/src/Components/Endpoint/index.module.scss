@@ -1,0 +1,44 @@
+@import "~plaid-threads/scss/variables";
+
+.endpointContainer {
+  display: grid;
+  grid-template-columns: 15% 57% 28%;
+  width: 100%;
+  border-top: 1px solid $black200;
+}
+
+.post {
+  margin: 2 * $unit 0px 2 * $unit 3 * $unit;
+  font-size: 1.4rem;
+}
+
+.endpointContents {
+  margin: 3 * $unit 4 * $unit;
+}
+
+.endpointHeader {
+  margin-bottom: $unit;
+}
+
+.endpointName {
+  font-weight: bold;
+  font-size: 2 * $unit;
+  padding-right: $unit;
+}
+
+.schema {
+  font-size: 2 * $unit;
+  font-family: $font-stack-monospace;
+  letter-spacing: -0.24px;
+}
+
+.endpointDescription {
+  font-size: 1.4rem;
+  line-height: 2 * $unit;
+}
+
+.sendRequest {
+  margin: 2 * $unit;
+  width: 70%;
+  margin-left: 3 * $unit;
+}

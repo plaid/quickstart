@@ -1,0 +1,75 @@
+@import "~plaid-threads/scss/variables";
+
+.grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  margin-bottom: 2 * $unit;
+}
+
+.title {
+  margin-top: 9 * $unit;
+  margin-bottom: 0;
+  font-weight: 800;
+  height: 6 * $unit;
+}
+
+.subtitle {
+  margin-top: 0;
+  margin-bottom: 3 * $unit;
+}
+
+.introPar {
+  width: 100%;
+  font-size: 2 * $unit;
+  margin: 2 * $unit 0;
+}
+
+.linkButton {
+  margin-top: 3 * $unit;
+}
+
+.itemAccessContainer {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: 100%;
+  box-shadow: $shadow-small;
+  margin-top: 3 * $unit;
+  border-radius: 2px;
+}
+
+.itemAccessRow {
+  display: flex;
+  border: 1px solid $black200;
+  height: 50%;
+  margin: 0;
+
+  &:last-child {
+    border-top: 0px;
+  }
+}
+
+.idName {
+  padding: 2 * $unit 3 * $unit 2 * $unit 5 * $unit;
+  flex: 1;
+  font-weight: bold;
+  font-family: $font-stack-monospace;
+  color: $black1000;
+}
+
+.tokenText {
+  padding: 2 * $unit 3 * $unit 2 * $unit 0;
+  flex: 5;
+  font-family: $font-stack-monospace;
+}
+
+.requests {
+  margin-top: 7 * $unit;
+  font-size: 2 * $unit;
+}
+
+.error {
+  width: 100%;
+}

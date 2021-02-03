@@ -22,7 +22,7 @@ public class QuickstartConfiguration extends Configuration {
 
   // Parameters used for the OAuth redirect Link flow.
 
-  // Set PLAID_REDIRECT_URI to 'http://localhost:8000/oauth-response.html'
+  // Set PLAID_REDIRECT_URI to 'http://localhost:3000/'
   // The OAuth redirect flow requires an endpoint on the developer's website
   // that the bank website should redirect to. You will need to configure
   // this redirect URI for your client ID through the Plaid developer dashboard

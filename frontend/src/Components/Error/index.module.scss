@@ -1,0 +1,67 @@
+@import "~plaid-threads/scss/variables";
+
+.errorTop {
+  width: 90%;
+  height: 1px;
+  border-top: 1px solid $black200;
+}
+
+.errorContainer {
+  display: grid;
+  grid-template-columns: 15% 57% 28%;
+  width: 100%;
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.code {
+  margin: 2 * $unit 0px 2 * $unit 3 * $unit;
+  font: $font-stack-monospace;
+  font-size: 1.4rem;
+}
+
+.errorContents {
+  margin: 3 * $unit 4 * $unit;
+ 
+}
+
+.errorItem {
+  display: grid;
+  grid-template-columns: 2fr 5fr;
+  margin-bottom: $unit;
+}
+
+.errorTitle {
+  font-weight: bold;
+  line-height: normal;
+}
+
+.errorData {
+  line-height: normal;
+  font-family: $font-stack-monospace;
+  letter-spacing: 0.25px;
+}
+
+.errorCode {
+  display: inline-block;
+  position: relative;
+}
+
+.pinkBox {
+  position: absolute;
+  top: 50%;
+  height: 6px;
+  width: 100%;
+  background-color: $red200;
+  z-index: -1;
+}
+
+.errorMessage {
+  line-height: normal;
+}
+
+.learnMore {
+  margin: 2 * $unit;
+  margin-left: 3 * $unit;
+  width: 70%;
+}

@@ -1,4 +1,4 @@
-FROM ruby:alpine
+FROM ruby:2-alpine
 
 WORKDIR /opt/app
 COPY . .
