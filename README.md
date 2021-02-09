@@ -51,7 +51,7 @@ $ cd quickstart
 
 #### Special instructions for Windows
 
-Note - because this repository makes use of symlinks, to run this on a windows machine please use
+Note - because this repository makes use of symlinks, to run this on a Windows machine, use
 the following command when cloning the project
 
 ```
@@ -71,23 +71,20 @@ the dashboard: https://dashboard.plaid.com/account/keys
 > NOTE: `.env` files are a convenient local development tool. Never run a production application
 > using an environment file with secrets in it.
 
-## 3. Run the quickstart
+## 3. Run the Quickstart
 
 There are two ways to run the various language quickstarts in this repository. You can simply choose to use Docker, or you can run the
 code directly. If you would like to run the code directly, skip to the
 [Run without Docker](#run-without-docker) section.
-
-If you are using Windows and choose not to use Docker, this quickstart assumes you are using some
-sort of Unix-like environment on Windows, such as Cygwin or WSL. Scripts in this repo may rely on
-things such as `bash`, `grep`, `cat`, etc.
 
 ### Run with Docker
 
 #### Pre-requisites
 
 - `make` available at your command line
-- Docker installed on your machine: https://docs.docker.com/get-docker/
+- Docker installed and running on your machine: https://docs.docker.com/get-docker/
 - Your environment variables populated in `.env`
+- If using Windows, a working Linux installation on Windows 10. If you are using Windows and do not already have WSL or Cygwin configured, we recommend [running without Docker](#run-without-docker).
 
 #### Running
 
@@ -111,6 +108,11 @@ The quickstart backend is now running on http://localhost:8000 and frontend on h
 If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
 `.env` file, simply run `make up language=node` again to rebuild and restart the container.
 
+If you experience a Docker connection error when running the command above, try the following:
+
+- Make sure Docker is running
+- Try running the command prefixed with `sudo`
+
 ##### View the logs
 
 ```
@@ -131,6 +133,8 @@ $ make stop language=node
   This repo should generally work with active LTS versions of each language such as node >= 12,
   python >= 3.8, ruby >= 2.6, etc.
 - Your environment variables populated in `.env`
+- [npm](https://www.npmjs.com/get-npm)
+- If using Windows, a command line utility (such as Powershell or Cygwin) capable of running basic Unix shell commands
 
 #### 1. Running the backend
 
