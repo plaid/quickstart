@@ -134,7 +134,7 @@ $ make stop language=node
   python >= 3.8, ruby >= 2.6, etc.
 - Your environment variables populated in `.env`
 - [npm](https://www.npmjs.com/get-npm)
-- If using Windows, a command line utility (such as Powershell or Cygwin) capable of running basic Unix shell commands
+- If using Windows, a command line utility capable of running basic Unix shell commands
 
 #### 1. Running the backend
 
