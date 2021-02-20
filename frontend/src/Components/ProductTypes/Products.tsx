@@ -17,7 +17,7 @@ import {
 
 const Products = () => {
   return (
-    <ProductTypesContainer productType="Products">
+    <ProductTypesContainer productType="Transactions">
       <Endpoint
         endpoint="transactions"
         name="Transactions"

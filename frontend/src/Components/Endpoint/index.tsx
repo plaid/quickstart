@@ -32,7 +32,8 @@ const Endpoint = (props: Props) => {
       setIsLoading(false);
       return;
     }
-    setTransformedData(props.transformData(data)); // transform data into proper format for each individual product
+    setTransformedData(props.transformData(data));
+    // transform data into proper format for each individual product
     setShowTable(true);
     setIsLoading(false);
   };
