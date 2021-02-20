@@ -40,7 +40,7 @@ const Endpoint = (props: Props) => {
 
   useEffect(() => {
     getData();
-  });
+  }, []);
 
   return (
     <>
