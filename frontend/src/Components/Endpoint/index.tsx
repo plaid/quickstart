@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "plaid-threads/Button";
 import Note from "plaid-threads/Note";
 
@@ -37,31 +37,13 @@ const Endpoint = (props: Props) => {
     setIsLoading(false);
   };
 
+  useEffect(() => {
+    getData();
+  });
+
   return (
     <>
       <div className={styles.endpointContainer}>
-        <Note info className={styles.post}>
-          POST
-        </Note>
-        <div className={styles.endpointContents}>
-          <div className={styles.endpointHeader}>
-            {props.name != null && (
-              <span className={styles.endpointName}>{props.name}</span>
-            )}
-            <span className={styles.schema}>{props.schema}</span>
-          </div>
-          <div className={styles.endpointDescription}>{props.description}</div>
-        </div>
-        <Button
-          small
-          centered
-          wide
-          secondary
-          className={styles.sendRequest}
-          onClick={getData}
-        >
-          {isLoading ? "Loading..." : `Send request`}
-        </Button>
       </div>
       {showTable && (
         <Table

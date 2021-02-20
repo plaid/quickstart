@@ -30,6 +30,6 @@ const Products = () => {
   );
 };
 
-Products.displayName = "Products";
+Products.displayName = "Transactions";
 
 export default Products;
