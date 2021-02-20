@@ -45,7 +45,6 @@ const App = () => {
         {linkSuccess && isItemAccess && (
           <>
             <Products />
-            <Items />
           </>
         )}
       </div>
