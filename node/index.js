@@ -5,12 +5,10 @@ const util = require('util');
 const express = require('express');
 const bodyParser = require('body-parser');
 const moment = require('moment');
-const plaid = require('plaid');
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
 const PLAID_SECRET = process.env.PLAID_SECRET;
-const PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
 
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
@@ -71,14 +69,6 @@ app.use(
   }),
 );
 app.use(bodyParser.json());
-
-app.post('/api/info', function (request, response, next) {
-  response.json({
-    item_id: ITEM_ID,
-    access_token: ACCESS_TOKEN,
-    products: PLAID_PRODUCTS,
-  });
-});
 
 // Create a link token with configs which we can then use to initialize Plaid Link client-side.
 // See https://plaid.com/docs/#create-link-token
@@ -449,6 +439,13 @@ const prettyPrintResponse = (response) => {
   console.log(util.inspect(response, { colors: true, depth: 4 }));
 };
 
+app.post('/api/info', function (request, response, next) {
+  response.json({
+    item_id: ITEM_ID,
+    access_token: ACCESS_TOKEN,
+    products: PLAID_PRODUCTS,
+  });
+});
 // This is a helper function to poll for the completion of an Asset Report and
 // then send it in the response to the client. Alternatively, you can provide a
 // webhook in the `options` object in your `/asset_report/create` request to be
