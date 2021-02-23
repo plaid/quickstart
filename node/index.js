@@ -97,86 +97,10 @@ app.post('/api/create_link_token', async function (request, response) {
   } catch (error) {
     prettyPrintResponse(error);
     return response.json({
-      error,
+      error: error.response.data,
     });
   }
 });
-
-// Create a link token with configs which we can then use to initialize Plaid Link client-side.
-// See https://plaid.com/docs/#payment-initiation-create-link-token-request
-app.post(
-  '/api/create_link_token_for_payment',
-  function (request, response, next) {
-    client.createPaymentRecipient(
-      'Harry Potter',
-      'GB33BUKB20201555555555',
-      {
-        street: ['4 Privet Drive'],
-        city: 'Little Whinging',
-        postal_code: '11111',
-        country: 'GB',
-      },
-      function (error, createRecipientResponse) {
-        const recipientId = createRecipientResponse.recipient_id;
-
-        client.createPayment(
-          recipientId,
-          'payment_ref',
-          {
-            value: 12.34,
-            currency: 'GBP',
-          },
-          function (error, createPaymentResponse) {
-            prettyPrintResponse(createPaymentResponse);
-            const paymentId = createPaymentResponse.payment_id;
-            PAYMENT_ID = paymentId;
-            const configs = {
-              user: {
-                // This should correspond to a unique id for the current user.
-                client_user_id: 'user-id',
-              },
-              client_name: 'Plaid Quickstart',
-              products: PLAID_PRODUCTS,
-              country_codes: PLAID_COUNTRY_CODES,
-              language: 'en',
-              payment_initiation: {
-                payment_id: paymentId,
-              },
-            };
-            if (PLAID_REDIRECT_URI !== '') {
-              configs.redirect_uri = PLAID_REDIRECT_URI;
-            }
-            client.createLinkToken(
-              {
-                user: {
-                  // This should correspond to a unique id for the current user.
-                  client_user_id: 'user-id',
-                },
-                client_name: 'Plaid Quickstart',
-                products: PLAID_PRODUCTS,
-                country_codes: PLAID_COUNTRY_CODES,
-                language: 'en',
-                redirect_uri: PLAID_REDIRECT_URI,
-                payment_initiation: {
-                  payment_id: paymentId,
-                },
-              },
-              function (error, createTokenResponse) {
-                if (error != null) {
-                  prettyPrintResponse(error);
-                  return response.json({
-                    error,
-                  });
-                }
-                response.json(createTokenResponse);
-              },
-            );
-          },
-        );
-      },
-    );
-  },
-);
 
 // Exchange token flow - exchange a Link public_token for
 // an API access_token
@@ -195,27 +119,9 @@ app.post('/api/set_access_token', async function (request, response, next) {
       error: null,
     });
   } catch (error) {
-    console.log('error!');
     prettyPrintResponse(error);
     return response.json({
-      error,
-    });
-  }
-});
-
-// Retrieve an Item's accounts
-// https://plaid.com/docs/#accounts
-app.get('/api/accounts', async function (request, response, next) {
-  try {
-    const accountsResponse = await client.accountsGet({
-      access_token: ACCESS_TOKEN,
-    });
-    prettyPrintResponse(accountsResponse);
-    response.json(accountsResponse.data);
-  } catch (error) {
-    prettyPrintResponse(error);
-    return response.json({
-      error,
+      error: error.response.data,
     });
   }
 });
@@ -229,9 +135,7 @@ app.get('/api/auth', async function (request, response, next) {
     response.json(authResponse.data);
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json({
-      error,
-    });
+    return response.json(makeErrorObject(error.response));
   }
 });
 
@@ -255,9 +159,7 @@ app.get('/api/transactions', async function (request, response, next) {
     response.json(transactionsResponse.data);
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json({
-      error,
-    });
+    return response.json(makeErrorObject(error.response));
   }
 });
 
@@ -272,9 +174,7 @@ app.get('/api/identity', async function (request, response, next) {
     response.json({ identity: identityResponse.data.accounts });
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json({
-      error,
-    });
+    return response.json(makeErrorObject(error.response));
   }
 });
 
@@ -289,9 +189,7 @@ app.get('/api/balance', async function (request, response, next) {
     response.json(balanceResponse.data);
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json({
-      error,
-    });
+    return response.json(makeErrorObject(error.response));
   }
 });
 
@@ -306,94 +204,8 @@ app.get('/api/holdings', async function (request, response, next) {
     response.json({ error: null, holdings: holdingsResponse.data });
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json({
-      error,
-    });
+    return response.json(makeErrorObject(error.response));
   }
-});
-
-// Retrieve Investment Transactions for an Item
-// https://plaid.com/docs/#investments
-app.get('/api/investment_transactions', function (request, response, next) {
-  const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
-  const endDate = moment().format('YYYY-MM-DD');
-  client.getInvestmentTransactions(
-    ACCESS_TOKEN,
-    startDate,
-    endDate,
-    function (error, investmentTransactionsResponse) {
-      if (error != null) {
-        prettyPrintResponse(error);
-        return response.json({
-          error,
-        });
-      }
-      prettyPrintResponse(investmentTransactionsResponse);
-      response.json({
-        error: null,
-        investment_transactions: investmentTransactionsResponse,
-      });
-    },
-  );
-});
-
-// Create and then retrieve an Asset Report for one or more Items. Note that an
-// Asset Report can contain up to 100 items, but for simplicity we're only
-// including one Item here.
-// https://plaid.com/docs/#assets
-app.get('/api/assets', function (request, response, next) {
-  // You can specify up to two years of transaction history for an Asset
-  // Report.
-  const daysRequested = 10;
-
-  // The `options` object allows you to specify a webhook for Asset Report
-  // generation, as well as information that you want included in the Asset
-  // Report. All fields are optional.
-  const options = {
-    client_report_id: 'Custom Report ID #123',
-    // webhook: 'https://your-domain.tld/plaid-webhook',
-    user: {
-      client_user_id: 'Custom User ID #456',
-      first_name: 'Alice',
-      middle_name: 'Bobcat',
-      last_name: 'Cranberry',
-      ssn: '123-45-6789',
-      phone_number: '555-123-4567',
-      email: 'alice@example.com',
-    },
-  };
-  client.createAssetReport(
-    [ACCESS_TOKEN],
-    daysRequested,
-    options,
-    function (error, assetReportCreateResponse) {
-      if (error != null) {
-        prettyPrintResponse(error);
-        return response.json({
-          error,
-        });
-      }
-      prettyPrintResponse(assetReportCreateResponse);
-
-      const assetReportToken = assetReportCreateResponse.asset_report_token;
-      respondWithAssetReport(20, assetReportToken, client, response);
-    },
-  );
-});
-
-// This functionality is only relevant for the UK Payment Initiation product.
-// Retrieve Payment for a specified Payment ID
-app.get('/api/payment', function (request, response, next) {
-  client.getPayment(PAYMENT_ID, function (error, paymentGetResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error,
-      });
-    }
-    prettyPrintResponse(paymentGetResponse);
-    response.json({ error: null, payment: paymentGetResponse });
-  });
 });
 
 // Retrieve information about an Item
@@ -403,32 +215,35 @@ app.get('/api/item', async function (request, response, next) {
     // Pull the Item - this includes information about available products,
     // billed products, webhook information, and more.
     const itemResponse = await client.itemGet({ access_token: ACCESS_TOKEN });
-    try {
-      console.log('Here it is:', itemResponse.data);
-      const instResponse = await client.institutionsGetById({
-        institution_id: itemResponse.data.item.institution_id,
-        country_codes: ['US'],
-      });
-      // prettyPrintResponse(itemResponse);
-      response.json({
-        item: itemResponse.data.item,
-        institution: instResponse.data.institution,
-      });
-    } catch (error) {
-      const msg = 'Unable to pull institution information from the Plaid API.';
-      console.log(msg + '\n' + JSON.stringify(error));
-      return response.json({
-        error: msg,
-      });
-    }
-    // prettyPrintResponse(itemResponse);
+    // Also pull information about the institution
+    const instResponse = await client.institutionsGetById({
+      institution_id: itemResponse.data.item.institution_id,
+      country_codes: ['US'],
+    });
+    prettyPrintResponse(itemResponse);
+    response.json({
+      item: itemResponse.data.item,
+      institution: instResponse.data.institution,
+    });
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json({
-      error,
-    });
+    return response.json(makeErrorObject(error.response));
   }
-  // Also pull information about the institution
+});
+
+// Retrieve an Item's accounts
+// https://plaid.com/docs/#accounts
+app.get('/api/accounts', async function (request, response, next) {
+  try {
+    const accountsResponse = await client.accountsGet({
+      access_token: ACCESS_TOKEN,
+    });
+    prettyPrintResponse(accountsResponse);
+    response.json(accountsResponse.data);
+  } catch (error) {
+    prettyPrintResponse(error);
+    return response.json(makeErrorObject(error.response));
+  }
 });
 
 const server = app.listen(APP_PORT, function () {
@@ -439,71 +254,8 @@ const prettyPrintResponse = (response) => {
   console.log(util.inspect(response, { colors: true, depth: 4 }));
 };
 
-app.post('/api/info', function (request, response, next) {
-  response.json({
-    item_id: ITEM_ID,
-    access_token: ACCESS_TOKEN,
-    products: PLAID_PRODUCTS,
-  });
-});
-// This is a helper function to poll for the completion of an Asset Report and
-// then send it in the response to the client. Alternatively, you can provide a
-// webhook in the `options` object in your `/asset_report/create` request to be
-// notified when the Asset Report is finished being generated.
-const respondWithAssetReport = (
-  numRetriesRemaining,
-  assetReportToken,
-  client,
-  response,
-) => {
-  if (numRetriesRemaining == 0) {
-    return response.json({
-      error: 'Timed out when polling for Asset Report',
-    });
-  }
-
-  const includeInsights = false;
-  client.getAssetReport(
-    assetReportToken,
-    includeInsights,
-    function (error, assetReportGetResponse) {
-      if (error != null) {
-        prettyPrintResponse(error);
-        if (error.error_code == 'PRODUCT_NOT_READY') {
-          setTimeout(
-            () =>
-              respondWithAssetReport(
-                --numRetriesRemaining,
-                assetReportToken,
-                client,
-                response,
-              ),
-            1000,
-          );
-          return;
-        }
-
-        return response.json({
-          error,
-        });
-      }
-
-      client.getAssetReportPdf(
-        assetReportToken,
-        function (error, assetReportGetPdfResponse) {
-          if (error != null) {
-            return response.json({
-              error,
-            });
-          }
-
-          response.json({
-            error: null,
-            json: assetReportGetResponse.report,
-            pdf: assetReportGetPdfResponse.buffer.toString('base64'),
-          });
-        },
-      );
-    },
-  );
+const makeErrorObject = (error) => {
+  return {
+    error: { ...error.data, status_code: error.status },
+  };
 };
