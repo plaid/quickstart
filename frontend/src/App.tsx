@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useCallback } from "react";
 
 import Header from "./Components/Headers";
 import Products from "./Components/ProductTypes/Products";
@@ -10,7 +10,7 @@ import styles from "./App.module.scss";
 const App = () => {
   const { linkSuccess, isItemAccess, dispatch } = useContext(Context);
 
-  const generateToken = async () => {
+  const generateToken = useCallback(async () => {
     const response = await fetch("/api/create_link_token", {
       method: "POST",
     });
@@ -23,7 +23,7 @@ const App = () => {
       dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
     }
     localStorage.setItem("link_token", data.link_token); //to use later for Oauth
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     // do not generate a new token for OAuth redirect; instead
@@ -36,7 +36,7 @@ const App = () => {
       return;
     }
     generateToken();
-  }, []);
+  }, [dispatch, generateToken]);
 
   return (
     <div className={styles.App}>
