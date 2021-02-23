@@ -1,6 +1,6 @@
 // read env vars from .env file
 require('dotenv').config();
-
+const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 const util = require('util');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -50,14 +50,19 @@ let PAYMENT_ID = null;
 
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
-const client = new plaid.Client({
-  clientID: PLAID_CLIENT_ID,
-  secret: PLAID_SECRET,
-  env: plaid.environments[PLAID_ENV],
-  options: {
-    version: '2019-05-29',
+
+const configuration = new Configuration({
+  basePath: PlaidEnvironments.sandbox,
+  baseOptions: {
+    headers: {
+      'PLAID-CLIENT-ID': PLAID_CLIENT_ID,
+      'PLAID-SECRET': PLAID_SECRET,
+      'Plaid-Version': '2020-09-14',
+    },
   },
 });
+
+const client = new PlaidApi(configuration);
 
 const app = express();
 app.use(
