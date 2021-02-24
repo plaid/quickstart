@@ -133,8 +133,8 @@ app.post(
           },
         },
       );
-      PAYMENT_ID= createPaymentResponse.payment_id;
-     
+      PAYMENT_ID = createPaymentResponse.payment_id;
+
       const configs = {
         user: {
           // This should correspond to a unique id for the current user.
@@ -375,15 +375,17 @@ app.get('/api/assets', async function (request, response, next) {
 
 // This functionality is only relevant for the UK Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
-app.get('/api/payment', function (request, response, next) {
-  try{
-    const paymentGetResponse = await client.paymentInitiationPaymentGet({payment_id: PAYMENT_ID});
+app.get('/api/payment', async function (request, response, next) {
+  try {
+    const paymentGetResponse = await client.paymentInitiationPaymentGet({
+      payment_id: PAYMENT_ID,
+    });
     prettyPrintResponse(paymentGetResponse);
     response.json({ error: null, payment: paymentGetResponse.data });
-}catch{
-      prettyPrintResponse(error);
-      return response.json(makeErrorObject(error.response));
-    }
+  } catch (error) {
+    prettyPrintResponse(error);
+    return response.json(makeErrorObject(error.response));
+  }
 });
 
 const server = app.listen(APP_PORT, function () {
@@ -411,37 +413,38 @@ const respondWithAssetReport = async (
   }
 
   const includeInsights = false;
-  try{
-  const assetReportGetResponse = await client.assetReportGet({
-   asset_report_token: assetReportToken,
-    include_insights: includeInsights,
-  });
-  const assetReportGetPdfResponse = await client.assetReportPdfGet({
-    asset_report_token: assetReportToken});
+  try {
+    const assetReportGetResponse = await client.assetReportGet({
+      asset_report_token: assetReportToken,
+      include_insights: includeInsights,
+    });
+    const assetReportGetPdfResponse = await client.assetReportPdfGet({
+      asset_report_token: assetReportToken,
+    });
     response.json({
       error: null,
       json: assetReportGetResponse.report,
       pdf: assetReportGetPdfResponse.buffer.toString('base64'),
     });
-} catch(error) {
-        prettyPrintResponse(error);
-        if (error.error_code == 'PRODUCT_NOT_READY') {
-          setTimeout(
-            () =>
-              respondWithAssetReport(
-                --numRetriesRemaining,
-                assetReportToken,
-                client,
-                response,
-              ),
-            1000,
-          );
-          return;
-        }
-        return response.json({
-          error:error.response.data,
-        });
-      }
+  } catch (error) {
+    prettyPrintResponse(error);
+    if (error.error_code == 'PRODUCT_NOT_READY') {
+      setTimeout(
+        () =>
+          respondWithAssetReport(
+            --numRetriesRemaining,
+            assetReportToken,
+            client,
+            response,
+          ),
+        1000,
+      );
+      return;
+    }
+    return response.json({
+      error: error.response.data,
+    });
+  }
 };
 
 const makeErrorObject = (error) => {
