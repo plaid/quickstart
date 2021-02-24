@@ -103,6 +103,66 @@ app.post('/api/create_link_token', async function (request, response) {
   }
 });
 
+// Create a link token with configs which we can then use to initialize Plaid Link client-side.
+// See https://plaid.com/docs/#payment-initiation-create-link-token-request
+app.post(
+  '/api/create_link_token_for_payment',
+  async function (request, response, next) {
+    try {
+      const createRecipientResponse = await client.paymentInitiationRecipientCreate(
+        {
+          name: 'Harry Potter',
+          iban: 'GB33BUKB20201555555555',
+          address: {
+            street: ['4 Privet Drive'],
+            city: 'Little Whinging',
+            postal_code: '11111',
+            country: 'GB',
+          },
+        },
+      );
+      const recipientId = createRecipientResponse.recipient_id;
+
+      const createPaymentResponse = await client.paymentInitiationPaymentCreate(
+        {
+          recipient_id: recipientId,
+          reference: 'payment_ref',
+          amount: {
+            value: 12.34,
+            currency: 'GBP',
+          },
+        },
+      );
+      prettyPrintResponse(createPaymentResponse);
+      const paymentId = createPaymentResponse.payment_id;
+      PAYMENT_ID = paymentId;
+      const configs = {
+        user: {
+          // This should correspond to a unique id for the current user.
+          client_user_id: 'user-id',
+        },
+        client_name: 'Plaid Quickstart',
+        products: PLAID_PRODUCTS,
+        country_codes: PLAID_COUNTRY_CODES,
+        language: 'en',
+        payment_initiation: {
+          payment_id: paymentId,
+        },
+      };
+      if (PLAID_REDIRECT_URI !== '') {
+        configs.redirect_uri = PLAID_REDIRECT_URI;
+      }
+      const createTokenResponse = await client.linkTokenCreate(configs);
+      response.json(createTokenResponse.data);
+    } catch (error) {
+      prettyPrintResponse(error);
+      return response.json({
+        error: error.response.data,
+      });
+    }
+  },
+);
+
 // Exchange token flow - exchange a Link public_token for
 // an API access_token
 // https://plaid.com/docs/#exchange-token-flow
@@ -163,6 +223,35 @@ app.get('/api/transactions', async function (request, response, next) {
     return response.json(makeErrorObject(error.response));
   }
 });
+
+// Retrieve Investment Transactions for an Item
+// https://plaid.com/docs/#investments
+app.get(
+  '/api/investment_transactions',
+  async function (request, response, next) {
+    const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
+    const endDate = moment().format('YYYY-MM-DD');
+    try {
+      const investmentTransactionsResponse = await client.investmentTransactionsGet(
+        {
+          access_token: ACCESS_TOKEN,
+          start_date: startDate,
+          end_date: endDate,
+        },
+      );
+      prettyPrintResponse(investmentTransactionsResponse);
+      response.json({
+        error: null,
+        investment_transactions: investmentTransactionsResponse.data,
+      });
+    } catch (error) {
+      prettyPrintResponse(error);
+      return response.json({
+        error,
+      });
+    }
+  },
+);
 
 // Retrieve Identity for an Item
 // https://plaid.com/docs/#identity
@@ -247,12 +336,128 @@ app.get('/api/accounts', async function (request, response, next) {
   }
 });
 
+// Create and then retrieve an Asset Report for one or more Items. Note that an
+// Asset Report can contain up to 100 items, but for simplicity we're only
+// including one Item here.
+// https://plaid.com/docs/#assets
+app.get('/api/assets', async function (request, response, next) {
+  // You can specify up to two years of transaction history for an Asset
+  // Report.
+  const daysRequested = 10;
+
+  // The `options` object allows you to specify a webhook for Asset Report
+  // generation, as well as information that you want included in the Asset
+  // Report. All fields are optional.
+  const options = {
+    client_report_id: 'Custom Report ID #123',
+    // webhook: 'https://your-domain.tld/plaid-webhook',
+    user: {
+      client_user_id: 'Custom User ID #456',
+      first_name: 'Alice',
+      middle_name: 'Bobcat',
+      last_name: 'Cranberry',
+      ssn: '123-45-6789',
+      phone_number: '555-123-4567',
+      email: 'alice@example.com',
+    },
+  };
+  try {
+    const assetReportCreateResponse = await client.assetReportCreate({
+      access_tokens: [ACCESS_TOKEN],
+      days_requested: daysRequested,
+      options,
+    });
+    prettyPrintResponse(assetReportCreateResponse);
+
+    const assetReportToken = assetReportCreateResponse.asset_report_token;
+    respondWithAssetReport(20, assetReportToken, client, response);
+  } catch {
+    prettyPrintResponse(error);
+    return response.json(makeErrorObject(error.response));
+  }
+});
+
+// This functionality is only relevant for the UK Payment Initiation product.
+// Retrieve Payment for a specified Payment ID
+app.get('/api/payment', function (request, response, next) {
+  try{
+    const paymentGetResponse = await client.paymentInitiationPaymentGet({payment_id: PAYMENT_ID});
+    prettyPrintResponse(paymentGetResponse);
+    response.json({ error: null, payment: paymentGetResponse.data });
+}catch{
+      prettyPrintResponse(error);
+      return response.json(makeErrorObject(error.response));
+    }
+});
+
 const server = app.listen(APP_PORT, function () {
   console.log('plaid-quickstart server listening on port ' + APP_PORT);
 });
 
 const prettyPrintResponse = (response) => {
   console.log(util.inspect(response, { colors: true, depth: 4 }));
+};
+
+// This is a helper function to poll for the completion of an Asset Report and
+// then send it in the response to the client. Alternatively, you can provide a
+// webhook in the `options` object in your `/asset_report/create` request to be
+// notified when the Asset Report is finished being generated.
+const respondWithAssetReport = (
+  numRetriesRemaining,
+  assetReportToken,
+  client,
+  response,
+) => {
+  if (numRetriesRemaining == 0) {
+    return response.json({
+      error: 'Timed out when polling for Asset Report',
+    });
+  }
+
+  const includeInsights = false;
+  client.getAssetReport(
+    assetReportToken,
+    includeInsights,
+    function (error, assetReportGetResponse) {
+      if (error != null) {
+        prettyPrintResponse(error);
+        if (error.error_code == 'PRODUCT_NOT_READY') {
+          setTimeout(
+            () =>
+              respondWithAssetReport(
+                --numRetriesRemaining,
+                assetReportToken,
+                client,
+                response,
+              ),
+            1000,
+          );
+          return;
+        }
+
+        return response.json({
+          error,
+        });
+      }
+
+      client.getAssetReportPdf(
+        assetReportToken,
+        function (error, assetReportGetPdfResponse) {
+          if (error != null) {
+            return response.json({
+              error,
+            });
+          }
+
+          response.json({
+            error: null,
+            json: assetReportGetResponse.report,
+            pdf: assetReportGetPdfResponse.buffer.toString('base64'),
+          });
+        },
+      );
+    },
+  );
 };
 
 const makeErrorObject = (error) => {
