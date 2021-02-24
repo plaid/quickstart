@@ -133,9 +133,8 @@ app.post(
           },
         },
       );
-      prettyPrintResponse(createPaymentResponse);
-      const paymentId = createPaymentResponse.payment_id;
-      PAYMENT_ID = paymentId;
+      PAYMENT_ID= createPaymentResponse.payment_id;
+     
       const configs = {
         user: {
           // This should correspond to a unique id for the current user.
@@ -146,7 +145,7 @@ app.post(
         country_codes: PLAID_COUNTRY_CODES,
         language: 'en',
         payment_initiation: {
-          payment_id: paymentId,
+          payment_id: PAYMENT_ID,
         },
       };
       if (PLAID_REDIRECT_URI !== '') {
@@ -246,9 +245,7 @@ app.get(
       });
     } catch (error) {
       prettyPrintResponse(error);
-      return response.json({
-        error,
-      });
+      return response.json(makeErrorObject(error.response));
     }
   },
 );
@@ -368,7 +365,6 @@ app.get('/api/assets', async function (request, response, next) {
       options,
     });
     prettyPrintResponse(assetReportCreateResponse);
-
     const assetReportToken = assetReportCreateResponse.asset_report_token;
     respondWithAssetReport(20, assetReportToken, client, response);
   } catch {
@@ -402,7 +398,7 @@ const prettyPrintResponse = (response) => {
 // then send it in the response to the client. Alternatively, you can provide a
 // webhook in the `options` object in your `/asset_report/create` request to be
 // notified when the Asset Report is finished being generated.
-const respondWithAssetReport = (
+const respondWithAssetReport = async (
   numRetriesRemaining,
   assetReportToken,
   client,
@@ -415,11 +411,19 @@ const respondWithAssetReport = (
   }
 
   const includeInsights = false;
-  client.getAssetReport(
-    assetReportToken,
-    includeInsights,
-    function (error, assetReportGetResponse) {
-      if (error != null) {
+  try{
+  const assetReportGetResponse = await client.assetReportGet({
+   asset_report_token: assetReportToken,
+    include_insights: includeInsights,
+  });
+  const assetReportGetPdfResponse = await client.assetReportPdfGet({
+    asset_report_token: assetReportToken});
+    response.json({
+      error: null,
+      json: assetReportGetResponse.report,
+      pdf: assetReportGetPdfResponse.buffer.toString('base64'),
+    });
+} catch(error) {
         prettyPrintResponse(error);
         if (error.error_code == 'PRODUCT_NOT_READY') {
           setTimeout(
@@ -434,30 +438,10 @@ const respondWithAssetReport = (
           );
           return;
         }
-
         return response.json({
-          error,
+          error:error.response.data,
         });
       }
-
-      client.getAssetReportPdf(
-        assetReportToken,
-        function (error, assetReportGetPdfResponse) {
-          if (error != null) {
-            return response.json({
-              error,
-            });
-          }
-
-          response.json({
-            error: null,
-            json: assetReportGetResponse.report,
-            pdf: assetReportGetPdfResponse.buffer.toString('base64'),
-          });
-        },
-      );
-    },
-  );
 };
 
 const makeErrorObject = (error) => {
