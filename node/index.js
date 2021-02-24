@@ -105,9 +105,7 @@ app.post('/api/create_link_token', async function (request, response) {
     response.json(createTokenResponse.data);
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json({
-      error: error.response.data,
-    });
+    return response.json(formatError(error.response));
   }
 });
 
@@ -116,30 +114,31 @@ app.post('/api/create_link_token', async function (request, response) {
 app.post(
   '/api/create_link_token_for_payment',
   async function (request, response, next) {
+    const recipientConfigs = {
+      name: 'Harry Potter',
+      iban: 'GB33BUKB20201555555555',
+      address: {
+        street: ['4 Privet Drive'],
+        city: 'Little Whinging',
+        postal_code: '11111',
+        country: 'GB',
+      },
+    };
     try {
       const createRecipientResponse = await client.paymentInitiationRecipientCreate(
-        {
-          name: 'Harry Potter',
-          iban: 'GB33BUKB20201555555555',
-          address: {
-            street: ['4 Privet Drive'],
-            city: 'Little Whinging',
-            postal_code: '11111',
-            country: 'GB',
-          },
-        },
+        recipientConfigs,
       );
       const recipientId = createRecipientResponse.recipient_id;
-
-      const createPaymentResponse = await client.paymentInitiationPaymentCreate(
-        {
-          recipient_id: recipientId,
-          reference: 'payment_ref',
-          amount: {
-            value: 12.34,
-            currency: 'GBP',
-          },
+      const paymentConfigs = {
+        recipient_id: recipientId,
+        reference: 'payment_ref',
+        amount: {
+          value: 12.34,
+          currency: 'GBP',
         },
+      };
+      const createPaymentResponse = await client.paymentInitiationPaymentCreate(
+        paymentConfigs,
       );
       PAYMENT_ID = createPaymentResponse.payment_id;
 
@@ -163,9 +162,7 @@ app.post(
       response.json(createTokenResponse.data);
     } catch (error) {
       prettyPrintResponse(error);
-      return response.json({
-        error: error.response.data,
-      });
+      return response.json(formatError(error.response));
     }
   },
 );
@@ -188,9 +185,7 @@ app.post('/api/set_access_token', async function (request, response, next) {
     });
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json({
-      error: error.response.data,
-    });
+    return response.json(formatError(error.response));
   }
 });
 
@@ -203,7 +198,7 @@ app.get('/api/auth', async function (request, response, next) {
     response.json(authResponse.data);
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json(makeErrorObject(error.response));
+    return response.json(formatError(error.response));
   }
 });
 
@@ -213,21 +208,22 @@ app.get('/api/transactions', async function (request, response, next) {
   // Pull transactions for the Item for the last 30 days
   const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
   const endDate = moment().format('YYYY-MM-DD');
+  const configs = {
+    access_token: ACCESS_TOKEN,
+    start_date: startDate,
+    end_date: endDate,
+    options: {
+      count: 250,
+      offset: 0,
+    },
+  };
   try {
-    const transactionsResponse = await client.transactionsGet({
-      access_token: ACCESS_TOKEN,
-      start_date: startDate,
-      end_date: endDate,
-      options: {
-        count: 250,
-        offset: 0,
-      },
-    });
+    const transactionsResponse = await client.transactionsGet(configs);
     prettyPrintResponse(transactionsResponse);
     response.json(transactionsResponse.data);
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json(makeErrorObject(error.response));
+    return response.json(formatError(error.response));
   }
 });
 
@@ -238,13 +234,14 @@ app.get(
   async function (request, response, next) {
     const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
     const endDate = moment().format('YYYY-MM-DD');
+    const configs = {
+      access_token: ACCESS_TOKEN,
+      start_date: startDate,
+      end_date: endDate,
+    };
     try {
       const investmentTransactionsResponse = await client.investmentTransactionsGet(
-        {
-          access_token: ACCESS_TOKEN,
-          start_date: startDate,
-          end_date: endDate,
-        },
+        configs,
       );
       prettyPrintResponse(investmentTransactionsResponse);
       response.json({
@@ -253,7 +250,7 @@ app.get(
       });
     } catch (error) {
       prettyPrintResponse(error);
-      return response.json(makeErrorObject(error.response));
+      return response.json(formatError(error.response));
     }
   },
 );
@@ -269,7 +266,7 @@ app.get('/api/identity', async function (request, response, next) {
     response.json({ identity: identityResponse.data.accounts });
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json(makeErrorObject(error.response));
+    return response.json(formatError(error.response));
   }
 });
 
@@ -284,7 +281,7 @@ app.get('/api/balance', async function (request, response, next) {
     response.json(balanceResponse.data);
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json(makeErrorObject(error.response));
+    return response.json(formatError(error.response));
   }
 });
 
@@ -299,7 +296,7 @@ app.get('/api/holdings', async function (request, response, next) {
     response.json({ error: null, holdings: holdingsResponse.data });
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json(makeErrorObject(error.response));
+    return response.json(formatError(error.response));
   }
 });
 
@@ -311,10 +308,11 @@ app.get('/api/item', async function (request, response, next) {
     // billed products, webhook information, and more.
     const itemResponse = await client.itemGet({ access_token: ACCESS_TOKEN });
     // Also pull information about the institution
-    const instResponse = await client.institutionsGetById({
+    const configs = {
       institution_id: itemResponse.data.item.institution_id,
       country_codes: ['US'],
-    });
+    };
+    const instResponse = await client.institutionsGetById(configs);
     prettyPrintResponse(itemResponse);
     response.json({
       item: itemResponse.data.item,
@@ -322,7 +320,7 @@ app.get('/api/item', async function (request, response, next) {
     });
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json(makeErrorObject(error.response));
+    return response.json(formatError(error.response));
   }
 });
 
@@ -337,7 +335,7 @@ app.get('/api/accounts', async function (request, response, next) {
     response.json(accountsResponse.data);
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json(makeErrorObject(error.response));
+    return response.json(formatError(error.response));
   }
 });
 
@@ -366,18 +364,19 @@ app.get('/api/assets', async function (request, response, next) {
       email: 'alice@example.com',
     },
   };
+  const configs = {
+    access_tokens: [ACCESS_TOKEN],
+    days_requested: daysRequested,
+    options,
+  };
   try {
-    const assetReportCreateResponse = await client.assetReportCreate({
-      access_tokens: [ACCESS_TOKEN],
-      days_requested: daysRequested,
-      options,
-    });
+    const assetReportCreateResponse = await client.assetReportCreate(configs);
     prettyPrintResponse(assetReportCreateResponse);
     const assetReportToken = assetReportCreateResponse.asset_report_token;
     respondWithAssetReport(20, assetReportToken, client, response);
   } catch {
     prettyPrintResponse(error);
-    return response.json(makeErrorObject(error.response));
+    return response.json(formatError(error.response));
   }
 });
 
@@ -392,7 +391,7 @@ app.get('/api/payment', async function (request, response, next) {
     response.json({ error: null, payment: paymentGetResponse.data });
   } catch (error) {
     prettyPrintResponse(error);
-    return response.json(makeErrorObject(error.response));
+    return response.json(formatError(error.response));
   }
 });
 
@@ -422,10 +421,11 @@ const respondWithAssetReport = async (
 
   const includeInsights = false;
   try {
-    const assetReportGetResponse = await client.assetReportGet({
+    const assetRepConfigs = {
       asset_report_token: assetReportToken,
       include_insights: includeInsights,
-    });
+    };
+    const assetReportGetResponse = await client.assetReportGet(assetRepConfigs);
     const assetReportGetPdfResponse = await client.assetReportPdfGet({
       asset_report_token: assetReportToken,
     });
@@ -455,7 +455,7 @@ const respondWithAssetReport = async (
   }
 };
 
-const makeErrorObject = (error) => {
+const formatError = (error) => {
   return {
     error: { ...error.data, status_code: error.status },
   };
