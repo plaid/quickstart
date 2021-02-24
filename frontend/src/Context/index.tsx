@@ -42,7 +42,6 @@ export const QuickstartProvider: React.FC<{ children: ReactNode }> = (
     switch (action.type) {
       case "SET_STATE":
         return { ...state, ...action.state };
-        break;
       default:
         return { ...state };
     }
