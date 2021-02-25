@@ -38,8 +38,6 @@ const Error = (props: Props) => {
     );
   }, [props.error]);
 
-  console.log(props.error);
-
   return (
     <>
       <div className={styles.errorTop}></div>
