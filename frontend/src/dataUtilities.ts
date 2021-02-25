@@ -466,15 +466,15 @@ interface PaymentData {
 }
 
 export const transformPaymentData = (data: PaymentData) => {
-  console.log(data);
-  const obj: DataItem = {
-    paymentId: data.payment.payment_id,
-    amount: `${data.payment.amount.currency} ${data.payment.amount.value}`,
-    status: data.payment.status,
-    statusUpdate: data.payment.last_status_update
-      .replace("T", " ")
-      .replace("Z", ""),
-    recipientId: data.payment.recipient_id,
-  };
-  return [obj];
+  return [
+    {
+      paymentId: data.payment.payment_id,
+      amount: `${data.payment.amount.currency} ${data.payment.amount.value}`,
+      status: data.payment.status,
+      statusUpdate: data.payment.last_status_update
+        .replace("T", " ")
+        .replace("Z", ""),
+      recipientId: data.payment.recipient_id,
+    },
+  ];
 };
