@@ -36,10 +36,10 @@ const Header = () => {
           </p>
           {/* message if backend is not running and there is no link token */}
           {linkToken == null || backend === false ? (
-            <Callout warning className={styles.error}>
+            <Callout warning>
               Unable to fetch link_token: please make sure your backend server
               is running and that your .env file has been configured with your
-              PLAID_CLIENT_ID and PLAID_SECRET.
+              <code>PLAID_CLIENT_ID</code> and <code>PLAID_SECRET</code>.
             </Callout>
           ) : linkToken === "" ? (
             <div className={styles.linkButton}>
@@ -68,7 +68,7 @@ const Header = () => {
             </h4>
           ) : (
             <h4 className={styles.subtitle}>
-              <Callout warning className={styles.error}>
+              <Callout warning>
                 Unable to create an item. Please check your backend server
               </Callout>
             </h4>
