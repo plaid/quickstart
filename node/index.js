@@ -127,7 +127,7 @@ app.post(
 
         client.createPayment(
           recipientId,
-          'paymentref',
+          'paymentRef',
           {
             value: 12.34,
             currency: 'GBP',
