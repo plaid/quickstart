@@ -461,20 +461,17 @@ export const transformAccountsData = (data: AccountsGetResponse) => {
 };
 
 interface PaymentData {
-  error: null;
   payment: PaymentInitiationPaymentGetResponse;
 }
 
-export const transformPaymentData = (data: PaymentData) => {
-  return [
-    {
-      paymentId: data.payment.payment_id,
-      amount: `${data.payment.amount.currency} ${data.payment.amount.value}`,
-      status: data.payment.status,
-      statusUpdate: data.payment.last_status_update
-        .replace("T", " ")
-        .replace("Z", ""),
-      recipientId: data.payment.recipient_id,
-    },
-  ];
-};
+export const transformPaymentData = (data: PaymentData) => [
+  {
+    paymentId: data.payment.payment_id,
+    amount: `${data.payment.amount.currency} ${data.payment.amount.value}`,
+    status: data.payment.status,
+    statusUpdate: data.payment.last_status_update
+      .replace("T", " ")
+      .replace("Z", ""),
+    recipientId: data.payment.recipient_id,
+  },
+];

@@ -135,6 +135,9 @@ app.post(
           function (error, createPaymentResponse) {
             if (error != null) {
               prettyPrintResponse(error);
+              return response.json({
+                error: error,
+              });
             }
             prettyPrintResponse(createPaymentResponse);
             const paymentId = createPaymentResponse.payment_id;
