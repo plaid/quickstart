@@ -46,7 +46,7 @@ public class LinkTokenWithPaymentResource {
     Response<PaymentCreateResponse> paymentCreateResponse =
       this.plaidClient.service().paymentCreate(new PaymentCreateRequest(
         recipientResponse.body().getRecipientId(),
-        "payment-ref",
+        "paymentRef",
         new Amount("GBP", 12.34)
       )).execute();
     String paymentId = paymentCreateResponse.body().getPaymentId();

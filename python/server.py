@@ -94,7 +94,7 @@ def create_link_token_for_payment():
 
     create_payment_response = client.PaymentInitiation.create_payment(
       recipient_id,
-      'payment_ref',
+      'paymentRef',
       {
         'value': 12.34,
         'currency': 'GBP'
