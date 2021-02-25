@@ -7,6 +7,7 @@ import {
   ItemGetResponse,
   InstitutionsGetByIdResponse,
   LiabilitiesGetResponse,
+  PaymentInitiationPaymentGetResponse,
 } from "plaid/dist/api.d";
 
 const formatter = new Intl.NumberFormat("en-US", {
@@ -63,6 +64,13 @@ interface LiabilitiessDataItem {
   type: string;
 }
 
+interface PaymentDataItem {
+  paymentId: string;
+  amount: string;
+  status: string;
+  statusUpdate: string;
+  recipientId: string;
+}
 interface ItemDataItem {
   billed: string;
   available: string;
@@ -85,7 +93,8 @@ export type DataItem =
   | BalanceDataItem
   | InvestmentsDataItem
   | LiabilitiessDataItem
-  | ItemDataItem;
+  | ItemDataItem
+  | PaymentDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -234,6 +243,29 @@ export const accountsCategories: Array<Categories> = [
   {
     title: "Mask",
     field: "mask",
+  },
+];
+
+export const paymentCategories: Array<Categories> = [
+  {
+    title: "Payment ID",
+    field: "paymentId",
+  },
+  {
+    title: "Amount",
+    field: "amount",
+  },
+  {
+    title: "Status",
+    field: "status",
+  },
+  {
+    title: "Status Update",
+    field: "statusUpdate",
+  },
+  {
+    title: "Recipient ID",
+    field: "recipientId",
   },
 ];
 
@@ -426,4 +458,23 @@ export const transformAccountsData = (data: AccountsGetResponse) => {
     };
     return obj;
   });
+};
+
+interface PaymentData {
+  error: null;
+  payment: PaymentInitiationPaymentGetResponse;
+}
+
+export const transformPaymentData = (data: PaymentData) => {
+  console.log(data);
+  const obj: DataItem = {
+    paymentId: data.payment.payment_id,
+    amount: `${data.payment.amount.currency} ${data.payment.amount.value}`,
+    status: data.payment.status,
+    statusUpdate: data.payment.last_status_update
+      .replace("T", " ")
+      .replace("Z", ""),
+    recipientId: data.payment.recipient_id,
+  };
+  return [obj];
 };

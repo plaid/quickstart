@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
-import Note from "plaid-threads/Note";
+import Callout from "plaid-threads/Callout";
+import Button from "plaid-threads/Button";
 import InlineLink from "plaid-threads/InlineLink";
 
 import Link from "../Link";
@@ -14,6 +15,7 @@ const Header = () => {
     linkToken,
     linkSuccess,
     isItemAccess,
+    backend,
   } = useContext(Context);
 
   return (
@@ -33,16 +35,19 @@ const Header = () => {
             to access their accounts via the Plaid API.
           </p>
           {/* message if backend is not running and there is no link token */}
-          {linkToken == null ? (
-            <Note error solid className={styles.error}>
+          {linkToken == null || backend === false ? (
+            <Callout warning className={styles.error}>
               Unable to fetch link_token: please make sure your backend server
-              is running and that your .env file has been configured with your PLAID_CLIENT_ID and PLAID_SECRET.
-            </Note>
-          ) : 
-          linkToken===""?(<div className={styles.linkButton}>
-            <Note>Loading...</Note>
-          </div>):
-          (
+              is running and that your .env file has been configured with your
+              PLAID_CLIENT_ID and PLAID_SECRET.
+            </Callout>
+          ) : linkToken === "" ? (
+            <div className={styles.linkButton}>
+              <Button large disabled>
+                Loading...
+              </Button>
+            </div>
+          ) : (
             <div className={styles.linkButton}>
               <Link />
             </div>
@@ -63,9 +68,9 @@ const Header = () => {
             </h4>
           ) : (
             <h4 className={styles.subtitle}>
-              <Note error solid className={styles.error}>
+              <Callout warning className={styles.error}>
                 Unable to create an item. Please check your backend server
-              </Note>
+              </Callout>
             </h4>
           )}
           <div className={styles.itemAccessContainer}>

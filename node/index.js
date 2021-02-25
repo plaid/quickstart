@@ -127,12 +127,15 @@ app.post(
 
         client.createPayment(
           recipientId,
-          'payment_ref',
+          'paymentref',
           {
             value: 12.34,
             currency: 'GBP',
           },
           function (error, createPaymentResponse) {
+            if (error != null) {
+              prettyPrintResponse(error);
+            }
             prettyPrintResponse(createPaymentResponse);
             const paymentId = createPaymentResponse.payment_id;
             PAYMENT_ID = paymentId;

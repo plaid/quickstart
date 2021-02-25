@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import Endpoint from "../Endpoint";
+import Context from "../../Context";
 import ProductTypesContainer from "./ProductTypesContainer";
 import {
   transactionsCategories,
@@ -8,16 +9,29 @@ import {
   identityCategories,
   balanceCategories,
   investmentsCategories,
+  paymentCategories,
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
   transformInvestmentsData,
   transformIdentityData,
+  transformPaymentData,
 } from "../../dataUtilities";
 
 const Products = () => {
+  const { paymentInitiation } = useContext(Context);
   return (
     <ProductTypesContainer productType="Products">
+      {paymentInitiation && (
+        <Endpoint
+          endpoint="payment"
+          name="Payment"
+          categories={paymentCategories}
+          schema="/payment/get/"
+          description="Retrieve information about your latest payment."
+          transformData={transformPaymentData}
+        />
+      )}
       <Endpoint
         endpoint="auth"
         name="Auth"
