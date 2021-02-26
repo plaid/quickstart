@@ -113,59 +113,16 @@ app.post('/api/create_link_token', async function (request, response) {
 // See https://plaid.com/docs/#payment-initiation-create-link-token-request
 app.post(
   '/api/create_link_token_for_payment',
-  async function (request, response, next) {
-    const recipientConfigs = {
-      name: 'Harry Potter',
-      iban: 'GB33BUKB20201555555555',
-      address: {
+  function (request, response, next) {
+    client.createPaymentRecipient(
+      'Harry Potter',
+      'GB33BUKB20201555555555',
+      {
         street: ['4 Privet Drive'],
         city: 'Little Whinging',
         postal_code: '11111',
         country: 'GB',
       },
-<<<<<<< HEAD
-    };
-    try {
-      const createRecipientResponse = await client.paymentInitiationRecipientCreate(
-        recipientConfigs,
-      );
-      const recipientId = createRecipientResponse.recipient_id;
-      const paymentConfigs = {
-        recipient_id: recipientId,
-        reference: 'payment_ref',
-        amount: {
-          value: 12.34,
-          currency: 'GBP',
-        },
-      };
-      const createPaymentResponse = await client.paymentInitiationPaymentCreate(
-        paymentConfigs,
-      );
-      PAYMENT_ID = createPaymentResponse.payment_id;
-
-      const configs = {
-        user: {
-          // This should correspond to a unique id for the current user.
-          client_user_id: 'user-id',
-        },
-        client_name: 'Plaid Quickstart',
-        products: PLAID_PRODUCTS,
-        country_codes: PLAID_COUNTRY_CODES,
-        language: 'en',
-        payment_initiation: {
-          payment_id: PAYMENT_ID,
-        },
-      };
-      if (PLAID_REDIRECT_URI !== '') {
-        configs.redirect_uri = PLAID_REDIRECT_URI;
-      }
-      const createTokenResponse = await client.linkTokenCreate(configs);
-      response.json(createTokenResponse.data);
-    } catch (error) {
-      prettyPrintResponse(error);
-      return response.json(formatError(error.response));
-    }
-=======
       function (error, createRecipientResponse) {
         const recipientId = createRecipientResponse.recipient_id;
 
@@ -231,7 +188,6 @@ app.post(
         );
       },
     );
->>>>>>> master
   },
 );
 
