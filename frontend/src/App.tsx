@@ -10,33 +10,64 @@ import styles from "./App.module.scss";
 const App = () => {
   const { linkSuccess, isItemAccess, dispatch } = useContext(Context);
 
-  const generateToken = useCallback(async () => {
-    const response = await fetch("/api/create_link_token", {
-      method: "POST",
-    });
+  const getInfo = useCallback(async () => {
+    const response = await fetch("/api/info", { method: "POST" });
     if (!response.ok) {
-      dispatch({ type: "SET_STATE", state: { linkToken: null } });
-      return;
+      dispatch({ type: "SET_STATE", state: { backend: false } });
+      return { paymentInitiation: false };
     }
     const data = await response.json();
-    if (data) {
-      dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
-    }
-    localStorage.setItem("link_token", data.link_token); //to use later for Oauth
+    const paymentInitiation: boolean = data.products.includes(
+      "payment_initiation"
+    );
+    dispatch({
+      type: "SET_STATE",
+      state: {
+        paymentInitiation,
+      },
+    });
+    return { paymentInitiation };
   }, [dispatch]);
 
-  useEffect(() => {
-    // do not generate a new token for OAuth redirect; instead
-    // setLinkToken from localStorage
-    if (window.location.href.includes("?oauth_state_id=")) {
-      dispatch({
-        type: "SET_STATE",
-        state: { linkToken: localStorage.getItem("link_token") },
+  const generateToken = useCallback(
+    async (paymentInitiation) => {
+      const path = paymentInitiation
+        ? "/api/create_link_token_for_payment"
+        : "/api/create_link_token";
+      const response = await fetch(path, {
+        method: "POST",
       });
-      return;
-    }
-    generateToken();
-  }, [dispatch, generateToken]);
+      if (!response.ok) {
+        dispatch({ type: "SET_STATE", state: { linkToken: null } });
+        return;
+      }
+      const data = await response.json();
+      if (data) {
+        dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
+      }
+      localStorage.setItem("link_token", data.link_token); //to use later for Oauth
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    const init = async () => {
+      const { paymentInitiation } = await getInfo(); // used to determine which path to take when generating token
+      // do not generate a new token for OAuth redirect; instead
+      // setLinkToken from localStorage
+      if (window.location.href.includes("?oauth_state_id=")) {
+        dispatch({
+          type: "SET_STATE",
+          state: {
+            linkToken: localStorage.getItem("link_token"),
+          },
+        });
+        return;
+      }
+      generateToken(paymentInitiation);
+    };
+    init();
+  }, [dispatch, generateToken, getInfo]);
 
   return (
     <div className={styles.App}>

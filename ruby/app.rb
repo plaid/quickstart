@@ -310,7 +310,7 @@ post '/api/create_link_token_for_payment' do
 
     create_payment_response = client.payment_initiation.create_payment(
       recipient_id,
-      'payment_ref',
+      'paymentRef',
       currency: 'GBP',
       value:    12.34
     )

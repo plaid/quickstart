@@ -169,7 +169,7 @@ func createLinkTokenForPayment(c *gin.Context) {
 		renderError(c, err)
 		return
 	}
-	paymentCreateResp, err := client.CreatePayment(recipientCreateResp.RecipientID, "payment-ref", plaid.PaymentAmount{
+	paymentCreateResp, err := client.CreatePayment(recipientCreateResp.RecipientID, "paymentRef", plaid.PaymentAmount{
 		Currency: "GBP",
 		Value:    12.34,
 	})

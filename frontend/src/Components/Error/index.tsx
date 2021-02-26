@@ -43,7 +43,7 @@ const Error = (props: Props) => {
       <div className={styles.errorTop}></div>
       <div className={styles.errorContainer}>
         <Note error className={styles.code}>
-          {props.error.status_code}
+          {props.error.status_code ? props.error.status_code : "error"}
         </Note>
         <div className={styles.errorContents}>
           <div className={styles.errorItem}>
