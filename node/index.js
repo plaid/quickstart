@@ -123,6 +123,7 @@ app.post(
         postal_code: '11111',
         country: 'GB',
       },
+<<<<<<< HEAD
     };
     try {
       const createRecipientResponse = await client.paymentInitiationRecipientCreate(
@@ -164,6 +165,73 @@ app.post(
       prettyPrintResponse(error);
       return response.json(formatError(error.response));
     }
+=======
+      function (error, createRecipientResponse) {
+        const recipientId = createRecipientResponse.recipient_id;
+
+        client.createPayment(
+          recipientId,
+          'paymentRef',
+          {
+            value: 12.34,
+            currency: 'GBP',
+          },
+          function (error, createPaymentResponse) {
+            if (error != null) {
+              prettyPrintResponse(error);
+              return response.json({
+                error: error,
+              });
+            }
+            prettyPrintResponse(createPaymentResponse);
+            const paymentId = createPaymentResponse.payment_id;
+            PAYMENT_ID = paymentId;
+            const configs = {
+              user: {
+                // This should correspond to a unique id for the current user.
+                client_user_id: 'user-id',
+              },
+              client_name: 'Plaid Quickstart',
+              products: PLAID_PRODUCTS,
+              country_codes: PLAID_COUNTRY_CODES,
+              language: 'en',
+              payment_initiation: {
+                payment_id: paymentId,
+              },
+            };
+            if (PLAID_REDIRECT_URI !== '') {
+              configs.redirect_uri = PLAID_REDIRECT_URI;
+            }
+            client.createLinkToken(
+              {
+                user: {
+                  // This should correspond to a unique id for the current user.
+                  client_user_id: 'user-id',
+                },
+                client_name: 'Plaid Quickstart',
+                products: PLAID_PRODUCTS,
+                country_codes: PLAID_COUNTRY_CODES,
+                language: 'en',
+                redirect_uri: PLAID_REDIRECT_URI,
+                payment_initiation: {
+                  payment_id: paymentId,
+                },
+              },
+              function (error, createTokenResponse) {
+                if (error != null) {
+                  prettyPrintResponse(error);
+                  return response.json({
+                    error,
+                  });
+                }
+                response.json(createTokenResponse);
+              },
+            );
+          },
+        );
+      },
+    );
+>>>>>>> master
   },
 );
 
