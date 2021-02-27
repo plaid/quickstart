@@ -102,6 +102,7 @@ app.post('/api/create_link_token', async function (request, response) {
   }
   try {
     const createTokenResponse = await client.linkTokenCreate(configs);
+    prettyPrintResponse(createTokenResponse);
     response.json(createTokenResponse.data);
   } catch (error) {
     prettyPrintResponse(error);
@@ -113,81 +114,60 @@ app.post('/api/create_link_token', async function (request, response) {
 // See https://plaid.com/docs/#payment-initiation-create-link-token-request
 app.post(
   '/api/create_link_token_for_payment',
-  function (request, response, next) {
-    client.createPaymentRecipient(
-      'Harry Potter',
-      'GB33BUKB20201555555555',
-      {
-        street: ['4 Privet Drive'],
-        city: 'Little Whinging',
-        postal_code: '11111',
-        country: 'GB',
-      },
-      function (error, createRecipientResponse) {
-        const recipientId = createRecipientResponse.recipient_id;
+  async function (request, response, next) {
+    try {
+      const createRecipientResponse = await client.paymentInitiationRecipientCreate(
+        {
+          name: 'Harry Potter',
+          iban: 'GB33BUKB20201555555555',
+          address: {
+            street: ['4 Privet Drive'],
+            city: 'Little Whinging',
+            postal_code: '11111',
+            country: 'GB',
+          },
+        },
+      );
+      const recipientId = createRecipientResponse.data.recipient_id;
+      console.log(recipientId);
+      prettyPrintResponse(createRecipientResponse);
 
-        client.createPayment(
-          recipientId,
-          'paymentRef',
-          {
+      const createPaymentResponse = await client.paymentInitiationPaymentCreate(
+        {
+          recipient_id: recipientId,
+          reference: 'paymentRef',
+          amount: {
             value: 12.34,
             currency: 'GBP',
           },
-          function (error, createPaymentResponse) {
-            if (error != null) {
-              prettyPrintResponse(error);
-              return response.json({
-                error: error,
-              });
-            }
-            prettyPrintResponse(createPaymentResponse);
-            const paymentId = createPaymentResponse.payment_id;
-            PAYMENT_ID = paymentId;
-            const configs = {
-              user: {
-                // This should correspond to a unique id for the current user.
-                client_user_id: 'user-id',
-              },
-              client_name: 'Plaid Quickstart',
-              products: PLAID_PRODUCTS,
-              country_codes: PLAID_COUNTRY_CODES,
-              language: 'en',
-              payment_initiation: {
-                payment_id: paymentId,
-              },
-            };
-            if (PLAID_REDIRECT_URI !== '') {
-              configs.redirect_uri = PLAID_REDIRECT_URI;
-            }
-            client.createLinkToken(
-              {
-                user: {
-                  // This should correspond to a unique id for the current user.
-                  client_user_id: 'user-id',
-                },
-                client_name: 'Plaid Quickstart',
-                products: PLAID_PRODUCTS,
-                country_codes: PLAID_COUNTRY_CODES,
-                language: 'en',
-                redirect_uri: PLAID_REDIRECT_URI,
-                payment_initiation: {
-                  payment_id: paymentId,
-                },
-              },
-              function (error, createTokenResponse) {
-                if (error != null) {
-                  prettyPrintResponse(error);
-                  return response.json({
-                    error,
-                  });
-                }
-                response.json(createTokenResponse);
-              },
-            );
-          },
-        );
-      },
-    );
+        },
+      );
+      prettyPrintResponse(createPaymentResponse);
+      const paymentId = createPaymentResponse.data.payment_id;
+      PAYMENT_ID = paymentId;
+      const configs = {
+        user: {
+          // This should correspond to a unique id for the current user.
+          client_user_id: 'user-id',
+        },
+        client_name: 'Plaid Quickstart',
+        products: PLAID_PRODUCTS,
+        country_codes: PLAID_COUNTRY_CODES,
+        language: 'en',
+        payment_initiation: {
+          payment_id: paymentId,
+        },
+      };
+      if (PLAID_REDIRECT_URI !== '') {
+        configs.redirect_uri = PLAID_REDIRECT_URI;
+      }
+      const createTokenResponse = await client.linkTokenCreate(configs);
+      prettyPrintResponse(createTokenResponse);
+      response.json(createTokenResponse.data);
+    } catch (error) {
+      prettyPrintResponse(error);
+      return response.json(formatError(error.response));
+    }
   },
 );
 
@@ -200,6 +180,7 @@ app.post('/api/set_access_token', async function (request, response, next) {
     const tokenResponse = await client.itemPublicTokenExchange({
       public_token: PUBLIC_TOKEN,
     });
+    prettyPrintResponse(tokenResponse);
     ACCESS_TOKEN = tokenResponse.data.access_token;
     ITEM_ID = tokenResponse.data.item_id;
     response.json({
