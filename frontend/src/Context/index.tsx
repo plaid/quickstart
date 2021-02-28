@@ -9,6 +9,7 @@ interface QuickstartState {
   isError: boolean;
   paymentInitiation: boolean | null;
   backend: boolean;
+  products: string[];
 }
 
 const initialState: QuickstartState = {
@@ -20,6 +21,7 @@ const initialState: QuickstartState = {
   isError: false,
   paymentInitiation: false,
   backend: true,
+  products: ["transactions"],
 };
 
 type QuickstartAction = {

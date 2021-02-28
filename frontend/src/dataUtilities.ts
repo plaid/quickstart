@@ -8,6 +8,8 @@ import {
   InstitutionsGetByIdResponse,
   LiabilitiesGetResponse,
   PaymentInitiationPaymentGetResponse,
+  AssetReportGetResponse,
+  AssetReport,
 } from "plaid/dist/api.d";
 
 const formatter = new Intl.NumberFormat("en-US", {
@@ -77,6 +79,13 @@ interface ItemDataItem {
   name: string;
 }
 
+interface AssetsDataItem {
+  account: string;
+  balance: string;
+  transactions: number;
+  daysAvailable: number;
+}
+
 export interface ErrorDataItem {
   error_type: string;
   error_code: string;
@@ -94,7 +103,8 @@ export type DataItem =
   | InvestmentsDataItem
   | LiabilitiessDataItem
   | ItemDataItem
-  | PaymentDataItem;
+  | PaymentDataItem
+  | AssetsDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -266,6 +276,25 @@ export const paymentCategories: Array<Categories> = [
   {
     title: "Recipient ID",
     field: "recipientId",
+  },
+];
+
+export const assetsCategories: Array<Categories> = [
+  {
+    title: "Account",
+    field: "account",
+  },
+  {
+    title: "Transactions",
+    field: "transactions",
+  },
+  {
+    title: "Balance",
+    field: "balance",
+  },
+  {
+    title: "Days Available",
+    field: "daysAvailable",
   },
 ];
 
@@ -475,3 +504,29 @@ export const transformPaymentData = (data: PaymentData) => [
     recipientId: data.payment.recipient_id,
   },
 ];
+
+interface AssetResponseData {
+  json: AssetReport;
+}
+
+export const transformAssetsData = (data: AssetResponseData) => {
+  const assetItems = data.json.items;
+  let final: DataItem[] = [];
+  assetItems.forEach((item) => {
+    final = final.concat(
+      item.accounts.map((account) => {
+        const obj: DataItem = {
+          account: account.name,
+          balance:
+            formatter.format(account.balances.available!) ||
+            formatter.format(account.balances.current!),
+          transactions: account.transactions!.length,
+          daysAvailable: account.days_available!,
+        };
+        console.log(obj);
+        return obj;
+      })
+    );
+  });
+  return final;
+};
