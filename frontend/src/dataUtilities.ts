@@ -523,7 +523,6 @@ export const transformAssetsData = (data: AssetResponseData) => {
           transactions: account.transactions!.length,
           daysAvailable: account.days_available!,
         };
-        console.log(obj);
         return obj;
       })
     );
