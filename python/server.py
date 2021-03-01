@@ -8,7 +8,6 @@ import datetime
 import plaid
 import json
 import time
-from plaid.api import plaid_api
 from flask import Flask
 from flask import render_template
 from flask import request
@@ -51,17 +50,10 @@ def empty_to_none(field):
 # at https://dashboard.plaid.com/team/api.
 PLAID_REDIRECT_URI = empty_to_none('PLAID_REDIRECT_URI')
 
-configuration = plaid.Configuration(
-    host=plaid.Environment[PLAID_ENV],
-    api_key={
-        'clientId': client_id,
-        'secret': secret,
-        'plaidVersion': '2020-09-14'
-    }
-)
-
-api_client = plaid.ApiClient(configuration)
-client = plaid_api.PlaidApi(api_client)
+client = plaid.Client(client_id=PLAID_CLIENT_ID,
+                      secret=PLAID_SECRET,
+                      environment=PLAID_ENV,
+                      api_version='2019-05-29')
 
 
 # We store the access_token in memory - in production, store it in a secure

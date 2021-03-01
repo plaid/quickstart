@@ -6,5 +6,5 @@ click==6.7
 itsdangerous==0.24
 requests==2.20.0
 wsgiref==0.1.2 ; python_version < '3.2'
-plaid-python>=8.0.0
+plaid-python>=5.0.0, < 6.0.0
 python-dotenv==0.14.0
