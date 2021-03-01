@@ -10,19 +10,21 @@ import {
   balanceCategories,
   investmentsCategories,
   paymentCategories,
+  assetsCategories,
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
   transformInvestmentsData,
   transformIdentityData,
   transformPaymentData,
+  transformAssetsData,
 } from "../../dataUtilities";
 
 const Products = () => {
-  const { paymentInitiation } = useContext(Context);
+  const { products } = useContext(Context);
   return (
     <ProductTypesContainer productType="Products">
-      {paymentInitiation && (
+      {products.includes("payment_initiation") && (
         <Endpoint
           endpoint="payment"
           name="Payment"
@@ -57,6 +59,16 @@ const Products = () => {
         fraud by comparing user-submitted data to validate identity."
         transformData={transformIdentityData}
       />
+      {products.includes("assets") && (
+        <Endpoint
+          endpoint="assets"
+          name="Assets"
+          categories={assetsCategories}
+          schema="/assets_report/get/"
+          description="Create and retrieve assets information an asset report"
+          transformData={transformAssetsData}
+        />
+      )}
       <Endpoint
         endpoint="balance"
         name="Balance"
