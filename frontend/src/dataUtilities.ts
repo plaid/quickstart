@@ -510,22 +510,17 @@ interface AssetResponseData {
 }
 
 export const transformAssetsData = (data: AssetResponseData) => {
-  const assetItems = data.json.items;
-  let final: DataItem[] = [];
-  assetItems.forEach((item) => {
-    final = final.concat(
-      item.accounts.map((account) => {
-        const obj: DataItem = {
-          account: account.name,
-          balance:
-            formatter.format(account.balances.available!) ||
-            formatter.format(account.balances.current!),
-          transactions: account.transactions!.length,
-          daysAvailable: account.days_available!,
-        };
-        return obj;
-      })
-    );
+  return data.json.items.flatMap((item) => {
+    return item.accounts.map((account) => {
+      const obj: DataItem = {
+        account: account.name,
+        balance:
+          formatter.format(account.balances.available!) ||
+          formatter.format(account.balances.current!),
+        transactions: account.transactions!.length,
+        daysAvailable: account.days_available!,
+      };
+      return obj;
+    });
   });
-  return final;
 };
