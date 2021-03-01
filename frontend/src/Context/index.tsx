@@ -7,7 +7,6 @@ interface QuickstartState {
   accessToken: string | null;
   itemId: string | null;
   isError: boolean;
-  paymentInitiation: boolean | null;
   backend: boolean;
   products: string[];
 }
@@ -19,7 +18,6 @@ const initialState: QuickstartState = {
   accessToken: null,
   itemId: null,
   isError: false,
-  paymentInitiation: false,
   backend: true,
   products: ["transactions"],
 };
