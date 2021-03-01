@@ -510,7 +510,8 @@ interface AssetResponseData {
 }
 
 export const transformAssetsData = (data: AssetResponseData) => {
-  return data.json.items.flatMap((item) => {
+  const assetItems = data.json.items;
+  return assetItems.flatMap((item) => {
     return item.accounts.map((account) => {
       const obj: DataItem = {
         account: account.name,
