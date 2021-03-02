@@ -378,7 +378,12 @@ app.get('/api/assets', async function (request, response, next) {
     const assetReportCreateResponse = await client.assetReportCreate(configs);
     prettyPrintResponse(assetReportCreateResponse);
     const assetReportToken = assetReportCreateResponse.data.asset_report_token;
-    respondWithAssetReport(20, assetReportToken, client, response);
+    const getResponse = await getAssetReportWithRetries(
+      client,
+      assetReportToken,
+    );
+    prettyPrintResponse(getResponse);
+    response.json({ json: getResponse.data.report });
   } catch {
     prettyPrintResponse(error);
     return response.json(formatError(error.response));
@@ -412,53 +417,37 @@ const prettyPrintResponse = (response) => {
 // then send it in the response to the client. Alternatively, you can provide a
 // webhook in the `options` object in your `/asset_report/create` request to be
 // notified when the Asset Report is finished being generated.
-const respondWithAssetReport = async (
-  numRetriesRemaining,
-  assetReportToken,
-  client,
-  response,
-) => {
-  if (numRetriesRemaining == 0) {
-    return response.json({
-      error: 'Timed out when polling for Asset Report',
-    });
-  }
 
-  const includeInsights = false;
-  try {
-    const assetRepConfigs = {
-      asset_report_token: assetReportToken,
-      include_insights: includeInsights,
+const getAssetReportWithRetries = (
+  plaidClient,
+  asset_report_token,
+  ms = 1000,
+  retriesLeft = 60,
+) =>
+  new Promise((resolve, reject) => {
+    const request = {
+      asset_report_token,
     };
-    const assetReportGetResponse = await client.assetReportGet(assetRepConfigs);
-    const assetReportGetPdfResponse = await client.assetReportPdfGet({
-      asset_report_token: assetReportToken,
-    });
-    response.json({
-      error: null,
-      json: assetReportGetResponse.report,
-      pdf: assetReportGetPdfResponse.buffer.toString('base64'),
-    });
-  } catch (error) {
-    prettyPrintResponse(error);
-    if (error.error_code == 'PRODUCT_NOT_READY') {
-      setTimeout(
-        () =>
-          respondWithAssetReport(
-            --numRetriesRemaining,
-            assetReportToken,
-            client,
-            response,
-          ),
-        1000,
-      );
-      return;
-    }
-    return response.json({
-      error: error.response.data,
-    });
-  }
-};
+
+    plaidClient
+      .assetReportGet(request)
+      .then((response) => {
+        return resolve(response);
+      })
+      .catch(() => {
+        setTimeout(() => {
+          if (retriesLeft === 1) {
+            return reject('Ran out of retries while polling for asset report');
+          }
+          getAssetReportWithRetries(
+            plaidClient,
+            asset_report_token,
+            ms,
+            retriesLeft - 1,
+          ).then((response) => resolve(response));
+        }, ms);
+      });
+  });
 
 const formatError = (error) => {
   return {
