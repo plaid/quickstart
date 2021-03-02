@@ -377,7 +377,7 @@ app.get('/api/assets', async function (request, response, next) {
   try {
     const assetReportCreateResponse = await client.assetReportCreate(configs);
     prettyPrintResponse(assetReportCreateResponse);
-    const assetReportToken = assetReportCreateResponse.asset_report_token;
+    const assetReportToken = assetReportCreateResponse.data.asset_report_token;
     respondWithAssetReport(20, assetReportToken, client, response);
   } catch {
     prettyPrintResponse(error);
