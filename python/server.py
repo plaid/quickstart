@@ -13,6 +13,8 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import jsonify
+from datetime import datetime
+from datetime import timedelta
 
 app = Flask(__name__)
 
@@ -179,61 +181,91 @@ def get_access_token():
 
 # Retrieve ACH or ETF account numbers for an Item
 # https://plaid.com/docs/#auth
+from plaid.model.auth_get_request import AuthGetRequest
 @app.route('/api/auth', methods=['GET'])
 def get_auth():
   try:
-    auth_response = client.Auth.get(access_token)
-  except plaid.errors.PlaidError as e:
-    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+    ag_request = AuthGetRequest(
+        access_token=access_token
+    )
+    auth_response = client.auth_get(ag_request)
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   pretty_print_response(auth_response)
-  return jsonify(auth_response)
+  return jsonify(auth_response.to_dict())
 
 # Retrieve Transactions for an Item
 # https://plaid.com/docs/#transactions
+from plaid.model.transactions_get_request import TransactionsGetRequest
+from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
   # Pull transactions for the last 30 days
-  start_date = '{:%Y-%m-%d}'.format(datetime.datetime.now() + datetime.timedelta(-30))
-  end_date = '{:%Y-%m-%d}'.format(datetime.datetime.now())
+  START_DATE = (datetime.now() - timedelta(days=(365*2)))
+  END_DATE = datetime.now()
   try:
-    transactions_response = client.Transactions.get(access_token, start_date, end_date)
-  except plaid.errors.PlaidError as e:
-    return jsonify(format_error(e))
+    options = TransactionsGetRequestOptions()
+    request = TransactionsGetRequest(
+                access_token=access_token,
+                start_date=START_DATE.date(),
+                end_date=END_DATE.date(),
+                options=options
+            )
+    transactions_response = client.transactions_get(request)
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   pretty_print_response(transactions_response)
-  return jsonify(transactions_response)
+  return jsonify(transactions_response.to_dict())
 
 # Retrieve Identity data for an Item
 # https://plaid.com/docs/#identity
+from plaid.model.identity_get_request import IdentityGetRequest
 @app.route('/api/identity', methods=['GET'])
 def get_identity():
   try:
-    identity_response = client.Identity.get(access_token)
-  except plaid.errors.PlaidError as e:
-    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+    request = IdentityGetRequest(
+        access_token=access_token
+    )
+    identity_response = client.identity_get(request)
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   pretty_print_response(identity_response)
-  return jsonify({'error': None, 'identity': identity_response['accounts']})
+  return jsonify({'error': None, 'identity': identity_response.to_dict()['accounts']})
 
 # Retrieve real-time balance data for each of an Item's accounts
 # https://plaid.com/docs/#balance
+from plaid.model.accounts_balance_get_request import AccountsBalanceGetRequest
 @app.route('/api/balance', methods=['GET'])
 def get_balance():
   try:
-    balance_response = client.Accounts.balance.get(access_token)
-  except plaid.errors.PlaidError as e:
-    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+    request = AccountsBalanceGetRequest(
+        access_token=access_token
+    )
+    balance_response = client.accounts_balance_get(request)
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   pretty_print_response(balance_response)
-  return jsonify(balance_response)
+  return jsonify(balance_response.to_dict())
 
 # Retrieve an Item's accounts
 # https://plaid.com/docs/#accounts
+from plaid.model.accounts_get_request import AccountsGetRequest
 @app.route('/api/accounts', methods=['GET'])
 def get_accounts():
   try:
-    accounts_response = client.Accounts.get(access_token)
-  except plaid.errors.PlaidError as e:
-    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+    request = AccountsGetRequest(
+        access_token=access_token
+    )
+    accounts_response = client.accounts_get(request)
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   pretty_print_response(accounts_response)
-  return jsonify(accounts_response)
+  return jsonify(accounts_response.to_dict())
 
 # Create and then retrieve an Asset Report for one or more Items. Note that an
 # Asset Report can contain up to 100 items, but for simplicity we're only
@@ -281,14 +313,17 @@ def get_assets():
 
 # Retrieve investment holdings data for an Item
 # https://plaid.com/docs/#investments
+from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
 @app.route('/api/holdings', methods=['GET'])
 def get_holdings():
   try:
-    holdings_response = client.Holdings.get(access_token)
-  except plaid.errors.PlaidError as e:
-    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+    h_request = InvestmentsHoldingsGetRequest(access_token=access_token)
+    holdings_response = client.investments_holdings_get(h_request)
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   pretty_print_response(holdings_response)
-  return jsonify({'error': None, 'holdings': holdings_response})
+  return jsonify({'error': None, 'holdings': holdings_response.to_dict()})
 
 # Retrieve Investment Transactions for an Item
 # https://plaid.com/docs/#investments
@@ -317,14 +352,26 @@ def payment():
 
 # Retrieve high-level information about an Item
 # https://plaid.com/docs/#retrieve-item
+from plaid.model.item_get_request import ItemGetRequest
+from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
 @app.route('/api/item', methods=['GET'])
 def item():
-  global access_token
-  item_response = client.Item.get(access_token)
-  institution_response = client.Institutions.get_by_id(item_response['item']['institution_id'])
+  try:
+    item_request = ItemGetRequest(
+              access_token=access_token
+          )
+    item_response = client.item_get(item_request)
+    inst_request = InstitutionsGetByIdRequest(
+        institution_id=item_response['item']['institution_id'],
+        country_codes=[CountryCode('US')]
+    )
+    institution_response = client.institutions_get_by_id(inst_request)
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   pretty_print_response(item_response)
   pretty_print_response(institution_response)
-  return jsonify({'error': None, 'item': item_response['item'], 'institution': institution_response['institution']})
+  return jsonify({'error': None, 'item': item_response.to_dict()['item'], 'institution': institution_response.to_dict()['institution']})
 
 def pretty_print_response(response):
   print(json.dumps(response, indent=2, sort_keys=True, default = str))
