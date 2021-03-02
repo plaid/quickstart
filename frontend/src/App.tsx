@@ -23,7 +23,7 @@ const App = () => {
     dispatch({
       type: "SET_STATE",
       state: {
-        paymentInitiation,
+        products: data.products,
       },
     });
     return { paymentInitiation };
