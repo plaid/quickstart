@@ -31,6 +31,7 @@ const App = () => {
 
   const generateToken = useCallback(
     async (paymentInitiation) => {
+      console.log("made it here");
       const path = paymentInitiation
         ? "/api/create_link_token_for_payment"
         : "/api/create_link_token";
@@ -41,7 +42,10 @@ const App = () => {
         dispatch({ type: "SET_STATE", state: { linkToken: null } });
         return;
       }
+
+      console.log("raw data", response);
       const data = await response.json();
+      console.log("after response.json", data);
       if (data) {
         dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
       }

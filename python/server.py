@@ -8,6 +8,7 @@ import datetime
 import plaid
 import json
 import time
+from plaid.api import plaid_api
 from flask import Flask
 from flask import render_template
 from flask import request
@@ -50,10 +51,18 @@ def empty_to_none(field):
 # at https://dashboard.plaid.com/team/api.
 PLAID_REDIRECT_URI = empty_to_none('PLAID_REDIRECT_URI')
 
-client = plaid.Client(client_id=PLAID_CLIENT_ID,
-                      secret=PLAID_SECRET,
-                      environment=PLAID_ENV,
-                      api_version='2019-05-29')
+configuration = plaid.Configuration(
+    host=plaid.Environment.Sandbox,
+    api_key={
+        'clientId': PLAID_CLIENT_ID,
+        'secret': PLAID_SECRET,
+        'plaidVersion': '2020-09-14'
+    }
+)
+
+api_client = plaid.ApiClient(configuration)
+client = plaid_api.PlaidApi(api_client)
+
 
 
 # We store the access_token in memory - in production, store it in a secure
@@ -123,44 +132,50 @@ def create_link_token_for_payment():
   except plaid.errors.PlaidError as e:
     return jsonify(format_error(e))
 
+
+
+from plaid.model.country_code import CountryCode
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.products import Products
 @app.route('/api/create_link_token', methods=['POST'])
 def create_link_token():
   try:
-    response = client.LinkToken.create(
-      {
-        'user': {
-          # This should correspond to a unique id for the current user.
-          'client_user_id': 'user-id',
-        },
-        'client_name': "Plaid Quickstart",
-        'products': PLAID_PRODUCTS,
-        'country_codes': PLAID_COUNTRY_CODES,
-        'language': "en",
-        'redirect_uri': PLAID_REDIRECT_URI,
-      }
+    request = LinkTokenCreateRequest(
+        products=[Products('auth'), Products('transactions')],
+        client_name="Plaid Quickstart",
+        country_codes=[CountryCode('US')],
+        language='en',
+        user=LinkTokenCreateRequestUser(
+            client_user_id=str(time.time())
+        )
     )
-    pretty_print_response(response)
-    return jsonify(response)
-  except plaid.errors.PlaidError as e:
-    return jsonify(format_error(e))
+
+    # create link token
+    response = client.link_token_create(request)
+    return jsonify(response.to_dict())
+  except plaid.ApiException as e:
+    return json.loads(e.body)
 
 # Exchange token flow - exchange a Link public_token for
 # an API access_token
 # https://plaid.com/docs/#exchange-token-flow
+from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 @app.route('/api/set_access_token', methods=['POST'])
 def get_access_token():
   global access_token
   global item_id
   public_token = request.form['public_token']
   try:
-    exchange_response = client.Item.public_token.exchange(public_token)
-  except plaid.errors.PlaidError as e:
-    return jsonify(format_error(e))
-
-  pretty_print_response(exchange_response)
-  access_token = exchange_response['access_token']
-  item_id = exchange_response['item_id']
-  return jsonify(exchange_response)
+    exchange_request = ItemPublicTokenExchangeRequest(public_token=public_token)
+    exchange_response = client.item_public_token_exchange(exchange_request)
+    # pretty_print_response(exchange_response)
+    access_token = exchange_response['access_token']
+    item_id = exchange_response['item_id']
+    return jsonify(exchange_response.to_dict())
+  except plaid.ApiException as e:
+    return json.loads(e.body)
+  
 
 # Retrieve ACH or ETF account numbers for an Item
 # https://plaid.com/docs/#auth
@@ -312,7 +327,7 @@ def item():
   return jsonify({'error': None, 'item': item_response['item'], 'institution': institution_response['institution']})
 
 def pretty_print_response(response):
-  print(json.dumps(response, indent=2, sort_keys=True))
+  print(json.dumps(response, indent=2, sort_keys=True, default = str))
 
 def format_error(e):
   return {'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type, 'error_message': e.message } }
