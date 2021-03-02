@@ -130,7 +130,7 @@ $ make stop language=node
 #### Pre-requisites
 
 - The language you intend to use is installed on your machine and available at your command line.
-  This repo should generally work with active LTS versions of each language such as node >= 12,
+  This repo should generally work with active LTS versions of each language such as node >= 14,
   python >= 3.8, ruby >= 2.6, etc.
 - Your environment variables populated in `.env`
 - [npm](https://www.npmjs.com/get-npm)
