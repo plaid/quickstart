@@ -344,16 +344,13 @@ def get_assets():
         asset_report_token=asset_report_token,
     )
     pdf = client.asset_report_pdf_get(pdf_request)
-    FILE = open('asset_report.pdf', 'wb')
-    FILE.write(pdf.read())
-    FILE.close()
   except plaid.ApiException  as e:
     response = json.loads(e.body)
     return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   return jsonify({
     'error': None,
     'json': asset_report_json.to_dict(),
-    'pdf': 'asset_report.pdf',
+    'pdf': base64.b64encode(pdf.read()).decode('utf-8'),
   })
 
 # Retrieve investment holdings data for an Item
