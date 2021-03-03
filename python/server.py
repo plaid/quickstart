@@ -15,6 +15,7 @@ from flask import request
 from flask import jsonify
 from datetime import datetime
 from datetime import timedelta
+from plaid.model.products import Products
 
 app = Flask(__name__)
 
@@ -64,6 +65,10 @@ configuration = plaid.Configuration(
 
 api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
+
+products = []
+for product in PLAID_PRODUCTS:
+  products.append(Products(product))
 
 
 
@@ -146,12 +151,13 @@ def create_link_token_for_payment():
 from plaid.model.country_code import CountryCode
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
-from plaid.model.products import Products
+
 @app.route('/api/create_link_token', methods=['POST'])
 def create_link_token():
+  
   try:
     request = LinkTokenCreateRequest(
-        products=[Products('assets'), Products('transactions')],
+        products=products,
         client_name="Plaid Quickstart",
         country_codes=[CountryCode('US')],
         language='en',
@@ -337,15 +343,17 @@ def get_assets():
     pdf_request = AssetReportPDFGetRequest(
         asset_report_token=asset_report_token,
     )
-    asset_report_pdf = client.asset_report_pdf_get(pdf_request)
-    print(type(asset_report_pdf))
+    pdf = client.asset_report_pdf_get(pdf_request)
+    FILE = open('asset_report.pdf', 'wb')
+    FILE.write(pdf.read())
+    FILE.close()
   except plaid.ApiException  as e:
     response = json.loads(e.body)
     return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   return jsonify({
     'error': None,
     'json': asset_report_json.to_dict(),
-    'pdf': base64.b64encode(asset_report_pdf).decode('utf-8'),
+    'pdf': 'asset_report.pdf',
   })
 
 # Retrieve investment holdings data for an Item
