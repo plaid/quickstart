@@ -87,52 +87,59 @@ def info():
     'products': PLAID_PRODUCTS
   })
 
+from plaid.model.payment_initiation_recipient_create_request import PaymentInitiationRecipientCreateRequest
+from plaid.model.nullable_recipient_bacs import NullableRecipientBACS
+from plaid.model.payment_initiation_address import PaymentInitiationAddress
+from plaid.model.payment_initiation_payment_create_request import PaymentInitiationPaymentCreateRequest
+from plaid.model.amount import Amount
+from plaid.model.link_token_create_request_payment_initiation import LinkTokenCreateRequestPaymentInitiation
 @app.route('/api/create_link_token_for_payment', methods=['POST'])
 def create_link_token_for_payment():
   global payment_id
   try:
-    create_recipient_response = client.PaymentInitiation.create_recipient(
-      'Harry Potter',
-      'GB33BUKB20201555555555',
-      {
-        'street':      ['4 Privet Drive'],
-        'city':        'Little Whinging',
-        'postal_code': '11111',
-        'country':     'GB'
-      },
+    rec_create_request = PaymentInitiationRecipientCreateRequest(
+        name='John Doe',
+        bacs=NullableRecipientBACS(account='26207729', sort_code='560029'),
+        address=PaymentInitiationAddress(
+            street=['street name 999'],
+            city='city',
+            postal_code='99999',
+            country='GB'
+        )
     )
+    create_recipient_response = client.payment_initiation_recipient_create(rec_create_request)
     recipient_id = create_recipient_response['recipient_id']
 
-    create_payment_response = client.PaymentInitiation.create_payment(
-      recipient_id,
-      'paymentRef',
-      {
-        'value': 12.34,
-        'currency': 'GBP'
-      },
+    payment_create_request = PaymentInitiationPaymentCreateRequest(
+        recipient_id=recipient_id,
+        reference='TestPayment',
+        amount=Amount(
+            currency='GBP',
+            value=100.00
+        )
+    )
+    create_payment_response = client.payment_initiation_payment_create(
+      payment_create_request
     )
     pretty_print_response(create_payment_response)
     payment_id = create_payment_response['payment_id']
-    response = client.LinkToken.create(
-      {
-        'user': {
-          # This should correspond to a unique id for the current user.
-          'client_user_id': 'user-id',
-        },
-        'client_name': "Plaid Quickstart",
-        'products': PLAID_PRODUCTS,
-        'country_codes': PLAID_COUNTRY_CODES,
-        'language': "en",
-        'redirect_uri': PLAID_REDIRECT_URI,
-        'payment_initiation': {
-          'payment_id': payment_id
-        }
-      }
+    link_request = LinkTokenCreateRequest(
+        products=[Products('payment_initiation')],
+        client_name='Plaid Test',
+        country_codes=[CountryCode('GB')],
+        language='en',
+        user=LinkTokenCreateRequestUser(
+            client_user_id=str(time.time())
+        ),
+        payment_initiation=LinkTokenCreateRequestPaymentInitiation(
+            payment_id=payment_id
+        )
     )
+    response = client.link_token_create(link_request)
     pretty_print_response(response)
-    return jsonify(response)
-  except plaid.errors.PlaidError as e:
-    return jsonify(format_error(e))
+    return jsonify(response.to_dict())
+  except plaid.ApiException as e:
+    return json.loads(e.body)
 
 
 
@@ -144,7 +151,7 @@ from plaid.model.products import Products
 def create_link_token():
   try:
     request = LinkTokenCreateRequest(
-        products=[Products('auth'), Products('transactions')],
+        products=[Products('assets'), Products('transactions')],
         client_name="Plaid Quickstart",
         country_codes=[CountryCode('US')],
         language='en',
@@ -271,14 +278,37 @@ def get_accounts():
 # Asset Report can contain up to 100 items, but for simplicity we're only
 # including one Item here.
 # https://plaid.com/docs/#assets
+from plaid.model.asset_report_create_request import AssetReportCreateRequest
+from plaid.model.asset_report_create_request_options import AssetReportCreateRequestOptions
+from plaid.model.asset_report_user import AssetReportUser
+from plaid.model.asset_report_get_request import AssetReportGetRequest
+from plaid.model.asset_report_pdf_get_request import AssetReportPDFGetRequest
 @app.route('/api/assets', methods=['GET'])
 def get_assets():
   try:
-    asset_report_create_response = client.AssetReport.create([access_token], 10)
-  except plaid.errors.PlaidError as e:
-    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
-  pretty_print_response(asset_report_create_response)
+    request = AssetReportCreateRequest(
+        access_tokens=[access_token],
+        days_requested=60,
+        options=AssetReportCreateRequestOptions(
+            webhook='https://www.example.com',
+            client_report_id='123',
+            user=AssetReportUser(
+                client_user_id='789',
+                first_name='Jane',
+                middle_name='Leah',
+                last_name='Doe',
+                ssn='123-45-6789',
+                phone_number='(555) 123-4567',
+                email='jane.doe@example.com',
+            )
+        )
+    )
 
+    asset_report_create_response = client.asset_report_create(request)
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
+  pretty_print_response(asset_report_create_response)
   asset_report_token = asset_report_create_response['asset_report_token']
 
   # Poll for the completion of the Asset Report.
@@ -286,28 +316,35 @@ def get_assets():
   asset_report_json = None
   while num_retries_remaining > 0:
     try:
-      asset_report_get_response = client.AssetReport.get(asset_report_token)
+      request = AssetReportGetRequest(
+            asset_report_token=asset_report_token,
+        )
+      asset_report_get_response = client.asset_report_get(request)
       asset_report_json = asset_report_get_response['report']
       break
-    except plaid.errors.PlaidError as e:
-      if e.code == 'PRODUCT_NOT_READY':
+    except plaid.ApiException as e:
+      response = json.loads(e.body)
+      if response['error_code'] == 'PRODUCT_NOT_READY':
         num_retries_remaining -= 1
         time.sleep(1)
         continue
-      return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
-
+      return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   if asset_report_json == None:
-    return jsonify({'error': {'display_message': 'Timed out when polling for Asset Report', 'error_code': '', 'error_type': '' } })
+    return jsonify({'error': {'status_code':e.status, 'display_message': 'Timed out when polling for Asset Report', 'error_code': '', 'error_type': '' } })
 
   asset_report_pdf = None
   try:
-    asset_report_pdf = client.AssetReport.get_pdf(asset_report_token)
-  except plaid.errors.PlaidError as e:
-    return jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
-
+    pdf_request = AssetReportPDFGetRequest(
+        asset_report_token=asset_report_token,
+    )
+    asset_report_pdf = client.asset_report_pdf_get(pdf_request)
+    print(type(asset_report_pdf))
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })
   return jsonify({
     'error': None,
-    'json': asset_report_json,
+    'json': asset_report_json.to_dict(),
     'pdf': base64.b64encode(asset_report_pdf).decode('utf-8'),
   })
 
@@ -343,12 +380,18 @@ def get_investment_transactions():
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
+from plaid.model.payment_initiation_payment_get_request import PaymentInitiationPaymentGetRequest
 @app.route('/api/payment', methods=['GET'])
 def payment():
   global payment_id
-  payment_get_response = client.PaymentInitiation.get_payment(payment_id)
+  try:
+    request = PaymentInitiationPaymentGetRequest(payment_id=payment_id)
+    payment_get_response = client.payment_initiation_payment_get(request)
+  except plaid.ApiException  as e:
+    response = json.loads(e.body)
+    return jsonify({'error': { 'status_code':e.status, 'display_message': response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type'] } })  
   pretty_print_response(payment_get_response)
-  return jsonify({'error': None, 'payment': payment_get_response})
+  return jsonify({'error': None, 'payment': payment_get_response.to_dict()})
 
 # Retrieve high-level information about an Item
 # https://plaid.com/docs/#retrieve-item
@@ -357,9 +400,7 @@ from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdReques
 @app.route('/api/item', methods=['GET'])
 def item():
   try:
-    item_request = ItemGetRequest(
-              access_token=access_token
-          )
+    item_request = ItemGetRequest(access_token=access_token)
     item_response = client.item_get(item_request)
     inst_request = InstitutionsGetByIdRequest(
         institution_id=item_response['item']['institution_id'],
