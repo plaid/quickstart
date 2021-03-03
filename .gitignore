@@ -49,3 +49,6 @@ docker-compose.local*.yml
 *.iml
 .env
 .idea
+
+#asset_report_pdf
+asset_report.pdf
