@@ -382,8 +382,18 @@ app.get('/api/assets', async function (request, response, next) {
       client,
       assetReportToken,
     );
+    const pdfRequest = {
+      asset_report_token: assetReportToken,
+    };
+
+    const pdfResponse = await client.assetReportPdfGet(pdfRequest, {
+      responseType: 'arraybuffer',
+    });
     prettyPrintResponse(getResponse);
-    response.json({ json: getResponse.data.report });
+    response.json({
+      json: getResponse.data.report,
+      pdf: pdfResponse.buffer.toString('base64'),
+    });
   } catch {
     prettyPrintResponse(error);
     return response.json(formatError(error.response));
