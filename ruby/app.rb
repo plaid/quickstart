@@ -7,6 +7,7 @@ require 'date'
 require 'json'
 require 'plaid'
 require 'sinatra'
+require 'pp'
 
 set :port, ENV['APP_PORT'] || 8000
 
@@ -93,11 +94,11 @@ get '/api/auth' do
     puts auth_get_request.class
     auth_response = client.auth_get(auth_get_request)
     puts "here............!!!!!!!!!!!!!!!!!!!"
-    puts auth_response.class
-    pretty_print_response(auth_response)
+    pp(JSON.generate(auth_response))
+    # pretty_print_response(auth_response)
     jsonObject = auth_response.to_json
     content_type :json
-   to_json(auth_response)
+   JSON.generate(auth_response)
   rescue Plaid::Error => e
     error_response = format_error(e)
     pretty_print_response(error_response)
