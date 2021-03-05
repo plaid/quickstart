@@ -89,13 +89,16 @@ get '/api/auth' do
   begin
     auth_get_request = Plaid::AuthGetRequest.new
     auth_get_request.access_token = access_token
+    puts "FIRST STRING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    puts auth_get_request.class
     auth_response = client.auth_get(auth_get_request)
     puts "here............!!!!!!!!!!!!!!!!!!!"
-    puts auth_response
+    puts auth_response.class
     pretty_print_response(auth_response)
+    jsonObject = auth_response.to_json
     content_type :json
-    auth_response.to_json
-  rescue Plaid::PlaidAPIError => e
+   to_json(auth_response)
+  rescue Plaid::Error => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -155,10 +158,16 @@ end
 # https://plaid.com/docs/#investments
 get '/api/holdings' do
   begin
-    product_response = client.investments.holdings.get(access_token)
+    investments_holdings_get_request = Plaid::InvestmentsHoldingsGetRequest.new
+    investments_holdings_get_request.access_token = access_token
+
+    product_response = client.investments_holdings_get(investments_holdings_get_request)
+    hash = eval(product_response)
+    puts "RIGHT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    puts hash.to_str
     pretty_print_response(product_response)
     content_type :json
-    { holdings: product_response }.to_json
+    { holdings: hash.to_str}.to_json
   rescue Plaid::PlaidAPIError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
