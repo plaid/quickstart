@@ -59,10 +59,9 @@ post '/api/set_access_token' do
   )
   access_token = exchange_token_response.access_token
   item_id = exchange_token_response.item_id
-  # pretty_print_response(exchange_token_response)
+  pretty_print_response(exchange_token_response)
   content_type :json
-  {:access_token=>access_token, :item_id=>item_id}.to_json
-  # exchange_token_response.to_json
+  exchange_token_response.to_hash.to_json
 end
 
 # Retrieve Transactions for an Item
@@ -90,15 +89,10 @@ get '/api/auth' do
   begin
     auth_get_request = Plaid::AuthGetRequest.new
     auth_get_request.access_token = access_token
-    puts "FIRST STRING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    puts auth_get_request.class
-    auth_response = client.auth_get(auth_get_request)
-    puts "here............!!!!!!!!!!!!!!!!!!!"
-    pp(JSON.generate(auth_response))
-    # pretty_print_response(auth_response)
+    pretty_print_response(auth_response)
     jsonObject = auth_response.to_json
     content_type :json
-   JSON.generate(auth_response)
+   auth_response.to_hash.to_json
   rescue Plaid::Error => e
     error_response = format_error(e)
     pretty_print_response(error_response)
@@ -163,12 +157,10 @@ get '/api/holdings' do
     investments_holdings_get_request.access_token = access_token
 
     product_response = client.investments_holdings_get(investments_holdings_get_request)
-    hash = eval(product_response)
-    puts "RIGHT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    puts hash.to_str
+    
     pretty_print_response(product_response)
     content_type :json
-    { holdings: hash.to_str}.to_json
+    { holdings: hash.to_str}.to_hash.to_json
   rescue Plaid::PlaidAPIError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
