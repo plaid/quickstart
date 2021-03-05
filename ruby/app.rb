@@ -14,9 +14,18 @@ set :port, ENV['APP_PORT'] || 8000
 # delete this for a production application.
 set :protection, :except => [:json_csrf]
 
-client = Plaid::Client.new(env: ENV['PLAID_ENV'] || 'sandbox',
-                           client_id: ENV['PLAID_CLIENT_ID'],
-                           secret: ENV['PLAID_SECRET'])
+configuration = Plaid::Configuration.new
+configuration.server_index = Plaid::Configuration::Environment[ENV['PLAID_ENV'] || 'sandbox']
+configuration.api_key["PLAID-CLIENT-ID"] = ENV['PLAID_CLIENT_ID']
+configuration.api_key["PLAID-SECRET"] = ENV['PLAID_SECRET']
+configuration.api_key["Plaid-Version"] = "2020-09-14"
+
+api_client = Plaid::ApiClient.new(
+  configuration
+)
+
+client = Plaid::PlaidApi.new(api_client)
+
 
 # We store the access_token in memory - in production, store it in a secure
 # persistent data store.
@@ -42,14 +51,17 @@ end
 # an API access_token
 # https://plaid.com/docs/#exchange-token-flow
 post '/api/set_access_token' do
+  item_public_token_exchange_request = Plaid::ItemPublicTokenExchangeRequest.new({:public_token=>params["public_token"]})
   exchange_token_response =
-    client.item.public_token.exchange(params['public_token'])
-  access_token = exchange_token_response['access_token']
-  item_id = exchange_token_response['item_id']
-  pretty_print_response(exchange_token_response)
-
+  client.item_public_token_exchange(
+    item_public_token_exchange_request
+  )
+  access_token = exchange_token_response.access_token
+  item_id = exchange_token_response.item_id
+  # pretty_print_response(exchange_token_response)
   content_type :json
-  exchange_token_response.to_json
+  {:access_token=>access_token, :item_id=>item_id}.to_json
+  # exchange_token_response.to_json
 end
 
 # Retrieve Transactions for an Item
@@ -75,10 +87,14 @@ end
 # https://plaid.com/docs/#auth
 get '/api/auth' do
   begin
-    product_response = client.auth.get(access_token)
-    pretty_print_response(product_response)
+    auth_get_request = Plaid::AuthGetRequest.new
+    auth_get_request.access_token = access_token
+    auth_response = client.auth_get(auth_get_request)
+    puts "here............!!!!!!!!!!!!!!!!!!!"
+    puts auth_response
+    pretty_print_response(auth_response)
     content_type :json
-    product_response.to_json
+    auth_response.to_json
   rescue Plaid::PlaidAPIError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
@@ -256,17 +272,15 @@ end
 
 post '/api/create_link_token' do
   begin
-    response = client.link_token.create(
-      user: {
-        # This should correspond to a unique id for the current user.
-        client_user_id: "user-id",
-      },
-      client_name: "Plaid Quickstart",
-      products: ENV['PLAID_PRODUCTS'].split(','),
-      country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
-      language: "en",
-      redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI'),
-    )
+    link_token_create_request = Plaid::LinkTokenCreateRequest.new({
+      :user => { :client_user_id => "user-id" },
+      :client_name => "Plaid Quickstart",
+      :products => ENV['PLAID_PRODUCTS'].split(','),
+      :country_codes => ENV['PLAID_COUNTRY_CODES'].split(','),
+      :language => "en",
+      :redirect_uri => nil_if_empty_envvar('PLAID_REDIRECT_URI')
+    })
+    response = client.link_token_create(link_token_create_request)
 
     content_type :json
     { link_token: response.link_token }.to_json
