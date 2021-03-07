@@ -305,12 +305,11 @@ get '/api/assets' do
     }.to_json
   end
   puts "I AM RIGHT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  puts asset_report_pdf
+  puts Base64.encode64(asset_report_pdf.to_s)
   content_type :json
   {
     json: asset_report_json.to_hash,
     pdf: Base64.encode64(asset_report_pdf.to_s)
-    # pdf: "hello"
   }.to_json
 end
 # rubocop:enable Metrics/BlockLength
