@@ -8,6 +8,8 @@
       "name": "Debug app.rb",
       "type": "Ruby",
       "request": "launch",
+      "pathToRDebugIDE": "/Users/lwoo/.rbenv/shims/rdebug-ide",
+      "pathToBundler": "/Users/lwoo/.rbenv/shims/bundler",
       "program": "${workspaceRoot}/ruby/app.rb"
     }
   ]

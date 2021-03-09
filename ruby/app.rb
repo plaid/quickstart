@@ -26,8 +26,6 @@ api_client = Plaid::ApiClient.new(
 )
 
 client = Plaid::PlaidApi.new(api_client)
-
-
 # We store the access_token in memory - in production, store it in a secure
 # persistent data store.
 access_token = nil
@@ -40,7 +38,6 @@ item_id = nil
 
 post '/api/info' do
   content_type :json
-
   {
     item_id:      item_id,
     access_token: access_token,
@@ -52,7 +49,8 @@ end
 # an API access_token
 # https://plaid.com/docs/#exchange-token-flow
 post '/api/set_access_token' do
-  item_public_token_exchange_request = Plaid::ItemPublicTokenExchangeRequest.new({:public_token=>params["public_token"]})
+  item_public_token_exchange_request = Plaid::ItemPublicTokenExchangeRequest.new(
+    {:public_token=>params["public_token"]})
   exchange_token_response =
   client.item_public_token_exchange(
     item_public_token_exchange_request
@@ -79,7 +77,7 @@ get '/api/transactions' do
     pretty_print_response(transactions_response)
     content_type :json
     transactions_response.to_hash.to_json
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -97,7 +95,7 @@ get '/api/auth' do
     pretty_print_response(auth_response)
     content_type :json
     auth_response.to_hash.to_json
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -114,8 +112,8 @@ get '/api/identity' do
     identity_response = client.identity_get(identity_get_request)
     pretty_print_response(identity_response)
     content_type :json
-    { identity: identity_response.to_hash['accounts']}.to_json
-  rescue Plaid::Error => e
+    { identity: identity_response.to_hash[:accounts]}.to_json
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -133,7 +131,7 @@ get '/api/balance' do
     pretty_print_response(balance_response)
     content_type :json
     balance_response.to_hash.to_json
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -146,12 +144,12 @@ end
 get '/api/accounts' do
   begin
     accounts_get_request = Plaid::AccountsGetRequest.new
-    accounts_get_request.access_token = access_token
+    accounts_get_request.access_token = "access_token"
     account_response = client.accounts_get(accounts_get_request)
     pretty_print_response(account_response)
     content_type :json
     account_response.to_hash.to_json
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -165,31 +163,33 @@ get '/api/holdings' do
   begin
     investments_holdings_get_request = Plaid::InvestmentsHoldingsGetRequest.new
     investments_holdings_get_request.access_token = access_token
-
     product_response = client.investments_holdings_get(investments_holdings_get_request)
-    
     pretty_print_response(product_response)
     content_type :json
     { holdings: product_response.to_hash}.to_json
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
-    error_response.to_json
+    error_response.to_hash.to_json
   end
 end
 
 # Retrieve Investment Transactions for an Item
 # https://plaid.com/docs/#investments
 get '/api/investment_transactions' do
-  now = Date.today
-  thirty_days_ago = (now - 30)
+  START_DATE = (Date.today - 365)
+  END_DATE = Date.today
   begin
-    product_response = client.investments.transactions.get(access_token, thirty_days_ago, now)
-    pretty_print_response(product_response)
+    investments_transactions_get_request = Plaid::InvestmentsTransactionsGetRequest.new
+    investments_transactions_get_request.access_token = access_token
+    investments_transactions_get_request.start_date = START_DATE
+    investments_transactions_get_request.end_date = END_DATE
+    response = client.investments_transactions_get(investments_transactions_get_request)
+    pretty_print_response(response)
     content_type :json
-    { investment_transactions: product_response }.to_json
-  rescue Plaid::Error => e
+    { investment_transactions: response.to_hash }.to_json
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -221,11 +221,10 @@ get '/api/assets' do
     asset_report_create_request.access_tokens = [access_token]
     asset_report_create_request.days_requested = 20
     asset_report_create_request.options = options
-
     asset_report_create_response =
       client.asset_report_create(asset_report_create_request)
     pretty_print_response(asset_report_create_response)
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -233,34 +232,10 @@ get '/api/assets' do
   end
 
   asset_report_token = asset_report_create_response.asset_report_token
-
   asset_report_json = nil
   asset_report_pdf = nil
-  # num_retries_remaining = 20
-  # while num_retries_remaining > 0
-  #   begin
-  #     asset_report_get_request = Plaid::AssetReportGetRequest.new
-  #     asset_report_get_request.asset_report_token = asset_report_token
-  #     asset_report_get_response = client.asset_report_get(asset_report_get_request)
-  #     asset_report_json = asset_report_get_response['report']
-  #     break
-  #   rescue Plaid::Error => e
-  #     if e.error_code == 'PRODUCT_NOT_READY'
-  #       puts num_retries_remaining
-  #       num_retries_remaining -= 1
-  #       sleep(1)
-  #       next
-  #     end
-  #     error_response = format_error(e)
-  #     puts "TRY RIGHT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  #     puts num_retries_remaining
-  #     pretty_print_response(error_response)
-  #     content_type :json
-  #     return error_response.to_json
-  #   end
-  # end
+
   begin
-    
     50.times do
       begin
         asset_report_get_request = Plaid::AssetReportGetRequest.new
@@ -270,8 +245,6 @@ get '/api/assets' do
         asset_report_pdf_get_request = Plaid::AssetReportPDFGetRequest.new
         asset_report_pdf_get_request.asset_report_token = asset_report_token
         asset_report_pdf = client.asset_report_pdf_get( asset_report_pdf_get_request)
-        puts "FIRST RIGHT HERE_____________________________________________________________________"
-        puts asset_report_pdf
         break
       rescue Plaid::ApiError => e
         json_response = JSON.parse(e.response_body)
@@ -279,16 +252,7 @@ get '/api/assets' do
         sleep 1
       end
     end
-    
-  
-    # asset_report_pdf_get_request = Plaid::AssetReportPDFGetRequest.new
-    # asset_report_pdf_get_request.asset_report_token = asset_report_token
-    # asset_report_pdf = client.asset_report_pdf_get(asset_report_token)
- 
-   
-
-
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -304,26 +268,40 @@ get '/api/assets' do
       }
     }.to_json
   end
-  puts "I AM RIGHT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  puts Base64.encode64(asset_report_pdf.to_s)
+ 
   content_type :json
   {
     json: asset_report_json.to_hash,
-    pdf: Base64.encode64(asset_report_pdf.to_s)
+    pdf:Base64.encode64(File.read(asset_report_pdf))
   }.to_json
 end
+
 # rubocop:enable Metrics/BlockLength
 
 # Retrieve high-level information about an Item
 # https://plaid.com/docs/#retrieve-item
 get '/api/item' do
-  item_response = client.item.get(access_token)
-  institution_response =
-    client.institutions.get_by_id(item_response['item']['institution_id'])
-  content_type :json
-  { item: item_response['item'],
-    institution: institution_response['institution'] }.to_json
-end
+  begin
+    item_get_request = Plaid::ItemGetRequest.new
+    item_get_request.access_token = access_token
+    item_response = client.item_get(item_get_request)
+    institutions_get_by_id_request = Plaid::InstitutionsGetByIdRequest.new
+    institutions_get_by_id_request.institution_id = item_response.item.institution_id
+    institutions_get_by_id_request.country_codes = ["US"]
+    institution_response =
+      client.institutions_get_by_id(institutions_get_by_id_request)
+      pretty_print_response(item_response)
+      pretty_print_response(institution_response)
+    content_type :json
+    { item: item_response.item.to_hash,
+      institution: institution_response.institution.to_hash }.to_json
+    rescue Plaid::ApiError => e
+      error_response = format_error(e)
+      pretty_print_response(error_response)
+      content_type :json
+      error_response.to_json
+    end
+  end 
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
@@ -332,9 +310,10 @@ get '/api/payment' do
     payment_initiation_payment_get_request = Plaid::PaymentInitiationPaymentGetRequest.new
     payment_initiation_payment_get_request.payment_id = payment_id
     payment_get_response = client.payment_initiation_payment_get(payment_initiation_payment_get_request)
+    pretty_print_response(payment_get_response)
     content_type :json
     { payment: payment_get_response.to_hash}.to_json
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -353,12 +332,11 @@ post '/api/create_link_token' do
       :redirect_uri => nil_if_empty_envvar('PLAID_REDIRECT_URI')
     })
     response = client.link_token_create(link_token_create_request)
-
+    pretty_print_response(response)
     content_type :json
     { link_token: response.link_token }.to_json
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
-
     pretty_print_response(error_response)
     content_type :json
     error_response.to_json
@@ -402,7 +380,6 @@ post '/api/create_link_token_for_payment' do
 
     payment_initiation_recipient_get_request = Plaid::PaymentInitiationRecipientGetRequest.new
     payment_initiation_recipient_get_request.recipient_id = recipient_id
-
     get_recipient_response = client.payment_initiation_recipient_get(
       payment_initiation_recipient_get_request
     )
@@ -417,9 +394,7 @@ post '/api/create_link_token_for_payment' do
     create_payment_response = client.payment_initiation_payment_create(
       payment_initiation_payment_create_request
     )
-
     payment_id = create_payment_response.payment_id
-
 
     link_token_create_request = Plaid::LinkTokenCreateRequest.new({
       :user => { :client_user_id => "user-id" },
@@ -431,11 +406,11 @@ post '/api/create_link_token_for_payment' do
       :redirect_uri => nil_if_empty_envvar('PLAID_REDIRECT_URI')
     })
     response = client.link_token_create(link_token_create_request)
-
+    pretty_print_response(response)
     content_type :json
     { link_token: response.link_token }.to_hash.to_json
     
-  rescue Plaid::Error => e
+  rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
     content_type :json
@@ -444,11 +419,13 @@ post '/api/create_link_token_for_payment' do
 end
 
 def format_error(err)
+  body = JSON.parse(err.response_body)
   {
     error: {
-      error_code: err.error_code,
-      error_message: err.error_message,
-      error_type: err.error_type
+      status_code: err.code,
+      error_code: body["error_code"],
+      error_message: body["error_message"],
+      error_type: body["error_type"]
     }
   }
 end
@@ -456,7 +433,6 @@ end
 def pretty_print_response(response)
   puts JSON.pretty_generate(response)
 end
-
 
 def poll_for_asset_report(asset_report_token)
   response = nil
