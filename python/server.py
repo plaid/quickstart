@@ -17,6 +17,26 @@ from datetime import datetime
 from datetime import timedelta
 from plaid.model.products import Products
 
+from plaid.model.payment_initiation_recipient_create_request import PaymentInitiationRecipientCreateRequest
+from plaid.model.nullable_recipient_bacs import NullableRecipientBACS
+from plaid.model.payment_initiation_address import PaymentInitiationAddress
+from plaid.model.payment_initiation_payment_create_request import PaymentInitiationPaymentCreateRequest
+from plaid.model.amount import Amount
+from plaid.model.link_token_create_request_payment_initiation import LinkTokenCreateRequestPaymentInitiation
+
+from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
+
+from plaid.model.country_code import CountryCode
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+
+from plaid.model.asset_report_create_request import AssetReportCreateRequest
+from plaid.model.asset_report_create_request_options import AssetReportCreateRequestOptions
+from plaid.model.asset_report_user import AssetReportUser
+from plaid.model.asset_report_get_request import AssetReportGetRequest
+from plaid.model.asset_report_pdf_get_request import AssetReportPDFGetRequest
+
+
 app = Flask(__name__)
 
 
@@ -92,12 +112,7 @@ def info():
     'products': PLAID_PRODUCTS
   })
 
-from plaid.model.payment_initiation_recipient_create_request import PaymentInitiationRecipientCreateRequest
-from plaid.model.nullable_recipient_bacs import NullableRecipientBACS
-from plaid.model.payment_initiation_address import PaymentInitiationAddress
-from plaid.model.payment_initiation_payment_create_request import PaymentInitiationPaymentCreateRequest
-from plaid.model.amount import Amount
-from plaid.model.link_token_create_request_payment_initiation import LinkTokenCreateRequestPaymentInitiation
+
 @app.route('/api/create_link_token_for_payment', methods=['POST'])
 def create_link_token_for_payment():
   global payment_id
@@ -147,11 +162,6 @@ def create_link_token_for_payment():
     return json.loads(e.body)
 
 
-
-from plaid.model.country_code import CountryCode
-from plaid.model.link_token_create_request import LinkTokenCreateRequest
-from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
-
 @app.route('/api/create_link_token', methods=['POST'])
 def create_link_token():
   
@@ -175,7 +185,7 @@ def create_link_token():
 # Exchange token flow - exchange a Link public_token for
 # an API access_token
 # https://plaid.com/docs/#exchange-token-flow
-from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
+
 @app.route('/api/set_access_token', methods=['POST'])
 def get_access_token():
   global access_token
@@ -284,11 +294,7 @@ def get_accounts():
 # Asset Report can contain up to 100 items, but for simplicity we're only
 # including one Item here.
 # https://plaid.com/docs/#assets
-from plaid.model.asset_report_create_request import AssetReportCreateRequest
-from plaid.model.asset_report_create_request_options import AssetReportCreateRequestOptions
-from plaid.model.asset_report_user import AssetReportUser
-from plaid.model.asset_report_get_request import AssetReportGetRequest
-from plaid.model.asset_report_pdf_get_request import AssetReportPDFGetRequest
+
 @app.route('/api/assets', methods=['GET'])
 def get_assets():
   try:
