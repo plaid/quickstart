@@ -37,8 +37,17 @@
   line-height: 2 * $unit;
 }
 
+.buttonsContainer {
+  display: flex;
+  flex-direction: column;
+}
+
 .sendRequest {
-  margin: 2 * $unit;
+  margin: 2 * $unit 2 * $unit $unit 3 * $unit;
   width: 70%;
-  margin-left: 3 * $unit;
+}
+
+.pdf {
+  margin: 0 2 * $unit 0 3 * $unit;
+  width: 70%;
 }
