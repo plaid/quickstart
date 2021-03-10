@@ -83,7 +83,8 @@ app.post('/api/create_link_token', function (request, response, next) {
       client_user_id: db.user._id,
     },
     client_name: 'Plaid Quickstart',
-    products: ['transactions', 'identity'],
+    products: ['transactions'],
+    optional_products: ['identity'],
     country_codes: ['US'],
     language: 'en',
   }, function (err, createTokenResponse) {
