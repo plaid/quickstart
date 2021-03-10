@@ -6,17 +6,20 @@
   "configurations": [
     
     {
-      "type": "java",
-      "name": "Launch Current File",
-      "request": "launch",
-      "mainClass": "${file}"
+      "name": "Attach to Chrome",
+      "port": 9222,
+      "request": "attach",
+      "type": "pwa-chrome",
+      "webRoot": "${workspaceFolder}"
     },
+    
     {
       "type": "java",
       "name": "Launch QuickstartApplication",
       "request": "launch",
-      "mainClass": "com.plaid.quickstart.QuickstartApplication",
-      "projectName": "quickstart"
-    }
+      "mainClass":"/Users/lwoo/quickstart/java/target/classes/com/plaid/quickstart/QuickstartApplication.class",
+      "args": ["server", "${workspaceFolder}/java/config.yml"],
+      "envFile": "${workspaceFolder}/java/.env"
+    },
   ]
 }
