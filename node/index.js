@@ -78,31 +78,17 @@ app.post('/api/info', function (request, response, next) {
 // Create a link token with configs which we can then use to initialize Plaid Link client-side.
 // See https://plaid.com/docs/#create-link-token
 app.post('/api/create_link_token', function (request, response, next) {
-  const configs = {
+  client.createLinkToken({
     user: {
-      // This should correspond to a unique id for the current user.
-      client_user_id: 'user-id',
+      client_user_id: db.user._id,
     },
     client_name: 'Plaid Quickstart',
-    products: PLAID_PRODUCTS,
-    country_codes: PLAID_COUNTRY_CODES,
+    products: ['transactions', 'identity'],
+    country_codes: ['US'],
     language: 'en',
-  };
-
-  if (PLAID_REDIRECT_URI !== '') {
-    configs.redirect_uri = PLAID_REDIRECT_URI;
-  }
-
-  if (PLAID_ANDROID_PACKAGE_NAME !== '') {
-    configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME;
-  }
-
-  client.createLinkToken(configs, function (error, createTokenResponse) {
-    if (error != null) {
-      prettyPrintResponse(error);
-      return response.json({
-        error: error,
-      });
+  }, function (err, createTokenResponse) {
+    if (err != null) {
+      return response.json({ error });
     }
     response.json(createTokenResponse);
   });
