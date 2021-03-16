@@ -2,9 +2,12 @@ package com.plaid.quickstart.resources;
 
 import java.io.IOException;
 
-import com.plaid.client.PlaidClient;
-import com.plaid.client.request.ItemPublicTokenCreateRequest;
-import com.plaid.client.response.ItemPublicTokenCreateResponse;
+
+import com.plaid.client.request.PlaidApi;
+import com.plaid.client.model.ItemPublicTokenCreateRequest;
+import com.plaid.client.model.ItemPublicTokenCreateResponse;
+// import com.plaid.client.request.ItemPublicTokenCreateRequest;
+// import com.plaid.client.response.ItemPublicTokenCreateResponse;
 import com.plaid.quickstart.QuickstartApplication;
 
 import javax.ws.rs.GET;
@@ -17,16 +20,20 @@ import retrofit2.Response;
 @Path("/create_public_token")
 @Produces(MediaType.APPLICATION_JSON)
 public class PublicTokenResource {
-  private final PlaidClient plaidClient;
+  private final PlaidApi plaidClient;
 
-  public PublicTokenResource(PlaidClient plaidClient) {
+  public PublicTokenResource(PlaidApi plaidClient) {
     this.plaidClient = plaidClient;
   }
 
   @GET
   public ItemPublicTokenCreateResponse createPublicToken() throws IOException {
-    Response<ItemPublicTokenCreateResponse> publicTokenResponse = plaidClient.service()
-      .itemPublicTokenCreate(new ItemPublicTokenCreateRequest(QuickstartApplication.accessToken))
+
+    ItemPublicTokenCreateRequest request = new ItemPublicTokenCreateRequest() 
+    .accessToken(QuickstartApplication.accessToken);
+
+    Response<ItemPublicTokenCreateResponse> publicTokenResponse = plaidClient
+      .itemCreatePublicToken(request)
       .execute();
 
     return publicTokenResponse.body();

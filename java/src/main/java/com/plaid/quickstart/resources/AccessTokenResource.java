@@ -2,9 +2,11 @@ package com.plaid.quickstart.resources;
 
 import java.io.IOException;
 
-import com.plaid.client.PlaidClient;
-import com.plaid.client.request.ItemPublicTokenExchangeRequest;
-import com.plaid.client.response.ItemPublicTokenExchangeResponse;
+
+import com.plaid.client.request.PlaidApi;
+import com.plaid.client.model.Item;
+import com.plaid.client.model.ItemPublicTokenExchangeRequest;
+import com.plaid.client.model.ItemPublicTokenExchangeResponse;
 import com.plaid.quickstart.QuickstartApplication;
 
 import java.util.Arrays;
@@ -23,17 +25,20 @@ import retrofit2.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AccessTokenResource {
   private static final Logger LOG = LoggerFactory.getLogger(AccessTokenResource.class);
-  private final PlaidClient plaidClient;
+  private final PlaidApi plaidClient;
 
-  public AccessTokenResource(PlaidClient plaidClient) {
+  public AccessTokenResource(PlaidApi plaidClient) {
     this.plaidClient = plaidClient;
   }
 
   @POST
   public InfoResource.InfoResponse getAccessToken(@FormParam("public_token") String publicToken)
     throws IOException {
-    Response<ItemPublicTokenExchangeResponse> itemResponse = plaidClient.service()
-      .itemPublicTokenExchange(new ItemPublicTokenExchangeRequest(publicToken))
+      ItemPublicTokenExchangeRequest request = new ItemPublicTokenExchangeRequest()
+      .publicToken(publicToken);
+
+    Response<ItemPublicTokenExchangeResponse> itemResponse = this.plaidClient
+      .itemPublicTokenExchange(request)
       .execute();
 
     // Ideally, we would store this somewhere more persistent
@@ -47,4 +52,6 @@ public class AccessTokenResource {
     return new InfoResource.InfoResponse(Arrays.asList(), QuickstartApplication.accessToken,
       QuickstartApplication.itemID);
   }
+
+ 
 }

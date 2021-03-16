@@ -1,8 +1,8 @@
 package com.plaid.quickstart.resources;
 
-import com.plaid.client.PlaidClient;
-import com.plaid.client.request.AccountsBalanceGetRequest;
-import com.plaid.client.response.AccountsBalanceGetResponse;
+import com.plaid.client.request.PlaidApi;
+import com.plaid.client.model.AccountsBalanceGetRequest;
+import com.plaid.client.model.AccountsGetResponse;
 import com.plaid.quickstart.QuickstartApplication;
 import java.io.IOException;
 import javax.ws.rs.GET;
@@ -14,16 +14,19 @@ import retrofit2.Response;
 @Path("/balance")
 @Produces(MediaType.APPLICATION_JSON)
 public class BalanceResource {
-  private final PlaidClient plaidClient;
+  private final PlaidApi plaidClient;
 
-  public BalanceResource(PlaidClient plaidClient) {
+  public BalanceResource(PlaidApi plaidClient) {
     this.plaidClient = plaidClient;
   }
 
   @GET
-  public AccountsBalanceGetResponse getAccounts() throws IOException {
-    Response<AccountsBalanceGetResponse> accountsResponse = plaidClient.service()
-      .accountsBalanceGet(new AccountsBalanceGetRequest(QuickstartApplication.accessToken))
+  public AccountsGetResponse getAccounts() throws IOException {
+    AccountsBalanceGetRequest accountsBalanceRequest = new AccountsBalanceGetRequest()
+      .accessToken(QuickstartApplication.accessToken);
+
+    Response<AccountsGetResponse> accountsResponse = plaidClient
+      .accountsBalanceGet(accountsBalanceRequest)
       .execute();
     return accountsResponse.body();
   }

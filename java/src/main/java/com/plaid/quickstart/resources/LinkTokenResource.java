@@ -1,13 +1,19 @@
 package com.plaid.quickstart.resources;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.plaid.client.PlaidClient;
-import com.plaid.client.request.LinkTokenCreateRequest;
-import com.plaid.client.response.LinkTokenCreateResponse;
+import com.plaid.client.request.PlaidApi;
+import com.plaid.client.model.CountryCode;
+import com.plaid.client.model.LinkTokenCreateRequest;
+import com.plaid.client.model.LinkTokenCreateRequestAccountSubtypes;
+import com.plaid.client.model.LinkTokenCreateRequestUser;
+import com.plaid.client.model.LinkTokenCreateResponse;
 import java.io.IOException;
 import java.util.List;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import java.util.Date;
+import java.util.Arrays;
+import com.plaid.client.model.Products;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import retrofit2.Response;
@@ -15,12 +21,12 @@ import retrofit2.Response;
 @Path("/create_link_token")
 @Produces(MediaType.APPLICATION_JSON)
 public class LinkTokenResource {
-  private final PlaidClient plaidClient;
+  private final PlaidApi plaidClient;
   private final List<String> plaidProducts;
   private final List<String> countryCodes;
   private final String redirectUri;
 
-  public LinkTokenResource(PlaidClient plaidClient, List<String> plaidProducts,
+  public LinkTokenResource(PlaidApi plaidClient, List<String> plaidProducts,
     List<String> countryCodes, String redirectUri) {
     this.plaidClient = plaidClient;
     this.plaidProducts = plaidProducts;
@@ -32,20 +38,30 @@ public class LinkTokenResource {
     @JsonProperty
     private String linkToken;
 
+
     public LinkToken(String linkToken) {
       this.linkToken = linkToken;
     }
   }
 
   @POST public LinkToken getLinkToken() throws IOException {
-    Response<LinkTokenCreateResponse> response =
-      this.plaidClient.service().linkTokenCreate(new LinkTokenCreateRequest(
-        new LinkTokenCreateRequest.User("user-id"),
-        "Plaid Quickstart",
-        this.plaidProducts,
-        this.countryCodes,
-        "en"
-      ).withRedirectUri(this.redirectUri)).execute();
+    
+
+    String clientUserId = Long.toString((new Date()).getTime());
+    LinkTokenCreateRequestUser user = new LinkTokenCreateRequestUser()
+		.clientUserId(clientUserId);
+
+		LinkTokenCreateRequest request = new LinkTokenCreateRequest()
+			.user(user)
+			.clientName("Quickstart Client")
+			.products(Arrays.asList(Products.AUTH, Products.TRANSACTIONS))
+			.countryCodes(Arrays.asList(CountryCode.US, CountryCode.CA))
+			.language("en")
+      .redirectUri(this.redirectUri);
+
+    	Response<LinkTokenCreateResponse> response =plaidClient
+			.linkTokenCreate(request)
+			.execute();
     return new LinkToken(response.body().getLinkToken());
   }
 }

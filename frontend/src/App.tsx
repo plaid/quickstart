@@ -42,6 +42,7 @@ const App = () => {
         return;
       }
       const data = await response.json();
+      console.log("hello",data)
       if (data) {
         dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
       }
