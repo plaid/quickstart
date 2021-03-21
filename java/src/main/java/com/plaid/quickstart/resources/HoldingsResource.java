@@ -1,19 +1,19 @@
 package com.plaid.quickstart.resources;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.plaid.client.request.PlaidApi;
-// import com.plaid.client.model.InvestmentHoldingsGetRequestOptions;
 import com.plaid.client.model.InvestmentsHoldingsGetRequest;
 import com.plaid.client.model.InvestmentsHoldingsGetResponse;
-// import com.plaid.client.request.InvestmentsHoldingsGetRequest;
-// import com.plaid.client.response.InvestmentsHoldingsGetResponse;
 import com.plaid.quickstart.QuickstartApplication;
-import java.io.IOException;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
 import retrofit2.Response;
 
 @Path("/holdings")

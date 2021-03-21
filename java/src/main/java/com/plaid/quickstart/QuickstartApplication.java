@@ -26,7 +26,6 @@ import com.plaid.quickstart.resources.PaymentInitiationResource;
 import com.plaid.quickstart.resources.PublicTokenResource;
 import com.plaid.quickstart.resources.TransactionsResource;
 import io.dropwizard.Application;
-import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -66,34 +65,13 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
         new EnvironmentVariableSubstitutor(false)
       )
     );
-    bootstrap.addBundle(new AssetsBundle("/static/", "/static/"));
-    // bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/index.html", null, "index"));
-    // bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/", null, "index"));
-    // bootstrap.addBundle(
-    //   new AssetsBundle("/templates/oauth-response.html", "/oauth-response.html", null,
-    //     "oauth-response"));
   }
 
   @Override
   public void run(final QuickstartConfiguration configuration,
     final Environment environment) {
     // or equivalent, depending on which environment you're calling into
-    // PlaidClient.Builder builder = PlaidClient.newBuilder()
-    //   .clientIdAndSecret(configuration.getPlaidClientID(), configuration.getPlaidSecret());
-    // switch (configuration.getPlaidEnv()) {
-    // case "sandbox":
-    //   builder = builder.sandboxBaseUrl();
-    //   break;
-    // case "development":
-    //   builder = builder.developmentBaseUrl();
-    //   break;
-    // case "production":
-    //   builder = builder.productionBaseUrl();
-    //   break;
-    // default:
-    //   throw new IllegalArgumentException("unknown environment: " + configuration.getPlaidEnv());
-    // }
-    // PlaidClient plaidClient = builder.build();
+   
     List<String> plaidProducts = Arrays.asList(configuration.getPlaidProducts().split(","));
     List<String> countryCodes = Arrays.asList(configuration.getPlaidCountryCodes().split(","));
     String plaidClientId = System.getenv("PLAID_CLIENT_ID");
@@ -111,9 +89,6 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     apiClient.setPlaidAdapter(ApiClient.Sandbox);
 
     plaidClient = apiClient.createService(PlaidApi.class);
-
-   
-
 
     environment.jersey().register(new AccessTokenResource(plaidClient));
     environment.jersey().register(new AccountsResource(plaidClient));

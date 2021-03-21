@@ -3,20 +3,17 @@ package com.plaid.quickstart.resources;
 import java.io.IOException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.Gson;
 
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.PaymentInitiationPaymentGetRequest;
 import com.plaid.client.model.PaymentInitiationPaymentGetResponse;
-// import com.plaid.client.request.paymentinitiation.PaymentGetRequest;
-// import com.plaid.client.response.ErrorResponse;
-// import com.plaid.client.response.paymentinitiation.PaymentGetResponse;
 import com.plaid.quickstart.QuickstartApplication;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import com.google.gson.Gson;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

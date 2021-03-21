@@ -1,21 +1,25 @@
 package com.plaid.quickstart.resources;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.CountryCode;
 import com.plaid.client.model.LinkTokenCreateRequest;
-import com.plaid.client.model.LinkTokenCreateRequestAccountSubtypes;
 import com.plaid.client.model.LinkTokenCreateRequestUser;
 import com.plaid.client.model.LinkTokenCreateResponse;
-import java.io.IOException;
+import com.plaid.client.model.Products;
+
 import java.util.List;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import java.util.Date;
 import java.util.Arrays;
-import com.plaid.client.model.Products;
+
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
 import retrofit2.Response;
 
 @Path("/create_link_token")

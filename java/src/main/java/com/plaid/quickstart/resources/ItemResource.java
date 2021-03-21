@@ -9,18 +9,12 @@ import com.plaid.client.model.CountryCode;
 import com.plaid.client.model.ItemGetRequest;
 import com.plaid.client.model.ItemGetResponse;
 import com.plaid.client.model.InstitutionsGetByIdRequest;
-import com.plaid.client.model.InstitutionsGetByIdRequestOptions;
 import com.plaid.client.model.InstitutionsGetByIdResponse;
-// import com.plaid.client.request.ItemGetRequest;
-// import com.plaid.client.request.InstitutionsGetByIdRequest;
-// import com.plaid.client.response.ItemGetResponse;
 import com.plaid.client.model.Institution;
 import com.plaid.client.model.Item;
-// import com.plaid.client.response.InstitutionsGetByIdResponse;
 import com.plaid.quickstart.QuickstartApplication;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;

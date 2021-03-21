@@ -7,15 +7,15 @@ import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.InvestmentsTransactionsGetRequest;
 import com.plaid.client.model.InvestmentsTransactionsGetResponse;
 import com.plaid.client.model.InvestmentsTransactionsGetRequestOptions;
-// import com.plaid.client.request.InvestmentsTransactionsGetRequest;
-// import com.plaid.client.response.InvestmentsTransactionsGetResponse;
 import com.plaid.quickstart.QuickstartApplication;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
 import retrofit2.Response;
 
 @Path("/investment_transactions")

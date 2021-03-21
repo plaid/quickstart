@@ -6,8 +6,6 @@ import java.io.IOException;
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.ItemPublicTokenCreateRequest;
 import com.plaid.client.model.ItemPublicTokenCreateResponse;
-// import com.plaid.client.request.ItemPublicTokenCreateRequest;
-// import com.plaid.client.response.ItemPublicTokenCreateResponse;
 import com.plaid.quickstart.QuickstartApplication;
 
 import javax.ws.rs.GET;

@@ -1,38 +1,31 @@
 package com.plaid.quickstart.resources;
 
+import java.io.IOException;
+
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.Amount;
+import com.plaid.client.model.Products;
+import com.plaid.client.model.CountryCode;
 import com.plaid.client.model.PaymentInitiationPaymentCreateRequest;
 import com.plaid.client.model.PaymentInitiationPaymentCreateResponse;
 import com.plaid.client.model.LinkTokenCreateRequest;
 import com.plaid.client.model.LinkTokenCreateRequestUser;
 import com.plaid.client.model.LinkTokenCreateResponse;
-import com.plaid.client.model.PaymentInitiationPaymentCreateResponse;
 import com.plaid.client.model.PaymentInitiationRecipientCreateResponse;
-import com.plaid.client.model.NullableRecipientBACS;
 import com.plaid.client.model.PaymentInitiationAddress;
 import com.plaid.client.model.PaymentInitiationRecipientCreateRequest;
 import com.plaid.client.model.LinkTokenCreateRequestPaymentInitiation;
-import com.plaid.client.model.PaymentInitiationRecipientCreateResponse;
-// import com.plaid.client.model.paymentinitiation.Address;
-// import com.plaid.client.model.paymentinitiation.Amount;
-// import com.plaid.client.request.LinkTokenCreateRequest;
-// import com.plaid.client.request.paymentinitiation.PaymentCreateRequest;
-// import com.plaid.client.request.paymentinitiation.RecipientCreateRequest;
-// import com.plaid.client.response.LinkTokenCreateResponse;
-// import com.plaid.client.response.paymentinitiation.PaymentCreateResponse;
-// import com.plaid.client.response.paymentinitiation.RecipientCreateResponse;
 import com.plaid.quickstart.QuickstartApplication;
-import java.io.IOException;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.Date;
+
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import java.util.Date;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import com.plaid.client.model.Products;
-import com.plaid.client.model.CountryCode;
+
 import retrofit2.Response;
 
 @Path("/create_link_token_for_payment")

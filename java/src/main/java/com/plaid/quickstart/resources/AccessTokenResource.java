@@ -2,9 +2,7 @@ package com.plaid.quickstart.resources;
 
 import java.io.IOException;
 
-
 import com.plaid.client.request.PlaidApi;
-import com.plaid.client.model.Item;
 import com.plaid.client.model.ItemPublicTokenExchangeRequest;
 import com.plaid.client.model.ItemPublicTokenExchangeResponse;
 import com.plaid.quickstart.QuickstartApplication;
