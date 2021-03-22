@@ -32,15 +32,11 @@ import retrofit2.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class LinkTokenWithPaymentResource {
   private final PlaidApi plaidClient;
-  private final List<String> plaidProducts;
-  private final List<String> countryCodes;
   private final String redirectUri;
 
   public LinkTokenWithPaymentResource(PlaidApi plaidClient, List<String> plaidProducts,
     List<String> countryCodes, String redirectUri) {
     this.plaidClient = plaidClient;
-    this.plaidProducts = plaidProducts;
-    this.countryCodes = countryCodes;
     this.redirectUri = redirectUri;
   }
 

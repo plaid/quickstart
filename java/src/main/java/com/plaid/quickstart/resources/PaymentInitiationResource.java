@@ -47,6 +47,7 @@ public class PaymentInitiationResource {
       try {
         Gson gson = new Gson();
           Error errorResponse = gson.fromJson(paymentGetResponse.errorBody().string(), Error.class);
+          System.out.println(errorResponse);
       } catch (Exception e) {
         LOG.error("error", e);
       }
