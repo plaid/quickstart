@@ -1,7 +1,6 @@
 # Read env vars from .env file
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
 from plaid.model.item_get_request import ItemGetRequest
-from plaid.model.payment_initiation_payment_get_request import PaymentInitiationPaymentGetRequest
 from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.accounts_balance_get_request import AccountsBalanceGetRequest
@@ -18,15 +17,16 @@ from plaid.model.asset_report_create_request_options import AssetReportCreateReq
 from plaid.model.asset_report_create_request import AssetReportCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
-from plaid.model.country_code import CountryCode
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.link_token_create_request_payment_initiation import LinkTokenCreateRequestPaymentInitiation
-from plaid.model.amount import Amount
+from plaid.model.payment_initiation_payment_get_request import PaymentInitiationPaymentGetRequest
 from plaid.model.payment_initiation_payment_create_request import PaymentInitiationPaymentCreateRequest
+from plaid.model.payment_initiation_recipient_create_request import PaymentInitiationRecipientCreateRequest
 from plaid.model.payment_initiation_address import PaymentInitiationAddress
 from plaid.model.nullable_recipient_bacs import NullableRecipientBACS
-from plaid.model.payment_initiation_recipient_create_request import PaymentInitiationRecipientCreateRequest
+from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
+from plaid.model.amount import Amount
 from datetime import timedelta
 from datetime import datetime
 from flask import jsonify
@@ -41,11 +41,10 @@ import datetime
 import os
 import base64
 from dotenv import load_dotenv
+
 load_dotenv()
 
-
 app = Flask(__name__)
-
 
 # Fill in your Plaid API keys - https://dashboard.plaid.com/account/keys
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
