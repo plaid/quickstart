@@ -17,9 +17,9 @@ set :protection, :except => [:json_csrf]
 
 configuration = Plaid::Configuration.new
 configuration.server_index = Plaid::Configuration::Environment[ENV['PLAID_ENV'] || 'sandbox']
-configuration.api_key["PLAID-CLIENT-ID"] = ENV['PLAID_CLIENT_ID']
-configuration.api_key["PLAID-SECRET"] = ENV['PLAID_SECRET']
-configuration.api_key["Plaid-Version"] = "2020-09-14"
+configuration.api_key['PLAID-CLIENT-ID'] = ENV['PLAID_CLIENT_ID']
+configuration.api_key['PLAID-SECRET'] = ENV['PLAID_SECRET']
+configuration.api_key['Plaid-Version'] = '2020-09-14'
 
 api_client = Plaid::ApiClient.new(
   configuration
@@ -166,7 +166,7 @@ get '/api/holdings' do
     product_response = client.investments_holdings_get(investments_holdings_get_request)
     pretty_print_response(product_response)
     content_type :json
-    { holdings: product_response.to_hash}.to_json
+    { holdings: product_response.to_hash }.to_json
   rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
@@ -205,16 +205,16 @@ end
 get '/api/assets' do
   begin
     options = {
-      client_report_id: "123",
-      webhook: "https://www.example.com",
+      client_report_id: '123',
+      webhook: 'https://www.example.com',
       user: {
-        client_user_id: "789",
-        first_name: "Jane",
-        middle_name: "Leah",
-        last_name: "Doe",
-        ssn: "123-45-6789",
-        phone_number: "(555) 123-4567",
-        email: "jane.doe@example.com",
+        client_user_id: '789',
+        first_name: 'Jane',
+        middle_name: 'Leah',
+        last_name: 'Doe',
+        ssn: '123-45-6789',
+        phone_number: '(555) 123-4567',
+        email: 'jane.doe@example.com',
       },
     }
     asset_report_create_request = Plaid::AssetReportCreateRequest.new
@@ -248,7 +248,8 @@ get '/api/assets' do
         break
       rescue Plaid::ApiError => e
         json_response = JSON.parse(e.response_body)
-        raise e if json_response["error_code"] != "PRODUCT_NOT_READY"
+        raise e if json_response['error_code'] != 'PRODUCT_NOT_READY'
+
         sleep 1
       end
     end
@@ -272,7 +273,7 @@ get '/api/assets' do
   content_type :json
   {
     json: asset_report_json.to_hash,
-    pdf:Base64.encode64(File.read(asset_report_pdf))
+    pdf:  Base64.encode64(File.read(asset_report_pdf))
   }.to_json
 end
 
@@ -287,21 +288,21 @@ get '/api/item' do
     item_response = client.item_get(item_get_request)
     institutions_get_by_id_request = Plaid::InstitutionsGetByIdRequest.new
     institutions_get_by_id_request.institution_id = item_response.item.institution_id
-    institutions_get_by_id_request.country_codes = ["US"]
+    institutions_get_by_id_request.country_codes = ['US']
     institution_response =
       client.institutions_get_by_id(institutions_get_by_id_request)
-      pretty_print_response(item_response)
-      pretty_print_response(institution_response)
+    pretty_print_response(item_response)
+    pretty_print_response(institution_response)
     content_type :json
     { item: item_response.item.to_hash,
       institution: institution_response.institution.to_hash }.to_json
-    rescue Plaid::ApiError => e
-      error_response = format_error(e)
-      pretty_print_response(error_response)
-      content_type :json
-      error_response.to_json
-    end
-  end 
+  rescue Plaid::ApiError => e
+    error_response = format_error(e)
+    pretty_print_response(error_response)
+    content_type :json
+    error_response.to_json
+  end
+end
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
@@ -323,14 +324,16 @@ end
 
 post '/api/create_link_token' do
   begin
-    link_token_create_request = Plaid::LinkTokenCreateRequest.new({
-      :user => { :client_user_id => "user-id" },
-      :client_name => "Plaid Quickstart",
-      :products => ENV['PLAID_PRODUCTS'].split(','),
-      :country_codes => ENV['PLAID_COUNTRY_CODES'].split(','),
-      :language => "en",
-      :redirect_uri => nil_if_empty_envvar('PLAID_REDIRECT_URI')
-    })
+    link_token_create_request = Plaid::LinkTokenCreateRequest.new(
+      {
+        :user => { :client_user_id => 'user-id' },
+        :client_name => 'Plaid Quickstart',
+        :products => ENV['PLAID_PRODUCTS'].split(','),
+        :country_codes => ENV['PLAID_COUNTRY_CODES'].split(','),
+        :language => "en",
+        :redirect_uri => nil_if_empty_envvar('PLAID_REDIRECT_URI')
+      }
+    )
     response = client.link_token_create(link_token_create_request)
     pretty_print_response(response)
     content_type :json
@@ -360,21 +363,21 @@ end
 post '/api/create_link_token_for_payment' do
   begin
     payment_initiation_recipient_create_request = Plaid::PaymentInitiationRecipientCreateRequest.new
-    payment_initiation_recipient_create_request.name = "Bruce Wayne"
-    payment_initiation_recipient_create_request.iban = "GB33BUKB20201555555555"
+    payment_initiation_recipient_create_request.name = 'Bruce Wayne'
+    payment_initiation_recipient_create_request.iban = 'GB33BUKB20201555555555'
     payment_initiation_recipient_create_request.address = {
-      street: ["686 Bat Cave Lane"],
-      city: "Gotham",
-      postal_code: "99999",
-      country: "GB",
+      street: ['686 Bat Cave Lane'],
+      city: 'Gotham',
+      postal_code: '99999',
+      country: 'GB',
     }
     payment_initiation_recipient_create_request.bacs = {
-      account: "26207729",
-      sort_code: "560029",
+      account: '26207729',
+      sort_code: '560029',
     }
 
     create_recipient_response = client.payment_initiation_recipient_create(
-     payment_initiation_recipient_create_request
+      payment_initiation_recipient_create_request
     )
     recipient_id = create_recipient_response.recipient_id
 
@@ -386,10 +389,10 @@ post '/api/create_link_token_for_payment' do
 
     payment_initiation_payment_create_request = Plaid::PaymentInitiationPaymentCreateRequest.new
     payment_initiation_payment_create_request.recipient_id = recipient_id
-    payment_initiation_payment_create_request.reference = "testpayment"
+    payment_initiation_payment_create_request.reference = 'testpayment'
     payment_initiation_payment_create_request.amount = {
       value: 100.00,
-      currency: "GBP",
+      currency: 'GBP'
     }
     create_payment_response = client.payment_initiation_payment_create(
       payment_initiation_payment_create_request
@@ -397,8 +400,8 @@ post '/api/create_link_token_for_payment' do
     payment_id = create_payment_response.payment_id
 
     link_token_create_request = Plaid::LinkTokenCreateRequest.new({
-      :user => { :client_user_id => "user-id" },
-      :client_name => "Plaid Quickstart",
+      :user => { :client_user_id => 'user-id' },
+      :client_name => 'Plaid Quickstart',
       :products => ENV['PLAID_PRODUCTS'].split(','),
       :country_codes => ENV['PLAID_COUNTRY_CODES'].split(','),
       :language => "en",
@@ -423,9 +426,9 @@ def format_error(err)
   {
     error: {
       status_code: err.code,
-      error_code: body["error_code"],
-      error_message: body["error_message"],
-      error_type: body["error_type"]
+      error_code: body['error_code'],
+      error_message: body['error_message'],
+      error_type: body['error_type']
     }
   }
 end
@@ -445,10 +448,11 @@ def poll_for_asset_report(asset_report_token)
       break
     rescue Plaid::ApiError => e
       json_response = JSON.parse(e.response_body)
-      raise e if json_response["error_code"] != "PRODUCT_NOT_READY"
+      raise e if json_response['error_code'] != 'PRODUCT_NOT_READY'
+      
       sleep 1
     end
   end
-  assert response, "Timed out while waiting for asset report generation"
+  assert response, 'Timed out while waiting for asset report generation'
   response
 end
