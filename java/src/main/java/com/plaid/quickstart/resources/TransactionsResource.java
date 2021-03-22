@@ -20,9 +20,7 @@ import retrofit2.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class TransactionsResource {
   private final PlaidApi plaidClient;
-  // private String accessToken;
-  // private LocalDate startDate;
-  // private LocalDate endDate;
+
 
   public TransactionsResource(PlaidApi plaidClient) {
     this.plaidClient = plaidClient;
