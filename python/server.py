@@ -5,6 +5,8 @@ from plaid.model.payment_initiation_payment_get_request import PaymentInitiation
 from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.accounts_balance_get_request import AccountsBalanceGetRequest
+from plaid.model.investments_transactions_get_request import InvestmentsTransactionsGetRequest
+from plaid.model.investments_transactions_get_request_options import InvestmentsTransactionsGetRequestOptions
 from plaid.model.identity_get_request import IdentityGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from plaid.model.transactions_get_request import TransactionsGetRequest
@@ -403,18 +405,25 @@ def get_holdings():
 @app.route('/api/investment_transactions', methods=['GET'])
 def get_investment_transactions():
     # Pull transactions for the last 30 days
-    start_date = '{:%Y-%m-%d}'.format(datetime.datetime.now() +
-                                      datetime.timedelta(-30))
-    end_date = '{:%Y-%m-%d}'.format(datetime.datetime.now())
+
+    START_DATE = (datetime.datetime.now() - timedelta(days=(365 * 2)))
+    END_DATE = datetime.datetime.now()
     try:
-        investment_transactions_response = client.InvestmentTransactions.get(access_token,
-                                                                             start_date,
-                                                                             end_date)
-    except plaid.errors.PlaidError as e:
-        return jsonify(format_error(e))
-    pretty_print_response(investment_transactions_response)
+        options = InvestmentsTransactionsGetRequestOptions()
+        request = InvestmentsTransactionsGetRequest(
+            access_token=access_token,
+            start_date=START_DATE.date(),
+            end_date=END_DATE.date(),
+            options=options
+        )
+        investment_transactions_response = client.investment_transactions_get(request)
+
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
+    pretty_print_response(error_response)
     return jsonify(
-        {'error': None, 'investment_transactions': investment_transactions_response})
+        {'error': None, 'investment_transactions': investment_transactions_response.to_dict()})
 
 
 # This functionality is only relevant for the UK Payment Initiation product.
