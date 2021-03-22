@@ -28,7 +28,6 @@ const Endpoint = (props: Props) => {
     setIsLoading(true);
     const response = await fetch(`/api/${props.endpoint}`, { method: "GET" });
     const data = await response.json();
-    console.log(data);
     if (data.error != null) {
       setError(data.error);
       setIsLoading(false);
