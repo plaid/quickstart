@@ -3,7 +3,6 @@ package com.plaid.quickstart;
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.*;
-import com.plaid.client.request.PlaidApi;
 
 public class QuickstartConfiguration extends Configuration {
   @NotEmpty
@@ -20,9 +19,6 @@ public class QuickstartConfiguration extends Configuration {
 
   @NotEmpty
   private String plaidCountryCodes;
-
-  @NotEmpty
-  private PlaidApi plaidClient;
 
   // Parameters used for the OAuth redirect Link flow.
 
@@ -62,10 +58,4 @@ public class QuickstartConfiguration extends Configuration {
   public String getPlaidRedirectUri() {
     return plaidRedirectUri;
   }
-
-  @JsonProperty
-  public PlaidApi client() {
-    return plaidClient;
-  }
-
 }
