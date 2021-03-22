@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # Load env vars from .env file
 require 'dotenv'
 Dotenv.load
@@ -14,7 +12,7 @@ set :port, ENV['APP_PORT'] || 8000
 
 # disable CSRF warning on localhost due to usage of local /api proxy in react app.
 # delete this for a production application.
-set :protection, except: [:json_csrf]
+set :protection, :except => [:json_csrf]
 
 client = Plaid::Client.new(env: ENV['PLAID_ENV'] || 'sandbox',
                            client_id: ENV['PLAID_CLIENT_ID'],
@@ -34,9 +32,9 @@ post '/api/info' do
   content_type :json
 
   {
-    item_id: item_id,
+    item_id:      item_id,
     access_token: access_token,
-    products: ENV['PLAID_PRODUCTS'].split(',')
+    products:     ENV['PLAID_PRODUCTS'].split(','),
   }.to_json
 end
 
@@ -96,7 +94,7 @@ get '/api/identity' do
     product_response = client.identity.get(access_token)
     pretty_print_response(product_response)
     content_type :json
-    { identity: product_response.accounts }.to_json
+    { identity: product_response.accounts}.to_json
   rescue Plaid::PlaidAPIError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
@@ -192,7 +190,7 @@ get '/api/assets' do
 
   asset_report_json = nil
   num_retries_remaining = 20
-  while num_retries_remaining.positive?
+  while num_retries_remaining > 0
     begin
       asset_report_get_response = client.asset_report.get(asset_report_token)
       asset_report_json = asset_report_get_response['report']
@@ -247,7 +245,7 @@ get '/api/payment' do
   begin
     payment_get_response = client.payment_initiation.get_payment(payment_id)
     content_type :json
-    { payment: payment_get_response }.to_json
+    { payment: payment_get_response}.to_json
   rescue Plaid::PlaidAPIError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
@@ -261,13 +259,13 @@ post '/api/create_link_token' do
     response = client.link_token.create(
       user: {
         # This should correspond to a unique id for the current user.
-        client_user_id: 'user-id'
+        client_user_id: "user-id",
       },
-      client_name: 'Plaid Quickstart',
+      client_name: "Plaid Quickstart",
       products: ENV['PLAID_PRODUCTS'].split(','),
       country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
-      language: 'en',
-      redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI')
+      language: "en",
+      redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI'),
     )
 
     content_type :json
@@ -284,7 +282,11 @@ end
 def nil_if_empty_envvar(field)
   val = ENV[field]
   puts "val #{val}"
-  val if !val.nil? && val.length.positive?
+  if !val.nil? && val.length > 0
+    return val
+  else
+    return nil
+  end
 end
 
 # This functionality is only relevant for the UK Payment Initiation product.
@@ -297,35 +299,35 @@ post '/api/create_link_token_for_payment' do
       'Harry Potter',
       'GB33BUKB20201555555555',
       {
-        street: ['4 Privet Drive'],
-        city: 'Little Whinging',
+        street:      ['4 Privet Drive'],
+        city:        'Little Whinging',
         postal_code: '11111',
-        country: 'GB'
+        country:     'GB'
       },
-      account: '555555'
+      account: '555555',
     )
     recipient_id = create_recipient_response.recipient_id
 
     create_payment_response = client.payment_initiation.create_payment(
       recipient_id,
-      'paymentRef',
+      'payment_ref',
       currency: 'GBP',
-      value: 12.34
+      value:    12.34
     )
     payment_id = create_payment_response.payment_id
     response = client.link_token.create(
       user: {
         # This should correspond to a unique id for the current user.
-        client_user_id: 'user-id'
+        client_user_id: "user-id",
       },
-      client_name: 'Plaid Quickstart',
+      client_name: "Plaid Quickstart",
       products: ENV['PLAID_PRODUCTS'].split(','),
       country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
-      language: 'en',
+      language: "en",
       redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI'),
       payment_initiation: {
-        payment_id: payment_id
-      }
+        payment_id: payment_id,
+      },
     )
 
     content_type :json

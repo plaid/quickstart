@@ -20,7 +20,6 @@ interface Props {
 const Endpoint = (props: Props) => {
   const [showTable, setShowTable] = useState(false);
   const [transformedData, setTransformedData] = useState<Data>([]);
-  const [pdf, setPdf] = useState<string | null>(null);
   const [error, setError] = useState<ErrorDataItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,16 +27,12 @@ const Endpoint = (props: Props) => {
     setIsLoading(true);
     const response = await fetch(`/api/${props.endpoint}`, { method: "GET" });
     const data = await response.json();
-    console.log(data);
     if (data.error != null) {
       setError(data.error);
       setIsLoading(false);
       return;
     }
     setTransformedData(props.transformData(data)); // transform data into proper format for each individual product
-    if (data.pdf != null) {
-      setPdf(data.pdf);
-    }
     setShowTable(true);
     setIsLoading(false);
   };
@@ -57,30 +52,16 @@ const Endpoint = (props: Props) => {
           </div>
           <div className={styles.endpointDescription}>{props.description}</div>
         </div>
-        <div className={styles.buttonsContainer}>
-          <Button
-            small
-            centered
-            wide
-            secondary
-            className={styles.sendRequest}
-            onClick={getData}
-          >
-            {isLoading ? "Loading..." : `Send request`}
-          </Button>
-          {pdf != null && (
-            <Button
-              small
-              centered
-              wide
-              className={styles.pdf}
-              href={`data:application/pdf;base64,${pdf}`}
-              componentProps={{ download: "Asset Report.pdf" }}
-            >
-              Download PDF
-            </Button>
-          )}
-        </div>
+        <Button
+          small
+          centered
+          wide
+          secondary
+          className={styles.sendRequest}
+          onClick={getData}
+        >
+          {isLoading ? "Loading..." : `Send request`}
+        </Button>
       </div>
       {showTable && (
         <Table
