@@ -1,42 +1,21 @@
 package com.plaid.quickstart;
 
-// package com.plaid.client.integration;
-
-// import static org.junit.Assert.*;
-
-// import com.google.gson.Gson;
-import com.plaid.client.ApiClient;
-// import com.plaid.client.model.Error;
-// import com.plaid.client.model.Item;
-import com.plaid.client.request.PlaidApi;
-// import java.io.IOException;
-// import java.lang.annotation.Annotation;
-// import java.lang.reflect.Array;
-import java.util.HashMap;
-// import okhttp3.Interceptor;
-// import okhttp3.Request;
-// import okhttp3.ResponseBody;
-// import org.junit.Before;
-// import retrofit2.Converter;
-// import retrofit2.Response;
-// import retrofit2.Retrofit;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-// import com.plaid.client.PlaidClient;
-// import com.plaid.quickstart.resources.AccessTokenResource;
-// import com.plaid.quickstart.resources.AccountsResource;
-// import com.plaid.quickstart.resources.AuthResource;
-// import com.plaid.quickstart.resources.BalanceResource;
-// import com.plaid.quickstart.resources.HoldingsResource;
-// import com.plaid.quickstart.resources.IdentityResource;
+import com.plaid.client.PlaidClient;
+import com.plaid.quickstart.resources.AccessTokenResource;
+import com.plaid.quickstart.resources.AccountsResource;
+import com.plaid.quickstart.resources.AuthResource;
+import com.plaid.quickstart.resources.BalanceResource;
+import com.plaid.quickstart.resources.HoldingsResource;
+import com.plaid.quickstart.resources.IdentityResource;
 import com.plaid.quickstart.resources.InfoResource;
-// import com.plaid.quickstart.resources.InvestmentTransactionsResource;
-// import com.plaid.quickstart.resources.ItemResource;
+import com.plaid.quickstart.resources.InvestmentTransactionsResource;
+import com.plaid.quickstart.resources.ItemResource;
 import com.plaid.quickstart.resources.LinkTokenResource;
-// import com.plaid.quickstart.resources.LinkTokenWithPaymentResource;
-// import com.plaid.quickstart.resources.PaymentInitiationResource;
-// import com.plaid.quickstart.resources.PublicTokenResource;
-// import com.plaid.quickstart.resources.TransactionsResource;
+import com.plaid.quickstart.resources.LinkTokenWithPaymentResource;
+import com.plaid.quickstart.resources.PaymentInitiationResource;
+import com.plaid.quickstart.resources.PublicTokenResource;
+import com.plaid.quickstart.resources.TransactionsResource;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -45,8 +24,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import java.util.Arrays;
 import java.util.List;
-
-
 
 public class QuickstartApplication extends Application<QuickstartConfiguration> {
   // We store the accessToken in memory - in production, store it in a secure
@@ -57,9 +34,6 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
   // We store the paymentId in memory - in production, store it in a secure
   // persistent data store.
   public static String paymentId;
-
-  private PlaidApi plaidClient;
-  private ApiClient apiClient;
 
   public static void main(final String[] args) throws Exception {
     new QuickstartApplication().run(args);
@@ -79,76 +53,52 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
       )
     );
     bootstrap.addBundle(new AssetsBundle("/static/", "/static/"));
-    // bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/index.html", null, "index"));
-    // bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/", null, "index"));
-    // bootstrap.addBundle(
-    //   new AssetsBundle("/templates/oauth-response.html", "/oauth-response.html", null,
-    //     "oauth-response"));
+    bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/index.html", null, "index"));
+    bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/", null, "index"));
+    bootstrap.addBundle(
+      new AssetsBundle("/templates/oauth-response.html", "/oauth-response.html", null,
+        "oauth-response"));
   }
 
   @Override
   public void run(final QuickstartConfiguration configuration,
     final Environment environment) {
     // or equivalent, depending on which environment you're calling into
-    // PlaidClient.Builder builder = PlaidClient.newBuilder()
-    //   .clientIdAndSecret(configuration.getPlaidClientID(), configuration.getPlaidSecret());
-    // switch (configuration.getPlaidEnv()) {
-    // case "sandbox":
-    //   builder = builder.sandboxBaseUrl();
-    //   break;
-    // case "development":
-    //   builder = builder.developmentBaseUrl();
-    //   break;
-    // case "production":
-    //   builder = builder.productionBaseUrl();
-    //   break;
-    // default:
-    //   throw new IllegalArgumentException("unknown environment: " + configuration.getPlaidEnv());
-    // }
-    // PlaidClient plaidClient = builder.build();
+    PlaidClient.Builder builder = PlaidClient.newBuilder()
+      .clientIdAndSecret(configuration.getPlaidClientID(), configuration.getPlaidSecret());
+    switch (configuration.getPlaidEnv()) {
+    case "sandbox":
+      builder = builder.sandboxBaseUrl();
+      break;
+    case "development":
+      builder = builder.developmentBaseUrl();
+      break;
+    case "production":
+      builder = builder.productionBaseUrl();
+      break;
+    default:
+      throw new IllegalArgumentException("unknown environment: " + configuration.getPlaidEnv());
+    }
+    PlaidClient plaidClient = builder.build();
     List<String> plaidProducts = Arrays.asList(configuration.getPlaidProducts().split(","));
     List<String> countryCodes = Arrays.asList(configuration.getPlaidCountryCodes().split(","));
-    String plaidClientId = System.getenv("PLAID_CLIENT_ID");
-    String plaidSecret = System.getenv("PLAID_SECRET");
     String redirectUri = null;
     if (configuration.getPlaidRedirectUri() != null && configuration.getPlaidRedirectUri().length() > 0) {
       redirectUri = configuration.getPlaidRedirectUri();
     }
-
-    HashMap<String, String> apiKeys = new HashMap<String, String>();
-    apiKeys.put("clientId", plaidClientId);
-    apiKeys.put("secret", plaidSecret);
-    apiKeys.put("plaidVersion", "2020-09-14");
-    apiClient = new ApiClient(apiKeys);
-    apiClient.setPlaidAdapter(ApiClient.Sandbox);
-
-    plaidClient = apiClient.createService(PlaidApi.class);
-
-   
-
-
-    // environment.jersey().register(new AccessTokenResource(plaidClient));
-    // environment.jersey().register(new AccountsResource(plaidClient));
-    // environment.jersey().register(new AuthResource(plaidClient));
-    // environment.jersey().register(new BalanceResource(plaidClient));
-    // environment.jersey().register(new HoldingsResource(plaidClient));
-    // environment.jersey().register(new IdentityResource(plaidClient));
+    environment.jersey().register(new AccessTokenResource(plaidClient));
+    environment.jersey().register(new AccountsResource(plaidClient));
+    environment.jersey().register(new AuthResource(plaidClient));
+    environment.jersey().register(new BalanceResource(plaidClient));
+    environment.jersey().register(new HoldingsResource(plaidClient));
+    environment.jersey().register(new IdentityResource(plaidClient));
     environment.jersey().register(new InfoResource(plaidProducts));
-    // environment.jersey().register(new InvestmentTransactionsResource(plaidClient));
-    // environment.jersey().register(new ItemResource(plaidClient));
+    environment.jersey().register(new InvestmentTransactionsResource(plaidClient));
+    environment.jersey().register(new ItemResource(plaidClient));
     environment.jersey().register(new LinkTokenResource(plaidClient, plaidProducts, countryCodes, redirectUri));
-    // environment.jersey().register(new LinkTokenWithPaymentResource(plaidClient, plaidProducts, countryCodes, redirectUri));
-    // environment.jersey().register(new PaymentInitiationResource(plaidClient));
-    // environment.jersey().register(new PublicTokenResource(plaidClient));
-    // environment.jersey().register(new TransactionsResource(plaidClient));
+    environment.jersey().register(new LinkTokenWithPaymentResource(plaidClient, plaidProducts, countryCodes, redirectUri));
+    environment.jersey().register(new PaymentInitiationResource(plaidClient));
+    environment.jersey().register(new PublicTokenResource(plaidClient));
+    environment.jersey().register(new TransactionsResource(plaidClient));
   }
-
-  protected PlaidApi client() {
-    return plaidClient;
-  }
-
-  protected ApiClient apiClient() {
-    return apiClient;
-  }
-
 }
