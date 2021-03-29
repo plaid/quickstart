@@ -390,9 +390,10 @@ app.get('/api/assets', async function (request, response, next) {
       responseType: 'arraybuffer',
     });
     prettyPrintResponse(getResponse);
+    prettyPrintResponse(pdfResponse);
     response.json({
       json: getResponse.data.report,
-      pdf: pdfResponse.buffer.toString('base64'),
+      pdf: pdfResponse.data.buffer.toString('base64'),
     });
   } catch {
     prettyPrintResponse(error);
