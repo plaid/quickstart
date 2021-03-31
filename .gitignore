@@ -49,3 +49,9 @@ docker-compose.local*.yml
 *.iml
 .env
 .idea
+
+#java
+
+java/.classpath
+java/.project
+java/.settings/
