@@ -51,4 +51,5 @@ docker-compose.local*.yml
 .idea
 
 # vs code
-**/.vscode/
+ruby/.vscode/launch.json
+.vscode/launch.json
