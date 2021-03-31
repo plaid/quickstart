@@ -51,4 +51,4 @@ docker-compose.local*.yml
 .idea
 
 # vs code
-.vscode/
+**/.vscode/
