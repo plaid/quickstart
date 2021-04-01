@@ -54,3 +54,9 @@ docker-compose.local*.yml
 java/.classpath
 java/.project
 java/.settings/
+
+#vs code
+.vscode/settings.json
+
+#python
+python/.prettierrc
