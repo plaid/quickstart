@@ -1,15 +1,8 @@
 package com.plaid.quickstart;
 
-// package com.plaid.client.integration;
-
-// import static org.junit.Assert.*;
-
-// import com.google.gson.Gson;
 import com.plaid.client.ApiClient;
 import com.plaid.client.request.PlaidApi;
-
 import java.util.HashMap;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.plaid.quickstart.resources.AccessTokenResource;
 import com.plaid.quickstart.resources.AccountsResource;
@@ -33,8 +26,6 @@ import io.dropwizard.setup.Environment;
 import java.util.Arrays;
 import java.util.List;
 
-
-
 public class QuickstartApplication extends Application<QuickstartConfiguration> {
   // We store the accessToken in memory - in production, store it in a secure
   // persistent data store.
@@ -47,6 +38,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
 
   private PlaidApi plaidClient;
   private ApiClient apiClient;
+  public String env;
 
   public static void main(final String[] args) throws Exception {
     new QuickstartApplication().run(args);
@@ -71,7 +63,19 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
   public void run(final QuickstartConfiguration configuration,
     final Environment environment) {
     // or equivalent, depending on which environment you're calling into
-   
+    switch(configuration.getPlaidEnv()){
+      case "sandbox":
+        env = ApiClient.Sandbox;
+        break;
+      case "development":
+        env = ApiClient.Development;
+        break;
+      case "production":
+        env = ApiClient.Production;
+        break;
+      default:
+        env = ApiClient.Sandbox;
+    }
     List<String> plaidProducts = Arrays.asList(configuration.getPlaidProducts().split(","));
     List<String> countryCodes = Arrays.asList(configuration.getPlaidCountryCodes().split(","));
     String plaidClientId = System.getenv("PLAID_CLIENT_ID");
@@ -86,7 +90,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     apiKeys.put("secret", plaidSecret);
     apiKeys.put("plaidVersion", "2020-09-14");
     apiClient = new ApiClient(apiKeys);
-    apiClient.setPlaidAdapter(ApiClient.Sandbox);
+    apiClient.setPlaidAdapter(env);
 
     plaidClient = apiClient.createService(PlaidApi.class);
 

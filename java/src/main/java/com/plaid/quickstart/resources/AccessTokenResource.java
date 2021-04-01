@@ -35,7 +35,7 @@ public class AccessTokenResource {
       ItemPublicTokenExchangeRequest request = new ItemPublicTokenExchangeRequest()
       .publicToken(publicToken);
 
-    Response<ItemPublicTokenExchangeResponse> itemResponse = this.plaidClient
+    Response<ItemPublicTokenExchangeResponse> itemResponse = plaidClient
       .itemPublicTokenExchange(request)
       .execute();
 
