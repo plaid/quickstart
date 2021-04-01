@@ -60,4 +60,4 @@ java/.settings/
 .vscode/settings.json
 
 #prettier
-python/.pretteirrc
+python/.prettierrc
