@@ -18,6 +18,10 @@
     "express": "4.16.x",
     "moment": "2.22.x",
     "nodemon": "^2.0.5",
+<<<<<<< HEAD
     "plaid": "^9.0.0-beta.11"
+=======
+    "plaid": "7.x.x"
+>>>>>>> master
   }
 }
