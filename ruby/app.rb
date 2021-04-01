@@ -112,7 +112,7 @@ get '/api/identity' do
     identity_response = client.identity_get(identity_get_request)
     pretty_print_response(identity_response)
     content_type :json
-    { identity: identity_response.to_hash[:accounts]}.to_json
+    { identity: identity_response.to_hash[:accounts] }.to_json
   rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
@@ -144,7 +144,7 @@ end
 get '/api/accounts' do
   begin
     accounts_get_request = Plaid::AccountsGetRequest.new
-    accounts_get_request.access_token = "access_token"
+    accounts_get_request.access_token = access_token
     account_response = client.accounts_get(accounts_get_request)
     pretty_print_response(account_response)
     content_type :json
@@ -214,8 +214,8 @@ get '/api/assets' do
         last_name: 'Doe',
         ssn: '123-45-6789',
         phone_number: '(555) 123-4567',
-        email: 'jane.doe@example.com',
-      },
+        email: 'jane.doe@example.com'
+      }
     }
     asset_report_create_request = Plaid::AssetReportCreateRequest.new
     asset_report_create_request.access_tokens = [access_token]
@@ -269,12 +269,10 @@ get '/api/assets' do
       }
     }.to_json
   end
- 
+
   content_type :json
-  {
-    json: asset_report_json.to_hash,
-    pdf:  Base64.encode64(File.read(asset_report_pdf))
-  }.to_json
+  { json: asset_report_json.to_hash,
+    pdf: Base64.encode64(File.read(asset_report_pdf)) }.to_json
 end
 
 # rubocop:enable Metrics/BlockLength
