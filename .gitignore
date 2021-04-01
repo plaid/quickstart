@@ -53,3 +53,12 @@ docker-compose.local*.yml
 # vs code
 ruby/.vscode/launch.json
 .vscode/launch.json
+.vscode/*
+
+#java
+java/.classpath
+java/.project
+java/.settings/
+
+#python
+python/.prettierrc
