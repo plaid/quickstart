@@ -50,5 +50,7 @@ docker-compose.local*.yml
 .env
 .idea
 
-#asset_report_pdf
-asset_report.pdf
+#java
+java/.classpath
+java/.project
+java/.settings/

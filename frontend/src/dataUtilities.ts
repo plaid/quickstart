@@ -10,7 +10,7 @@ import {
   PaymentInitiationPaymentGetResponse,
   AssetReportGetResponse,
   AssetReport,
-} from "plaid/dist/api.d";
+} from "plaid/dist/api";
 
 const formatter = new Intl.NumberFormat("en-US", {
   //should look like "$50" or "$50.34"
