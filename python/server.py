@@ -1,4 +1,20 @@
 # Read env vars from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
+import time
+import json
+import datetime
+import os
+import base64
+import plaid
+from datetime import timedelta
+from datetime import datetime
+from flask import jsonify
+from flask import request
+from flask import render_template
+from flask import Flask
+from plaid.api import plaid_api
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
 from plaid.model.item_get_request import ItemGetRequest
 from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
@@ -27,22 +43,7 @@ from plaid.model.nullable_recipient_bacs import NullableRecipientBACS
 from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
 from plaid.model.amount import Amount
-from datetime import timedelta
-from datetime import datetime
-from flask import jsonify
-from flask import request
-from flask import render_template
-from flask import Flask
-from plaid.api import plaid_api
-import time
-import json
-import plaid
-import datetime
-import os
-import base64
-from dotenv import load_dotenv
 
-load_dotenv()
 
 app = Flask(__name__)
 
@@ -171,7 +172,6 @@ def create_link_token_for_payment():
 
 @app.route('/api/create_link_token', methods=['POST'])
 def create_link_token():
-
     try:
         request = LinkTokenCreateRequest(
             products=products,
@@ -189,6 +189,7 @@ def create_link_token():
     except plaid.ApiException as e:
         return json.loads(e.body)
 
+
 # Exchange token flow - exchange a Link public_token for
 # an API access_token
 # https://plaid.com/docs/#exchange-token-flow
@@ -203,7 +204,7 @@ def get_access_token():
         exchange_request = ItemPublicTokenExchangeRequest(
             public_token=public_token)
         exchange_response = client.item_public_token_exchange(exchange_request)
-        # pretty_print_response(exchange_response)
+        pretty_print_response(exchange_response)
         access_token = exchange_response['access_token']
         item_id = exchange_response['item_id']
         return jsonify(exchange_response.to_dict())
@@ -219,15 +220,15 @@ def get_access_token():
 def get_auth():
     try:
         ag_request = AuthGetRequest(
-            access_token="aklfdj;ldsjkf;lkadjf;lkajd;fl"
+            access_token=access_token
         )
         auth_response = client.auth_get(ag_request)
+        pretty_print_response(auth_response)
+        return jsonify(auth_response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(auth_response)
-    return jsonify(auth_response.to_dict())
-
+    
 
 # Retrieve Transactions for an Item
 # https://plaid.com/docs/#transactions
@@ -235,12 +236,11 @@ def get_auth():
 
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
-    # Pull transactions for the last 30 days
-    START_DATE = (datetime.datetime.now() - timedelta(days=(365 * 2)))
-    END_DATE = datetime.datetime.now()
+    # Pull transactions for the last 2 years
+    START_DATE = (datetime.now() - timedelta(days=(365 * 2)))
+    END_DATE = datetime.now()
     try:
         options = TransactionsGetRequestOptions()
-        print(options)
         request = TransactionsGetRequest(
             access_token=access_token,
             start_date=START_DATE.date(),
@@ -248,12 +248,12 @@ def get_transactions():
             options=options
         )
         transactions_response = client.transactions_get(request)
+        pretty_print_response(transactions_response)
+        return jsonify(transactions_response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(transactions_response)
-    return jsonify(transactions_response.to_dict())
-
+    
 
 # Retrieve Identity data for an Item
 # https://plaid.com/docs/#identity
@@ -266,12 +266,12 @@ def get_identity():
             access_token=access_token
         )
         identity_response = client.identity_get(request)
+        pretty_print_response(identity_response)
+        return jsonify(
+            {'error': None, 'identity': identity_response.to_dict()['accounts']})
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(identity_response)
-    return jsonify(
-        {'error': None, 'identity': identity_response.to_dict()['accounts']})
 
 
 # Retrieve real-time balance data for each of an Item's accounts
@@ -285,11 +285,11 @@ def get_balance():
             access_token=access_token
         )
         balance_response = client.accounts_balance_get(request)
+        pretty_print_response(balance_response)
+        return jsonify(balance_response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(balance_response)
-    return jsonify(balance_response.to_dict())
 
 
 # Retrieve an Item's accounts
@@ -303,11 +303,12 @@ def get_accounts():
             access_token=access_token
         )
         accounts_response = client.accounts_get(request)
+        pretty_print_response(accounts_response)
+        return jsonify(accounts_response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(accounts_response)
-    return jsonify(accounts_response.to_dict())
+    
 
 # Create and then retrieve an Asset Report for one or more Items. Note that an
 # Asset Report can contain up to 100 items, but for simplicity we're only
@@ -337,11 +338,12 @@ def get_assets():
         )
 
         asset_report_create_response = client.asset_report_create(request)
+        pretty_print_response(asset_report_create_response)
+        asset_report_token = asset_report_create_response['asset_report_token']
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(asset_report_create_response)
-    asset_report_token = asset_report_create_response['asset_report_token']
+    
 
     # Poll for the completion of the Asset Report.
     num_retries_remaining = 20
@@ -372,14 +374,14 @@ def get_assets():
             asset_report_token=asset_report_token,
         )
         pdf = client.asset_report_pdf_get(pdf_request)
+        return jsonify({
+            'error': None,
+            'json': asset_report_json.to_dict(),
+            'pdf': base64.b64encode(pdf.read()).decode('utf-8'),
+        })
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    return jsonify({
-        'error': None,
-        'json': asset_report_json.to_dict(),
-        'pdf': base64.b64encode(pdf.read()).decode('utf-8'),
-    })
 
 
 # Retrieve investment holdings data for an Item
@@ -391,11 +393,12 @@ def get_holdings():
     try:
         h_request = InvestmentsHoldingsGetRequest(access_token=access_token)
         holdings_response = client.investments_holdings_get(h_request)
+        pretty_print_response(holdings_response)
+        return jsonify({'error': None, 'holdings': holdings_response.to_dict()})
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(holdings_response)
-    return jsonify({'error': None, 'holdings': holdings_response.to_dict()})
+    
 
 # Retrieve Investment Transactions for an Item
 # https://plaid.com/docs/#investments
@@ -416,14 +419,14 @@ def get_investment_transactions():
             options=options
         )
         investment_transactions_response = client.investment_transactions_get(request)
+        pretty_print_response(error_response)
+        return jsonify(
+            {'error': None, 'investment_transactions': investment_transactions_response.to_dict()})
 
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(error_response)
-    return jsonify(
-        {'error': None, 'investment_transactions': investment_transactions_response.to_dict()})
-
+    
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
@@ -435,12 +438,12 @@ def payment():
     try:
         request = PaymentInitiationPaymentGetRequest(payment_id=payment_id)
         payment_get_response = client.payment_initiation_payment_get(request)
+        pretty_print_response(payment_get_response)
+        return jsonify({'error': None, 'payment': payment_get_response.to_dict()})
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(payment_get_response)
-    return jsonify({'error': None, 'payment': payment_get_response.to_dict()})
-
+    
 
 # Retrieve high-level information about an Item
 # https://plaid.com/docs/#retrieve-item
@@ -456,14 +459,14 @@ def item():
             country_codes=[CountryCode('US')]
         )
         institution_response = client.institutions_get_by_id(inst_request)
+        pretty_print_response(item_response)
+        pretty_print_response(institution_response)
+        return jsonify({'error': None, 'item': item_response.to_dict()[
+                    'item'], 'institution': institution_response.to_dict()['institution']})
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    pretty_print_response(item_response)
-    pretty_print_response(institution_response)
-    return jsonify({'error': None, 'item': item_response.to_dict()[
-                   'item'], 'institution': institution_response.to_dict()['institution']})
-
+    
 
 def pretty_print_response(response):
     print(json.dumps(response, indent=2, sort_keys=True, default=str))
