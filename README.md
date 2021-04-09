@@ -196,13 +196,13 @@ $ npm start
 
 ## Testing OAuth
 
-Some European institutions require an OAuth redirect authentication flow, where the end user is
-redirected to the bank’s website or mobile app to authenticate. For this flow, you should set
-`PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to
-register this localhost redirect URI in the [Plaid dashboard under Team Settings > API > Allowed
-redirect URIs][dashboard-api-section].
+Some institutions (primarily in Europe, but a small number in the US) require an OAuth redirect 
+authentication flow, where the end user is redirected to the bank’s website or mobile app to 
+authenticate. For this flow, you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. 
+You will also need to register this localhost redirect URI in the 
+[Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section].
 
-OAuth flows are only testable in the `sandbox` environment in this quickstart app due to an https
+OAuth flows are only testable in the `sandbox` environment in this Quickstart app due to an https
 `redirect_uri` being required in other environments. Additionally, if you want to use the [Payment
 Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this
 product enabled.
