@@ -253,11 +253,7 @@ get '/api/assets' do
         sleep 1
       end
     end
-  rescue Plaid::ApiError => e
-    error_response = format_error(e)
-    pretty_print_response(error_response)
-    content_type :json
-    error_response.to_json
+  
   end
 
   if asset_report_json.nil?

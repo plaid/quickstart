@@ -62,3 +62,6 @@ java/.settings/
 
 #python
 python/.prettierrc
+
+#ruby
+ruby/bin/
