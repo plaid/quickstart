@@ -1,48 +1,47 @@
 # Read env vars from .env file
+from plaid.model.amount import Amount
+from plaid.model.products import Products
+from plaid.model.country_code import CountryCode
+from plaid.model.nullable_recipient_bacs import NullableRecipientBACS
+from plaid.model.payment_initiation_address import PaymentInitiationAddress
+from plaid.model.payment_initiation_recipient_create_request import PaymentInitiationRecipientCreateRequest
+from plaid.model.payment_initiation_payment_create_request import PaymentInitiationPaymentCreateRequest
+from plaid.model.payment_initiation_payment_get_request import PaymentInitiationPaymentGetRequest
+from plaid.model.link_token_create_request_payment_initiation import LinkTokenCreateRequestPaymentInitiation
+from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.asset_report_create_request import AssetReportCreateRequest
+from plaid.model.asset_report_create_request_options import AssetReportCreateRequestOptions
+from plaid.model.asset_report_user import AssetReportUser
+from plaid.model.asset_report_get_request import AssetReportGetRequest
+from plaid.model.asset_report_pdf_get_request import AssetReportPDFGetRequest
+from plaid.model.auth_get_request import AuthGetRequest
+from plaid.model.transactions_get_request import TransactionsGetRequest
+from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
+from plaid.model.identity_get_request import IdentityGetRequest
+from plaid.model.investments_transactions_get_request_options import InvestmentsTransactionsGetRequestOptions
+from plaid.model.investments_transactions_get_request import InvestmentsTransactionsGetRequest
+from plaid.model.accounts_balance_get_request import AccountsBalanceGetRequest
+from plaid.model.accounts_get_request import AccountsGetRequest
+from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
+from plaid.model.item_get_request import ItemGetRequest
+from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
+from plaid.api import plaid_api
+from flask import Flask
+from flask import render_template
+from flask import request
+from flask import jsonify
+from datetime import datetime
+from datetime import timedelta
+import plaid
+import base64
+import os
+import datetime
+import json
+import time
 from dotenv import load_dotenv
 load_dotenv()
-
-import time
-import json
-import datetime
-import os
-import base64
-import plaid
-from datetime import timedelta
-from datetime import datetime
-from flask import jsonify
-from flask import request
-from flask import render_template
-from flask import Flask
-from plaid.api import plaid_api
-from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
-from plaid.model.item_get_request import ItemGetRequest
-from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
-from plaid.model.accounts_get_request import AccountsGetRequest
-from plaid.model.accounts_balance_get_request import AccountsBalanceGetRequest
-from plaid.model.investments_transactions_get_request import InvestmentsTransactionsGetRequest
-from plaid.model.investments_transactions_get_request_options import InvestmentsTransactionsGetRequestOptions
-from plaid.model.identity_get_request import IdentityGetRequest
-from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
-from plaid.model.transactions_get_request import TransactionsGetRequest
-from plaid.model.auth_get_request import AuthGetRequest
-from plaid.model.asset_report_pdf_get_request import AssetReportPDFGetRequest
-from plaid.model.asset_report_get_request import AssetReportGetRequest
-from plaid.model.asset_report_user import AssetReportUser
-from plaid.model.asset_report_create_request_options import AssetReportCreateRequestOptions
-from plaid.model.asset_report_create_request import AssetReportCreateRequest
-from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
-from plaid.model.link_token_create_request import LinkTokenCreateRequest
-from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
-from plaid.model.link_token_create_request_payment_initiation import LinkTokenCreateRequestPaymentInitiation
-from plaid.model.payment_initiation_payment_get_request import PaymentInitiationPaymentGetRequest
-from plaid.model.payment_initiation_payment_create_request import PaymentInitiationPaymentCreateRequest
-from plaid.model.payment_initiation_recipient_create_request import PaymentInitiationRecipientCreateRequest
-from plaid.model.payment_initiation_address import PaymentInitiationAddress
-from plaid.model.nullable_recipient_bacs import NullableRecipientBACS
-from plaid.model.country_code import CountryCode
-from plaid.model.products import Products
-from plaid.model.amount import Amount
 
 
 app = Flask(__name__)
@@ -228,7 +227,7 @@ def get_auth():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    
+
 
 # Retrieve Transactions for an Item
 # https://plaid.com/docs/#transactions
@@ -253,7 +252,7 @@ def get_transactions():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    
+
 
 # Retrieve Identity data for an Item
 # https://plaid.com/docs/#identity
@@ -308,7 +307,7 @@ def get_accounts():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    
+
 
 # Create and then retrieve an Asset Report for one or more Items. Note that an
 # Asset Report can contain up to 100 items, but for simplicity we're only
@@ -343,7 +342,6 @@ def get_assets():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    
 
     # Poll for the completion of the Asset Report.
     num_retries_remaining = 20
@@ -398,7 +396,7 @@ def get_holdings():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    
+
 
 # Retrieve Investment Transactions for an Item
 # https://plaid.com/docs/#investments
@@ -418,7 +416,8 @@ def get_investment_transactions():
             end_date=END_DATE.date(),
             options=options
         )
-        investment_transactions_response = client.investment_transactions_get(request)
+        investment_transactions_response = client.investment_transactions_get(
+            request)
         print(investment_transactions_response)
         return jsonify(
             {'error': None, 'investment_transactions': investment_transactions_response.to_dict()})
@@ -426,7 +425,7 @@ def get_investment_transactions():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    
+
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
@@ -443,7 +442,7 @@ def payment():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
-    
+
 
 # Retrieve high-level information about an Item
 # https://plaid.com/docs/#retrieve-item
@@ -462,7 +461,7 @@ def item():
         print(item_response)
         print(institution_response)
         return jsonify({'error': None, 'item': item_response.to_dict()[
-                    'item'], 'institution': institution_response.to_dict()['institution']})
+            'item'], 'institution': institution_response.to_dict()['institution']})
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
