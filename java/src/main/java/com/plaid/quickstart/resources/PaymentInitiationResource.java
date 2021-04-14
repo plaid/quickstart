@@ -46,10 +46,10 @@ public class PaymentInitiationResource {
     if (!response.isSuccessful()) {
       try {
         Gson gson = new Gson();
-          Error errorResponse = gson.fromJson(response.errorBody().string(), Error.class);
-          LOG.error("error: " + errorResponse);
+        Error errorResponse = gson.fromJson(response.errorBody().string(), Error.class);
+        LOG.error("error: " + errorResponse);
       } catch (Exception e) {
-        LOG.error("error", e);
+          LOG.error("error", e);
       }
     }
     return new PaymentResponse(response.body());
