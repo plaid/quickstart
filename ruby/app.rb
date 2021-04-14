@@ -7,7 +7,6 @@ require 'date'
 require 'json'
 require 'plaid'
 require 'sinatra'
-# require 'pp'
 
 set :port, ENV['APP_PORT'] || 8000
 
