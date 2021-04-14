@@ -66,18 +66,18 @@ end
 # https://plaid.com/docs/#transactions
 get '/api/transactions' do
   begin
-    START_DATE = (Date.today - 365)
-    END_DATE = Date.today
+    start_date = (Date.today - 30)
+    end_date = Date.today
     transactions_get_request = Plaid::TransactionsGetRequest.new(
       {
         access_token: access_token,
-        start_date: START_DATE,
-        end_date: END_DATE
+        start_date: start_date,
+        end_date: end_date
       }
     )
     transactions_response =
       client.transactions_get(transactions_get_request)
-      pretty_print_response(transactions_response.to_hash) 
+    pretty_print_response(transactions_response.to_hash)
     content_type :json
     transactions_response.to_hash.to_json
   rescue Plaid::ApiError => e
@@ -177,13 +177,13 @@ end
 # https://plaid.com/docs/#investments
 get '/api/investment_transactions' do
   begin
-    START_DATE = (Date.today - 365)
-    END_DATE = Date.today
+    start_date = (Date.today - 30)
+    end_date = Date.today
     investments_transactions_get_request = Plaid::InvestmentsTransactionsGetRequest.new(
       {
         access_token: access_token,
-        start_date: START_DATE,
-        end_date: END_DATE
+        start_date: start_date,
+        end_date: end_date
       }
     )
     transactions_response = client.investments_transactions_get(investments_transactions_get_request)
