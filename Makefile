@@ -20,7 +20,7 @@ up:
 logs:
 	$(DOCKER_COMPOSE) \
 		$@ --follow \
-		$(language)
+		$(language) frontend
 
 .PHONY: stop build
 stop build:
