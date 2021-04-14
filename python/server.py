@@ -123,7 +123,7 @@ def info():
 def create_link_token_for_payment():
     global payment_id
     try:
-        rec_create_request = PaymentInitiationRecipientCreateRequest(
+        request = PaymentInitiationRecipientCreateRequest(
             name='John Doe',
             bacs=NullableRecipientBACS(account='26207729', sort_code='560029'),
             address=PaymentInitiationAddress(
@@ -133,11 +133,11 @@ def create_link_token_for_payment():
                 country='GB'
             )
         )
-        create_recipient_response = client.payment_initiation_recipient_create(
-            rec_create_request)
-        recipient_id = create_recipient_response['recipient_id']
+        response = client.payment_initiation_recipient_create(
+            request)
+        recipient_id = response['recipient_id']
 
-        payment_create_request = PaymentInitiationPaymentCreateRequest(
+        request = PaymentInitiationPaymentCreateRequest(
             recipient_id=recipient_id,
             reference='TestPayment',
             amount=Amount(
@@ -145,12 +145,12 @@ def create_link_token_for_payment():
                 value=100.00
             )
         )
-        create_payment_response = client.payment_initiation_payment_create(
-            payment_create_request
+        response = client.payment_initiation_payment_create(
+            request
         )
-        print(create_payment_response)
-        payment_id = create_payment_response['payment_id']
-        link_request = LinkTokenCreateRequest(
+        print(response)
+        payment_id = response['payment_id']
+        request = LinkTokenCreateRequest(
             products=[Products('payment_initiation')],
             client_name='Plaid Test',
             country_codes=[CountryCode('GB')],
@@ -162,7 +162,7 @@ def create_link_token_for_payment():
                 payment_id=payment_id
             )
         )
-        response = client.link_token_create(link_request)
+        response = client.link_token_create(request)
         print(response)
         return jsonify(response.to_dict())
     except plaid.ApiException as e:
@@ -218,12 +218,12 @@ def get_access_token():
 @app.route('/api/auth', methods=['GET'])
 def get_auth():
     try:
-        ag_request = AuthGetRequest(
+       request = AuthGetRequest(
             access_token=access_token
         )
-        auth_response = client.auth_get(ag_request)
-        print(auth_response)
-        return jsonify(auth_response.to_dict())
+       response = client.auth_get(request)
+       print(response)
+       return jsonify(response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -235,20 +235,20 @@ def get_auth():
 
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
-    # Pull transactions for the last 2 years
-    START_DATE = (datetime.now() - timedelta(days=(365 * 2)))
-    END_DATE = datetime.now()
+    # Pull transactions for the last 30 days
+    start_date = (datetime.datetime.now() - timedelta(days=30))
+    end_date = datetime.datetime.now()
     try:
         options = TransactionsGetRequestOptions()
         request = TransactionsGetRequest(
             access_token=access_token,
-            start_date=START_DATE.date(),
-            end_date=END_DATE.date(),
+            start_date=start_date.date(),
+            end_date=end_date.date(),
             options=options
         )
-        transactions_response = client.transactions_get(request)
-        print(transactions_response)
-        return jsonify(transactions_response.to_dict())
+        response = client.transactions_get(request)
+        print(response)
+        return jsonify(response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -264,10 +264,10 @@ def get_identity():
         request = IdentityGetRequest(
             access_token=access_token
         )
-        identity_response = client.identity_get(request)
-        print(identity_response)
+        response = client.identity_get(request)
+        print(response)
         return jsonify(
-            {'error': None, 'identity': identity_response.to_dict()['accounts']})
+            {'error': None, 'identity': response.to_dict()['accounts']})
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -283,9 +283,9 @@ def get_balance():
         request = AccountsBalanceGetRequest(
             access_token=access_token
         )
-        balance_response = client.accounts_balance_get(request)
-        print(balance_response)
-        return jsonify(balance_response.to_dict())
+        response = client.accounts_balance_get(request)
+        print(response)
+        return jsonify(response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -301,9 +301,9 @@ def get_accounts():
         request = AccountsGetRequest(
             access_token=access_token
         )
-        accounts_response = client.accounts_get(request)
-        print(accounts_response)
-        return jsonify(accounts_response.to_dict())
+        response = client.accounts_get(request)
+        print(response)
+        return jsonify(response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -336,9 +336,9 @@ def get_assets():
             )
         )
 
-        asset_report_create_response = client.asset_report_create(request)
-        print(asset_report_create_response)
-        asset_report_token = asset_report_create_response['asset_report_token']
+        response = client.asset_report_create(request)
+        print(response)
+        asset_report_token = response['asset_report_token']
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -351,8 +351,8 @@ def get_assets():
             request = AssetReportGetRequest(
                 asset_report_token=asset_report_token,
             )
-            asset_report_get_response = client.asset_report_get(request)
-            asset_report_json = asset_report_get_response['report']
+            response = client.asset_report_get(request)
+            asset_report_json = response['report']
             break
         except plaid.ApiException as e:
             response = json.loads(e.body)
@@ -368,10 +368,10 @@ def get_assets():
 
     asset_report_pdf = None
     try:
-        pdf_request = AssetReportPDFGetRequest(
+        request = AssetReportPDFGetRequest(
             asset_report_token=asset_report_token,
         )
-        pdf = client.asset_report_pdf_get(pdf_request)
+        pdf = client.asset_report_pdf_get(request)
         return jsonify({
             'error': None,
             'json': asset_report_json.to_dict(),
@@ -389,10 +389,10 @@ def get_assets():
 @app.route('/api/holdings', methods=['GET'])
 def get_holdings():
     try:
-        h_request = InvestmentsHoldingsGetRequest(access_token=access_token)
-        holdings_response = client.investments_holdings_get(h_request)
-        print(holdings_response)
-        return jsonify({'error': None, 'holdings': holdings_response.to_dict()})
+        request = InvestmentsHoldingsGetRequest(access_token=access_token)
+        response = client.investments_holdings_get(request)
+        print(response)
+        return jsonify({'error': None, 'holdings': response.to_dict()})
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -406,21 +406,21 @@ def get_holdings():
 def get_investment_transactions():
     # Pull transactions for the last 30 days
 
-    START_DATE = (datetime.datetime.now() - timedelta(days=(365 * 2)))
-    END_DATE = datetime.datetime.now()
+    start_date = (datetime.datetime.now() - timedelta(days=(30)))
+    end_date = datetime.datetime.now()
     try:
         options = InvestmentsTransactionsGetRequestOptions()
         request = InvestmentsTransactionsGetRequest(
             access_token=access_token,
-            start_date=START_DATE.date(),
-            end_date=END_DATE.date(),
+            start_date=start_date.date(),
+            end_date=end_date.date(),
             options=options
         )
-        investment_transactions_response = client.investment_transactions_get(
+        response = client.investment_transactions_get(
             request)
-        print(investment_transactions_response)
+        print(response)
         return jsonify(
-            {'error': None, 'investment_transactions': investment_transactions_response.to_dict()})
+            {'error': None, 'investment_transactions': response.to_dict()})
 
     except plaid.ApiException as e:
         error_response = format_error(e)
@@ -436,9 +436,9 @@ def payment():
     global payment_id
     try:
         request = PaymentInitiationPaymentGetRequest(payment_id=payment_id)
-        payment_get_response = client.payment_initiation_payment_get(request)
-        print(payment_get_response)
-        return jsonify({'error': None, 'payment': payment_get_response.to_dict()})
+        response = client.payment_initiation_payment_get(request)
+        print(response)
+        return jsonify({'error': None, 'payment': response.to_dict()})
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -451,16 +451,16 @@ def payment():
 @app.route('/api/item', methods=['GET'])
 def item():
     try:
-        item_request = ItemGetRequest(access_token=access_token)
-        item_response = client.item_get(item_request)
-        inst_request = InstitutionsGetByIdRequest(
-            institution_id=item_response['item']['institution_id'],
+        request = ItemGetRequest(access_token=access_token)
+        response = client.item_get(request)
+        request = InstitutionsGetByIdRequest(
+            institution_id=response['item']['institution_id'],
             country_codes=[CountryCode('US')]
         )
-        institution_response = client.institutions_get_by_id(inst_request)
-        print(item_response)
+        institution_response = client.institutions_get_by_id(request)
+        print(response)
         print(institution_response)
-        return jsonify({'error': None, 'item': item_response.to_dict()[
+        return jsonify({'error': None, 'item': response.to_dict()[
             'item'], 'institution': institution_response.to_dict()['institution']})
     except plaid.ApiException as e:
         error_response = format_error(e)
