@@ -29,7 +29,7 @@ public class InvestmentTransactionsResource {
 
   @GET
   public InvestmentTransactionsResponse getAccounts() throws IOException {
-    LocalDate startDate = LocalDate.now().minusDays(365 * 2);
+    LocalDate startDate = LocalDate.now().minusDays(30);
     LocalDate endDate = LocalDate.now();
     InvestmentsTransactionsGetRequestOptions options = new InvestmentsTransactionsGetRequestOptions()
     .count(100);

@@ -32,7 +32,7 @@ public class TransactionsResource {
 
   @GET
   public TransactionsGetResponse getTransactions() throws IOException {
-    LocalDate startDate = LocalDate.now().minusDays(365 * 2);
+    LocalDate startDate = LocalDate.now().minusDays(30);
     LocalDate endDate = LocalDate.now();
 
     TransactionsGetRequestOptions options = new TransactionsGetRequestOptions()
