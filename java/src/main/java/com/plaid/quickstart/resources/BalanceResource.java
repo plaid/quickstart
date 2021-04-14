@@ -25,12 +25,12 @@ public class BalanceResource {
 
   @GET
   public AccountsGetResponse getAccounts() throws IOException {
-    AccountsBalanceGetRequest accountsBalanceRequest = new AccountsBalanceGetRequest()
+    AccountsBalanceGetRequest request = new AccountsBalanceGetRequest()
       .accessToken(QuickstartApplication.accessToken);
 
-    Response<AccountsGetResponse> accountsResponse = plaidClient
-      .accountsBalanceGet(accountsBalanceRequest)
+    Response<AccountsGetResponse> response = plaidClient
+      .accountsBalanceGet(request)
       .execute();
-    return accountsResponse.body();
+    return response.body();
   }
 }

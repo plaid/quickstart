@@ -38,7 +38,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
 
   private PlaidApi plaidClient;
   private ApiClient apiClient;
-  public String env;
+  public String plaidEnv;
 
   public static void main(final String[] args) throws Exception {
     new QuickstartApplication().run(args);
@@ -65,16 +65,16 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     // or equivalent, depending on which environment you're calling into
     switch(configuration.getPlaidEnv()){
       case "sandbox":
-        env = ApiClient.Sandbox;
+        plaidEnv = ApiClient.Sandbox;
         break;
       case "development":
-        env = ApiClient.Development;
+        plaidEnv = ApiClient.Development;
         break;
       case "production":
-        env = ApiClient.Production;
+        plaidEnv = ApiClient.Production;
         break;
       default:
-        env = ApiClient.Sandbox;
+        plaidEnv = ApiClient.Sandbox;
     }
     List<String> plaidProducts = Arrays.asList(configuration.getPlaidProducts().split(","));
     List<String> countryCodes = Arrays.asList(configuration.getPlaidCountryCodes().split(","));
@@ -90,7 +90,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     apiKeys.put("secret", plaidSecret);
     apiKeys.put("plaidVersion", "2020-09-14");
     apiClient = new ApiClient(apiKeys);
-    apiClient.setPlaidAdapter(env);
+    apiClient.setPlaidAdapter(plaidEnv);
 
     plaidClient = apiClient.createService(PlaidApi.class);
 

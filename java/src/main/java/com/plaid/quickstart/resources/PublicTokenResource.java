@@ -30,10 +30,10 @@ public class PublicTokenResource {
     ItemPublicTokenCreateRequest request = new ItemPublicTokenCreateRequest() 
     .accessToken(QuickstartApplication.accessToken);
 
-    Response<ItemPublicTokenCreateResponse> publicTokenResponse = plaidClient
+    Response<ItemPublicTokenCreateResponse> response = plaidClient
       .itemCreatePublicToken(request)
       .execute();
 
-    return publicTokenResponse.body();
+    return response.body();
   }
 }

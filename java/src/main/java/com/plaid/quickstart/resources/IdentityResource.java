@@ -28,12 +28,12 @@ public class IdentityResource {
 
   @GET
   public IdentityResponse getAccounts() throws IOException {
-    IdentityGetRequest identityGetRequest = new IdentityGetRequest()
+    IdentityGetRequest request = new IdentityGetRequest()
       .accessToken(QuickstartApplication.accessToken);
-    Response<IdentityGetResponse> accountsResponse = plaidClient 
-    .identityGet(identityGetRequest)
+    Response<IdentityGetResponse> response = plaidClient 
+    .identityGet(request)
     .execute();
-    return new IdentityResponse(accountsResponse.body());
+    return new IdentityResponse(response.body());
   }
 
   private static class IdentityResponse {

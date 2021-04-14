@@ -35,17 +35,17 @@ public class AccessTokenResource {
       ItemPublicTokenExchangeRequest request = new ItemPublicTokenExchangeRequest()
       .publicToken(publicToken);
 
-    Response<ItemPublicTokenExchangeResponse> itemResponse = plaidClient
+    Response<ItemPublicTokenExchangeResponse> response = plaidClient
       .itemPublicTokenExchange(request)
       .execute();
 
     // Ideally, we would store this somewhere more persistent
     QuickstartApplication.
-      accessToken = itemResponse.body().getAccessToken();
-    QuickstartApplication.itemID = itemResponse.body().getItemId();
+      accessToken = response.body().getAccessToken();
+    QuickstartApplication.itemID = response.body().getItemId();
     LOG.info("public token: " + publicToken);
     LOG.info("access token: " + QuickstartApplication.accessToken);
-    LOG.info("item ID: " + itemResponse.body().getItemId());
+    LOG.info("item ID: " + response.body().getItemId());
 
     return new InfoResource.InfoResponse(Arrays.asList(), QuickstartApplication.accessToken,
       QuickstartApplication.itemID);

@@ -36,23 +36,23 @@ public class PaymentInitiationResource {
   public PaymentResponse getPayment() throws IOException {
     String paymentId = QuickstartApplication.paymentId;
 
-    PaymentInitiationPaymentGetRequest payRequest = new PaymentInitiationPaymentGetRequest()
+    PaymentInitiationPaymentGetRequest request = new PaymentInitiationPaymentGetRequest()
       .paymentId(paymentId);
 
-    Response<PaymentInitiationPaymentGetResponse> paymentGetResponse =
+    Response<PaymentInitiationPaymentGetResponse> response =
       plaidClient
-      .paymentInitiationPaymentGet(payRequest)
+      .paymentInitiationPaymentGet(request)
       .execute();
-    if (!paymentGetResponse.isSuccessful()) {
+    if (!response.isSuccessful()) {
       try {
         Gson gson = new Gson();
-          Error errorResponse = gson.fromJson(paymentGetResponse.errorBody().string(), Error.class);
-          System.out.println(errorResponse);
+          Error errorResponse = gson.fromJson(response.errorBody().string(), Error.class);
+          LOG.error("error: " + errorResponse);
       } catch (Exception e) {
         LOG.error("error", e);
       }
     }
-    return new PaymentResponse(paymentGetResponse.body());
+    return new PaymentResponse(response.body());
   }
 
   private static class PaymentResponse {

@@ -40,10 +40,10 @@ public class InvestmentTransactionsResource {
       .endDate(endDate)
       .options(options);
 
-    Response<InvestmentsTransactionsGetResponse> accountsResponse = plaidClient
+    Response<InvestmentsTransactionsGetResponse> response = plaidClient
       .investmentsTransactionsGet(request)
       .execute();
-    return new InvestmentTransactionsResponse(accountsResponse.body());
+    return new InvestmentTransactionsResponse(response.body());
   }
 
   private static class InvestmentTransactionsResponse {

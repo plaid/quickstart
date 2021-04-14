@@ -56,8 +56,7 @@ java/.project
 java/.settings/
 
 #vs code
-.vscode/settings.json
-.vscode/launch.json
+.vscode
 
 #python
 python/.prettierrc

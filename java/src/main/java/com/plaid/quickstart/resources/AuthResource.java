@@ -26,12 +26,12 @@ public class AuthResource {
   @GET
   public AuthGetResponse getAccounts() throws IOException {
 
-    AuthGetRequest authGetRequest = new AuthGetRequest()
+    AuthGetRequest request = new AuthGetRequest()
     .accessToken(QuickstartApplication.accessToken);
-    Response<AuthGetResponse> accountsResponse = plaidClient
-      .authGet(authGetRequest)
+    Response<AuthGetResponse> response = plaidClient
+      .authGet(request)
       .execute();
 
-    return accountsResponse.body();
+    return response.body();
   }
 }

@@ -31,11 +31,11 @@ public class HoldingsResource {
     InvestmentsHoldingsGetRequest request = new InvestmentsHoldingsGetRequest()
     .accessToken(QuickstartApplication.accessToken);
 
-    Response<InvestmentsHoldingsGetResponse> accountsResponse = plaidClient
+    Response<InvestmentsHoldingsGetResponse> response = plaidClient
       .investmentsHoldingsGet(request)
       .execute();
 
-    return new HoldingsResponse(accountsResponse.body());
+    return new HoldingsResponse(response.body());
   }
 
   private static class HoldingsResponse {

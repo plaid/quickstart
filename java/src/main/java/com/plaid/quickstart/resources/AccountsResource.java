@@ -28,9 +28,9 @@ public class AccountsResource {
     AccountsGetRequest request = new AccountsGetRequest()
     .accessToken(QuickstartApplication.accessToken);
 
-    Response<AccountsGetResponse> accountsResponse = plaidClient
+    Response<AccountsGetResponse> response = plaidClient
       .accountsGet(request)
       .execute();
-    return accountsResponse.body();
+    return response.body();
   }
 }
