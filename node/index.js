@@ -434,7 +434,7 @@ const getAssetReportWithRetries = (
   plaidClient,
   asset_report_token,
   ms = 1000,
-  retriesLeft = 60,
+  retriesLeft = 20,
 ) =>
   new Promise((resolve, reject) => {
     const request = {
