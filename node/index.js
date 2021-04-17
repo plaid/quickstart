@@ -391,7 +391,6 @@ app.get('/api/assets', async function (request, response, next) {
     });
     prettyPrintResponse(getResponse);
     prettyPrintResponse(pdfResponse);
-    prettyPrintResponse(pdfResponse);
     response.json({
       json: getResponse.data.report,
       pdf: pdfResponse.data.toString('base64'),
