@@ -47,9 +47,17 @@ const Header = () => {
           ) : /* message if backend is running and there is no link token */
           linkToken == null && backend === true ? (
             <Callout warning>
-              <div>Unable to fetch link_token:</div>
-              <div>Error Code: {linkErrorCode}</div>
-              <div>Error Type: {linkErrorType}</div>
+              <div>
+                Unable to fetch link_token: please make sure your backend server
+                is running and that your .env file has been configured
+                correctly.
+              </div>
+              <div>
+                Error Code: <code>{linkErrorCode}</code>
+              </div>
+              <div>
+                Error Type: <code>{linkErrorType}</code>{" "}
+              </div>
               <div>Error Message: {linkErrorMessage}</div>
             </Callout>
           ) : linkToken === "" ? (
