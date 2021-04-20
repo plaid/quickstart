@@ -48,9 +48,9 @@ const Header = () => {
           linkToken == null && backend === true ? (
             <Callout warning>
               <div>Unable to fetch link_token:</div>
-              <div>Link Error Code: {linkErrorCode}</div>
-              <div>Link Error Type: {linkErrorType}</div>
-              <div>Link Error Message: {linkErrorMessage}</div>
+              <div>Error Code: {linkErrorCode}</div>
+              <div>Error Type: {linkErrorType}</div>
+              <div>Error Message: {linkErrorMessage}</div>
             </Callout>
           ) : linkToken === "" ? (
             <div className={styles.linkButton}>
