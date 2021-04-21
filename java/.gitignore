@@ -7,3 +7,8 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
+
+#java
+java/.classpath
+java/.project
+java/.settings/

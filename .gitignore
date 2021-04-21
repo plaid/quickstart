@@ -50,13 +50,5 @@ docker-compose.local*.yml
 .env
 .idea
 
-#java
-java/.classpath
-java/.project
-java/.settings/
-
 #vs code
 .vscode
-
-#python
-python/.prettierrc
