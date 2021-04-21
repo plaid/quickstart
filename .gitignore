@@ -51,18 +51,4 @@ docker-compose.local*.yml
 .idea
 
 # vs code
-ruby/.vscode/launch.json
-.vscode/launch.json
-.vscode/*
-
-#java
-java/.classpath
-java/.project
-java/.settings/
-
-#python
-python/.prettierrc
-
-#ruby
-ruby/bin/
-ruby/.bundle/
+.vscode

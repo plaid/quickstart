@@ -1,0 +1,6 @@
+# vs code
+ruby/.vscode/launch.json
+
+#ruby
+ruby/bin/
+ruby/.bundle/
