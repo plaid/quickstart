@@ -48,9 +48,7 @@ const App = () => {
             type: "SET_STATE",
             state: {
               linkToken: null,
-              linkErrorMessage: data.error.error_message,
-              linkErrorType: data.error.error_type,
-              linkErrorCode: data.error.error_code,
+              linkTokenError: data.error,
             },
           });
           return;
