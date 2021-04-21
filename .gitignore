@@ -50,5 +50,7 @@ docker-compose.local*.yml
 .env
 .idea
 
-# vs code
-.vscode
+#java
+java/.classpath
+java/.project
+java/.settings/
