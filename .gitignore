@@ -54,3 +54,6 @@ docker-compose.local*.yml
 java/.classpath
 java/.project
 java/.settings/
+
+#vscode
+.vscode
