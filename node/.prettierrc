@@ -1,9 +1,0 @@
-{
-  "requirePragma": false,
-  "jsxSingleQuote": true,
-  "singleQuote": true,
-  "trailingComma": "all",
-  "bracketSpacing": true,
-  "jsxBracketSameLine": false,
-  "semi": true
-}
