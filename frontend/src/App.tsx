@@ -43,6 +43,16 @@ const App = () => {
       }
       const data = await response.json();
       if (data) {
+        if (data.error != null) {
+          dispatch({
+            type: "SET_STATE",
+            state: {
+              linkToken: null,
+              linkTokenError: data.error,
+            },
+          });
+          return;
+        }
         dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
       }
       localStorage.setItem("link_token", data.link_token); //to use later for Oauth

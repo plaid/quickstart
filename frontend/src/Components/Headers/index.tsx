@@ -16,6 +16,7 @@ const Header = () => {
     linkSuccess,
     isItemAccess,
     backend,
+    linkTokenError,
   } = useContext(Context);
 
   return (
@@ -35,11 +36,27 @@ const Header = () => {
             to access their accounts via the Plaid API.
           </p>
           {/* message if backend is not running and there is no link token */}
-          {linkToken == null || backend === false ? (
+          {!backend ? (
             <Callout warning>
               Unable to fetch link_token: please make sure your backend server
               is running and that your .env file has been configured with your
               <code>PLAID_CLIENT_ID</code> and <code>PLAID_SECRET</code>.
+            </Callout>
+          ) : /* message if backend is running and there is no link token */
+          linkToken == null && backend ? (
+            <Callout warning>
+              <div>
+                Unable to fetch link_token: please make sure your backend server
+                is running and that your .env file has been configured
+                correctly.
+              </div>
+              <div>
+                Error Code: <code>{linkTokenError.error_code}</code>
+              </div>
+              <div>
+                Error Type: <code>{linkTokenError.error_type}</code>{" "}
+              </div>
+              <div>Error Message: {linkTokenError.error_message}</div>
             </Callout>
           ) : linkToken === "" ? (
             <div className={styles.linkButton}>

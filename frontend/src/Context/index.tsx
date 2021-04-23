@@ -9,6 +9,11 @@ interface QuickstartState {
   isError: boolean;
   backend: boolean;
   products: string[];
+  linkTokenError: {
+    error_message: string;
+    error_code: string;
+    error_type: string;
+  };
 }
 
 const initialState: QuickstartState = {
@@ -20,6 +25,11 @@ const initialState: QuickstartState = {
   isError: false,
   backend: true,
   products: ["transactions"],
+  linkTokenError: {
+    error_type: "",
+    error_code: "",
+    error_message: "",
+  },
 };
 
 type QuickstartAction = {
