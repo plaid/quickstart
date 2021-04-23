@@ -2,5 +2,5 @@
 ruby/.vscode/launch.json
 
 #ruby
-ruby/bin/
-ruby/.bundle/
+bin
+.bundle
