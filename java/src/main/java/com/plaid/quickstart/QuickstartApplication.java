@@ -1,7 +1,9 @@
 package com.plaid.quickstart;
 
+import com.plaid.client.ApiClient;
+import com.plaid.client.request.PlaidApi;
+import java.util.HashMap;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.plaid.client.PlaidClient;
 import com.plaid.quickstart.resources.AccessTokenResource;
 import com.plaid.quickstart.resources.AccountsResource;
 import com.plaid.quickstart.resources.AuthResource;
@@ -17,7 +19,6 @@ import com.plaid.quickstart.resources.PaymentInitiationResource;
 import com.plaid.quickstart.resources.PublicTokenResource;
 import com.plaid.quickstart.resources.TransactionsResource;
 import io.dropwizard.Application;
-import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -34,6 +35,10 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
   // We store the paymentId in memory - in production, store it in a secure
   // persistent data store.
   public static String paymentId;
+
+  private PlaidApi plaidClient;
+  private ApiClient apiClient;
+  public String plaidEnv;
 
   public static void main(final String[] args) throws Exception {
     new QuickstartApplication().run(args);
@@ -52,40 +57,43 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
         new EnvironmentVariableSubstitutor(false)
       )
     );
-    bootstrap.addBundle(new AssetsBundle("/static/", "/static/"));
-    bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/index.html", null, "index"));
-    bootstrap.addBundle(new AssetsBundle("/templates/index.html", "/", null, "index"));
-    bootstrap.addBundle(
-      new AssetsBundle("/templates/oauth-response.html", "/oauth-response.html", null,
-        "oauth-response"));
   }
 
   @Override
   public void run(final QuickstartConfiguration configuration,
     final Environment environment) {
     // or equivalent, depending on which environment you're calling into
-    PlaidClient.Builder builder = PlaidClient.newBuilder()
-      .clientIdAndSecret(configuration.getPlaidClientID(), configuration.getPlaidSecret());
-    switch (configuration.getPlaidEnv()) {
-    case "sandbox":
-      builder = builder.sandboxBaseUrl();
-      break;
-    case "development":
-      builder = builder.developmentBaseUrl();
-      break;
-    case "production":
-      builder = builder.productionBaseUrl();
-      break;
-    default:
-      throw new IllegalArgumentException("unknown environment: " + configuration.getPlaidEnv());
+    switch(configuration.getPlaidEnv()){
+      case "sandbox":
+        plaidEnv = ApiClient.Sandbox;
+        break;
+      case "development":
+        plaidEnv = ApiClient.Development;
+        break;
+      case "production":
+        plaidEnv = ApiClient.Production;
+        break;
+      default:
+        plaidEnv = ApiClient.Sandbox;
     }
-    PlaidClient plaidClient = builder.build();
     List<String> plaidProducts = Arrays.asList(configuration.getPlaidProducts().split(","));
     List<String> countryCodes = Arrays.asList(configuration.getPlaidCountryCodes().split(","));
+    String plaidClientId = System.getenv("PLAID_CLIENT_ID");
+    String plaidSecret = System.getenv("PLAID_SECRET");
     String redirectUri = null;
     if (configuration.getPlaidRedirectUri() != null && configuration.getPlaidRedirectUri().length() > 0) {
       redirectUri = configuration.getPlaidRedirectUri();
     }
+
+    HashMap<String, String> apiKeys = new HashMap<String, String>();
+    apiKeys.put("clientId", plaidClientId);
+    apiKeys.put("secret", plaidSecret);
+    apiKeys.put("plaidVersion", "2020-09-14");
+    apiClient = new ApiClient(apiKeys);
+    apiClient.setPlaidAdapter(plaidEnv);
+
+    plaidClient = apiClient.createService(PlaidApi.class);
+
     environment.jersey().register(new AccessTokenResource(plaidClient));
     environment.jersey().register(new AccountsResource(plaidClient));
     environment.jersey().register(new AuthResource(plaidClient));
@@ -101,4 +109,13 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new PublicTokenResource(plaidClient));
     environment.jersey().register(new TransactionsResource(plaidClient));
   }
+
+  protected PlaidApi client() {
+    return plaidClient;
+  }
+
+  protected ApiClient apiClient() {
+    return apiClient;
+  }
+
 }

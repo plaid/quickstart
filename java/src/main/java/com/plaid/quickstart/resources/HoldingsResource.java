@@ -1,33 +1,41 @@
 package com.plaid.quickstart.resources;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.plaid.client.PlaidClient;
-import com.plaid.client.request.InvestmentsHoldingsGetRequest;
-import com.plaid.client.response.InvestmentsHoldingsGetResponse;
-import com.plaid.quickstart.QuickstartApplication;
 import java.io.IOException;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import com.plaid.client.request.PlaidApi;
+import com.plaid.client.model.InvestmentsHoldingsGetRequest;
+import com.plaid.client.model.InvestmentsHoldingsGetResponse;
+import com.plaid.quickstart.QuickstartApplication;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
 import retrofit2.Response;
 
 @Path("/holdings")
 @Produces(MediaType.APPLICATION_JSON)
 public class HoldingsResource {
-  private final PlaidClient plaidClient;
+  private final PlaidApi plaidClient;
 
-  public HoldingsResource(PlaidClient plaidClient) {
+  public HoldingsResource(PlaidApi plaidClient) {
     this.plaidClient = plaidClient;
   }
 
   @GET
   public HoldingsResponse getAccounts() throws IOException {
-    Response<InvestmentsHoldingsGetResponse> accountsResponse = plaidClient.service()
-      .investmentsHoldingsGet(new InvestmentsHoldingsGetRequest(QuickstartApplication.accessToken))
+
+    InvestmentsHoldingsGetRequest request = new InvestmentsHoldingsGetRequest()
+    .accessToken(QuickstartApplication.accessToken);
+
+    Response<InvestmentsHoldingsGetResponse> response = plaidClient
+      .investmentsHoldingsGet(request)
       .execute();
 
-    return new HoldingsResponse(accountsResponse.body());
+    return new HoldingsResponse(response.body());
   }
 
   private static class HoldingsResponse {

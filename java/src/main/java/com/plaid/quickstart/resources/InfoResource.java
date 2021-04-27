@@ -1,8 +1,9 @@
 package com.plaid.quickstart.resources;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.plaid.quickstart.QuickstartApplication;
-import java.io.IOException;
+
 import java.util.List;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;

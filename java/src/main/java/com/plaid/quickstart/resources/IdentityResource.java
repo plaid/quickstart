@@ -1,39 +1,44 @@
 package com.plaid.quickstart.resources;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.plaid.client.PlaidClient;
-import com.plaid.client.request.IdentityGetRequest;
-import com.plaid.client.response.IdentityGetResponse;
-import com.plaid.quickstart.QuickstartApplication;
 import java.io.IOException;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.plaid.client.request.PlaidApi;
+import com.plaid.client.model.AccountIdentity;
+import com.plaid.client.model.IdentityGetRequest;
+import com.plaid.client.model.IdentityGetResponse;
+import com.plaid.quickstart.QuickstartApplication;
+
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
 import retrofit2.Response;
 
 @Path("/identity")
 @Produces(MediaType.APPLICATION_JSON)
 public class IdentityResource {
-  private final PlaidClient plaidClient;
+  private final PlaidApi plaidClient;
 
-  public IdentityResource(PlaidClient plaidClient) {
+  public IdentityResource(PlaidApi plaidClient) {
     this.plaidClient = plaidClient;
   }
 
   @GET
   public IdentityResponse getAccounts() throws IOException {
-    Response<IdentityGetResponse> accountsResponse = plaidClient.service()
-      .identityGet(new IdentityGetRequest(QuickstartApplication.accessToken))
-      .execute();
-
-    return new IdentityResponse(accountsResponse.body());
+    IdentityGetRequest request = new IdentityGetRequest()
+      .accessToken(QuickstartApplication.accessToken);
+    Response<IdentityGetResponse> response = plaidClient 
+    .identityGet(request)
+    .execute();
+    return new IdentityResponse(response.body());
   }
 
   private static class IdentityResponse {
     @JsonProperty
-    private final List<IdentityGetResponse.AccountWithOwners> identity;
+    private final List<AccountIdentity> identity;
 
     public IdentityResponse(IdentityGetResponse response) {
       this.identity = response.getAccounts();
