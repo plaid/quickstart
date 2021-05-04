@@ -81,7 +81,7 @@ def empty_to_none(field):
 PLAID_REDIRECT_URI = empty_to_none('PLAID_REDIRECT_URI')
 
 configuration = plaid.Configuration(
-    host=plaid.Environment.Sandbox,
+    host=plaid.Environment[PLAID_ENV],
     api_key={
         'clientId': PLAID_CLIENT_ID,
         'secret': PLAID_SECRET,
