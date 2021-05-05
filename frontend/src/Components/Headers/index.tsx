@@ -20,7 +20,7 @@ const Header = () => {
 
   return (
     <div className={styles.grid}>
-      <h3 className={styles.title}>Plaid Quickstart</h3>
+      <h3 className={styles.title}>Plaid Quickstart!</h3>
 
       {!linkSuccess ? (
         <>
