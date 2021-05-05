@@ -1,5 +1,7 @@
 FROM maven:openjdk
 
+RUN java --version
+
 WORKDIR /opt/app
 COPY . .
 WORKDIR /opt/app/java

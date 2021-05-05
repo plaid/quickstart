@@ -129,11 +129,16 @@ $ make stop language=node
 
 #### Pre-requisites
 
-- The language you intend to use is installed on your machine and available at your command line.
-  This repo should generally work with active LTS versions of each language such as node >= 14,
-  python >= 3.8, ruby >= 2.6, etc.
+- The backend language you intend to use is installed on your machine and available at your command line.
+  This repo should generally work with the latest active LTS versions of each language, and language version
+  files such as `.nvmrc`, `.python-version`, etc are included in each directory for use with popular version management utilities.
+    - Node 14, npm 6
+    - Python 3.8
+    - Ruby 2.7
+    - Java 16
+    - Go 1.16
+- [Node 14](https://nodejs.org/en/download/) with the default `npm` version 6 (for running the frontend).
 - Your environment variables populated in `.env`
-- [npm](https://www.npmjs.com/get-npm)
 - If using Windows, a command line utility capable of running basic Unix shell commands
 
 #### 1. Running the backend

@@ -1,4 +1,6 @@
-FROM node:alpine
+FROM node:14-alpine
+
+RUN node --version
 
 WORKDIR /opt/app
 RUN chown -R node:node /opt/app
