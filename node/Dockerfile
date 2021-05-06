@@ -1,7 +1,5 @@
 FROM node:14-alpine
 
-RUN node --version
-
 WORKDIR /opt/app
 RUN chown -R node:node /opt/app
 COPY --chown=node:node ./node/package*.json /opt/app/
