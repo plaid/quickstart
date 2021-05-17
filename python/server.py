@@ -70,7 +70,15 @@ def empty_to_none(field):
         return None
     return value
 
+host = plaid.Environment.Sandbox
+if PLAID_ENV == 'sandbox':
+    host = plaid.Environment.Sandbox
 
+if PLAID_ENV == 'development':
+    host = plaid.Environment.Development  
+
+if PLAID_ENV == 'production':
+    host = plaid.Environment.Production   
 # Parameters used for the OAuth redirect Link flow.
 #
 # Set PLAID_REDIRECT_URI to 'http://localhost:3000/'
@@ -81,7 +89,7 @@ def empty_to_none(field):
 PLAID_REDIRECT_URI = empty_to_none('PLAID_REDIRECT_URI')
 
 configuration = plaid.Configuration(
-    host=plaid.Environment.Sandbox,
+    host=host,
     api_key={
         'clientId': PLAID_CLIENT_ID,
         'secret': PLAID_SECRET,
