@@ -79,7 +79,8 @@ if PLAID_ENV == 'development':
     host = plaid.Environment.Development
 
 if PLAID_ENV == 'production':
-    host = plaid.Environment.Production   
+    host = plaid.Environment.Production
+
 # Parameters used for the OAuth redirect Link flow.
 #
 # Set PLAID_REDIRECT_URI to 'http://localhost:3000/'
