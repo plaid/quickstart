@@ -76,7 +76,7 @@ if PLAID_ENV == 'sandbox':
     host = plaid.Environment.Sandbox
 
 if PLAID_ENV == 'development':
-    host = plaid.Environment.Development  
+    host = plaid.Environment.Development
 
 if PLAID_ENV == 'production':
     host = plaid.Environment.Production   
