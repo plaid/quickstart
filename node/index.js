@@ -105,7 +105,7 @@ app.post('/api/create_link_token', async function (request, response) {
     prettyPrintResponse(createTokenResponse);
     response.json(createTokenResponse.data);
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -129,7 +129,6 @@ app.post(
         },
       );
       const recipientId = createRecipientResponse.data.recipient_id;
-      console.log(recipientId);
       prettyPrintResponse(createRecipientResponse);
 
       const createPaymentResponse = await client.paymentInitiationPaymentCreate(
@@ -165,7 +164,7 @@ app.post(
       prettyPrintResponse(createTokenResponse);
       response.json(createTokenResponse.data);
     } catch (error) {
-      prettyPrintResponse(error);
+      prettyPrintResponse(error.response);
       return response.json(formatError(error.response));
     }
   },
@@ -189,7 +188,7 @@ app.post('/api/set_access_token', async function (request, response, next) {
       error: null,
     });
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -202,7 +201,7 @@ app.get('/api/auth', async function (request, response, next) {
     prettyPrintResponse(authResponse);
     response.json(authResponse.data);
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -227,7 +226,7 @@ app.get('/api/transactions', async function (request, response, next) {
     prettyPrintResponse(transactionsResponse);
     response.json(transactionsResponse.data);
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -254,7 +253,7 @@ app.get(
         investment_transactions: investmentTransactionsResponse.data,
       });
     } catch (error) {
-      prettyPrintResponse(error);
+      prettyPrintResponse(error.response);
       return response.json(formatError(error.response));
     }
   },
@@ -270,7 +269,7 @@ app.get('/api/identity', async function (request, response, next) {
     prettyPrintResponse(identityResponse);
     response.json({ identity: identityResponse.data.accounts });
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -285,7 +284,7 @@ app.get('/api/balance', async function (request, response, next) {
     prettyPrintResponse(balanceResponse);
     response.json(balanceResponse.data);
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -300,7 +299,7 @@ app.get('/api/holdings', async function (request, response, next) {
     prettyPrintResponse(holdingsResponse);
     response.json({ error: null, holdings: holdingsResponse.data });
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -324,7 +323,7 @@ app.get('/api/item', async function (request, response, next) {
       institution: instResponse.data.institution,
     });
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -339,7 +338,7 @@ app.get('/api/accounts', async function (request, response, next) {
     prettyPrintResponse(accountsResponse);
     response.json(accountsResponse.data);
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -396,7 +395,7 @@ app.get('/api/assets', async function (request, response, next) {
       pdf: pdfResponse.data.toString('base64'),
     });
   } catch {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -411,7 +410,7 @@ app.get('/api/payment', async function (request, response, next) {
     prettyPrintResponse(paymentGetResponse);
     response.json({ error: null, payment: paymentGetResponse.data });
   } catch (error) {
-    prettyPrintResponse(error);
+    prettyPrintResponse(error.response);
     return response.json(formatError(error.response));
   }
 });
@@ -421,7 +420,7 @@ const server = app.listen(APP_PORT, function () {
 });
 
 const prettyPrintResponse = (response) => {
-  console.log(util.inspect(response, { colors: true, depth: 4 }));
+  console.log(util.inspect(response.data, { colors: true, depth: 4 }));
 };
 
 // This is a helper function to poll for the completion of an Asset Report and
