@@ -1,5 +1,9 @@
 {
   "name": "plaid-node-walkthrough",
+  "engines": {
+    "node": "^14",
+    "npm": "^6"
+  },
   "version": "0.1.0",
   "description": "A sample app and accompanying walkthrough for the Plaid API.",
   "main": "index.js",

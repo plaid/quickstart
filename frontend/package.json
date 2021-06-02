@@ -1,5 +1,9 @@
 {
   "name": "plaid_react_quickstart",
+  "engines": {
+    "node": "^14",
+    "npm": "^6"
+  },
   "version": "0.1.0",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
