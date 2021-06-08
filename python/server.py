@@ -1,5 +1,5 @@
 # Read env vars from .env file
-from plaid.model.amount import Amount
+from plaid.model.payment_amount import PaymentAmount
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from plaid.model.nullable_recipient_bacs import NullableRecipientBACS
@@ -150,7 +150,7 @@ def create_link_token_for_payment():
         request = PaymentInitiationPaymentCreateRequest(
             recipient_id=recipient_id,
             reference='TestPayment',
-            amount=Amount(
+            amount=PaymentAmount(
                 currency='GBP',
                 value=100.00
             )
@@ -158,7 +158,7 @@ def create_link_token_for_payment():
         response = client.payment_initiation_payment_create(
             request
         )
-        pretty_print_response(response)
+        pretty_print_response(response.to_dict())
         payment_id = response['payment_id']
         request = LinkTokenCreateRequest(
             products=[Products('payment_initiation')],
@@ -166,7 +166,7 @@ def create_link_token_for_payment():
             country_codes=[CountryCode('GB')],
             language='en',
             user=LinkTokenCreateRequestUser(
-                client_user_id=str(time.time())
+                client_user_id="userID"
             ),
             payment_initiation=LinkTokenCreateRequestPaymentInitiation(
                 payment_id=payment_id
@@ -176,6 +176,7 @@ def create_link_token_for_payment():
         pretty_print_response(response.to_dict())
         return jsonify(response.to_dict())
     except plaid.ApiException as e:
+        print(e)
         return json.loads(e.body)
 
 
@@ -213,7 +214,6 @@ def get_access_token():
         exchange_request = ItemPublicTokenExchangeRequest(
             public_token=public_token)
         exchange_response = client.item_public_token_exchange(exchange_request)
-        pretty_print_response(exchange_response.to_dict())
         access_token = exchange_response['access_token']
         item_id = exchange_response['item_id']
         return jsonify(exchange_response.to_dict())
@@ -477,7 +477,7 @@ def item():
         return jsonify(error_response)
 
 def pretty_print_response(response):
-  print(json.dumps(response, indent=2, sort_keys=True))
+  print(json.dumps(response, indent=2, sort_keys=True, default=str))
 
 def format_error(e):
     response = json.loads(e.body)
