@@ -166,7 +166,7 @@ def create_link_token_for_payment():
             country_codes=[CountryCode('GB')],
             language='en',
             user=LinkTokenCreateRequestUser(
-                client_user_id='user-id'
+                client_user_id=str(time.time())
             ),
             payment_initiation=LinkTokenCreateRequestPaymentInitiation(
                 payment_id=payment_id
