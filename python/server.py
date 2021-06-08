@@ -166,7 +166,7 @@ def create_link_token_for_payment():
             country_codes=[CountryCode('GB')],
             language='en',
             user=LinkTokenCreateRequestUser(
-                client_user_id="userID"
+                client_user_id='user-id'
             ),
             payment_initiation=LinkTokenCreateRequestPaymentInitiation(
                 payment_id=payment_id
@@ -176,7 +176,6 @@ def create_link_token_for_payment():
         pretty_print_response(response.to_dict())
         return jsonify(response.to_dict())
     except plaid.ApiException as e:
-        print(e)
         return json.loads(e.body)
 
 
