@@ -163,7 +163,7 @@ def create_link_token_for_payment():
         request = LinkTokenCreateRequest(
             products=[Products('payment_initiation')],
             client_name='Plaid Test',
-            country_codes=[CountryCode('GB')],
+            country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
             language='en',
             user=LinkTokenCreateRequestUser(
                 client_user_id=str(time.time())
@@ -185,7 +185,7 @@ def create_link_token():
         request = LinkTokenCreateRequest(
             products=products,
             client_name="Plaid Quickstart",
-            country_codes=[CountryCode('US')],
+            country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
             language='en',
             user=LinkTokenCreateRequestUser(
                 client_user_id=str(time.time())
@@ -464,7 +464,7 @@ def item():
         response = client.item_get(request)
         request = InstitutionsGetByIdRequest(
             institution_id=response['item']['institution_id'],
-            country_codes=[CountryCode('US')]
+            country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES))
         )
         institution_response = client.institutions_get_by_id(request)
         pretty_print_response(response.to_dict())
