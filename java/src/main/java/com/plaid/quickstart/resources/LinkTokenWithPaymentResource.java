@@ -3,7 +3,7 @@ package com.plaid.quickstart.resources;
 import java.io.IOException;
 
 import com.plaid.client.request.PlaidApi;
-import com.plaid.client.model.Amount;
+import com.plaid.client.model.PaymentAmount;
 import com.plaid.client.model.Products;
 import com.plaid.client.model.CountryCode;
 import com.plaid.client.model.PaymentInitiationPaymentCreateRequest;
@@ -62,8 +62,8 @@ public class LinkTokenWithPaymentResource {
 
     String recipientId = recipientResponse.body().getRecipientId();
 
-    Amount amount = new Amount()
-    .currency(Amount.CurrencyEnum.GBP)
+    PaymentAmount amount = new PaymentAmount()
+    .currency(PaymentAmount.CurrencyEnum.GBP)
     .value(999.99);
 
     PaymentInitiationPaymentCreateRequest paymentCreateRequest = new PaymentInitiationPaymentCreateRequest()
@@ -75,7 +75,7 @@ public class LinkTokenWithPaymentResource {
       .paymentInitiationPaymentCreate(paymentCreateRequest)
       .execute();
 
-      
+
     String paymentId = paymentResponse.body().getPaymentId();
      QuickstartApplication.paymentId = paymentId;
 
@@ -98,7 +98,7 @@ public class LinkTokenWithPaymentResource {
     	Response<LinkTokenCreateResponse> response =plaidClient
 			.linkTokenCreate(request)
 			.execute();
-  
+
     return new LinkTokenResource.LinkToken(response.body().getLinkToken());
   }
 }
