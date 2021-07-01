@@ -493,17 +493,24 @@ interface PaymentData {
   payment: PaymentInitiationPaymentGetResponse;
 }
 
-export const transformPaymentData = (data: PaymentData) => [
-  {
-    paymentId: data.payment.payment_id,
-    amount: `${data.payment.amount.currency} ${data.payment.amount.value}`,
-    status: data.payment.status,
-    statusUpdate: data.payment.last_status_update
-      .replace("T", " ")
-      .replace("Z", ""),
-    recipientId: data.payment.recipient_id,
-  },
-];
+export const transformPaymentData = (data: PaymentData) => {
+  const statusUpdate =
+    typeof data.payment.last_status_update === "string"
+      ? data.payment.last_status_update.replace("T", " ").replace("Z", "")
+      : new Date(data.payment.last_status_update * 1000)
+          .toISOString()
+          .replace("T", " ")
+          .replace("Z", "");
+  return [
+    {
+      paymentId: data.payment.payment_id,
+      amount: `${data.payment.amount.currency} ${data.payment.amount.value}`,
+      status: data.payment.status,
+      statusUpdate: statusUpdate,
+      recipientId: data.payment.recipient_id,
+    },
+  ];
+};
 
 interface AssetResponseData {
   json: AssetReport;
