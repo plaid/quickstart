@@ -497,7 +497,7 @@ export const transformPaymentData = (data: PaymentData) => {
   const statusUpdate =
     typeof data.payment.last_status_update === "string"
       ? data.payment.last_status_update.replace("T", " ").replace("Z", "")
-      : new Date(data.payment.last_status_update * 1000)
+      : new Date(data.payment.last_status_update * 1000) // Java data comes as timestamp
           .toISOString()
           .replace("T", " ")
           .replace("Z", "");
