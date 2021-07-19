@@ -150,6 +150,8 @@ $ ./start.sh
 
 ##### Python
 
+**:warning:  As `python2` has reached its end of life, only `python3` is supported.**
+
 ```
 $ cd ./python
 
