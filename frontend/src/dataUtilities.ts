@@ -12,12 +12,14 @@ import {
   AssetReport,
 } from "plaid/dist/api";
 
-const formatter = new Intl.NumberFormat("en-US", {
-  //should look like "$50" or "$50.34"
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 0,
-});
+const formatCurrency = (
+  number: number | null | undefined,
+  code: string | null | undefined
+) => {
+  if (number != null && number != undefined) {
+    return ` ${parseFloat(number.toFixed(2)).toLocaleString("en")} ${code}`;
+  }
+};
 
 export interface Categories {
   title: string;
@@ -53,7 +55,7 @@ interface BalanceDataItem {
 
 interface InvestmentsDataItem {
   mask: string;
-  quantity: number;
+  quantity: number | string;
   price: string;
   value: string;
   name: string;
@@ -306,8 +308,14 @@ export const transformAuthData = (data: AuthGetResponse) => {
     const obj: DataItem = {
       name: account.name,
       balance:
-        formatter.format(account.balances.available!) ||
-        formatter.format(account.balances.current!),
+        formatCurrency(
+          account.balances.available!,
+          account.balances.iso_currency_code
+        ) ||
+        formatCurrency(
+          account.balances.current!,
+          account.balances.iso_currency_code
+        ),
       account: achNumbers.account!,
       routing: achNumbers.routing!,
     };
@@ -321,7 +329,7 @@ export const transformTransactionsData = (
   return data.transactions!.map((t) => {
     const item: DataItem = {
       name: t.name!,
-      amount: formatter.format(t.amount!),
+      amount: formatCurrency(t.amount!, t.iso_currency_code),
       date: t.date,
     };
     return item;
@@ -373,11 +381,11 @@ export const transformIdentityData = (data: IdentityData) => {
 export const transformBalanceData = (data: AccountsGetResponse) => {
   const balanceData = data.accounts;
   return balanceData.map((account) => {
+    const balance: number | null | undefined =
+      account.balances.available || account.balances.current;
     const obj: DataItem = {
       name: account.name,
-      balance:
-        formatter.format(account.balances.available!) ||
-        formatter.format(account.balances.current!),
+      balance: formatCurrency(balance, account.balances.iso_currency_code),
       subtype: account.subtype,
       mask: account.mask!,
     };
@@ -407,9 +415,12 @@ export const transformInvestmentsData = (data: InvestmentData) => {
     const obj: DataItem = {
       mask: account.mask!,
       name: security.name!,
-      quantity: holding.quantity,
-      price: formatter.format(security.close_price!),
-      value: formatter.format(value),
+      quantity: formatCurrency(holding.quantity, ""),
+      price: formatCurrency(
+        security.close_price!,
+        account.balances.iso_currency_code
+      ),
+      value: formatCurrency(value, account.balances.iso_currency_code),
     };
     return obj;
   });
@@ -425,7 +436,10 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
       name: account.name,
       type: "credit card",
       date: credit.last_payment_date,
-      amount: formatter.format(credit.last_payment_amount),
+      amount: formatCurrency(
+        credit.last_payment_amount,
+        account.balances.iso_currency_code
+      ),
     };
     return obj;
   });
@@ -438,7 +452,10 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
       name: account.name,
       type: "mortgage",
       date: mortgage.last_payment_date!,
-      amount: formatter.format(mortgage.last_payment_amount!),
+      amount: formatCurrency(
+        mortgage.last_payment_amount!,
+        account.balances.iso_currency_code
+      ),
     };
     return obj;
   });
@@ -451,7 +468,10 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
       name: account.name,
       type: "student loan",
       date: student.last_payment_date!,
-      amount: formatter.format(student.last_payment_amount!),
+      amount: formatCurrency(
+        student.last_payment_amount!,
+        account.balances.iso_currency_code
+      ),
     };
     return obj;
   });
@@ -477,11 +497,11 @@ export const transformItemData = (data: ItemData): Array<DataItem> => {
 export const transformAccountsData = (data: AccountsGetResponse) => {
   const accountsData = data.accounts;
   return accountsData.map((account) => {
+    const balance: number | null | undefined =
+      account.balances.available || account.balances.current;
     const obj: DataItem = {
       name: account.name,
-      balance:
-        formatter.format(account.balances.available!) ||
-        formatter.format(account.balances.current!),
+      balance: formatCurrency(balance, account.balances.iso_currency_code),
       subtype: account.subtype,
       mask: account.mask!,
     };
@@ -520,11 +540,11 @@ export const transformAssetsData = (data: AssetResponseData) => {
   const assetItems = data.json.items;
   return assetItems.flatMap((item) => {
     return item.accounts.map((account) => {
+      const balance: number | null | undefined =
+        account.balances.available || account.balances.current;
       const obj: DataItem = {
         account: account.name,
-        balance:
-          formatter.format(account.balances.available!) ||
-          formatter.format(account.balances.current!),
+        balance: formatCurrency(balance, account.balances.iso_currency_code),
         transactions: account.transactions!.length,
         daysAvailable: account.days_available!,
       };
