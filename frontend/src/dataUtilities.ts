@@ -19,6 +19,7 @@ const formatCurrency = (
   if (number != null && number !== undefined) {
     return ` ${parseFloat(number.toFixed(2)).toLocaleString("en")} ${code}`;
   }
+  return "no data";
 };
 
 export interface Categories {
@@ -30,11 +31,11 @@ export interface Categories {
 interface AuthDataItem {
   routing: string;
   account: string;
-  balance: string | undefined;
+  balance: string;
   name: string;
 }
 interface TransactionsDataItem {
-  amount: string | undefined;
+  amount: string;
   date: string;
   name: string;
 }
@@ -47,7 +48,7 @@ interface IdentityDataItem {
 }
 
 interface BalanceDataItem {
-  balance: string | undefined;
+  balance: string;
   subtype: string | null;
   mask: string;
   name: string;
@@ -55,9 +56,9 @@ interface BalanceDataItem {
 
 interface InvestmentsDataItem {
   mask: string;
-  quantity: string | undefined;
-  price: string | undefined;
-  value: string | undefined;
+  quantity: string;
+  price: string;
+  value: string;
   name: string;
 }
 
