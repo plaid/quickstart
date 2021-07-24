@@ -84,7 +84,7 @@ interface ItemDataItem {
 
 interface AssetsDataItem {
   account: string;
-  balance: string | undefined;
+  balance: string;
   transactions: number;
   daysAvailable: number;
 }
