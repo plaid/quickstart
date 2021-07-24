@@ -16,7 +16,7 @@ const formatCurrency = (
   number: number | null | undefined,
   code: string | null | undefined
 ) => {
-  if (number != null && number != undefined) {
+  if (number != null && number !== undefined) {
     return ` ${parseFloat(number.toFixed(2)).toLocaleString("en")} ${code}`;
   }
 };
@@ -30,11 +30,11 @@ export interface Categories {
 interface AuthDataItem {
   routing: string;
   account: string;
-  balance: string;
+  balance: string | undefined;
   name: string;
 }
 interface TransactionsDataItem {
-  amount: string;
+  amount: string | undefined;
   date: string;
   name: string;
 }
@@ -47,7 +47,7 @@ interface IdentityDataItem {
 }
 
 interface BalanceDataItem {
-  balance: string;
+  balance: string | undefined;
   subtype: string | null;
   mask: string;
   name: string;
@@ -55,9 +55,9 @@ interface BalanceDataItem {
 
 interface InvestmentsDataItem {
   mask: string;
-  quantity: number | string;
-  price: string;
-  value: string;
+  quantity: string | undefined;
+  price: string | undefined;
+  value: string | undefined;
   name: string;
 }
 
@@ -83,7 +83,7 @@ interface ItemDataItem {
 
 interface AssetsDataItem {
   account: string;
-  balance: string;
+  balance: string | undefined;
   transactions: number;
   daysAvailable: number;
 }
@@ -305,17 +305,11 @@ export const transformAuthData = (data: AuthGetResponse) => {
     const account = data.accounts!.filter((a) => {
       return a.account_id === achNumbers.account_id;
     })[0];
+    const balance: number | null | undefined =
+      account.balances.available || account.balances.current;
     const obj: DataItem = {
       name: account.name,
-      balance:
-        formatCurrency(
-          account.balances.available!,
-          account.balances.iso_currency_code
-        ) ||
-        formatCurrency(
-          account.balances.current!,
-          account.balances.iso_currency_code
-        ),
+      balance: formatCurrency(balance, account.balances.iso_currency_code),
       account: achNumbers.account!,
       routing: achNumbers.routing!,
     };
