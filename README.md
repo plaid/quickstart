@@ -152,10 +152,10 @@ $ ./start.sh
 
 **:warning: As `python2` has reached its end of life, only `python3` is supported.**
 
-If you are running python 3.9, you may need to run the following command in your terminal in order to install SSL certificates:
+You may need to run the following command in your terminal in order to install SSL certificates:
 
 ```
-open /Applications/Python\ 3.9/Install\ Certificates.command
+open /Applications/Python\ {your python version (e.g. 3.9 or 3.6}/Install\ Certificates.command
 ```
 
 ```
