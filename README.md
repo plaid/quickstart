@@ -152,12 +152,6 @@ $ ./start.sh
 
 **:warning: As `python2` has reached its end of life, only `python3` is supported.**
 
-If you are running python 3.9, you may need to run the following command in your terminal in order to install SSL certificates:
-
-```
-open /Applications/Python\ 3.9/Install\ Certificates.command
-```
-
 ```
 $ cd ./python
 
@@ -167,6 +161,21 @@ $ cd ./python
 
 $ pip install -r requirements.txt
 $ ./start.sh
+```
+
+If you get this error message:
+
+```
+ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:749)
+```
+
+You may need to run the following command in your terminal for your particular version of python in order to install SSL certificates:
+
+```
+# examples:
+open /Applications/Python\ 3.9/Install\ Certificates.command
+# or
+open /Applications/Python\ 3.6/Install\ Certificates.command
 ```
 
 ##### Ruby
