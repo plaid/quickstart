@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"encoding/base64"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -473,5 +477,67 @@ func linkTokenCreate(
 }
 
 func assets(c *gin.Context) {
-	c.JSON(http.StatusBadRequest, gin.H{"error": "unfortunately the go client library does not support assets report creation yet."})
+	ctx := context.Background()
+
+	// create the asset report
+	assetReportCreateResp, _, err := client.PlaidApi.AssetReportCreate(ctx).AssetReportCreateRequest(
+		*plaid.NewAssetReportCreateRequest([]string{accessToken}, 10),
+	).Execute()
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	assetReportToken := assetReportCreateResp.GetAssetReportToken()
+
+	// get the asset report
+	assetReportGetResp, err := pollForAssetReport(ctx, client, assetReportToken)
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	// get it as a pdf
+	pdfRequest := plaid.NewAssetReportPDFGetRequest(assetReportToken)
+	pdfFile, _, err := client.PlaidApi.AssetReportPdfGet(ctx).AssetReportPDFGetRequest(*pdfRequest).Execute()
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	reader := bufio.NewReader(pdfFile)
+	content, err := ioutil.ReadAll(reader)
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	// convert pdf to base64
+	encodedPdf := base64.StdEncoding.EncodeToString(content)
+
+	c.JSON(http.StatusOK, gin.H{
+		"json": assetReportGetResp.GetReport(),
+		"pdf":  encodedPdf,
+	})
+}
+
+func pollForAssetReport(ctx context.Context, client *plaid.APIClient, assetReportToken string) (*plaid.AssetReportGetResponse, error) {
+	numRetries := 20
+	request := plaid.NewAssetReportGetRequest(assetReportToken)
+
+	for i := 0; i < numRetries; i++ {
+		response, _, err := client.PlaidApi.AssetReportGet(ctx).AssetReportGetRequest(*request).Execute()
+		if err != nil {
+			plaidErr, err := plaid.ToPlaidError(err)
+			if plaidErr.ErrorCode == "PRODUCT_NOT_READY" {
+				time.Sleep(1 * time.Second)
+				continue
+			} else {
+				return nil, err
+			}
+		} else {
+			return &response, nil
+		}
+	}
+	return nil, errors.New("Timed out when polling for an asset report.")
 }
