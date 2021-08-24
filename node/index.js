@@ -3,7 +3,6 @@ require('dotenv').config();
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 const util = require('util');
 const express = require('express');
-const bodyParser = require('body-parser');
 const moment = require('moment');
 
 const APP_PORT = process.env.APP_PORT || 8000;
@@ -25,13 +24,6 @@ const PLAID_COUNTRY_CODES = (process.env.PLAID_COUNTRY_CODES || 'US').split(
 );
 
 // Parameters used for the OAuth redirect Link flow.
-//
-// Set PLAID_REDIRECT_URI to 'http://localhost:3000'
-// The OAuth redirect flow requires an endpoint on the developer's website
-// that the bank website should redirect to. You will need to configure
-// this redirect URI for your client ID through the Plaid developer dashboard
-// at https://dashboard.plaid.com/team/api.
-const PLAID_REDIRECT_URI = process.env.PLAID_REDIRECT_URI || '';
 
 // Parameter used for OAuth in Android. This should be the package name of your app,
 // e.g. com.plaid.linksample
@@ -64,12 +56,10 @@ const configuration = new Configuration({
 const client = new PlaidApi(configuration);
 
 const app = express();
-app.use(
-  bodyParser.urlencoded({
-    extended: false,
-  }),
-);
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({
+  extended: true
+}));
 
 app.post('/api/info', function (request, response, next) {
   response.json({
@@ -92,10 +82,6 @@ app.post('/api/create_link_token', async function (request, response) {
     country_codes: PLAID_COUNTRY_CODES,
     language: 'en',
   };
-
-  if (PLAID_REDIRECT_URI !== '') {
-    configs.redirect_uri = PLAID_REDIRECT_URI;
-  }
 
   if (PLAID_ANDROID_PACKAGE_NAME !== '') {
     configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME;
@@ -157,9 +143,6 @@ app.post(
           payment_id: paymentId,
         },
       };
-      if (PLAID_REDIRECT_URI !== '') {
-        configs.redirect_uri = PLAID_REDIRECT_URI;
-      }
       const createTokenResponse = await client.linkTokenCreate(configs);
       prettyPrintResponse(createTokenResponse);
       response.json(createTokenResponse.data);
