@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	plaid "github.com/plaid/plaid-go"
 )
 
@@ -35,6 +36,9 @@ var environments = map[string]plaid.Environment{
 }
 
 func init() {
+	// load env vars from .env file
+	err := godotenv.Load()
+
 	// set constants from env
 	PLAID_CLIENT_ID = os.Getenv("PLAID_CLIENT_ID")
 	PLAID_SECRET = os.Getenv("PLAID_SECRET")
@@ -69,6 +73,9 @@ func init() {
 		log.Fatal("PLAID_SECRET is not set. Make sure to fill out the .env file")
 	}
 
+	if err != nil {
+		panic(fmt.Errorf("unexpected error while initializing plaid client %w", err))
+	}
 	// create Plaid client
 	configuration := plaid.NewConfiguration()
 	configuration.AddDefaultHeader("PLAID-CLIENT-ID", PLAID_CLIENT_ID)
