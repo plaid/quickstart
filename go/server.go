@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	plaid "github.com/plaid/plaid-go"
 )
 
@@ -35,6 +36,12 @@ var environments = map[string]plaid.Environment{
 }
 
 func init() {
+	// load env vars from .env file
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error when loading environment variables from .env file %w", err)
+	}
+
 	// set constants from env
 	PLAID_CLIENT_ID = os.Getenv("PLAID_CLIENT_ID")
 	PLAID_SECRET = os.Getenv("PLAID_SECRET")
