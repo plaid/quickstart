@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:16-alpine
 
 WORKDIR /opt/app
 RUN chown -R node:node /opt/app
