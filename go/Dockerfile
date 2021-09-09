@@ -1,15 +1,22 @@
-FROM golang:1.12 AS build
+# base image
+FROM golang:1.17-alpine3.14 as golang-builder
+WORKDIR /go/src/github.com/plaid/quickstart
+ENV CGO_ENABLED 0
+ENV GOOS=linux
 
-WORKDIR /opt/src
+COPY .env .
 COPY . .
-WORKDIR /opt/src/go
-
-RUN go get -d -v ./...
-RUN go build -o quickstart
+RUN go get .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /quickstart server.go 
+WORKDIR /app/quickstart
+COPY . .
 
 FROM gcr.io/distroless/base-debian10
 
-COPY --from=build /opt/src/go/quickstart /
-
+COPY --from=golang-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+WORKDIR /bin
+COPY --from=golang-builder /quickstart .
+COPY .env .
+# COPY .env /bin/.env
 EXPOSE 8000
-ENTRYPOINT ["/quickstart"]
+ENTRYPOINT ["/bin/quickstart"]
