@@ -1,4 +1,5 @@
 # Logs
+nginx/letsencrypt
 logs
 *.log
 npm-debug.log*
