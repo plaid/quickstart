@@ -51,8 +51,7 @@ $ cd quickstart
 
 #### Special instructions for Windows
 
-Note - because this repository makes use of symlinks, to run this on a Windows machine, use
-the following command when cloning the project
+Note - because this repository makes use of symbolic links, to run this on a Windows machine, make sure you have checked the "enable symbolic links" box when you download Git to your local machine. Then you can run the above commands to clone the quickstart. Otherwise, you may open your Git Bash terminal as an administrator and use the following command when cloning the project
 
 ```
 $ git clone -c core.symlinks=true https://github.com/plaid/quickstart
