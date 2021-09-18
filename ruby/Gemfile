@@ -4,4 +4,4 @@ gem 'sinatra'
 
 gem "dotenv", "~> 2.7"
 
-gem "plaid", "= 14.0.0.beta.2"
+gem "plaid", "= 14.3.0"
