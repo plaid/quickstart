@@ -509,7 +509,6 @@ const authorizeAndcreateTransfer = async (accessToken) => {
       user: {
         legal_name: 'FirstName LastName',
         email_address: 'foobar@email.com',
-        // phone_number: '555-123-4567',
         address: {
           street: '123 Main St.',
           city: 'San Francisco',
@@ -535,7 +534,6 @@ const authorizeAndcreateTransfer = async (accessToken) => {
       user: {
         legal_name: 'FirstName LastName',
         email_address: 'foobar@email.com',
-        // phone_number: '555-123-4567',
         address: {
           street: '123 Main St.',
           city: 'San Francisco',
