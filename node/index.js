@@ -46,6 +46,10 @@ let ITEM_ID = null;
 // We store the payment_id in memory - in production, store it in a secure
 // persistent data store
 let PAYMENT_ID = null;
+// The transfer_id is only relevant for Transfer ACH product.
+// We store the transfer_id in memomory - in produciton, store it in a secure
+// persistent data store
+let TRANSFER_ID = null;
 
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
@@ -182,6 +186,9 @@ app.post('/api/set_access_token', async function (request, response, next) {
     prettyPrintResponse(tokenResponse);
     ACCESS_TOKEN = tokenResponse.data.access_token;
     ITEM_ID = tokenResponse.data.item_id;
+    if (PLAID_PRODUCTS.includes('transfer')) {
+      TRANSFER_ID = await authorizeAndcreateTransfer(ACCESS_TOKEN);
+    }
     response.json({
       access_token: ACCESS_TOKEN,
       item_id: ITEM_ID,
@@ -400,6 +407,19 @@ app.get('/api/assets', async function (request, response, next) {
   }
 });
 
+app.get('/api/transfer', async function (request, response, next) {
+  try {
+    const transferGetResponse = await client.transferGet({
+      transfer_id: TRANSFER_ID,
+    });
+    prettyPrintResponse(transferGetResponse);
+    response.json({ error: null, transfer: transferGetResponse.data.transfer });
+  } catch (error) {
+    prettyPrintResponse(error.response);
+    return response.json(formatError(error.response));
+  }
+});
+
 // This functionality is only relevant for the UK Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
 app.get('/api/payment', async function (request, response, next) {
@@ -463,4 +483,70 @@ const formatError = (error) => {
   return {
     error: { ...error.data, status_code: error.status },
   };
+};
+
+// This is a helper function to create a Transfer after successful exchange
+// of a public_token for an access_token. The TRANSFER_ID is then used to
+// obtain the data about that particular Transfer.
+const authorizeAndcreateTransfer = async (accessToken) => {
+  try {
+    // We call /accounts/get to obtain first account_id - in production,
+    // account_id's should be persisted in a data store and retrieved
+    // from there.
+    const accountsResponse = await client.accountsGet({
+      access_token: accessToken
+    });
+    const accountId = accountsResponse.data.accounts[0].account_id;
+
+    const transferAuthorizationResponse = await client.transferAuthorizationCreate({
+      access_token: accessToken,
+      account_id: accountId,
+      type: 'credit',
+      network: 'ach',
+      amount: '12.34',
+      ach_class: 'ppd',
+      user: {
+        legal_name: 'FirstName LastName',
+        email_address: 'foobar@email.com',
+        // phone_number: '555-123-4567',
+        address: {
+          street: '123 Main St.',
+          city: 'San Francisco',
+          region: 'CA',
+          postal_code: '94053',
+          country: 'US'
+        }
+      },
+    });
+    prettyPrintResponse(transferAuthorizationResponse);
+    const authorizationId = transferAuthorizationResponse.data.authorization.id;
+
+    const transferResponse = await client.transferCreate({
+      idempotency_key: "1223abc456xyz7890001",
+      access_token: accessToken,
+      account_id: accountId,
+      authorization_id: authorizationId,
+      type: 'credit',
+      network: 'ach',
+      amount: '12.34',
+      description: 'Payment',
+      ach_class: 'ppd',
+      user: {
+        legal_name: 'FirstName LastName',
+        email_address: 'foobar@email.com',
+        // phone_number: '555-123-4567',
+        address: {
+          street: '123 Main St.',
+          city: 'San Francisco',
+          region: 'CA',
+          postal_code: '94053',
+          country: 'US'
+        }
+      },
+    });
+    prettyPrintResponse(transferResponse);
+    return transferResponse.data.transfer.id;
+  } catch (error) {
+    prettyPrintResponse(error.response);
+  }
 };
