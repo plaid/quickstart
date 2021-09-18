@@ -10,6 +10,7 @@ import {
   PaymentInitiationPaymentGetResponse,
   AssetReportGetResponse,
   AssetReport,
+  TransferGetResponse,
 } from "plaid/dist/api";
 
 const formatCurrency = (
@@ -89,6 +90,14 @@ interface AssetsDataItem {
   daysAvailable: number;
 }
 
+interface TransferDataItem {
+  transferId: string;
+  amount: string;
+  type: string;
+  achClass: string;
+  network: string;
+}
+
 export interface ErrorDataItem {
   error_type: string;
   error_code: string;
@@ -107,7 +116,8 @@ export type DataItem =
   | LiabilitiessDataItem
   | ItemDataItem
   | PaymentDataItem
-  | AssetsDataItem;
+  | AssetsDataItem
+  | TransferDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -301,6 +311,33 @@ export const assetsCategories: Array<Categories> = [
   },
 ];
 
+export const transferCategories: Array<Categories> = [
+  {
+    title: "Transfer ID",
+    field: "transferId",
+  },
+  {
+    title: "Amount",
+    field: "amount",
+  },
+  {
+    title: "Type",
+    field: "type",
+  },
+  {
+    title: "ACH Class",
+    field: "achClass",
+  },
+  {
+    title: "Network",
+    field: "network",
+  },
+  {
+    title: "Status",
+    field: "status",
+  },
+];
+
 export const transformAuthData = (data: AuthGetResponse) => {
   return data.numbers.ach!.map((achNumbers) => {
     const account = data.accounts!.filter((a) => {
@@ -472,6 +509,20 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
   });
 
   return credit!.concat(mortgages!).concat(student!);
+};
+
+export const transformTransferData = (data: TransferGetResponse): Array<DataItem> => {
+  const transferData = data.transfer;
+  return [
+    {
+      transferId: transferData.id,
+      amount: transferData.amount,
+      type: transferData.type,
+      achClass: transferData.ach_class,
+      network: transferData.network,
+      status: transferData.status,
+    },
+  ];
 };
 
 interface ItemData {
