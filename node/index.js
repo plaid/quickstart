@@ -485,9 +485,10 @@ const formatError = (error) => {
   };
 };
 
-// This is a helper function to create a Transfer after successful exchange
-// of a public_token for an access_token. The TRANSFER_ID is then used to
-// obtain the data about that particular Transfer.
+// This is a helper function to authorize and create a Transfer after successful
+// exchange of a public_token for an access_token. The TRANSFER_ID is then used
+// to obtain the data about that particular Transfer.
+
 const authorizeAndcreateTransfer = async (accessToken) => {
   try {
     // We call /accounts/get to obtain first account_id - in production,
