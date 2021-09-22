@@ -10,7 +10,7 @@
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
     "classnames": "^2.2.6",
-    "sass": "^1.32.8",
+    "node-sass": "4.14",
     "plaid": "^9.0.0-beta.4",
     "plaid-threads": "^11.2.3",
     "react": "^16.14.0",
