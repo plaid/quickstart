@@ -9,14 +9,14 @@ const moment = require('moment');
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = "5319453d95d7f400008526d1"
 //process.env.PLAID_CLIENT_ID;
-const PLAID_SECRET = "asd"
+const PLAID_SECRET = "BNaHz5orOsz8yHTL_wnSUp"
 //process.env.PLAID_SECRET;
 const PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
 
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
-const PLAID_PRODUCTS = (process.env.PLAID_PRODUCTS || 'transactions').split(
+const PLAID_PRODUCTS = (process.env.PLAID_PRODUCTS || 'income_verification').split(
   ',',
 );
 

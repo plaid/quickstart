@@ -9,6 +9,7 @@ interface QuickstartState {
   isError: boolean;
   backend: boolean;
   products: string[];
+  isIncomeItem: boolean;
   linkTokenError: {
     error_message: string;
     error_code: string;
@@ -25,6 +26,7 @@ const initialState: QuickstartState = {
   isError: false,
   backend: true,
   products: ["transactions"],
+  isIncomeItem: false,
   linkTokenError: {
     error_type: "",
     error_code: "",
