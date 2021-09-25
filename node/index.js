@@ -7,9 +7,9 @@ const bodyParser = require('body-parser');
 const moment = require('moment');
 
 const APP_PORT = process.env.APP_PORT || 8000;
-const PLAID_CLIENT_ID = "5319453d95d7f400008526d1"
+const PLAID_CLIENT_ID = "614f8f4965ecfd000fa98960"
 //process.env.PLAID_CLIENT_ID;
-const PLAID_SECRET = "BNaHz5orOsz8yHTL_wnSUp"
+const PLAID_SECRET = "7397e76c72f3b92937b3cfdd67d1bc"
 //process.env.PLAID_SECRET;
 const PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
 
@@ -467,26 +467,14 @@ const formatError = (error) => {
   };
 };
 
+
 //Retrieve Income Verification Paystubs data
 
 app.get('/api/income/paystubs', async function (request, response, next) {
+  console.log("HIHSLKFhd")
   try {
     const paystubsResponse = await client.incomeVerificationPaystubGet({
-      access_token: "access-sandbox-7060f18b-04b3-4adb-95da-6e2c7692b96e",
-    });
-    prettyPrintResponse(paystubsResponse);
-    response.json(paystubsResponse.data); 
-  } catch (error) {
-    prettyPrintResponse(error.response);
-    return response.json(formatError(error.response));
-  }
-});
-
-//Retriev Income Verification Summary Data
-app.get('/api/income/summary', async function (request, response, next) {
-  try {
-    const paystubsResponse = await client.incomeVerificationSummaryGet({
-      access_token: "access-sandbox-7060f18b-04b3-4adb-95da-6e2c7692b96e",
+      access_token: ACCESS_TOKEN,
     });
     prettyPrintResponse(paystubsResponse);
     response.json(paystubsResponse.data); 

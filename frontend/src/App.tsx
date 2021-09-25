@@ -2,6 +2,7 @@ import React, { useEffect, useContext, useCallback } from "react";
 
 import Header from "./Components/Headers";
 import Products from "./Components/ProductTypes/Products";
+import ProductIncome from "./Components/ProductTypes/ProductIncome";
 import Items from "./Components/ProductTypes/Items";
 import Context from "./Context";
 
@@ -100,6 +101,11 @@ const App = () => {
           <>
             <Products />
             <Items />
+          </>
+        )},
+        {linkSuccess && isIncomeItem && (
+          <>
+            <ProductIncome />
           </>
         )}
       </div>
