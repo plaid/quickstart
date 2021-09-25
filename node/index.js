@@ -7,8 +7,10 @@ const bodyParser = require('body-parser');
 const moment = require('moment');
 
 const APP_PORT = process.env.APP_PORT || 8000;
-const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
-const PLAID_SECRET = process.env.PLAID_SECRET;
+const PLAID_CLIENT_ID = "5319453d95d7f400008526d1"
+//process.env.PLAID_CLIENT_ID;
+const PLAID_SECRET = "BNaHz5orOsz8yHTL_wnSUp"
+//process.env.PLAID_SECRET;
 const PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
 
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
@@ -464,3 +466,32 @@ const formatError = (error) => {
     error: { ...error.data, status_code: error.status },
   };
 };
+
+//Retrieve Income Verification Paystubs data
+
+app.get('/api/income/paystubs', async function (request, response, next) {
+  try {
+    const paystubsResponse = await client.incomeVerificationPaystubGet({
+      access_token: "access-sandbox-7060f18b-04b3-4adb-95da-6e2c7692b96e",
+    });
+    prettyPrintResponse(paystubsResponse);
+    response.json(paystubsResponse.data); 
+  } catch (error) {
+    prettyPrintResponse(error.response);
+    return response.json(formatError(error.response));
+  }
+});
+
+//Retriev Income Verification Summary Data
+app.get('/api/income/summary', async function (request, response, next) {
+  try {
+    const paystubsResponse = await client.incomeVerificationSummaryGet({
+      access_token: "access-sandbox-7060f18b-04b3-4adb-95da-6e2c7692b96e",
+    });
+    prettyPrintResponse(paystubsResponse);
+    response.json(paystubsResponse.data); 
+  } catch (error) {
+    prettyPrintResponse(error.response);
+    return response.json(formatError(error.response));
+  }
+});
