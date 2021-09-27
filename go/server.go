@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"reflect"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -112,6 +113,7 @@ func main() {
 	r.GET("/api/investment_transactions", investmentTransactions)
 	r.GET("/api/holdings", holdings)
 	r.GET("/api/assets", assets)
+	// r.GET("/api/transfer", transfer)
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
@@ -125,6 +127,11 @@ var accessToken string
 var itemID string
 
 var paymentID string
+
+// The transfer_id is only relevant for Transfer ACH product.
+// We store the transfer_id in memomory - in produciton, store it in a secure
+// persistent data store
+var transferID string
 
 func renderError(c *gin.Context, originalErr error) {
 	if plaidError, err := plaid.ToPlaidError(originalErr); err == nil {
@@ -151,6 +158,9 @@ func getAccessToken(c *gin.Context) {
 
 	accessToken = exchangePublicTokenResp.GetAccessToken()
 	itemID = exchangePublicTokenResp.GetItemId()
+	if itemExists(strings.Split(PLAID_PRODUCTS, ","), "transfer") {
+		authorizeAndCreateTransfer(ctx, client, accessToken)
+	}
 
 	fmt.Println("public token: " + publicToken)
 	fmt.Println("access token: " + accessToken)
@@ -353,6 +363,14 @@ func payment(c *gin.Context) {
 	})
 }
 
+// This functionality is only relevant for the ACH Transfer product.
+// Retrieve Transfer for a specified Transfer ID
+// func transfer(c *gin.Context) {
+// 	ctx := context.Background()
+
+
+// }
+
 func investmentTransactions(c *gin.Context) {
 	ctx := context.Background()
 
@@ -547,4 +565,37 @@ func pollForAssetReport(ctx context.Context, client *plaid.APIClient, assetRepor
 		}
 	}
 	return nil, errors.New("Timed out when polling for an asset report.")
+}
+
+// This is a helper function to authorize and create a Transfer after successful
+// exchange of a public_token for an access_token. The transfer_id is then used
+// to obtain the data about that particular Transfer.
+func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, accessToken string) {
+	// We call /accounts/get to obtain first account_id - in production,
+	// account_id's should be persisted in a data store and retrieved
+	// from there.
+	accountsGetResp, _, _ := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
+		*plaid.NewAccountsGetRequest(accessToken),
+	).Execute()
+
+	accountID := accountsGetResp.GetAccounts()
+
+	fmt.Print(accountID, "\n")	
+}
+
+// Helper function to determine if Transfer is in Plaid product array
+func itemExists(arrayType interface{}, item interface{}) bool {
+	arr := reflect.ValueOf(arrayType)
+
+	if arr.Kind() != reflect.Array {
+		panic("Invalid data-type")
+	}
+
+	for i := 0; i < arr.Len(); i++ {
+		if arr.Index(i).Interface() == item {
+			return true
+		}
+	}
+
+	return false
 }
