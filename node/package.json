@@ -17,7 +17,7 @@
     "ejs": "2.5.x",
     "express": "4.16.x",
     "moment": "2.22.x",
-    "nodemon": "^2.0.5",
+    "nodemon": "^2.0.12",
     "plaid": "^9.0.0-beta.11"
   }
 }
