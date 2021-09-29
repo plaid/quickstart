@@ -127,7 +127,7 @@ var itemID string
 
 var paymentID string
 
-// The transfer_id is only relevant for Transfer ACH product.
+// The transfer_id is only relevant for the Transfer ACH product.
 // We store the transfer_id in memory - in production, store it in a secure
 // persistent data store
 var transferID string
