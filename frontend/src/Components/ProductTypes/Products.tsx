@@ -11,6 +11,7 @@ import {
   investmentsCategories,
   paymentCategories,
   assetsCategories,
+  transferCategories,
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
@@ -18,6 +19,7 @@ import {
   transformIdentityData,
   transformPaymentData,
   transformAssetsData,
+  transformTransferData,
 } from "../../dataUtilities";
 
 const Products = () => {
@@ -88,6 +90,16 @@ const Products = () => {
         to market segments."
         transformData={transformInvestmentsData}
       />
+      {products.includes("transfer") && (
+        <Endpoint
+          endpoint="transfer"
+          name="Transfer"
+          categories={transferCategories}
+          schema="/transfer/get/"
+          description="Retrieve information about your latest ACH Transfer."
+          transformData={transformTransferData}
+        />
+      )}
     </ProductTypesContainer>
   );
 };

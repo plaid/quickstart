@@ -1,8 +1,10 @@
+# source /Users/tnappy/node_projects/quickstart/python/bin/activate
 # Read env vars from .env file
+from plaid.exceptions import ApiException
 from plaid.model.payment_amount import PaymentAmount
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
-from plaid.model.nullable_recipient_bacs import NullableRecipientBACS
+from plaid.model.numbers_bacs_nullable import NumbersBACSNullable
 from plaid.model.payment_initiation_address import PaymentInitiationAddress
 from plaid.model.payment_initiation_recipient_create_request import PaymentInitiationRecipientCreateRequest
 from plaid.model.payment_initiation_payment_create_request import PaymentInitiationPaymentCreateRequest
@@ -27,6 +29,15 @@ from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
 from plaid.model.item_get_request import ItemGetRequest
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
+from plaid.model.transfer_authorization_create_request import TransferAuthorizationCreateRequest
+from plaid.model.transfer_create_request import TransferCreateRequest
+from plaid.model.transfer_get_request import TransferGetRequest
+from plaid.model.transfer_network import TransferNetwork
+from plaid.model.transfer_type import TransferType
+from plaid.model.transfer_user_in_request import TransferUserInRequest
+from plaid.model.ach_class import ACHClass
+from plaid.model.transfer_create_idempotency_key import TransferCreateIdempotencyKey
+from plaid.model.transfer_user_address_in_request import TransferUserAddressInRequest
 from plaid.api import plaid_api
 from flask import Flask
 from flask import render_template
@@ -41,6 +52,7 @@ import datetime
 import json
 import time
 from dotenv import load_dotenv
+from werkzeug.wrappers import response
 load_dotenv()
 
 
@@ -114,6 +126,10 @@ access_token = None
 # We store the payment_id in memory - in production, store it in a secure
 # persistent data store.
 payment_id = None
+# The transfer_id is only relevant for Transfer ACH product.
+# We store the transfer_id in memomory - in produciton, store it in a secure
+# persistent data store
+transfer_id = None
 
 item_id = None
 
@@ -135,7 +151,7 @@ def create_link_token_for_payment():
     try:
         request = PaymentInitiationRecipientCreateRequest(
             name='John Doe',
-            bacs=NullableRecipientBACS(account='26207729', sort_code='560029'),
+            bacs=NumbersBACSNullable(account='26207729', sort_code='560029'),
             address=PaymentInitiationAddress(
                 street=['street name 999'],
                 city='city',
@@ -208,6 +224,7 @@ def create_link_token():
 def get_access_token():
     global access_token
     global item_id
+    global transfer_id
     public_token = request.form['public_token']
     try:
         exchange_request = ItemPublicTokenExchangeRequest(
@@ -215,6 +232,8 @@ def get_access_token():
         exchange_response = client.item_public_token_exchange(exchange_request)
         access_token = exchange_response['access_token']
         item_id = exchange_response['item_id']
+        if 'transfer' in PLAID_PRODUCTS:
+            transfer_id = authorize_and_create_transfer(access_token)
         return jsonify(exchange_response.to_dict())
     except plaid.ApiException as e:
         return json.loads(e.body)
@@ -435,6 +454,21 @@ def get_investment_transactions():
         error_response = format_error(e)
         return jsonify(error_response)
 
+# This functionality is only relevant for the ACH Transfer product.
+# Retrieve Transfer for a specified Transfer ID
+
+@app.route('/api/transfer', methods=['GET'])
+def transfer():
+    global transfer_id
+    try:
+        request = TransferGetRequest(transfer_id=transfer_id)
+        response = client.transfer_get(request)
+        pretty_print_response(response.to_dict())
+        return jsonify({'error': None, 'transfer': response['transfer'].to_dict()})
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
+
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
@@ -482,6 +516,70 @@ def format_error(e):
     response = json.loads(e.body)
     return {'error': {'status_code': e.status, 'display_message':
                       response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type']}}
+
+# This is a helper function to authorize and create a Transfer after successful
+# exchange of a public_token for an access_token. The transfer_id is then used
+# to obtain the data about that particular Transfer.
+def authorize_and_create_transfer(access_token):
+    try:
+        # We call /accounts/get to obtain first account_id - in production,
+        # account_id's should be persisted in a data store and retrieved
+        # from there.
+        request = AccountsGetRequest(access_token=access_token)
+        response = client.accounts_get(request)
+        account_id = response['accounts'][0]['account_id']
+
+        request = TransferAuthorizationCreateRequest(
+            access_token=access_token,
+            account_id=account_id,
+            type=TransferType('credit'),
+            network=TransferNetwork('ach'),
+            amount='12.34',
+            ach_class=ACHClass('ppd'),
+            user=TransferUserInRequest(
+                legal_name='FirstName LastName',
+                email_address='foobar@email.com',
+                address=TransferUserAddressInRequest(
+                    street='123 Main St.',
+                    city='San Francisco',
+                    region='CA',
+                    postal_code='94053',
+                    country='US'
+                ),
+            ),
+        )
+        response = client.transfer_authorization_create(request)
+        pretty_print_response(response)
+        authorization_id = response['authorization']['id']
+
+        request = TransferCreateRequest(
+            idempotency_key=TransferCreateIdempotencyKey('1223abc456xyz7890001'),
+            access_token=access_token,
+            account_id=account_id,
+            authorization_id=authorization_id,
+            type=TransferType('credit'),
+            network=TransferNetwork('ach'),
+            amount='12.34',
+            description='Payment',
+            ach_class=ACHClass('ppd'),
+            user=TransferUserInRequest(
+                legal_name='FirstName LastName',
+                email_address='foobar@email.com',
+                address=TransferUserAddressInRequest(
+                    street='123 Main St.',
+                    city='San Francisco',
+                    region='CA',
+                    postal_code='94053',
+                    country='US'
+                ),
+            ),
+        )
+        response = client.transfer_create(request)
+        pretty_print_response(response)
+        return response['transfer']['id']
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
 
 
 if __name__ == '__main__':
