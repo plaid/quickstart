@@ -187,7 +187,7 @@ app.post('/api/set_access_token', async function (request, response, next) {
     ACCESS_TOKEN = tokenResponse.data.access_token;
     ITEM_ID = tokenResponse.data.item_id;
     if (PLAID_PRODUCTS.includes('transfer')) {
-      TRANSFER_ID = await authorizeAndcreateTransfer(ACCESS_TOKEN);
+      TRANSFER_ID = await authorizeAndCreateTransfer(ACCESS_TOKEN);
     }
     response.json({
       access_token: ACCESS_TOKEN,
@@ -489,7 +489,7 @@ const formatError = (error) => {
 // exchange of a public_token for an access_token. The TRANSFER_ID is then used
 // to obtain the data about that particular Transfer.
 
-const authorizeAndcreateTransfer = async (accessToken) => {
+const authorizeAndCreateTransfer = async (accessToken) => {
   try {
     // We call /accounts/get to obtain first account_id - in production,
     // account_id's should be persisted in a data store and retrieved
