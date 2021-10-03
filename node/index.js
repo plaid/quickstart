@@ -490,7 +490,6 @@ const formatError = (error) => {
 //Retrieve Income Verification Paystubs data
 
 app.get('/api/income/paystubs', async function (request, response, next) {
-  console.log("HIHSLKFhd")
   try {
     const paystubsResponse = await client.incomeVerificationPaystubGet({
       access_token: ACCESS_TOKEN,
