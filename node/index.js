@@ -9,7 +9,7 @@ const moment = require('moment');
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = "5e690e9042cef30012b3f9d4"
 //process.env.PLAID_CLIENT_ID;
-const PLAID_SECRET = "ddf466fc40c3864ee1aa4a1169e76d"
+const PLAID_SECRET = ""
 //process.env.PLAID_SECRET;
 const PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
 
