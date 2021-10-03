@@ -18,6 +18,7 @@ import com.plaid.quickstart.resources.LinkTokenWithPaymentResource;
 import com.plaid.quickstart.resources.PaymentInitiationResource;
 import com.plaid.quickstart.resources.PublicTokenResource;
 import com.plaid.quickstart.resources.TransactionsResource;
+import com.plaid.quickstart.resources.TransferResource;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -35,6 +36,10 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
   // We store the paymentId in memory - in production, store it in a secure
   // persistent data store.
   public static String paymentId;
+  // The transfer_id is only relevant for Transfer ACH product.
+  // We store the transfer_id in memomory - in produciton, store it in a secure
+  // persistent data store
+  public static String transferId;
 
   private PlaidApi plaidClient;
   private ApiClient apiClient;
@@ -94,7 +99,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
 
     plaidClient = apiClient.createService(PlaidApi.class);
 
-    environment.jersey().register(new AccessTokenResource(plaidClient));
+    environment.jersey().register(new AccessTokenResource(plaidClient, plaidProducts));
     environment.jersey().register(new AccountsResource(plaidClient));
     environment.jersey().register(new AuthResource(plaidClient));
     environment.jersey().register(new BalanceResource(plaidClient));
@@ -108,6 +113,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new PaymentInitiationResource(plaidClient));
     environment.jersey().register(new PublicTokenResource(plaidClient));
     environment.jersey().register(new TransactionsResource(plaidClient));
+    environment.jersey().register(new TransferResource(plaidClient));
   }
 
   protected PlaidApi client() {
