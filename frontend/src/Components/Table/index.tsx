@@ -1,7 +1,10 @@
-import React from "react";
+import React, {useContext} from "react";
 
 import { DataItem, Categories } from "../../dataUtilities";
 import Identity from "./Identity";
+import Income from "./income";
+import Context from "../../Context";
+
 
 import styles from "./index.module.scss";
 
@@ -12,6 +15,13 @@ interface Props {
 }
 
 const Table = (props: Props) => {
+
+  //checking to see if Income item and routing to Income table
+  const {isIncomeItem} = useContext(Context);
+  if(isIncomeItem){
+    return <Income data={props.data} />
+  }
+
   const maxRows = 15;
   // regular table
   const headers = props.categories.map((category, index) => (

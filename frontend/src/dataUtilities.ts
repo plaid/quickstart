@@ -78,6 +78,7 @@ interface PaymentDataItem {
   statusUpdate: string;
   recipientId: string;
 }
+
 interface ItemDataItem {
   billed: string;
   available: string;
@@ -91,13 +92,6 @@ interface AssetsDataItem {
   daysAvailable: number;
 }
 
-interface IncomeEmployeeDataItem {
-  employeeName: string;
-  address: string;
-  employer: string;
-  payFrequency: string;
-}
-
 interface TransferDataItem {
   transferId: string;
   amount: string;
@@ -105,6 +99,43 @@ interface TransferDataItem {
   achClass: string;
   network: string;
 }
+
+interface IncomeEmployeeDataItem {
+  name: string| null;
+  street: string| null;
+  city: string| null;
+  region: string| null;
+  zip: number| null;
+}
+
+interface IncomeEployerDataItem {
+  name: string| null;
+  street: string| null;
+  city: string| null;
+  region: string| null;
+  zip: number| null;
+}
+
+interface PayPeroidDataItem {
+  startDate: string| null;
+  endDate: string| null; 
+  grossPay: number| null;
+  onCheckPay: number| null;
+}
+
+interface IncomeBreakdownDataItem{
+  type: string| null;
+  amount: number| null;
+  rate: number| null;
+  hours: number| null; 
+}
+
+export type IncomeDataItem = 
+  | IncomeEmployeeDataItem
+  | IncomeEployerDataItem 
+  | PayPeroidDataItem
+  | Array<IncomeBreakdownDataItem>
+
 
 export interface ErrorDataItem {
   error_type: string;
@@ -125,7 +156,7 @@ export type DataItem =
   | ItemDataItem
   | PaymentDataItem
   | AssetsDataItem
-  | IncomeEmployeeDataItem
+  | IncomeDataItem
   | TransferDataItem;
 
 export type Data = Array<DataItem>;
@@ -349,21 +380,17 @@ export const transferCategories: Array<Categories> = [
 
 export const incomeEmployeeCategories: Array<Categories> = [
   {
-    title: "Employee Name",
-    field: "employeeName",
+    title: "Personal Information",
+    field: "personalInfo",
   },
   {
-    title: "Home Address",
-    field: "address",
+    title: "Pay Peroid",
+    field: "payPeroid",
   },
   {
-    title: "Employer Name",
-    field: "employer",
+    title: "Income Breakdown",
+    field: "incomeBreakdown",
   },
-  {
-    title: "Pay Frequency",
-    field: "payFrequency",
-  }
 ];
 
 
@@ -436,7 +463,6 @@ export const transformIdentityData = (data: IdentityData) => {
       final.push(obj);
     }
   });
-
   return final;
 };
 
@@ -633,23 +659,46 @@ interface incomePaystubsData {
   paystubs: IncomeVerificationPaystubsGetResponse;
 }
 
-export const transformIncomeEmployeeData = (data:incomePaystubsData):Array<DataItem> => {
+export const transformIncomeEmployeeData = (data:incomePaystubsData):Array<DataItem>=> {
 
-  console.log(data)
 
-  return [
-    {
-      employeeName: "MilesSSS",
-      address: "Whatever",
-      employer:"Plaid",
-      payFrequency: "NEVER!"
-    },
-  
-  ];
-  
-  
-  
-};
+  const employeeInfo: IncomeDataItem = {
+    name: data.paystubs[0].employee.name,
+    city: data.paystubs[0].employee.address.city,
+    zip: data.paystubs[0].employee.address.postal_code,
+    street: data.paystubs[0].employee.address.street,
+    region: data.paystubs[0].employee.address.region,
+  }
+
+  const employerInfo: IncomeEployerDataItem = {
+    name: data.paystubs[0].employer.name,
+    city: data.paystubs[0].employee.address.city,
+    zip: data.paystubs[0].employee.address.postal_code,
+    street: data.paystubs[0].employee.address.street,
+    region: data.paystubs[0].employee.address.region,
+  }
+
+  const payPeroidInfo: PayPeroidDataItem = {
+    startDate: data.paystubs[0].pay_period_details.start_date,
+    endDate: data.paystubs[0].pay_period_details.end_date,
+    grossPay: data.paystubs[0].pay_period_details.gross_earnings,
+    onCheckPay: data.paystubs[0].pay_period_details.check_amount,
+  }
+
+  const incomeBreakdowns = data.paystubs[0].income_breakdown.map((breakdown: any) => {
+
+    const breakdownData: IncomeBreakdownDataItem = {
+      type: breakdown.type,
+      amount: breakdown.total,
+      rate: breakdown.rate,
+      hours: breakdown.hours,
+    }
+    return breakdownData
+
+  })  
+
+  return [employeeInfo, employerInfo, payPeroidInfo, incomeBreakdowns]
+}
 
 
 

@@ -9,14 +9,14 @@ const moment = require('moment');
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = "5e690e9042cef30012b3f9d4"
 //process.env.PLAID_CLIENT_ID;
-const PLAID_SECRET = ""
+const PLAID_SECRET = "ddf466fc40c3864ee1aa4a1169e76d"
 //process.env.PLAID_SECRET;
 const PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
 
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
-const PLAID_PRODUCTS = (process.env.PLAID_PRODUCTS || 'transactions').split(
+const PLAID_PRODUCTS = (process.env.PLAID_PRODUCTS || 'income_verification').split(
   ',',
 );
 
@@ -41,9 +41,10 @@ const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || '';
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
-let ACCESS_TOKEN = null;
+let ACCESS_TOKEN = "access-sandbox-94fe4e65-0c30-4bac-87eb-571c8675e60e"
+//null;
 let PUBLIC_TOKEN = null;
-let ITEM_ID = null;
+let ITEM_ID = "vKab7Zx3l5u7qWDDzjPei5lB9ByNBaCWw8pmD";
 // The payment_id is only relevant for the UK Payment Initiation product.
 // We store the payment_id in memory - in production, store it in a secure
 // persistent data store
@@ -491,7 +492,7 @@ const formatError = (error) => {
 
 app.get('/api/income/paystubs', async function (request, response, next) {
   try {
-    const paystubsResponse = await client.incomeVerificationPaystubGet({
+    const paystubsResponse = await client.incomeVerificationPaystubsGet({
       access_token: ACCESS_TOKEN,
     });
     prettyPrintResponse(paystubsResponse);
