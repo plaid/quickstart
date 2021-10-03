@@ -10,7 +10,7 @@ import {
   PaymentInitiationPaymentGetResponse,
   AssetReportGetResponse,
   AssetReport,
-  IncomeVerificationPaystubGetResponse,
+  IncomeVerificationPaystubsGetResponse,
 } from "plaid/dist/api";
 
 const formatCurrency = (
@@ -318,7 +318,7 @@ export const incomeEmployeeCategories: Array<Categories> = [
   },
   {
     title: "Home Address",
-    field: "homeAddress",
+    field: "address",
   },
   {
     title: "Employer Name",
@@ -578,7 +578,7 @@ export const transformAssetsData = (data: AssetResponseData) => {
 };
 
 interface incomePaystubsData {
-  paystubs: IncomeVerificationPaystubGetResponse;
+  paystubs: IncomeVerificationPaystubsGetResponse;
 }
 
 export const transformIncomeEmployeeData = (data:incomePaystubsData):Array<DataItem> => {
@@ -587,11 +587,12 @@ export const transformIncomeEmployeeData = (data:incomePaystubsData):Array<DataI
 
   return [
     {
-      employeeName: "hello",
-      address: "hijkljsklfjsdklfjsklfgjsfkldgjskldfgjslkfdgjsdfklg",
-      employer:"walll",
-      payFrequency: "192093812month"
+      employeeName: "MilesSSS",
+      address: "Whatever",
+      employer:"Plaid",
+      payFrequency: "NEVER!"
     },
+  
   ];
   
   

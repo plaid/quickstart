@@ -5,7 +5,6 @@ import Context from "../../Context";
 import ProductTypesContainer from "./ProductTypesContainer";
 import {
   incomeEmployeeCategories,
-  transformAuthData,
   transformIncomeEmployeeData,
  
 } from "../../dataUtilities";
