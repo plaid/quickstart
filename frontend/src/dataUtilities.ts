@@ -11,6 +11,7 @@ import {
   AssetReportGetResponse,
   AssetReport,
   IncomeVerificationPaystubsGetResponse,
+  TransferGetResponse,
 } from "plaid/dist/api";
 
 const formatCurrency = (
@@ -97,6 +98,13 @@ interface IncomeEmployeeDataItem {
   payFrequency: string;
 }
 
+interface TransferDataItem {
+  transferId: string;
+  amount: string;
+  type: string;
+  achClass: string;
+  network: string;
+}
 
 export interface ErrorDataItem {
   error_type: string;
@@ -117,7 +125,8 @@ export type DataItem =
   | ItemDataItem
   | PaymentDataItem
   | AssetsDataItem
-  | IncomeEmployeeDataItem;
+  | IncomeEmployeeDataItem
+  | TransferDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -311,6 +320,33 @@ export const assetsCategories: Array<Categories> = [
   },
 ];
 
+export const transferCategories: Array<Categories> = [
+  {
+    title: "Transfer ID",
+    field: "transferId",
+  },
+  {
+    title: "Amount",
+    field: "amount",
+  },
+  {
+    title: "Type",
+    field: "type",
+  },
+  {
+    title: "ACH Class",
+    field: "achClass",
+  },
+  {
+    title: "Network",
+    field: "network",
+  },
+  {
+    title: "Status",
+    field: "status",
+  },
+];
+
 export const incomeEmployeeCategories: Array<Categories> = [
   {
     title: "Employee Name",
@@ -327,8 +363,10 @@ export const incomeEmployeeCategories: Array<Categories> = [
   {
     title: "Pay Frequency",
     field: "payFrequency",
-  },
+  }
 ];
+
+
 
 export const transformAuthData = (data: AuthGetResponse) => {
   return data.numbers.ach!.map((achNumbers) => {
@@ -501,6 +539,20 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
   });
 
   return credit!.concat(mortgages!).concat(student!);
+};
+
+export const transformTransferData = (data: TransferGetResponse): Array<DataItem> => {
+  const transferData = data.transfer;
+  return [
+    {
+      transferId: transferData.id,
+      amount: transferData.amount,
+      type: transferData.type,
+      achClass: transferData.ach_class,
+      network: transferData.network,
+      status: transferData.status,
+    },
+  ];
 };
 
 interface ItemData {
