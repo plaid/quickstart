@@ -10,6 +10,7 @@ import {
   PaymentInitiationPaymentGetResponse,
   AssetReportGetResponse,
   AssetReport,
+  IncomeVerificationPaystubsGetResponse,
 } from "plaid/dist/api";
 
 const formatCurrency = (
@@ -89,6 +90,14 @@ interface AssetsDataItem {
   daysAvailable: number;
 }
 
+interface IncomeEmployeeDataItem {
+  employeeName: string;
+  address: string;
+  employer: string;
+  payFrequency: string;
+}
+
+
 export interface ErrorDataItem {
   error_type: string;
   error_code: string;
@@ -107,7 +116,8 @@ export type DataItem =
   | LiabilitiessDataItem
   | ItemDataItem
   | PaymentDataItem
-  | AssetsDataItem;
+  | AssetsDataItem
+  | IncomeEmployeeDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -298,6 +308,25 @@ export const assetsCategories: Array<Categories> = [
   {
     title: "Days Available",
     field: "daysAvailable",
+  },
+];
+
+export const incomeEmployeeCategories: Array<Categories> = [
+  {
+    title: "Employee Name",
+    field: "employeeName",
+  },
+  {
+    title: "Home Address",
+    field: "address",
+  },
+  {
+    title: "Employer Name",
+    field: "employer",
+  },
+  {
+    title: "Pay Frequency",
+    field: "payFrequency",
   },
 ];
 
@@ -547,3 +576,29 @@ export const transformAssetsData = (data: AssetResponseData) => {
     });
   });
 };
+
+interface incomePaystubsData {
+  paystubs: IncomeVerificationPaystubsGetResponse;
+}
+
+export const transformIncomeEmployeeData = (data:incomePaystubsData):Array<DataItem> => {
+
+  console.log(data)
+
+  return [
+    {
+      employeeName: "MilesSSS",
+      address: "Whatever",
+      employer:"Plaid",
+      payFrequency: "NEVER!"
+    },
+  
+  ];
+  
+  
+  
+};
+
+
+
+

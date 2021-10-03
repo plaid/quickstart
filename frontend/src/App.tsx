@@ -2,13 +2,14 @@ import React, { useEffect, useContext, useCallback } from "react";
 
 import Header from "./Components/Headers";
 import Products from "./Components/ProductTypes/Products";
+import ProductIncome from "./Components/ProductTypes/ProductIncome";
 import Items from "./Components/ProductTypes/Items";
 import Context from "./Context";
 
 import styles from "./App.module.scss";
 
 const App = () => {
-  const { linkSuccess, isItemAccess, dispatch } = useContext(Context);
+  const { linkSuccess, isItemAccess, isIncomeItem, dispatch } = useContext(Context);
 
   const getInfo = useCallback(async () => {
     const response = await fetch("/api/info", { method: "POST" });
@@ -20,6 +21,19 @@ const App = () => {
     const paymentInitiation: boolean = data.products.includes(
       "payment_initiation"
     );
+  
+    const incomeVerification: boolean = data.products.includes(
+      "income_verification"
+    );
+    if (incomeVerification){
+      dispatch({
+        type: "SET_STATE",
+        state: {
+          isIncomeItem: true,
+        },
+      });
+    }
+
     dispatch({
       type: "SET_STATE",
       state: {
@@ -83,10 +97,15 @@ const App = () => {
     <div className={styles.App}>
       <div className={styles.container}>
         <Header />
-        {linkSuccess && isItemAccess && (
+        {linkSuccess && isItemAccess && !isIncomeItem &&(
           <>
             <Products />
             <Items />
+          </>
+        )},
+        {linkSuccess && isIncomeItem && (
+          <>
+            <ProductIncome />
           </>
         )}
       </div>
