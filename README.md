@@ -210,6 +210,13 @@ $ npm start
 
 ```
 
+## Credentials
+
+To test in the Sandbox environment, use any institution other than Capital One.
+
+Username: `user_good`
+Password: `pass_good`
+
 ## Testing OAuth
 
 Some institutions (primarily in Europe, but a small number in the US) require an OAuth redirect
