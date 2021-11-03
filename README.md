@@ -143,7 +143,7 @@ Once started with one of the commands below, the quickstart will be running on h
 
 ```
 $ cd ./node
-$ npm install
+$ npm ci
 $ ./start.sh
 ```
 
@@ -205,7 +205,7 @@ $ ./start.sh
 
 ```
 $ cd ./frontend
-$ npm install
+$ npm ci
 $ npm start
 
 ```
