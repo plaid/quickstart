@@ -456,9 +456,7 @@ const getAssetReportWithRetries = (
 
     plaidClient
       .assetReportGet(request)
-      .then((response) => {
-        resolve(response);
-      })
+      .then(resolve)
       .catch(() => {
         setTimeout(() => {
           if (retriesLeft === 1) {
@@ -470,7 +468,7 @@ const getAssetReportWithRetries = (
             asset_report_token,
             ms,
             retriesLeft - 1,
-          ).then((response) => resolve(response));
+          ).then(resolve);
         }, ms);
       });
   });
