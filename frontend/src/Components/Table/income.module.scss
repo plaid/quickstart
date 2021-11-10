@@ -1,0 +1,54 @@
+@import "~plaid-threads/scss/variables";
+
+.paystubsWrapper {
+  width: 90%;
+  margin-bottom: 3 * $unit;
+  border-spacing: 0px;
+  font-size: 3rem;
+  border-top: 1px solid $black1000;
+
+}
+
+.infoTop {
+  // border-top: 1px solid $black1000;
+  text-align: left;
+  height: 4 * $unit;
+  display: block;
+  font-size: 2.5rem;
+  width: 90%;
+}
+
+.infoBottom {
+  // border-top: 1px solid $black1000;
+  text-align: left;
+  height: 4 * $unit;
+  font-size: 2rem;
+  width: 90%;
+}
+
+
+.paystubsSectionwrapper {
+  border-top: 1px solid $black200;
+  border-bottom: 1px solid $black1000;
+  padding-top: 1.2rem;
+  padding-bottom: $unit;
+  padding-left: $unit;
+}
+
+.payPeoridDataRows {
+  display: block;
+  font-size: 2rem;
+
+}
+
+.dataField {
+  text-align: left;
+    font-size: 2rem;
+
+  overflow-wrap: break-word;
+  border-top: 1px solid $black200;
+  vertical-align: top;
+  padding-top: 2 * $unit;
+  padding-left: $unit;
+  display: block;
+}

@@ -11,6 +11,7 @@ import {
   AssetReportGetResponse,
   AssetReport,
   IncomeVerificationPaystubsGetResponse,
+  IncomeVerificationStatusWebhook,
   TransferGetResponse,
 } from "plaid/dist/api";
 
@@ -100,7 +101,7 @@ interface TransferDataItem {
   network: string;
 }
 
-interface IncomeEmployeeDataItem {
+export interface IncomeEmployeeDataItem {
   name: string| null;
   street: string| null;
   city: string| null;
@@ -108,7 +109,7 @@ interface IncomeEmployeeDataItem {
   zip: number| null;
 }
 
-interface IncomeEployerDataItem {
+export interface IncomeEployerDataItem {
   name: string| null;
   street: string| null;
   city: string| null;
@@ -116,26 +117,19 @@ interface IncomeEployerDataItem {
   zip: number| null;
 }
 
-interface PayPeroidDataItem {
+export interface PayPeroidDataItem {
   startDate: string| null;
   endDate: string| null; 
   grossPay: number| null;
   onCheckPay: number| null;
 }
 
-interface IncomeBreakdownDataItem{
+export interface IncomeBreakdownDataItem{
   type: string| null;
   amount: number| null;
   rate: number| null;
   hours: number| null; 
 }
-
-export type IncomeDataItem = 
-  | IncomeEmployeeDataItem
-  | IncomeEployerDataItem 
-  | PayPeroidDataItem
-  | Array<IncomeBreakdownDataItem>
-
 
 export interface ErrorDataItem {
   error_type: string;
@@ -156,8 +150,11 @@ export type DataItem =
   | ItemDataItem
   | PaymentDataItem
   | AssetsDataItem
-  | IncomeDataItem
-  | TransferDataItem;
+  | TransferDataItem
+  | IncomeEmployeeDataItem
+  | IncomeEployerDataItem 
+  | PayPeroidDataItem
+  | Array<IncomeBreakdownDataItem>;
 
 export type Data = Array<DataItem>;
 
@@ -661,8 +658,9 @@ interface incomePaystubsData {
 
 export const transformIncomeEmployeeData = (data:incomePaystubsData):Array<DataItem>=> {
 
+  console.log(data)
 
-  const employeeInfo: IncomeDataItem = {
+  const employeeInfo: IncomeEmployeeDataItem = {
     name: data.paystubs[0].employee.name,
     city: data.paystubs[0].employee.address.city,
     zip: data.paystubs[0].employee.address.postal_code,
