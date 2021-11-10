@@ -10,6 +10,7 @@ RUN go build -o quickstart
 FROM gcr.io/distroless/base-debian10
 
 COPY --from=build /opt/src/go/quickstart /
+COPY .env /.env
 
 EXPOSE 8000
 ENTRYPOINT ["/quickstart"]
