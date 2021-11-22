@@ -534,7 +534,7 @@ def authorize_and_create_transfer(access_token):
             account_id=account_id,
             type=TransferType('credit'),
             network=TransferNetwork('ach'),
-            amount='12.34',
+            amount='1.34',
             ach_class=ACHClass('ppd'),
             user=TransferUserInRequest(
                 legal_name='FirstName LastName',
@@ -559,7 +559,7 @@ def authorize_and_create_transfer(access_token):
             authorization_id=authorization_id,
             type=TransferType('credit'),
             network=TransferNetwork('ach'),
-            amount='12.34',
+            amount='1.34',
             description='Payment',
             ach_class=ACHClass('ppd'),
             user=TransferUserInRequest(
