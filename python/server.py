@@ -4,7 +4,7 @@ from plaid.exceptions import ApiException
 from plaid.model.payment_amount import PaymentAmount
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
-from plaid.model.numbers_bacs_nullable import NumbersBACSNullable
+from plaid.model.recipient_bacs_nullable import RecipientBACSNullable
 from plaid.model.payment_initiation_address import PaymentInitiationAddress
 from plaid.model.payment_initiation_recipient_create_request import PaymentInitiationRecipientCreateRequest
 from plaid.model.payment_initiation_payment_create_request import PaymentInitiationPaymentCreateRequest
@@ -151,7 +151,7 @@ def create_link_token_for_payment():
     try:
         request = PaymentInitiationRecipientCreateRequest(
             name='John Doe',
-            bacs=NumbersBACSNullable(account='26207729', sort_code='560029'),
+            bacs=RecipientBACSNullable(account='26207729', sort_code='560029'),
             address=PaymentInitiationAddress(
                 street=['street name 999'],
                 city='city',
