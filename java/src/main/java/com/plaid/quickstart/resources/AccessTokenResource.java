@@ -82,7 +82,7 @@ public class AccessTokenResource {
         .accountId(accountId)
         .type(TransferType.CREDIT)
         .network(TransferNetwork.ACH)
-        .amount("12.34")
+        .amount("1.34")
         .achClass(ACHClass.PPD)
         .user(user);
 
@@ -99,7 +99,7 @@ public class AccessTokenResource {
         .accountId(accountId)
         .type(TransferType.CREDIT)
         .network(TransferNetwork.ACH)
-        .amount("12.34")
+        .amount("1.34")
         .achClass(ACHClass.PPD)
         .description("Payment")
         .user(user);

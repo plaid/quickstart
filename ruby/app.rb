@@ -490,7 +490,7 @@ def authorize_and_create_transfer(access_token, client)
       account_id: account_id,
       type: 'credit',
       network: 'ach',
-      amount: '12.34',
+      amount: '1.34',
       ach_class: 'ppd',
       user: {
         legal_name: 'FirstName LastName',
@@ -515,7 +515,7 @@ def authorize_and_create_transfer(access_token, client)
       authorization_id: authorization_id,
       type: 'credit',
       network: 'ach',
-      amount: '12.34',
+      amount: '1.34',
       description: 'Payment',
       ach_class: 'ppd',
       user: {

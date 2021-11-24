@@ -140,7 +140,7 @@ app.post(
           recipient_id: recipientId,
           reference: 'paymentRef',
           amount: {
-            value: 12.34,
+            value: 1.34,
             currency: 'GBP',
           },
         },
@@ -504,7 +504,7 @@ const authorizeAndCreateTransfer = async (accessToken) => {
       account_id: accountId,
       type: 'credit',
       network: 'ach',
-      amount: '12.34',
+      amount: '1.34',
       ach_class: 'ppd',
       user: {
         legal_name: 'FirstName LastName',
@@ -528,7 +528,7 @@ const authorizeAndCreateTransfer = async (accessToken) => {
       authorization_id: authorizationId,
       type: 'credit',
       network: 'ach',
-      amount: '12.34',
+      amount: '1.34',
       description: 'Payment',
       ach_class: 'ppd',
       user: {
