@@ -141,10 +141,11 @@ Once started with one of the commands below, the quickstart will be running on h
 
 ##### Node
 
+
 ```bash
-cd ./node
-npm install
-./start.sh
+$ cd ./node
+$ npm ci
+$ ./start.sh
 ```
 
 ##### Python
@@ -203,10 +204,11 @@ mvn clean package
 
 #### 2. Running the frontend
 
+
 ```bash
-cd ./frontend
-npm install
-npm start
+$ cd ./frontend
+$ npm ci
+$ npm start
 ```
 
 ## Testing OAuth
