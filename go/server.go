@@ -197,7 +197,7 @@ func createLinkTokenForPayment(c *gin.Context) {
 	paymentCreateRequest := plaid.NewPaymentInitiationPaymentCreateRequest(
 		paymentRecipientCreateResp.GetRecipientId(),
 		"paymentRef",
-		*plaid.NewPaymentAmount("GBP", 12.34),
+		*plaid.NewPaymentAmount("GBP", 1.34),
 	)
 	paymentCreateResp, _, err := client.PlaidApi.PaymentInitiationPaymentCreate(ctx).PaymentInitiationPaymentCreateRequest(*paymentCreateRequest).Execute()
 	if err != nil {
@@ -597,7 +597,7 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 		accountID,
 		"credit",
 		"ach",
-		"12.34",
+		"1.34",
 		"ppd",
 		*transferAuthorizationCreateUser,
 	)
@@ -614,7 +614,7 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 		authorizationID,
 		"credit",
 		"ach",
-		"12.34",
+		"1.34",
 		"Payment",
 		"ppd",
 		*transferAuthorizationCreateUser,
