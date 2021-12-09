@@ -1,3 +1,3 @@
 Flask==1.1.2
-plaid_python==8.7.0
+plaid_python==8.8.0
 python-dotenv==0.15.0
