@@ -37,30 +37,30 @@ Here you'll find full example integration apps using our [**client libraries**][
 
 Using https:
 
-```
-$ git clone https://github.com/plaid/quickstart
-$ cd quickstart
+```bash
+git clone https://github.com/plaid/quickstart
+cd quickstart
 ```
 
 Alternatively, if you use ssh:
 
-```
-$ git clone git@github.com:plaid/quickstart.git
-$ cd quickstart
+```bash
+git clone git@github.com:plaid/quickstart.git
+cd quickstart
 ```
 
 #### Special instructions for Windows
 
 Note - because this repository makes use of symbolic links, to run this on a Windows machine, make sure you have checked the "enable symbolic links" box when you download Git to your local machine. Then you can run the above commands to clone the quickstart. Otherwise, you may open your Git Bash terminal as an administrator and use the following command when cloning the project
 
-```
-$ git clone -c core.symlinks=true https://github.com/plaid/quickstart
+```bash
+git clone -c core.symlinks=true https://github.com/plaid/quickstart
 ```
 
 ## 2. Set up your environment variables
 
-```
-$ cp .env.example .env
+```bash
+cp .env.example .env
 ```
 
 Copy `.env.example` to a new file called `.env` and fill out the environment variables inside. At
@@ -98,8 +98,8 @@ Each of these should be used with a `language` argument, which is one of `node`,
 
 ##### Start the container
 
-```
-$ make up language=node
+```bash
+make up language=node
 ```
 
 The quickstart backend is now running on http://localhost:8000 and frontend on http://localhost:3000.
@@ -114,14 +114,14 @@ If you experience a Docker connection error when running the command above, try 
 
 ##### View the logs
 
-```
-$ make logs language=node
+```bash
+make logs language=node
 ```
 
 ##### Stop the container
 
-```
-$ make stop language=node
+```bash
+make stop language=node
 ```
 
 ### Run without Docker
@@ -141,9 +141,10 @@ Once started with one of the commands below, the quickstart will be running on h
 
 ##### Node
 
-```
+
+```bash
 $ cd ./node
-$ npm install
+$ npm ci
 $ ./start.sh
 ```
 
@@ -151,26 +152,26 @@ $ ./start.sh
 
 **:warning: As `python2` has reached its end of life, only `python3` is supported.**
 
-```
-$ cd ./python
+```bash
+cd ./python
 
 # If you use virtualenv
 # virtualenv venv
 # source venv/bin/activate
 
-$ pip install -r requirements.txt
-$ ./start.sh
+pip install -r requirements.txt
+./start.sh
 ```
 
 If you get this error message:
 
-```
+```txt
 ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:749)
 ```
 
 You may need to run the following command in your terminal for your particular version of python in order to install SSL certificates:
 
-```
+```bash
 # examples:
 open /Applications/Python\ 3.9/Install\ Certificates.command
 # or
@@ -179,35 +180,35 @@ open /Applications/Python\ 3.6/Install\ Certificates.command
 
 ##### Ruby
 
-```
-$ cd ./ruby
-$ bundle
-$ ./start.sh
+```bash
+cd ./ruby
+bundle
+./start.sh
 ```
 
 ##### Go
 
-```
-$ cd ./go
-$ go build
-$ ./start.sh
+```bash
+cd ./go
+go build
+./start.sh
 ```
 
 ##### Java
 
-```
-$ cd ./java
-$ mvn clean package
-$ ./start.sh
+```bash
+cd ./java
+mvn clean package
+./start.sh
 ```
 
 #### 2. Running the frontend
 
-```
-$ cd ./frontend
-$ npm install
-$ npm start
 
+```bash
+$ cd ./frontend
+$ npm ci
+$ npm start
 ```
 
 ## Testing OAuth

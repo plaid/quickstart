@@ -498,7 +498,7 @@ const authorizeAndCreateTransfer = async (accessToken) => {
       account_id: accountId,
       type: 'credit',
       network: 'ach',
-      amount: '12.34',
+      amount: '1.34',
       ach_class: 'ppd',
       user: {
         legal_name: 'FirstName LastName',
