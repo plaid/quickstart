@@ -141,7 +141,6 @@ Once started with one of the commands below, the quickstart will be running on h
 
 ##### Node
 
-
 ```bash
 $ cd ./node
 $ npm ci
@@ -159,7 +158,7 @@ cd ./python
 # virtualenv venv
 # source venv/bin/activate
 
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ./start.sh
 ```
 
@@ -203,7 +202,6 @@ mvn clean package
 ```
 
 #### 2. Running the frontend
-
 
 ```bash
 $ cd ./frontend
