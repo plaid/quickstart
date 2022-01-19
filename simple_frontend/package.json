@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "vite": "^2.7.10"
+  },
+  "name": "simple_frontend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
