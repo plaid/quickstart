@@ -108,8 +108,9 @@ app.post('/api/create_link_token', function (request, response, next) {
         country_codes: PLAID_COUNTRY_CODES,
         language: 'en',
       };
+      const forcePopup = request.body.forcePopup;
 
-      if (PLAID_REDIRECT_URI !== '') {
+      if (PLAID_REDIRECT_URI !== '' && !forcePopup) {
         configs.redirect_uri = PLAID_REDIRECT_URI;
       }
 
