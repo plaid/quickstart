@@ -1,68 +1,46 @@
-console.log(`Hello there world!`);
-
 const HOST = "http://localhost:8000";
-let linkData;
 
-async function requestLinkToken(isPopup) {
-  const linkTokenResponse = await fetch(`${HOST}/api/create_link_token`, {
-    method: "POST",
-    headers: { "Content-type": "application/json" },
-    body: JSON.stringify({ forcePopup: isPopup }),
+async function getConnectedStatus() {
+  const connectedStatusResponse = await fetch(`${HOST}/api/is_user_connected`, {
+    method: "GET",
   });
-  linkData = await linkTokenResponse.json();
-  localStorage.setItem("linkData", JSON.stringify(linkData));
-
-  console.log(`Link token created: ${JSON.stringify(linkData)}`);
-  document.querySelector("#startLinkBtn").classList.remove("invisible");
+  connectedData = await connectedStatusResponse.json();
+  console.log(JSON.stringify(connectedData));
+  if (connectedData.connected === true) {
+    document.querySelector("#connectedUI").classList.remove("hidden");
+  } else {
+    document.querySelector("#disconnectedUI").classList.remove("hidden");
+  }
 }
 
-async function exchangePublicTokenForAccessToken(public_token) {
-  const tokenExchangeResponse = await fetch(`${HOST}/api/set_access_token`, {
-    method: "POST",
-    headers: { "Content-type": "application/json" },
-    body: JSON.stringify({ public_token: public_token }),
+async function getAccountList() {
+  const accountListResponse = await fetch(`${HOST}/api/accounts`, {
+    method: "GET",
   });
-  tokenData = await tokenExchangeResponse.json();
-  console.log(
-    `This is already stored server-side, but here's your access token ${JSON.stringify(
-      tokenData
-    )}`
-  );
-  //TODO: We probably shouldn't redirect if we get back an error
-  window.location.href = "access-granted.html";
+  accountData = await accountListResponse.json();
+  document.querySelector(
+    "#resultText"
+  ).textContent = `Here's your account data! ${JSON.stringify(accountData)}`;
 }
 
-function startLinkProcess() {
-  const handler = Plaid.create({
-    token: linkData.link_token,
-    onSuccess: (public_token, metadata) => {
-      console.log(
-        `I have a public token: ${public_token} I should exchange this`
-      );
-      exchangePublicTokenForAccessToken(public_token);
-    },
-    onExit: (err, metadata) => {
-      console.log(`I'm all done. Here's your metadata ${metadata}`);
-    },
-    onEvent: (eventName, metadata) => {
-      console.log(`Event ${eventName}`);
-    },
+async function getTransactions() {
+  const transactionResponse = await fetch(`${HOST}/api/transactions`, {
+    method: "GET",
   });
-  handler.open();
+  const transactionData = await transactionResponse.json();
+  document.querySelector(
+    "#resultText"
+  ).textContent = `Here is your transaction data! ${JSON.stringify(
+    transactionData
+  )}`;
 }
 
-document
-  .querySelector("#initiateLinkBtn")
-  .addEventListener("click", async () => {
-    await requestLinkToken(false);
-  });
-
-document
-  .querySelector("#initiateLinkBtnPopup")
-  .addEventListener("click", async () => {
-    await requestLinkToken(true);
-  });
-
-document.querySelector("#startLinkBtn").addEventListener("click", () => {
-  startLinkProcess();
+document.querySelector("#seeAccountsBtn").addEventListener("click", (_) => {
+  getAccountList();
 });
+
+document.querySelector("#seeTransactionsBtn").addEventListener("click", (_) => {
+  getTransactions();
+});
+
+getConnectedStatus();

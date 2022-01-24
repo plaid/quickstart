@@ -93,6 +93,14 @@ app.post('/api/info', function (request, response, next) {
   });
 });
 
+app.get('/api/is_user_connected', function (request, response, next) {
+  if (ACCESS_TOKEN && ACCESS_TOKEN !== '') {
+    response.json({ connected: true });
+  } else {
+    response.json({ connected: false });
+  }
+});
+
 // Create a link token with configs which we can then use to initialize Plaid Link client-side.
 // See https://plaid.com/docs/#create-link-token
 app.post('/api/create_link_token', function (request, response, next) {

@@ -13,7 +13,7 @@ async function exchangePublicTokenForAccessToken(public_token) {
     )}`
   );
   //TODO: We probably shouldn't redirect if we get back an error
-  window.location.href = "access-granted.html";
+  window.location.href = "index.html";
 }
 
 function handleReturningFromOAuth() {
