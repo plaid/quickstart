@@ -3,6 +3,7 @@ import {
   TransactionsGetResponse,
   IdentityGetResponse,
   InvestmentsHoldingsGetResponse,
+  InvestmentsTransactionsGetResponse,
   AccountsGetResponse,
   ItemGetResponse,
   InstitutionsGetByIdResponse,
@@ -63,6 +64,12 @@ interface InvestmentsDataItem {
   name: string;
 }
 
+interface InvestmentsTransactionItem {
+  amount: number;
+  date: string;
+  name: string;
+}
+
 interface LiabilitiessDataItem {
   amount: string;
   date: string;
@@ -113,6 +120,7 @@ export type DataItem =
   | IdentityDataItem
   | BalanceDataItem
   | InvestmentsDataItem
+  | InvestmentsTransactionItem
   | LiabilitiessDataItem
   | ItemDataItem
   | PaymentDataItem
@@ -213,6 +221,21 @@ export const investmentsCategories: Array<Categories> = [
   {
     title: "Value",
     field: "value",
+  },
+];
+
+export const investmentsTransactionsCategories: Array<Categories> = [
+  {
+    title: "Name",
+    field: "name",
+  },
+  {
+    title: "Amount",
+    field: "amount",
+  },
+  {
+    title: "Date",
+    field: "date",
   },
 ];
 
@@ -453,6 +476,30 @@ export const transformInvestmentsData = (data: InvestmentData) => {
         account.balances.iso_currency_code
       ),
       value: formatCurrency(value, account.balances.iso_currency_code),
+    };
+    return obj;
+  });
+};
+
+interface InvestmentsTransactionData {
+  error: null;
+  investmentTransactions: InvestmentsTransactionsGetResponse;
+}
+
+export const transformInvestmentTransactionsData = (data: InvestmentsTransactionData) => {
+  const investmentTransactionsData = data.investmentTransactions.investment_transactions!.sort(function (a,b) {
+    if (a.account_id > b.account_id) return 1;
+    return -1;
+  });
+  return investmentTransactionsData.map((investmentTransaction) => {
+    const security = data.investmentTransactions.securities!.filter(
+      (sec) => sec.security_id === investmentTransaction.security_id
+    )[0];
+
+    const obj: DataItem = {
+      name: security.name!,
+      amount: investmentTransaction.amount,
+      date: investmentTransaction.date,
     };
     return obj;
   });
