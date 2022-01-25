@@ -9,6 +9,7 @@ import {
   identityCategories,
   balanceCategories,
   investmentsCategories,
+  investmentsTransactionsCategories,
   paymentCategories,
   assetsCategories,
   transferCategories,
@@ -16,6 +17,7 @@ import {
   transformTransactionsData,
   transformBalanceData,
   transformInvestmentsData,
+  transformInvestmentTransactionsData,
   transformIdentityData,
   transformPaymentData,
   transformAssetsData,
@@ -89,6 +91,15 @@ const Products = () => {
         brokerage, or investment institution. Analyze over-exposure
         to market segments."
         transformData={transformInvestmentsData}
+      />
+      <Endpoint
+        endpoint="investment_transactions"
+        name="Investments Transactions"
+        categories={investmentsTransactionsCategories}
+        schema="/investments/transactions/get"
+        description="Retrieve investment transactions on file with the bank,
+        brokerage, or investments institution."
+        transformData={transformInvestmentTransactionsData}
       />
       {products.includes("transfer") && (
         <Endpoint
