@@ -80,16 +80,18 @@ const Products = () => {
         fees."
         transformData={transformBalanceData}
       />
-      <Endpoint
-        endpoint="holdings"
-        name="Investments"
-        categories={investmentsCategories}
-        schema="/investments/holdings/get/"
-        description="Retrieve investment holdings on file with the bank,
+      {products.includes("investments") && (
+        <Endpoint
+          endpoint="holdings"
+          name="Investments"
+          categories={investmentsCategories}
+          schema="/investments/holdings/get/"
+          description="Retrieve investment holdings on file with the bank,
         brokerage, or investment institution. Analyze over-exposure
         to market segments."
-        transformData={transformInvestmentsData}
-      />
+          transformData={transformInvestmentsData}
+        />
+      )}
       {products.includes("transfer") && (
         <Endpoint
           endpoint="transfer"
