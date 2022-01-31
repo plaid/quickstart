@@ -10,9 +10,11 @@
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
     "classnames": "^2.2.6",
+    "immer": "^9.0.6",
     "plaid": "^9.2.0",
     "plaid-threads": "^11.2.3",
     "react": "^16.14.0",
+    "react-dev-utils": "^12.0.0",
     "react-dom": "^16.14.0",
     "react-plaid-link": "^3.2.1",
     "react-scripts": "4.0.1",
@@ -26,7 +28,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "preinstall": "npx npm-force-resolutions"
   },
   "eslintConfig": {
     "extends": [
@@ -50,6 +53,9 @@
     "@types/classnames": "^2.2.11"
   },
   "resolutions": {
-    "fsevents": "2.2.0"
+    "fsevents": "2.2.0",
+    "immer": "9.0.6",
+    "ssri": "8.0.1",
+    "glob-parent": "5.1.2"
   }
 }
