@@ -76,14 +76,6 @@ app.use(
   }),
 );
 app.use(bodyParser.json());
-app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // update to match the domain you will make the request from
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept',
-  );
-  next();
-});
 
 app.post('/api/info', function (request, response, next) {
   response.json({
@@ -91,14 +83,6 @@ app.post('/api/info', function (request, response, next) {
     access_token: ACCESS_TOKEN,
     products: PLAID_PRODUCTS,
   });
-});
-
-app.get('/api/is_user_connected', function (request, response, next) {
-  if (ACCESS_TOKEN && ACCESS_TOKEN !== '') {
-    response.json({ connected: true });
-  } else {
-    response.json({ connected: false });
-  }
 });
 
 // Create a link token with configs which we can then use to initialize Plaid Link client-side.
@@ -116,9 +100,8 @@ app.post('/api/create_link_token', function (request, response, next) {
         country_codes: PLAID_COUNTRY_CODES,
         language: 'en',
       };
-      const forcePopup = request.body.forcePopup;
 
-      if (PLAID_REDIRECT_URI !== '' && !forcePopup) {
+      if (PLAID_REDIRECT_URI !== '') {
         configs.redirect_uri = PLAID_REDIRECT_URI;
       }
 
