@@ -210,7 +210,7 @@ $ npm ci
 $ npm start
 ```
 ## Test credentials
-For Sandbox, you can log in to any institution except Capital One. Use `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`.
+In Sandbox, you can log in to any institution except Capital One. Use `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`.
 
 In Development or Production, use real-life credentials. 
 
