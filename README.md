@@ -29,6 +29,7 @@ Here you'll find full example integration apps using our [**client libraries**][
       - [Go](#go)
       - [Java](#java)
     - [2. Running the frontend](#2-running-the-frontend)
+- [Test credentials](#test-credentials)
 - [Testing OAuth](#testing-oauth)
 
 <!-- tocstop -->
@@ -208,6 +209,10 @@ $ cd ./frontend
 $ npm ci
 $ npm start
 ```
+## Test credentials
+In Sandbox, you can log in to any supported institution (except Capital One) using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`.
+
+In Development or Production, use real-life credentials. 
 
 ## Testing OAuth
 
