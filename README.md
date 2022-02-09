@@ -73,57 +73,10 @@ the dashboard: https://dashboard.plaid.com/account/keys
 
 ## 3. Run the Quickstart
 
-There are two ways to run the various language quickstarts in this repository. You can simply choose to use Docker, or you can run the
-code directly. If you would like to run the code directly, skip to the
-[Run without Docker](#run-without-docker) section.
+There are two ways to run the various language quickstarts in this repository. You can choose to use Docker, or you can run the
+code directly. If you would like to run the code via Docker, skip to the
+[Run with Docker](#run-with-docker) section.
 
-### Run with Docker
-
-#### Pre-requisites
-
-- `make` available at your command line
-- Docker installed and running on your machine: https://docs.docker.com/get-docker/
-- Your environment variables populated in `.env`
-- If using Windows, a working Linux installation on Windows 10. If you are using Windows and do not already have WSL or Cygwin configured, we recommend [running without Docker](#run-without-docker).
-
-#### Running
-
-There are three basic `make` commands available
-
-- `up`: builds and starts the container
-- `logs`: tails logs
-- `stop`: stops the container
-
-Each of these should be used with a `language` argument, which is one of `node`, `python`, `ruby`,
-`java`, or `go`. If unspecified, the default is `node`.
-
-##### Start the container
-
-```bash
-make up language=node
-```
-
-The quickstart backend is now running on http://localhost:8000 and frontend on http://localhost:3000.
-
-If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
-`.env` file, simply run `make up language=node` again to rebuild and restart the container.
-
-If you experience a Docker connection error when running the command above, try the following:
-
-- Make sure Docker is running
-- Try running the command prefixed with `sudo`
-
-##### View the logs
-
-```bash
-make logs language=node
-```
-
-##### Stop the container
-
-```bash
-make stop language=node
-```
 
 ### Run without Docker
 
@@ -209,6 +162,55 @@ $ cd ./frontend
 $ npm ci
 $ npm start
 ```
+
+### Run with Docker
+
+#### Pre-requisites
+
+- `make` available at your command line
+- Docker installed and running on your machine: https://docs.docker.com/get-docker/
+- Your environment variables populated in `.env`
+- If using Windows, a working Linux installation on Windows 10. If you are using Windows and do not already have WSL or Cygwin configured, we recommend [running without Docker](#run-without-docker).
+
+#### Running
+
+There are three basic `make` commands available
+
+- `up`: builds and starts the container
+- `logs`: tails logs
+- `stop`: stops the container
+
+Each of these should be used with a `language` argument, which is one of `node`, `python`, `ruby`,
+`java`, or `go`. If unspecified, the default is `node`.
+
+##### Start the container
+
+```bash
+make up language=node
+```
+
+The quickstart backend is now running on http://localhost:8000 and frontend on http://localhost:3000.
+
+If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
+`.env` file, simply run `make up language=node` again to rebuild and restart the container.
+
+If you experience a Docker connection error when running the command above, try the following:
+
+- Make sure Docker is running
+- Try running the command prefixed with `sudo`
+
+##### View the logs
+
+```bash
+make logs language=node
+```
+
+##### Stop the container
+
+```bash
+make stop language=node
+```
+
 ## Test credentials
 In Sandbox, you can log in to any supported institution (except Capital One) using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`.
 
