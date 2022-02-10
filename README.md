@@ -73,8 +73,8 @@ the dashboard: https://dashboard.plaid.com/account/keys
 
 ## 3. Run the Quickstart
 
-There are two ways to run the various language quickstarts in this repository. You can choose to use Docker, or you can run the
-code directly. If you would like to run the code via Docker, skip to the
+There are two ways to run the various language quickstarts in this repository. You can choose to run the
+code directly or you can run it in Docker.  If you would like to run the code via Docker, skip to the
 [Run with Docker](#run-with-docker) section.
 
 
