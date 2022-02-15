@@ -141,7 +141,7 @@ app.post(
             recipient_id: recipientId,
             reference: 'paymentRef',
             amount: {
-              value: 12.34,
+              value: 1.23,
               currency: 'GBP',
             },
           });
