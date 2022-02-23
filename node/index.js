@@ -49,7 +49,7 @@ let ITEM_ID = null;
 // persistent data store
 let PAYMENT_ID = null;
 // The transfer_id is only relevant for Transfer ACH product.
-// We store the transfer_id in memomory - in produciton, store it in a secure
+// We store the transfer_id in memory - in production, store it in a secure
 // persistent data store
 let TRANSFER_ID = null;
 
