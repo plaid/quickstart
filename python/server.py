@@ -430,8 +430,8 @@ def get_holdings():
 # https://plaid.com/docs/#investments
 
 
-@app.route('/api/investment_transactions', methods=['GET'])
-def get_investment_transactions():
+@app.route('/api/investments_transactions', methods=['GET'])
+def get_investments_transactions():
     # Pull transactions for the last 30 days
 
     start_date = (datetime.datetime.now() - timedelta(days=(30)))
@@ -444,7 +444,7 @@ def get_investment_transactions():
             end_date=end_date.date(),
             options=options
         )
-        response = client.investment_transactions_get(
+        response = client.investments_transactions_get(
             request)
         pretty_print_response(response.to_dict())
         return jsonify(
