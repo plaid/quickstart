@@ -74,9 +74,8 @@ the dashboard: https://dashboard.plaid.com/account/keys
 ## 3. Run the Quickstart
 
 There are two ways to run the various language quickstarts in this repository. You can choose to run the
-code directly or you can run it in Docker.  If you would like to run the code via Docker, skip to the
+code directly or you can run it in Docker. If you would like to run the code via Docker, skip to the
 [Run with Docker](#run-with-docker) section.
-
 
 ### Run without Docker
 
@@ -212,20 +211,51 @@ make stop language=node
 ```
 
 ## Test credentials
+
 In Sandbox, you can log in to any supported institution (except Capital One) using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`.
 
-In Development or Production, use real-life credentials. 
+In Development or Production, use real-life credentials.
 
 ## Testing OAuth
 
 Some institutions (primarily in Europe, but a small number in the US) require an OAuth redirect
 authentication flow, where the end user is redirected to the bank’s website or mobile app to
-authenticate. For this flow, you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`.
-You will also need to register this localhost redirect URI in the
+authenticate. To test this flow in sandbox, you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to register this localhost redirect URI in the
 [Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section].
 
-OAuth flows are only testable in the `sandbox` environment in this Quickstart app due to an https
-`redirect_uri` being required in other environments. Additionally, if you want to use the [Payment
+If you want to test OAuth in development, you need to use https and set `PLAID_REDIRECT_URI=https://localhost:3000/` in `.env`. In order to run your localhost on https, you will need to create a self-signed certificate and add it to the frontend root folder. You can use the following instructions to do this:
+
+In your terminal, use homebrew to install mkcert:
+
+```bash
+brew install mkcert
+```
+
+Then create your certificate for localhost:
+
+```bash
+mkcert -install
+mkcert localhost
+```
+
+This will create a certificate file localhost.pem and a key file localhost-key.pem.
+Copy both of these files to the root of the Quickstart frontend folder.
+
+Then in the package.json file in the package.json folder, replace this line on line 28
+
+```bash
+  "start": "react-scripts start",
+```
+
+with this line instead:
+
+```bash
+"start": "HTTPS=true SSL_CRT_FILE=localhost.pem SSL_KEY_FILE=localhost-key.pem react-scripts start",
+```
+
+After starting up the Quickstart, you can now view it at https://localhost:3000.
+
+If you want to use the [Payment
 Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this
 product enabled.
 
