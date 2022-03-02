@@ -224,7 +224,7 @@ authentication flow, where the end user is redirected to the bank’s website or
 authenticate. To test this flow in sandbox, you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to register this localhost redirect URI in the
 [Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section].
 
-To test the OAuth flow, choose 'Playtypus OAuth Bank' from the list of financial institutions in Plaid Link.
+To test the OAuth flow in sandbox, choose 'Playtypus OAuth Bank' from the list of financial institutions in Plaid Link.
 
 ### Instructions for using https with localhost
 
