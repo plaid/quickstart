@@ -31,6 +31,7 @@ Here you'll find full example integration apps using our [**client libraries**][
       - [Stop the container](#stop-the-container)
 - [Test credentials](#test-credentials)
 - [Testing OAuth](#testing-oauth)
+- [Payment Initiation](#payment-initiation)
 
 <!-- tocstop -->
 
@@ -259,6 +260,8 @@ with this line instead:
 ```
 
 After starting up the Quickstart, you can now view it at https://localhost:3000.
+
+## Payment Initiation
 
 If you want to use the [Payment
 Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this
