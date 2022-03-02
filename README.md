@@ -223,7 +223,7 @@ authentication flow, where the end user is redirected to the bank’s website or
 authenticate. To test this flow in sandbox, you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to register this localhost redirect URI in the
 [Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section].
 
-If you want to test OAuth in development, you need to use https and set `PLAID_REDIRECT_URI=https://localhost:3000/` in `.env`. In order to run your localhost on https, you will need to create a self-signed certificate and add it to the frontend root folder. You can use the following instructions to do this:
+If you want to test OAuth in development, you need to use https and set `PLAID_REDIRECT_URI=https://localhost:3000/` in `.env`. In order to run your localhost on https, you will need to create a self-signed certificate and add it to the frontend root folder. You can use the following instructions to do this. However, please note that this is recommended for local development enviroments only and not for production environments.
 
 In your terminal, use homebrew to install mkcert:
 
