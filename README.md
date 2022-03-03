@@ -236,7 +236,7 @@ In your terminal, change to the frontend folder:
 cd frontend
 ```
 
-Use homebrew to install mkcert:it
+Use homebrew to install mkcert:
 
 ```bash
 brew install mkcert
