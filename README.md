@@ -228,7 +228,7 @@ To test the OAuth flow in sandbox, choose 'Playtypus OAuth Bank' from the list o
 
 ### Instructions for using https with localhost
 
-If you want to test OAuth in development, you need to use https and set `PLAID_REDIRECT_URI=https://localhost:3000/` in `.env`. In order to run your localhost on https, you will need to create a self-signed certificate and add it to the frontend root folder. You can use the following instructions to do this. However, please note that this is recommended for local development environments only and not for production environments.
+If you want to test OAuth in development, you need to use https and set `PLAID_REDIRECT_URI=https://localhost:3000/` in `.env`. In order to run your localhost on https, you will need to create a self-signed certificate and add it to the frontend root folder. You can use the following instructions to do this. Note that self-signed certificates should be used for testing purposes only, never for actual deployments.
 
 In your terminal, change to the frontend folder:
 
