@@ -263,8 +263,8 @@ with this line instead:
 "start": "HTTPS=true SSL_CRT_FILE=localhost.pem SSL_KEY_FILE=localhost-key.pem react-scripts start",
 ```
 
-After starting up the Quickstart, you can now view it at https://localhost:3000. Note that if you are on Windows, you
-may still get an invalid certification warning on your browser. If so, click on "advanced" and proceed. However, please note that this is recommended for local development environments only and not for production environments. Also on Windows, the frontend may still try to load http://localhost:3000 and you may have to enter https://localhost:3000 manually.
+After starting up the Quickstart, you can now view it at https://localhost:3000. If you are on Windows, you
+may still get an invalid certificate warning on your browser. If so, click on "advanced" and proceed. Also on Windows, the frontend may still try to load http://localhost:3000 and you may have to access https://localhost:3000 manually.
 
 ## Payment Initiation
 
