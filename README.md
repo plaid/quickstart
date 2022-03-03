@@ -236,7 +236,7 @@ In your terminal, change to the frontend folder:
 cd frontend
 ```
 
-Use homebrew to install mkcert:
+Use homebrew to install mkcert:it
 
 ```bash
 brew install mkcert
@@ -251,7 +251,7 @@ mkcert localhost
 
 This will create a certificate file localhost.pem and a key file localhost-key.pem inside your client folder.
 
-Then in the package.json file in the package.json folder, replace this line on line 28
+Then in the package.json file in the frontend folder, replace this line on line 28
 
 ```bash
   "start": "react-scripts start",
