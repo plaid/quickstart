@@ -254,7 +254,7 @@ This will create a certificate file localhost.pem and a key file localhost-key.p
 Then in the package.json file in the frontend folder, replace this line on line 28
 
 ```bash
-  "start": "react-scripts start",
+"start": "react-scripts start",
 ```
 
 with this line instead:
