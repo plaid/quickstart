@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "1.18.x",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "ejs": "2.5.x",
     "express": "4.16.x",
