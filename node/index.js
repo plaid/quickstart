@@ -7,6 +7,7 @@ const util = require('util');
 const express = require('express');
 const bodyParser = require('body-parser');
 const moment = require('moment');
+const cors = require('cors')
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -76,6 +77,7 @@ app.use(
   }),
 );
 app.use(bodyParser.json());
+app.use(cors());
 
 app.post('/api/info', function (request, response, next) {
   response.json({
