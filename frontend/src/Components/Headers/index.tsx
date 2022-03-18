@@ -51,6 +51,24 @@ const Header = () => {
                 correctly.
               </div>
               <div>
+                If you are on a Windows machine, please ensure that you have
+                cloned the repo with{" "}
+                <InlineLink
+                  href="https://github.com/plaid/quickstart#special-instructions-for-windows"
+                  target="_blank"
+                >
+                  symlinks turned on.
+                </InlineLink>{" "}
+                You can also try checking your{" "}
+                <InlineLink
+                  href="https://dashboard.plaid.com/activity/logs"
+                  target="_blank"
+                >
+                  activity log
+                </InlineLink>{" "}
+                on your Plaid dashboard.
+              </div>
+              <div>
                 Error Code: <code>{linkTokenError.error_code}</code>
               </div>
               <div>
