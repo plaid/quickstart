@@ -15,7 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/plaid"
+	plaid "github.com/plaid/plaid-go/v3/plaid"
 )
 
 var (
@@ -608,7 +608,6 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 	authorizationID := transferAuthorizationCreateResp.GetAuthorization().Id
 
 	transferCreateRequest := plaid.NewTransferCreateRequest(
-		"1223abc456xyz7890001",
 		accessToken,
 		accountID,
 		authorizationID,
