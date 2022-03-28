@@ -203,11 +203,11 @@ def create_link_token():
             client_name="Plaid Quickstart",
             country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
             language='en',
+            redirect_uri=PLAID_REDIRECT_URI,
             user=LinkTokenCreateRequestUser(
                 client_user_id=str(time.time())
             )
         )
-
         # create link token
         response = client.link_token_create(request)
         return jsonify(response.to_dict())
