@@ -2,6 +2,7 @@
 # Read env vars from .env file
 from plaid.exceptions import ApiException
 from plaid.model.payment_amount import PaymentAmount
+from plaid.model.payment_amount_currency import PaymentAmountCurrency
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from plaid.model.recipient_bacs_nullable import RecipientBACSNullable
@@ -167,7 +168,7 @@ def create_link_token_for_payment():
             recipient_id=recipient_id,
             reference='TestPayment',
             amount=PaymentAmount(
-                currency='GBP',
+                PaymentAmountCurrency('GBP'),
                 value=100.00
             )
         )
@@ -176,7 +177,7 @@ def create_link_token_for_payment():
         )
         pretty_print_response(response.to_dict())
         payment_id = response['payment_id']
-        request = LinkTokenCreateRequest(
+        linkRequest = LinkTokenCreateRequest(
             products=[Products('payment_initiation')],
             client_name='Plaid Test',
             country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
@@ -188,9 +189,12 @@ def create_link_token_for_payment():
                 payment_id=payment_id
             )
         )
-        response = client.link_token_create(request)
-        pretty_print_response(response.to_dict())
-        return jsonify(response.to_dict())
+
+        if PLAID_REDIRECT_URI!=None:
+            linkRequest['redirect_uri']=PLAID_REDIRECT_URI
+        linkResponse = client.link_token_create(linkRequest)
+        pretty_print_response(linkResponse.to_dict())
+        return jsonify(linkResponse.to_dict())
     except plaid.ApiException as e:
         return json.loads(e.body)
 
@@ -203,12 +207,13 @@ def create_link_token():
             client_name="Plaid Quickstart",
             country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
             language='en',
-            redirect_uri=PLAID_REDIRECT_URI,
             user=LinkTokenCreateRequestUser(
                 client_user_id=str(time.time())
             )
         )
-        # create link token
+        if PLAID_REDIRECT_URI!=None:
+            request['redirect_uri']=PLAID_REDIRECT_URI
+    # create link token
         response = client.link_token_create(request)
         return jsonify(response.to_dict())
     except plaid.ApiException as e:
