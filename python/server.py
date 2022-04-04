@@ -168,7 +168,7 @@ def create_link_token_for_payment():
             recipient_id=recipient_id,
             reference='TestPayment',
             amount=PaymentAmount(
-                PaymentAmountCurrency( 'GBP'),
+                PaymentAmountCurrency('GBP'),
                 value=100.00
             )
         )
@@ -189,13 +189,12 @@ def create_link_token_for_payment():
                 payment_id=payment_id
             )
         )
+
         if PLAID_REDIRECT_URI!=None:
             linkRequest['redirect_uri']=PLAID_REDIRECT_URI
-        print("linkRequest!!!!!!!!!!!!!!!!")
-        print(linkRequest)
-        response = client.link_token_create(linkRequest)
-        pretty_print_response(response.to_dict())
-        return jsonify(response.to_dict())
+        linkResponse = client.link_token_create(linkRequest)
+        pretty_print_response(linkResponse.to_dict())
+        return jsonify(linkResponse.to_dict())
     except plaid.ApiException as e:
         return json.loads(e.body)
 
