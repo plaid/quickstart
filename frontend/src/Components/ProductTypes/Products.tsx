@@ -83,6 +83,7 @@ const Products = () => {
         transformData={transformBalanceData}
       />
       {products.includes("investments") && (
+        <>
         <Endpoint
           endpoint="holdings"
           name="Investments"
@@ -102,6 +103,7 @@ const Products = () => {
         brokerage, or investments institution."
         transformData={transformInvestmentTransactionsData}
       />
+      </>
       )}
       {products.includes("transfer") && (
         <Endpoint
