@@ -453,7 +453,7 @@ def get_investments_transactions():
             request)
         pretty_print_response(response.to_dict())
         return jsonify(
-            {'error': None, 'investment_transactions': response.to_dict()})
+            {'error': None, 'investments_transactions': response.to_dict()})
 
     except plaid.ApiException as e:
         error_response = format_error(e)
