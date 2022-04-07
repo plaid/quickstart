@@ -48,10 +48,10 @@ public class InvestmentTransactionsResource {
 
   private static class InvestmentTransactionsResponse {
     @JsonProperty
-    private InvestmentsTransactionsGetResponse investmentTransactions;
+    private InvestmentsTransactionsGetResponse investmentsTransactions;
 
     public InvestmentTransactionsResponse(InvestmentsTransactionsGetResponse investmentTransactions) {
-      this.investmentTransactions = investmentTransactions;
+      this.investmentsTransactions = investmentTransactions;
     }
   }
 }
