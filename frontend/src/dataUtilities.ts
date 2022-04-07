@@ -483,16 +483,16 @@ export const transformInvestmentsData = (data: InvestmentData) => {
 
 interface InvestmentsTransactionData {
   error: null;
-  investmentTransactions: InvestmentsTransactionsGetResponse;
+  investments_transactions: InvestmentsTransactionsGetResponse;
 }
 
 export const transformInvestmentTransactionsData = (data: InvestmentsTransactionData) => {
-  const investmentTransactionsData = data.investmentTransactions.investment_transactions!.sort(function (a,b) {
+  const investmentTransactionsData = data.investments_transactions.investment_transactions!.sort(function (a,b) {
     if (a.account_id > b.account_id) return 1;
     return -1;
   });
   return investmentTransactionsData.map((investmentTransaction) => {
-    const security = data.investmentTransactions.securities!.filter(
+    const security = data.investments_transactions.securities!.filter(
       (sec) => sec.security_id === investmentTransaction.security_id
     )[0];
 

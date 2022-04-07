@@ -249,12 +249,12 @@ app.get('/api/investments_transactions', function (request, response, next) {
         start_date: startDate,
         end_date: endDate,
       };
-      const investmentsTransactionsResponse =
+      const investmentTransactionsResponse =
         await client.investmentsTransactionsGet(configs);
-      prettyPrintResponse(investmentsTransactionsResponse);
+      prettyPrintResponse(investmentTransactionsResponse);
       response.json({
         error: null,
-        investments_transactions: investmentsTransactionsResponse.data,
+        investments_transactions: investmentTransactionsResponse.data,
       });
     })
     .catch(next);
