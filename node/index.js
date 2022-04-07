@@ -237,7 +237,7 @@ app.get('/api/transactions', function (request, response, next) {
 
 // Retrieve Investment Transactions for an Item
 // https://plaid.com/docs/#investments
-app.get('/api/investment_transactions', function (request, response, next) {
+app.get('/api/investments_transactions', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
       const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
@@ -247,12 +247,12 @@ app.get('/api/investment_transactions', function (request, response, next) {
         start_date: startDate,
         end_date: endDate,
       };
-      const investmentTransactionsResponse =
-        await client.investmentTransactionsGet(configs);
-      prettyPrintResponse(investmentTransactionsResponse);
+      const investmentsTransactionsResponse =
+        await client.investmentsTransactionsGet(configs);
+      prettyPrintResponse(investmentsTransactionsResponse);
       response.json({
         error: null,
-        investment_transactions: investmentTransactionsResponse.data,
+        investments_transactions: investmentsTransactionsResponse.data,
       });
     })
     .catch(next);
