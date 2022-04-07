@@ -95,7 +95,7 @@ const Products = () => {
         transformData={transformInvestmentsData}
       />
       <Endpoint
-        endpoint="investment_transactions"
+        endpoint="investments_transactions"
         name="Investments Transactions"
         categories={investmentsTransactionsCategories}
         schema="/investments/transactions/get"
