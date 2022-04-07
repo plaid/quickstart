@@ -7,6 +7,7 @@ const util = require('util');
 const express = require('express');
 const bodyParser = require('body-parser');
 const moment = require('moment');
+const cors = require('cors');
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -49,7 +50,7 @@ let ITEM_ID = null;
 // persistent data store
 let PAYMENT_ID = null;
 // The transfer_id is only relevant for Transfer ACH product.
-// We store the transfer_id in memomory - in produciton, store it in a secure
+// We store the transfer_id in memory - in production, store it in a secure
 // persistent data store
 let TRANSFER_ID = null;
 
@@ -76,6 +77,7 @@ app.use(
   }),
 );
 app.use(bodyParser.json());
+app.use(cors());
 
 app.post('/api/info', function (request, response, next) {
   response.json({
@@ -141,7 +143,7 @@ app.post(
             recipient_id: recipientId,
             reference: 'paymentRef',
             amount: {
-              value: 12.34,
+              value: 1.23,
               currency: 'GBP',
             },
           });

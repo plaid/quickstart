@@ -14,12 +14,6 @@ Here you'll find full example integration apps using our [**client libraries**][
   - [Special instructions for Windows](#special-instructions-for-windows)
 - [2. Set up your environment variables](#2-set-up-your-environment-variables)
 - [3. Run the quickstart](#3-run-the-quickstart)
-  - [Run with Docker](#run-with-docker)
-    - [Pre-requisites](#pre-requisites-1)
-    - [Running](#running-1)
-      - [Start the container](#start-the-container)
-      - [View the logs](#view-the-logs)
-      - [Stop the container](#stop-the-container)
   - [Run without Docker](#run-without-docker)
     - [Pre-requisites](#pre-requisites)
     - [1. Running the backend](#1-running-the-backend)
@@ -29,7 +23,15 @@ Here you'll find full example integration apps using our [**client libraries**][
       - [Go](#go)
       - [Java](#java)
     - [2. Running the frontend](#2-running-the-frontend)
+  - [Run with Docker](#run-with-docker)
+    - [Pre-requisites](#pre-requisites-1)
+    - [Running](#running-1)
+      - [Start the container](#start-the-container)
+      - [View the logs](#view-the-logs)
+      - [Stop the container](#stop-the-container)
+- [Test credentials](#test-credentials)
 - [Testing OAuth](#testing-oauth)
+- [Payment Initiation](#payment-initiation)
 
 <!-- tocstop -->
 
@@ -72,57 +74,9 @@ the dashboard: https://dashboard.plaid.com/account/keys
 
 ## 3. Run the Quickstart
 
-There are two ways to run the various language quickstarts in this repository. You can simply choose to use Docker, or you can run the
-code directly. If you would like to run the code directly, skip to the
-[Run without Docker](#run-without-docker) section.
-
-### Run with Docker
-
-#### Pre-requisites
-
-- `make` available at your command line
-- Docker installed and running on your machine: https://docs.docker.com/get-docker/
-- Your environment variables populated in `.env`
-- If using Windows, a working Linux installation on Windows 10. If you are using Windows and do not already have WSL or Cygwin configured, we recommend [running without Docker](#run-without-docker).
-
-#### Running
-
-There are three basic `make` commands available
-
-- `up`: builds and starts the container
-- `logs`: tails logs
-- `stop`: stops the container
-
-Each of these should be used with a `language` argument, which is one of `node`, `python`, `ruby`,
-`java`, or `go`. If unspecified, the default is `node`.
-
-##### Start the container
-
-```bash
-make up language=node
-```
-
-The quickstart backend is now running on http://localhost:8000 and frontend on http://localhost:3000.
-
-If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
-`.env` file, simply run `make up language=node` again to rebuild and restart the container.
-
-If you experience a Docker connection error when running the command above, try the following:
-
-- Make sure Docker is running
-- Try running the command prefixed with `sudo`
-
-##### View the logs
-
-```bash
-make logs language=node
-```
-
-##### Stop the container
-
-```bash
-make stop language=node
-```
+There are two ways to run the various language quickstarts in this repository. You can choose to run the
+code directly or you can run it in Docker. If you would like to run the code via Docker, skip to the
+[Run with Docker](#run-with-docker) section.
 
 ### Run without Docker
 
@@ -209,16 +163,112 @@ $ npm ci
 $ npm start
 ```
 
+### Run with Docker
+
+#### Pre-requisites
+
+- `make` available at your command line
+- Docker installed and running on your machine: https://docs.docker.com/get-docker/
+- Your environment variables populated in `.env`
+- If using Windows, a working Linux installation on Windows 10. If you are using Windows and do not already have WSL or Cygwin configured, we recommend [running without Docker](#run-without-docker).
+
+#### Running
+
+There are three basic `make` commands available
+
+- `up`: builds and starts the container
+- `logs`: tails logs
+- `stop`: stops the container
+
+Each of these should be used with a `language` argument, which is one of `node`, `python`, `ruby`,
+`java`, or `go`. If unspecified, the default is `node`.
+
+##### Start the container
+
+```bash
+make up language=node
+```
+
+The quickstart backend is now running on http://localhost:8000 and frontend on http://localhost:3000.
+
+If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
+`.env` file, simply run `make up language=node` again to rebuild and restart the container.
+
+If you experience a Docker connection error when running the command above, try the following:
+
+- Make sure Docker is running
+- Try running the command prefixed with `sudo`
+
+##### View the logs
+
+```bash
+make logs language=node
+```
+
+##### Stop the container
+
+```bash
+make stop language=node
+```
+
+## Test credentials
+
+In Sandbox, you can log in to any supported institution (except Capital One) using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`.
+
+In Development or Production, use real-life credentials.
+
 ## Testing OAuth
 
 Some institutions (primarily in Europe, but a small number in the US) require an OAuth redirect
 authentication flow, where the end user is redirected to the bank’s website or mobile app to
-authenticate. For this flow, you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`.
-You will also need to register this localhost redirect URI in the
+authenticate. To test this flow in sandbox, you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to register this localhost redirect URI in the
 [Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section].
 
-OAuth flows are only testable in the `sandbox` environment in this Quickstart app due to an https
-`redirect_uri` being required in other environments. Additionally, if you want to use the [Payment
+To test the OAuth flow in sandbox, choose 'Playtypus OAuth Bank' from the list of financial institutions in Plaid Link.
+
+### Instructions for using https with localhost
+
+If you want to test OAuth in development, you need to use https and set `PLAID_REDIRECT_URI=https://localhost:3000/` in `.env`. In order to run your localhost on https, you will need to create a self-signed certificate and add it to the frontend root folder. You can use the following instructions to do this. Note that self-signed certificates should be used for testing purposes only, never for actual deployments.
+
+In your terminal, change to the frontend folder:
+
+```bash
+cd frontend
+```
+
+Use homebrew to install mkcert:
+
+```bash
+brew install mkcert
+```
+
+Then create your certificate for localhost:
+
+```bash
+mkcert -install
+mkcert localhost
+```
+
+This will create a certificate file localhost.pem and a key file localhost-key.pem inside your client folder.
+
+Then in the package.json file in the frontend folder, replace this line on line 28
+
+```bash
+"start": "react-scripts start",
+```
+
+with this line instead:
+
+```bash
+"start": "HTTPS=true SSL_CRT_FILE=localhost.pem SSL_KEY_FILE=localhost-key.pem react-scripts start",
+```
+
+After starting up the Quickstart, you can now view it at https://localhost:3000. If you are on Windows, you
+may still get an invalid certificate warning on your browser. If so, click on "advanced" and proceed. Also on Windows, the frontend may still try to load http://localhost:3000 and you may have to access https://localhost:3000 manually.
+
+## Payment Initiation
+
+If you want to use the [Payment
 Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this
 product enabled.
 

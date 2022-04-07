@@ -514,7 +514,7 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
     const obj: DataItem = {
       name: account.name,
       type: "credit card",
-      date: credit.last_payment_date,
+      date: credit.last_payment_date ?? "",
       amount: formatCurrency(
         credit.last_payment_amount,
         account.balances.iso_currency_code
