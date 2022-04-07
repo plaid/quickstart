@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 
 import retrofit2.Response;
 
-@Path("/investment_transactions")
+@Path("/investments_transactions")
 @Produces(MediaType.APPLICATION_JSON)
 public class InvestmentTransactionsResource {
   private final PlaidApi plaidClient;

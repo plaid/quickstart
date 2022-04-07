@@ -454,6 +454,10 @@ interface InvestmentData {
 }
 
 export const transformInvestmentsData = (data: InvestmentData) => {
+  // outdated java libraries
+  if (data.holdings == null) {
+    return []
+  }
   const holdingsData = data.holdings.holdings!.sort(function (a, b) {
     if (a.account_id > b.account_id) return 1;
     return -1;
@@ -487,6 +491,10 @@ interface InvestmentsTransactionData {
 }
 
 export const transformInvestmentTransactionsData = (data: InvestmentsTransactionData) => {
+  // outdated java libraries
+  if (data.investments_transactions == null) {
+    return []
+  }
   const investmentTransactionsData = data.investments_transactions.investment_transactions!.sort(function (a,b) {
     if (a.account_id > b.account_id) return 1;
     return -1;
