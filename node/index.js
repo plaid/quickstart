@@ -302,6 +302,20 @@ app.get('/api/holdings', function (request, response, next) {
     .catch(next);
 });
 
+// Retrieve Liabilities for an Item
+// https://plaid.com/docs/#liabilities
+app.get('/api/liabilities', function (request, response, next) {
+  Promise.resolve()
+    .then(async function () {
+      const liabilitiesResponse = await client.liabilitiesGet({
+        access_token: ACCESS_TOKEN,
+      });
+      prettyPrintResponse(liabilitiesResponse);
+      response.json({ error: null, liabilities: liabilitiesResponse.data });
+    })
+    .catch(next);
+});
+
 // Retrieve information about an Item
 // https://plaid.com/docs/#retrieve-item
 app.get('/api/item', function (request, response, next) {
@@ -426,6 +440,19 @@ app.get('/api/payment', function (request, response, next) {
     })
     .catch(next);
 });
+
+//TO-DO: This endpoint will be deprecated in the near future
+app.get('/api/income/verification/paystubs', function (request, response, next) {
+  Promise.resolve()
+  .then(async function () {
+    const paystubsGetResponse = await client.incomeVerificationPaystubsGet({
+      access_token: ACCESS_TOKEN
+    });
+    prettyPrintResponse(paystubsGetResponse);
+    response.json({ error: null, paystubs: paystubsGetResponse.data})
+  })
+  .catch(next);
+})
 
 app.use('/api', function (error, request, response, next) {
   prettyPrintResponse(error.response);

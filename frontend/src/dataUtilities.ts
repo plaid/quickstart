@@ -12,6 +12,9 @@ import {
   AssetReportGetResponse,
   AssetReport,
   TransferGetResponse,
+  IncomeVerificationPaystubsGetResponse,
+  Paystub,
+  Earnings,
 } from "plaid/dist/api";
 
 const formatCurrency = (
@@ -105,6 +108,12 @@ interface TransferDataItem {
   network: string;
 }
 
+interface IncomePaystubsDataItem {
+  description: string;
+  currentAmount: number | null;
+  currency: number | null;
+}
+
 export interface ErrorDataItem {
   error_type: string;
   error_code: string;
@@ -125,7 +134,8 @@ export type DataItem =
   | ItemDataItem
   | PaymentDataItem
   | AssetsDataItem
-  | TransferDataItem;
+  | TransferDataItem
+  | IncomePaystubsDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -361,6 +371,21 @@ export const transferCategories: Array<Categories> = [
   },
 ];
 
+export const incomePaystubsCategories: Array<Categories> = [
+  {
+    title: "Description",
+    field: "description",
+  },
+  {
+    title: "Current Amount",
+    field: "currentAmount",
+  },
+  {
+    title: "Currency",
+    field: "currency",
+  }
+]
+
 export const transformAuthData = (data: AuthGetResponse) => {
   return data.numbers.ach!.map((achNumbers) => {
     const account = data.accounts!.filter((a) => {
@@ -505,10 +530,17 @@ export const transformInvestmentTransactionsData = (data: InvestmentsTransaction
   });
 };
 
-export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
-  const liabilitiesData = data.liabilities;
+interface LiabilitiesDataResponse {
+  error: null;
+  liabilities: LiabilitiesGetResponse;
+}
+
+export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
+  const liabilitiesData = data.liabilities.liabilities;
+  //console.log(liabilitiesData)
+  //console.log("random")
   const credit = liabilitiesData.credit!.map((credit) => {
-    const account = data.accounts.filter(
+    const account = data.liabilities.accounts.filter(
       (acc) => acc.account_id === credit.account_id
     )[0];
     const obj: DataItem = {
@@ -524,7 +556,7 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
   });
 
   const mortgages = liabilitiesData.mortgage?.map((mortgage) => {
-    const account = data.accounts.filter(
+    const account = data.liabilities.accounts.filter(
       (acc) => acc.account_id === mortgage.account_id
     )[0];
     const obj: DataItem = {
@@ -540,7 +572,7 @@ export const transformLiabilitiesData = (data: LiabilitiesGetResponse) => {
   });
 
   const student = liabilitiesData.student?.map((student) => {
-    const account = data.accounts.filter(
+    const account = data.liabilities.accounts.filter(
       (acc) => acc.account_id === student.account_id
     )[0];
     const obj: DataItem = {
@@ -645,3 +677,24 @@ export const transformAssetsData = (data: AssetResponseData) => {
     });
   });
 };
+
+interface IncomePaystub {
+  paystubs: IncomeVerificationPaystubsGetResponse,
+}
+
+export const transformIncomePaystubsData = (data: IncomePaystub) => {
+  const paystubsItemsArray: Array<Paystub> = data.paystubs.paystubs
+  var finalArray: Array<IncomePaystubsDataItem> = []
+  for (var i = 0; i < paystubsItemsArray.length; i++){
+    var ActualEarningVariable: any = paystubsItemsArray[i].earnings
+    for (var j = 0; j < ActualEarningVariable.breakdown.length; j++){
+      var payStubItem: IncomePaystubsDataItem = {
+        description: paystubsItemsArray[i].employer.name + '_' + ActualEarningVariable.breakdown[j].description,
+        currentAmount: ActualEarningVariable.breakdown[j].current_amount,
+        currency: ActualEarningVariable.breakdown[j].iso_currency_code
+      }
+    finalArray.push(payStubItem)
+  }
+}
+  return finalArray
+}
