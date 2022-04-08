@@ -42,6 +42,7 @@ const Products = () => {
           transformData={transformPaymentData}
         />
       )}
+      {products.includes("auth") && (
       <Endpoint
         endpoint="auth"
         name="Auth"
@@ -50,6 +51,8 @@ const Products = () => {
         description="Retrieve account and routing numbers for checking and savings accounts."
         transformData={transformAuthData}
       />
+      )}
+      {products.includes("transactions") && (
       <Endpoint
         endpoint="transactions"
         name="Transactions"
@@ -58,6 +61,8 @@ const Products = () => {
         description="Retrieve transactions for credit and depository accounts."
         transformData={transformTransactionsData}
       />
+      )}
+      {products.includes("identity") && (
       <Endpoint
         endpoint="identity"
         name="Identity"
@@ -67,6 +72,7 @@ const Products = () => {
         fraud by comparing user-submitted data to validate identity."
         transformData={transformIdentityData}
       />
+      )}
       {products.includes("assets") && (
         <Endpoint
           endpoint="assets"
@@ -77,6 +83,7 @@ const Products = () => {
           transformData={transformAssetsData}
         />
       )}
+      {products.includes("balance") && (
       <Endpoint
         endpoint="balance"
         name="Balance"
@@ -86,6 +93,7 @@ const Products = () => {
         fees."
         transformData={transformBalanceData}
       />
+      )}
       {products.includes("investments") && (
         <>
         <Endpoint
