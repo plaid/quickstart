@@ -52,7 +52,6 @@ const Products = () => {
         transformData={transformAuthData}
       />
       )}
-      {products.includes("transactions") && (
       <Endpoint
         endpoint="transactions"
         name="Transactions"
@@ -61,7 +60,6 @@ const Products = () => {
         description="Retrieve transactions for credit and depository accounts."
         transformData={transformTransactionsData}
       />
-      )}
       {products.includes("identity") && (
       <Endpoint
         endpoint="identity"
@@ -83,7 +81,6 @@ const Products = () => {
           transformData={transformAssetsData}
         />
       )}
-      {products.includes("balance") && (
       <Endpoint
         endpoint="balance"
         name="Balance"
@@ -93,7 +90,6 @@ const Products = () => {
         fees."
         transformData={transformBalanceData}
       />
-      )}
       {products.includes("investments") && (
         <>
         <Endpoint
