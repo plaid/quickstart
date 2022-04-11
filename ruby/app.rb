@@ -183,7 +183,7 @@ end
 
 # Retrieve Investment Transactions for an Item
 # https://plaid.com/docs/#investments
-get '/api/investment_transactions' do
+get '/api/investments_transactions' do
   begin
     start_date = (Date.today - 30)
     end_date = Date.today
@@ -197,7 +197,7 @@ get '/api/investment_transactions' do
     transactions_response = client.investments_transactions_get(investments_transactions_get_request)
     pretty_print_response(transactions_response.to_hash)
     content_type :json
-    { investment_transactions: transactions_response.to_hash }.to_json
+    { investments_transactions: transactions_response.to_hash }.to_json
   rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)

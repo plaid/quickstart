@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 
 import retrofit2.Response;
 
-@Path("/investment_transactions")
+@Path("/investments_transactions")
 @Produces(MediaType.APPLICATION_JSON)
 public class InvestmentTransactionsResource {
   private final PlaidApi plaidClient;
@@ -48,10 +48,10 @@ public class InvestmentTransactionsResource {
 
   private static class InvestmentTransactionsResponse {
     @JsonProperty
-    private InvestmentsTransactionsGetResponse investmentTransactions;
+    private InvestmentsTransactionsGetResponse investmentsTransactions;
 
     public InvestmentTransactionsResponse(InvestmentsTransactionsGetResponse investmentTransactions) {
-      this.investmentTransactions = investmentTransactions;
+      this.investmentsTransactions = investmentTransactions;
     }
   }
 }

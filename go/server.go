@@ -109,7 +109,7 @@ func main() {
 	r.GET("/api/payment", payment)
 	r.GET("/api/create_public_token", createPublicToken)
 	r.POST("/api/create_link_token", createLinkToken)
-	r.GET("/api/investment_transactions", investmentTransactions)
+	r.GET("/api/investments_transactions", investmentTransactions)
 	r.GET("/api/holdings", holdings)
 	r.GET("/api/assets", assets)
 	r.GET("/api/transfer", transfer)
@@ -395,7 +395,7 @@ func investmentTransactions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"investment_transactions": invTxResp,
+		"investments_transactions": invTxResp,
 	})
 }
 

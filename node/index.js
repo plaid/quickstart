@@ -239,7 +239,7 @@ app.get('/api/transactions', function (request, response, next) {
 
 // Retrieve Investment Transactions for an Item
 // https://plaid.com/docs/#investments
-app.get('/api/investment_transactions', function (request, response, next) {
+app.get('/api/investments_transactions', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
       const startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
@@ -250,11 +250,11 @@ app.get('/api/investment_transactions', function (request, response, next) {
         end_date: endDate,
       };
       const investmentTransactionsResponse =
-        await client.investmentTransactionsGet(configs);
+        await client.investmentsTransactionsGet(configs);
       prettyPrintResponse(investmentTransactionsResponse);
       response.json({
         error: null,
-        investment_transactions: investmentTransactionsResponse.data,
+        investments_transactions: investmentTransactionsResponse.data,
       });
     })
     .catch(next);
@@ -298,6 +298,20 @@ app.get('/api/holdings', function (request, response, next) {
       });
       prettyPrintResponse(holdingsResponse);
       response.json({ error: null, holdings: holdingsResponse.data });
+    })
+    .catch(next);
+});
+
+// Retrieve Liabilities for an Item
+// https://plaid.com/docs/#liabilities
+app.get('/api/liabilities', function (request, response, next) {
+  Promise.resolve()
+    .then(async function () {
+      const liabilitiesResponse = await client.liabilitiesGet({
+        access_token: ACCESS_TOKEN,
+      });
+      prettyPrintResponse(liabilitiesResponse);
+      response.json({ error: null, liabilities: liabilitiesResponse.data });
     })
     .catch(next);
 });
@@ -426,6 +440,19 @@ app.get('/api/payment', function (request, response, next) {
     })
     .catch(next);
 });
+
+//TO-DO: This endpoint will be deprecated in the near future
+app.get('/api/income/verification/paystubs', function (request, response, next) {
+  Promise.resolve()
+  .then(async function () {
+    const paystubsGetResponse = await client.incomeVerificationPaystubsGet({
+      access_token: ACCESS_TOKEN
+    });
+    prettyPrintResponse(paystubsGetResponse);
+    response.json({ error: null, paystubs: paystubsGetResponse.data})
+  })
+  .catch(next);
+})
 
 app.use('/api', function (error, request, response, next) {
   prettyPrintResponse(error.response);

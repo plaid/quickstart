@@ -9,17 +9,23 @@ import {
   identityCategories,
   balanceCategories,
   investmentsCategories,
+  investmentsTransactionsCategories,
+  liabilitiesCategories,
   paymentCategories,
   assetsCategories,
+  incomePaystubsCategories,
   transferCategories,
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
   transformInvestmentsData,
+  transformInvestmentTransactionsData,
+  transformLiabilitiesData,
   transformIdentityData,
   transformPaymentData,
   transformAssetsData,
   transformTransferData,
+  transformIncomePaystubsData,
 } from "../../dataUtilities";
 
 const Products = () => {
@@ -81,6 +87,7 @@ const Products = () => {
         transformData={transformBalanceData}
       />
       {products.includes("investments") && (
+        <>
         <Endpoint
           endpoint="holdings"
           name="Investments"
@@ -89,8 +96,26 @@ const Products = () => {
           description="Retrieve investment holdings on file with the bank,
         brokerage, or investment institution. Analyze over-exposure
         to market segments."
-          transformData={transformInvestmentsData}
-        />
+        transformData={transformInvestmentsData}
+      />
+      <Endpoint
+        endpoint="investments_transactions"
+        name="Investments Transactions"
+        categories={investmentsTransactionsCategories}
+        schema="/investments/transactions/get"
+        description="Retrieve investment transactions on file with the bank,
+        brokerage, or investments institution."
+        transformData={transformInvestmentTransactionsData}
+      />
+      <Endpoint
+        endpoint="liabilities"
+        name="Liabilities"
+        categories={liabilitiesCategories}
+        schema="/liabilities/get"
+        description="Retrieve liabilities and various details about an Item with loan or credit accounts."
+        transformData={transformLiabilitiesData}
+      />
+      </>
       )}
       {products.includes("transfer") && (
         <Endpoint
@@ -101,6 +126,16 @@ const Products = () => {
           description="Retrieve information about your latest ACH Transfer."
           transformData={transformTransferData}
         />
+      )}
+      {products.includes("income_verification") && (
+        <Endpoint
+          endpoint="/income/verification/paystubs"
+          name="Income Paystubs"
+          categories={incomePaystubsCategories}
+          schema="/income/verification/paystubs"
+          description="(Deprecated) Retrieve information from the paystubs used for income verification"
+          transformData={transformIncomePaystubsData}
+          />
       )}
     </ProductTypesContainer>
   );

@@ -13,6 +13,7 @@ import com.plaid.client.model.Products;
 
 import java.util.List;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.ws.rs.POST;
@@ -29,6 +30,7 @@ public class LinkTokenResource {
   private final List<String> plaidProducts;
   private final List<String> countryCodes;
   private final String redirectUri;
+  private final List<Products> correctedPlaidProducts;
 
   public LinkTokenResource(PlaidApi plaidClient, List<String> plaidProducts,
     List<String> countryCodes, String redirectUri) {
@@ -36,6 +38,7 @@ public class LinkTokenResource {
     this.plaidProducts = plaidProducts;
     this.countryCodes = countryCodes;
     this.redirectUri = redirectUri;
+    this.correctedPlaidProducts = new ArrayList<>();
   }
 
   public static class LinkToken {
@@ -55,10 +58,14 @@ public class LinkTokenResource {
     LinkTokenCreateRequestUser user = new LinkTokenCreateRequestUser()
 		.clientUserId(clientUserId);
 
+    for (int i = 0; i < this.plaidProducts.size(); i++){
+      this.correctedPlaidProducts.add(Products.fromValue(this.plaidProducts.get(i)));
+    };
+
 		LinkTokenCreateRequest request = new LinkTokenCreateRequest()
 			.user(user)
 			.clientName("Quickstart Client")
-			.products(Arrays.asList(Products.AUTH, Products.TRANSACTIONS))
+			.products(this.correctedPlaidProducts)
 			.countryCodes(Arrays.asList(CountryCode.US, CountryCode.CA))
 			.language("en")
       .redirectUri(this.redirectUri);
