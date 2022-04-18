@@ -31,6 +31,7 @@ public class LinkTokenResource {
   private final List<String> countryCodes;
   private final String redirectUri;
   private final List<Products> correctedPlaidProducts;
+  private final List<CountryCode> correctedCountryCodes;
 
   public LinkTokenResource(PlaidApi plaidClient, List<String> plaidProducts,
     List<String> countryCodes, String redirectUri) {
@@ -39,6 +40,7 @@ public class LinkTokenResource {
     this.countryCodes = countryCodes;
     this.redirectUri = redirectUri;
     this.correctedPlaidProducts = new ArrayList<>();
+    this.correctedCountryCodes = new ArrayList<>();
   }
 
   public static class LinkToken {
@@ -62,11 +64,15 @@ public class LinkTokenResource {
       this.correctedPlaidProducts.add(Products.fromValue(this.plaidProducts.get(i)));
     };
 
+    for (int i = 0; i < this.countryCodes.size(); i++){
+      this.correctedCountryCodes.add(CountryCode.fromValue(this.countryCodes.get(i)));
+    };
+
 		LinkTokenCreateRequest request = new LinkTokenCreateRequest()
 			.user(user)
 			.clientName("Quickstart Client")
 			.products(this.correctedPlaidProducts)
-			.countryCodes(Arrays.asList(CountryCode.US, CountryCode.CA))
+			.countryCodes(this.correctedCountryCodes)
 			.language("en")
       .redirectUri(this.redirectUri);
 
