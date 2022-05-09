@@ -22,6 +22,7 @@ Here you'll find full example integration apps using our [**client libraries**][
       - [Ruby](#ruby)
       - [Go](#go)
       - [Java](#java)
+      - [.NET](#net) (community support only)
     - [2. Running the frontend](#2-running-the-frontend)
   - [Run with Docker](#run-with-docker)
     - [Pre-requisites](#pre-requisites-1)
@@ -154,6 +155,10 @@ cd ./java
 mvn clean package
 ./start.sh
 ```
+
+##### .NET
+
+A community-supported implementation of the Plaid Quickstart using the [Going.Plaid](https://github.com/viceroypenguin/Going.Plaid) client library can be found at [PlaidQuickstartBlazor](https://github.com/jcoliz/PlaidQuickstartBlazor). Note that Plaid does not provide first-party support for .NET client libraries and that this Quickstart and client library are not created, reviewed, or supported by Plaid. 
 
 #### 2. Running the frontend
 
