@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -320,26 +321,45 @@ func identity(c *gin.Context) {
 func transactions(c *gin.Context) {
 	ctx := context.Background()
 
-	// pull transactions for the past 30 days
-	endDate := time.Now().Local().Format("2006-01-02")
-	startDate := time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02")
+	// Set cursor to empty to receive all historical updates
+	var cursor *string
 
-	transactionsResp, _, err := client.PlaidApi.TransactionsGet(ctx).TransactionsGetRequest(
-		*plaid.NewTransactionsGetRequest(
-			accessToken,
-			startDate,
-			endDate,
-		),
-	).Execute()
+	// New transaction updates since "cursor"
+	var added []plaid.Transaction
+	var modified []plaid.Transaction
+	var removed []plaid.RemovedTransaction // Removed transaction ids
+	hasMore := true
+	// Iterate through each page of new transaction updates for item
+	for hasMore {
+		request := plaid.NewTransactionsSyncRequest(accessToken)
+		if cursor != nil {
+			request.SetCursor(*cursor)
+		}
+		resp, _, err := client.PlaidApi.TransactionsSync(
+			ctx,
+		).TransactionsSyncRequest(*request).Execute()
+		if err != nil {
+			renderError(c, err)
+			return
+		}
 
-	if err != nil {
-		renderError(c, err)
-		return
+		// Add this page of results
+		added = append(added, resp.GetAdded()...)
+		modified = append(modified, resp.GetModified()...)
+		removed = append(removed, resp.GetRemoved()...)
+		hasMore = resp.GetHasMore()
+		// Update cursor to the next cursor
+		nextCursor := resp.GetNextCursor()
+		cursor = &nextCursor
 	}
 
+	sort.Slice(added, func(i, j int) bool {
+		return added[i].GetDate() < added[j].GetDate()
+	})
+	latestTransactions := added[len(added)-9:]
+
 	c.JSON(http.StatusOK, gin.H{
-		"accounts":     transactionsResp.GetAccounts(),
-		"transactions": transactionsResp.GetTransactions(),
+		"latest_transactions": latestTransactions,
 	})
 }
 
@@ -588,8 +608,6 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 	).Execute()
 
 	accountID := accountsGetResp.GetAccounts()[0].AccountId
-
-
 
 	transferAuthorizationCreateUser := plaid.NewTransferUserInRequest("FirstName LastName")
 	transferAuthorizationCreateRequest := plaid.NewTransferAuthorizationCreateRequest(

@@ -54,8 +54,8 @@ const Products = () => {
         endpoint="transactions"
         name="Transactions"
         categories={transactionsCategories}
-        schema="/transactions/get/"
-        description="Retrieve transactions for credit and depository accounts."
+        schema="/transactions/sync/"
+        description="Retrieve transactions or incremental updates for credit and depository accounts."
         transformData={transformTransactionsData}
       />
       <Endpoint

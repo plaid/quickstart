@@ -1,13 +1,17 @@
 package com.plaid.quickstart.resources;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.plaid.client.request.PlaidApi;
-import com.plaid.client.model.TransactionsGetRequest;
-import com.plaid.client.model.TransactionsGetRequestOptions;
-import com.plaid.client.model.TransactionsGetResponse;
-import com.plaid.client.model.Error;
+import com.plaid.client.model.TransactionsSyncRequest;
+import com.plaid.client.model.TransactionsSyncResponse;
+import com.plaid.client.model.Transaction;
+import com.plaid.client.model.RemovedTransaction;
 import com.plaid.quickstart.QuickstartApplication;
 
 import javax.ws.rs.GET;
@@ -15,10 +19,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import jersey.repackaged.com.google.common.base.Throwables;
 import retrofit2.Response;
-
-import com.google.gson.Gson;
 
 @Path("/transactions")
 @Produces(MediaType.APPLICATION_JSON)
@@ -31,36 +32,52 @@ public class TransactionsResource {
   }
 
   @GET
-  public TransactionsGetResponse getTransactions() throws IOException {
-    LocalDate startDate = LocalDate.now().minusDays(30);
-    LocalDate endDate = LocalDate.now();
+  public TransactionsResponse getTransactions() throws IOException {
+    // Set cursor to empty to receive all historical updates
+    String cursor = null;
 
-    TransactionsGetRequestOptions options = new TransactionsGetRequestOptions()
-    .count(100);
+    // New transaction updates since "cursor"
+    List<Transaction> added = new ArrayList<Transaction>();
+    List<Transaction> modified = new ArrayList<Transaction>();
+    List<RemovedTransaction> removed = new ArrayList<RemovedTransaction>();
+    boolean hasMore = true;
+    // Iterate through each page of new transaction updates for item
+    while (hasMore) {
+      TransactionsSyncRequest request = new TransactionsSyncRequest()
+        .accessToken(QuickstartApplication.accessToken)
+        .cursor(cursor);
 
-    TransactionsGetRequest request = new TransactionsGetRequest()
-      .accessToken(QuickstartApplication.accessToken)
-      .startDate(startDate)
-      .endDate(endDate)
-      .options(options);
+      Response<TransactionsSyncResponse> response = plaidClient.transactionsSync(request).execute();
+      TransactionsSyncResponse responseBody = response.body();
 
-    Response<TransactionsGetResponse> response = null;
-    for (int i = 0; i < 5; i++){
-      response = plaidClient.transactionsGet(request).execute();
-      if (response.isSuccessful()){
-        break;
-      } else {
-        try {
-          Gson gson = new Gson();
-          Error error = gson.fromJson(response.errorBody().string(), Error.class);
-          error.getErrorType().equals(Error.ErrorTypeEnum.ITEM_ERROR);
-          error.getErrorCode().equals("PRODUCT_NOT_READY");
-          Thread.sleep(3000);
-        } catch (Exception e) {
-          throw Throwables.propagate(e);
-        }
-      }
+      // Add this page of results
+      added.addAll(responseBody.getAdded());
+      modified.addAll(responseBody.getModified());
+      removed.addAll(responseBody.getRemoved());
+      hasMore = responseBody.getHasMore();
+      // Update cursor to the next cursor
+      cursor = responseBody.getNextCursor();
     }
-    return response.body();
+
+    // Return the 8 most recent transactions
+    added.sort(new TransactionsResource.CompareTransactionDate());
+    List<Transaction> latestTransactions = added.subList(Math.max(added.size() - 8, 0), added.size());
+    return new TransactionsResponse(latestTransactions);
+  }
+
+  private class CompareTransactionDate implements Comparator<Transaction> {
+    @Override
+    public int compare(Transaction o1, Transaction o2) {
+        return o1.getDate().compareTo(o2.getDate());
+    }
+  }
+  
+  private static class TransactionsResponse {
+    @JsonProperty
+    private final List<Transaction> latest_transactions;
+  
+    public TransactionsResponse(List<Transaction> latestTransactions) {
+      this.latest_transactions = latestTransactions;
+    }
   }
 }
