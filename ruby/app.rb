@@ -74,20 +74,36 @@ end
 # https://plaid.com/docs/#transactions
 get '/api/transactions' do
   begin
-    start_date = (Date.today - 30)
-    end_date = Date.today
-    transactions_get_request = Plaid::TransactionsGetRequest.new(
-      {
-        access_token: access_token,
-        start_date: start_date,
-        end_date: end_date
-      }
-    )
-    transactions_response =
-      client.transactions_get(transactions_get_request)
-    pretty_print_response(transactions_response.to_hash)
+    # Set cursor to empty to receive all historical updates
+    cursor = ''
+
+    # New transaction updates since "cursor"
+    added = []
+    modified = []
+    removed = [] # Removed transaction ids
+    has_more = TRUE
+    # Iterate through each page of new transaction updates for item
+    while has_more
+      request = Plaid::TransactionsSyncRequest.new(
+        {
+          access_token: access_token,
+          cursor: cursor
+        }
+      )
+      
+      response = client.transactions_sync(request)
+      # Add this page of results
+      added += response.added
+      modified += response.modified
+      removed += response.removed
+      has_more = response.has_more
+      # Update cursor to the next cursor
+      cursor = response.next_cursor
+      pretty_print_response(response.to_hash)
+    end
+    # Return the 8 most recent transactions
     content_type :json
-    transactions_response.to_hash.to_json
+    { latest_transactions: added.sort_by(&:date).last(8).map(&:to_hash) }.to_json
   rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)

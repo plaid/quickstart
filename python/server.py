@@ -20,8 +20,7 @@ from plaid.model.asset_report_user import AssetReportUser
 from plaid.model.asset_report_get_request import AssetReportGetRequest
 from plaid.model.asset_report_pdf_get_request import AssetReportPDFGetRequest
 from plaid.model.auth_get_request import AuthGetRequest
-from plaid.model.transactions_get_request import TransactionsGetRequest
-from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
+from plaid.model.transactions_sync_request import TransactionsSyncRequest
 from plaid.model.identity_get_request import IdentityGetRequest
 from plaid.model.investments_transactions_get_request_options import InvestmentsTransactionsGetRequestOptions
 from plaid.model.investments_transactions_get_request import InvestmentsTransactionsGetRequest
@@ -268,20 +267,36 @@ def get_auth():
 
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
-    # Pull transactions for the last 30 days
-    start_date = (datetime.datetime.now() - timedelta(days=30))
-    end_date = datetime.datetime.now()
+    # Set cursor to empty to receive all historical updates
+    cursor = ''
+
+    # New transaction updates since "cursor"
+    added = []
+    modified = []
+    removed = [] # Removed transaction ids
+    has_more = True
     try:
-        options = TransactionsGetRequestOptions()
-        request = TransactionsGetRequest(
-            access_token=access_token,
-            start_date=start_date.date(),
-            end_date=end_date.date(),
-            options=options
-        )
-        response = client.transactions_get(request)
-        pretty_print_response(response.to_dict())
-        return jsonify(response.to_dict())
+        # Iterate through each page of new transaction updates for item
+        while has_more:
+            request = TransactionsSyncRequest(
+                access_token=access_token,
+                cursor=cursor,
+            )
+            response = client.transactions_sync(request).to_dict()
+            # Add this page of results
+            added.extend(response['added'])
+            modified.extend(response['modified'])
+            removed.extend(response['removed'])
+            has_more = response['has_more']
+            # Update cursor to the next cursor
+            cursor = response['next_cursor']
+            pretty_print_response(response)
+
+        # Return the 8 most recent transactions
+        latest_transactions = sorted(added, key=lambda t: t['date'])[-8:]
+        return jsonify({
+            'latest_transactions': latest_transactions})
+
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
