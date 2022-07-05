@@ -2,7 +2,6 @@ FROM python:alpine
 
 WORKDIR /opt/app
 COPY . .
-WORKDIR /opt/app/python
 
 RUN pip3 install -r requirements.txt
 
