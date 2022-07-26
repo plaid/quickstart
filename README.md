@@ -229,9 +229,9 @@ In Development or Production, use real-life credentials.
 
 View the server logs to see the associated error message with detailed troubleshooting instructions. If you can't view logs locally, view them via the [Dashboard activity logs](https://dashboard.plaid.com/activity/logs). 
 
-### "Connectivity is not supported"
+### "Connectivity not supported"
 
-If you get a "Connectivity is not supported" error when connecting in Link, you probably specified some products in your .env file that the target financial institution doesn't support. Remove the unsupported products and try again.
+If you get a "Connectivity not supported" error when after selecting a financial institution in Link, you probably specified some products in your .env file that the target financial institution doesn't support. Remove the unsupported products and try again.
 
 ## Testing OAuth
 
