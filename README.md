@@ -31,6 +31,7 @@ Here you'll find full example integration apps using our [**client libraries**][
       - [View the logs](#view-the-logs)
       - [Stop the container](#stop-the-container)
 - [Test credentials](#test-credentials)
+- [Troubleshooting](#troubleshooting)
 - [Testing OAuth](#testing-oauth)
 - [Payment Initiation](#payment-initiation)
 
@@ -221,6 +222,16 @@ make stop language=node
 In Sandbox, you can log in to any supported institution (except Capital One) using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`.
 
 In Development or Production, use real-life credentials.
+
+## Troubleshooting
+
+### Can't get a link token, or API calls are 400ing
+
+View the server logs to see the associated error message with detailed troubleshooting instructions. If you can't view logs locally, view them via the [Dashboard activity logs](https://dashboard.plaid.com/activity/logs). 
+
+### "Connectivity not supported"
+
+If you get a "Connectivity not supported" error when after selecting a financial institution in Link, you probably specified some products in your .env file that the target financial institution doesn't support. Remove the unsupported products and try again.
 
 ## Testing OAuth
 
