@@ -2,7 +2,9 @@
 
 This repository accompanies Plaid's [**quickstart guide**][quickstart].
 
-Here you'll find full example integration apps using our [**client libraries**][libraries]:
+Here you'll find full example integration apps using our [**client libraries**][libraries].
+
+This Quickstart is designed to show as many products and configurations as possible, including all five officially supported backends and multiple Plaid APIs, against a React frontend. If you prefer a more minimal example with a single language, vanilla JS frontend, and a single endpoint, see the [Tiny Quickstart](https://github.com/plaid/tiny-quickstart).
 
 ![Plaid quickstart app](/assets/quickstart.jpeg)
 
