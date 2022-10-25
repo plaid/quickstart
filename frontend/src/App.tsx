@@ -32,7 +32,7 @@ const App = () => {
 
   const generateToken = useCallback(
     async (isPaymentInitiation) => {
-      // Link tokens for 'payment_initiation' require a few extra steps to be executed by your backend.
+      // Link tokens for 'payment_initiation' use a different creation flow in your backend.
       const path = isPaymentInitiation
         ? "/api/create_link_token_for_payment"
         : "/api/create_link_token";
@@ -57,7 +57,7 @@ const App = () => {
         }
         dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
       }
-      // Save the link_token to be use later in the Oauth flow.
+      // Save the link_token to be used later in the Oauth flow.
       localStorage.setItem("link_token", data.link_token);
     },
     [dispatch]
@@ -87,19 +87,17 @@ const App = () => {
       <div className={styles.container}>
         <Header />
         {linkSuccess && (
-            <>
-              {isPaymentInitiation && (
-                  <>
-                    <Products />
-                  </>
-              )}
-              {isItemAccess && (
-                  <>
-                    <Products />
-                    <Items />
-                  </>
-              )}
-            </>
+          <>
+            {isPaymentInitiation && (
+              <Products />
+            )}
+            {isItemAccess && (
+              <>
+                <Products />
+                <Items />
+              </>
+            )}
+          </>
         )}
       </div>
     </div>

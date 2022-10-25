@@ -9,9 +9,9 @@ const Link = () => {
   const { linkToken, isPaymentInitiation, dispatch } = useContext(Context);
 
   const onSuccess = React.useCallback(
-    (public_token: string, metadata: any) => {
-      // send public_token to server
-      const exchangePublicToken = async () => {
+    (public_token: string) => {
+      // If the access_token is needed, send public_token to server
+      const exchangePublicTokenForAccessToken = async () => {
         const response = await fetch("/api/set_access_token", {
           method: "POST",
           headers: {
@@ -40,11 +40,12 @@ const Link = () => {
           },
         });
       };
+
       // 'payment_initiation' products do not require the public_token to be exchanged for an access_token.
-      if (!isPaymentInitiation){
-        exchangePublicToken();
-      } else {
+      if (isPaymentInitiation){
         dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
+      } else {
+        exchangePublicTokenForAccessToken();
       }
 
       dispatch({ type: "SET_STATE", state: { linkSuccess: true } });
@@ -60,6 +61,8 @@ const Link = () => {
   };
 
   if (window.location.href.includes("?oauth_state_id=")) {
+    // TODO: figure out how to delete this ts-ignore
+    // @ts-ignore
     config.receivedRedirectUri = window.location.href;
     isOauth = true;
   }
