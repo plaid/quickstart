@@ -8,7 +8,7 @@ import Context from "./Context";
 import styles from "./App.module.scss";
 
 const App = () => {
-  const { linkSuccess, isItemAccess, dispatch } = useContext(Context);
+  const { linkSuccess, isItemAccess, isPaymentInitiation, dispatch } = useContext(Context);
 
   const getInfo = useCallback(async () => {
     const response = await fetch("/api/info", { method: "POST" });
@@ -24,14 +24,16 @@ const App = () => {
       type: "SET_STATE",
       state: {
         products: data.products,
+        isPaymentInitiation: paymentInitiation,
       },
     });
     return { paymentInitiation };
   }, [dispatch]);
 
   const generateToken = useCallback(
-    async (paymentInitiation) => {
-      const path = paymentInitiation
+    async (isPaymentInitiation) => {
+      // Link tokens for 'payment_initiation' require a few extra steps to be executed by your backend.
+      const path = isPaymentInitiation
         ? "/api/create_link_token_for_payment"
         : "/api/create_link_token";
       const response = await fetch(path, {
@@ -55,7 +57,8 @@ const App = () => {
         }
         dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
       }
-      localStorage.setItem("link_token", data.link_token); //to use later for Oauth
+      // Save the link_token to be use later in the Oauth flow.
+      localStorage.setItem("link_token", data.link_token);
     },
     [dispatch]
   );
@@ -83,11 +86,20 @@ const App = () => {
     <div className={styles.App}>
       <div className={styles.container}>
         <Header />
-        {linkSuccess && isItemAccess && (
-          <>
-            <Products />
-            <Items />
-          </>
+        {linkSuccess && (
+            <>
+              {isPaymentInitiation && (
+                  <>
+                    <Products />
+                  </>
+              )}
+              {isItemAccess && (
+                  <>
+                    <Products />
+                    <Items />
+                  </>
+              )}
+            </>
         )}
       </div>
     </div>

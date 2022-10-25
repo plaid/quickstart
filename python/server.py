@@ -175,13 +175,22 @@ def create_link_token_for_payment():
             request
         )
         pretty_print_response(response.to_dict())
+        
+        # We store the payment_id in memory for demo purposes - in production, store it in a secure
+        # persistent data store along with the Payment metadata, such as userId.
         payment_id = response['payment_id']
+        
         linkRequest = LinkTokenCreateRequest(
+            # The 'payment_initiation' product has to be the only element in the 'products' list.
             products=[Products('payment_initiation')],
             client_name='Plaid Test',
+            # Institutions from all listed countries will be shown.
             country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
             language='en',
             user=LinkTokenCreateRequestUser(
+                # This should correspond to a unique id for the current user.
+                # Typically, this will be a user ID number from your application.
+                # Personally identifiable information, such as an email address or phone number, should not be used here.
                 client_user_id=str(time.time())
             ),
             payment_initiation=LinkTokenCreateRequestPaymentInitiation(

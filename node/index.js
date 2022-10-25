@@ -2,8 +2,9 @@
 
 // read env vars from .env file
 require('dotenv').config();
-const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
+const { Configuration, PlaidApi, Products, PlaidEnvironments} = require('plaid');
 const util = require('util');
+const { v4: uuidv4 } = require('uuid');
 const express = require('express');
 const bodyParser = require('body-parser');
 const moment = require('moment');
@@ -17,7 +18,7 @@ const PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
-const PLAID_PRODUCTS = (process.env.PLAID_PRODUCTS || 'transactions').split(
+const PLAID_PRODUCTS = (process.env.PLAID_PRODUCTS || Products.Transactions).split(
   ',',
 );
 
@@ -45,9 +46,9 @@ const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || '';
 let ACCESS_TOKEN = null;
 let PUBLIC_TOKEN = null;
 let ITEM_ID = null;
-// The payment_id is only relevant for the UK Payment Initiation product.
+// The payment_id is only relevant for the UK/EU Payment Initiation product.
 // We store the payment_id in memory - in production, store it in a secure
-// persistent data store
+// persistent data store along with the Payment metadata, such as userId .
 let PAYMENT_ID = null;
 // The transfer_id is only relevant for Transfer ACH product.
 // We store the transfer_id in memory - in production, store it in a secure
@@ -117,8 +118,11 @@ app.post('/api/create_link_token', function (request, response, next) {
     .catch(next);
 });
 
-// Create a link token with configs which we can then use to initialize Plaid Link client-side.
-// See https://plaid.com/docs/#payment-initiation-create-link-token-request
+// Create a link token with configs which we can then use to initialize Plaid Link client-side
+// for a 'payment-initiation' flow.
+// See:
+// - https://plaid.com/docs/payment-initiation/
+// - https://plaid.com/docs/#payment-initiation-create-link-token-request
 app.post(
   '/api/create_link_token_for_payment',
   function (request, response, next) {
@@ -149,16 +153,24 @@ app.post(
           });
         prettyPrintResponse(createPaymentResponse);
         const paymentId = createPaymentResponse.data.payment_id;
+
+        // We store the payment_id in memory for demo purposes - in production, store it in a secure
+        // persistent data store along with the Payment metadata, such as userId.
         PAYMENT_ID = paymentId;
+
         const configs = {
+          client_name: 'Plaid Quickstart',
           user: {
             // This should correspond to a unique id for the current user.
-            client_user_id: 'user-id',
+            // Typically, this will be a user ID number from your application.
+            // Personally identifiable information, such as an email address or phone number, should not be used here.
+            client_user_id: uuidv4(),
           },
-          client_name: 'Plaid Quickstart',
-          products: PLAID_PRODUCTS,
+          // Institutions from all listed countries will be shown.
           country_codes: PLAID_COUNTRY_CODES,
           language: 'en',
+          // The 'payment_initiation' product has to be the only element in the 'products' list.
+          products: [Products.PaymentInitiation],
           payment_initiation: {
             payment_id: paymentId,
           },
@@ -187,10 +199,11 @@ app.post('/api/set_access_token', function (request, response, next) {
       prettyPrintResponse(tokenResponse);
       ACCESS_TOKEN = tokenResponse.data.access_token;
       ITEM_ID = tokenResponse.data.item_id;
-      if (PLAID_PRODUCTS.includes('transfer')) {
+      if (PLAID_PRODUCTS.includes(Products.Transfer)) {
         TRANSFER_ID = await authorizeAndCreateTransfer(ACCESS_TOKEN);
       }
       response.json({
+        // the 'access_token' is a private token, DO NOT pass this token to the frontend in your production environment
         access_token: ACCESS_TOKEN,
         item_id: ITEM_ID,
         error: null,
@@ -345,7 +358,7 @@ app.get('/api/item', function (request, response, next) {
       // Also pull information about the institution
       const configs = {
         institution_id: itemResponse.data.item.institution_id,
-        country_codes: ['US'],
+        country_codes: PLAID_COUNTRY_CODES,
       };
       const instResponse = await client.institutionsGetById(configs);
       prettyPrintResponse(itemResponse);
@@ -443,7 +456,7 @@ app.get('/api/transfer', function (request, response, next) {
     .catch(next);
 });
 
-// This functionality is only relevant for the UK Payment Initiation product.
+// This functionality is only relevant for the UK/EU Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
 app.get('/api/payment', function (request, response, next) {
   Promise.resolve()

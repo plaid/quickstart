@@ -3,14 +3,15 @@ import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
 import Context from "../../Context";
+import {Products} from "plaid";
 
 const Link = () => {
-  const { linkToken, dispatch } = useContext(Context);
+  const { linkToken, isPaymentInitiation, dispatch } = useContext(Context);
 
   const onSuccess = React.useCallback(
-    (public_token: string) => {
+    (public_token: string, metadata: any) => {
       // send public_token to server
-      const setToken = async () => {
+      const exchangePublicToken = async () => {
         const response = await fetch("/api/set_access_token", {
           method: "POST",
           headers: {
@@ -39,7 +40,13 @@ const Link = () => {
           },
         });
       };
-      setToken();
+      // 'payment_initiation' products do not require the public_token to be exchanged for an access_token.
+      if (!isPaymentInitiation){
+        exchangePublicToken();
+      } else {
+        dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
+      }
+
       dispatch({ type: "SET_STATE", state: { linkSuccess: true } });
       window.history.pushState("", "", "/");
     },
@@ -53,8 +60,6 @@ const Link = () => {
   };
 
   if (window.location.href.includes("?oauth_state_id=")) {
-    // TODO: figure out how to delete this ts-ignore
-    // @ts-ignore
     config.receivedRedirectUri = window.location.href;
     isOauth = true;
   }
