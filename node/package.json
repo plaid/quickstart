@@ -17,7 +17,7 @@
     "dotenv": "^8.2.0",
     "ejs": "2.5.x",
     "express": "4.16.x",
-    "moment": "2.22.x",
+    "moment": "2.29.x",
     "nodemon": "^2.0.20",
     "plaid": "^9.9.0",
     "uuid": "^9.0.0"
