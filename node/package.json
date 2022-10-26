@@ -15,7 +15,7 @@
     "body-parser": "1.18.x",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
-    "ejs": "2.5.x",
+    "ejs": "3.1.x",
     "express": "4.16.x",
     "moment": "2.22.x",
     "nodemon": "^2.0.20",
