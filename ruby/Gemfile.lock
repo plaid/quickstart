@@ -7,12 +7,12 @@ GEM
       multipart-post (>= 1.2, < 3)
       ruby2_keywords
     faraday-net_http (1.0.1)
-    multipart-post (2.1.1)
+    multipart-post (2.2.3)
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
-    plaid (14.3.0)
+    plaid (14.10.0)
       faraday (~> 1.0, >= 1.0.1)
-    rack (2.2.3)
+    rack (2.2.4)
     rack-protection (2.0.8.1)
       rack
     ruby2_keywords (0.0.2)
@@ -28,7 +28,7 @@ PLATFORMS
 
 DEPENDENCIES
   dotenv (~> 2.7)
-  plaid (= 14.3.0)
+  plaid (= 14.10.0)
   sinatra
 
 BUNDLED WITH
