@@ -42,31 +42,37 @@ const Products = () => {
           transformData={transformPaymentData}
         />
       )}
-      <Endpoint
-        endpoint="auth"
-        name="Auth"
-        categories={authCategories}
-        schema="/auth/get/"
-        description="Retrieve account and routing numbers for checking and savings accounts."
-        transformData={transformAuthData}
-      />
-      <Endpoint
-        endpoint="transactions"
-        name="Transactions"
-        categories={transactionsCategories}
-        schema="/transactions/sync/"
-        description="Retrieve transactions or incremental updates for credit and depository accounts."
-        transformData={transformTransactionsData}
-      />
-      <Endpoint
-        endpoint="identity"
-        name="Identity"
-        categories={identityCategories}
-        schema="/identity/get/"
-        description="Retrieve Identity information on file with the bank. Reduce
-        fraud by comparing user-submitted data to validate identity."
-        transformData={transformIdentityData}
-      />
+      {products.includes("auth") && (
+        <Endpoint
+            endpoint="auth"
+            name="Auth"
+            categories={authCategories}
+            schema="/auth/get/"
+            description="Retrieve account and routing numbers for checking and savings accounts."
+            transformData={transformAuthData}
+        />
+      )}
+      {products.includes("transactions") && (
+        <Endpoint
+          endpoint="transactions"
+          name="Transactions"
+          categories={transactionsCategories}
+          schema="/transactions/sync/"
+          description="Retrieve transactions or incremental updates for credit and depository accounts."
+          transformData={transformTransactionsData}
+        />
+      )}
+      {products.includes("identity") && (
+        <Endpoint
+              endpoint="identity"
+              name="Identity"
+              categories={identityCategories}
+              schema="/identity/get/"
+              description="Retrieve Identity information on file with the bank. Reduce
+              fraud by comparing user-submitted data to validate identity."
+              transformData={transformIdentityData}
+        />
+      )}
       {products.includes("assets") && (
         <Endpoint
           endpoint="assets"
@@ -77,15 +83,17 @@ const Products = () => {
           transformData={transformAssetsData}
         />
       )}
-      <Endpoint
-        endpoint="balance"
-        name="Balance"
-        categories={balanceCategories}
-        schema="/accounts/balance/get/"
-        description="Check balances in real time to prevent non-sufficient funds
+      {!products.includes("payment_initiation") && (
+          <Endpoint
+              endpoint="balance"
+              name="Balance"
+              categories={balanceCategories}
+              schema="/accounts/balance/get/"
+              description="Check balances in real time to prevent non-sufficient funds
         fees."
-        transformData={transformBalanceData}
-      />
+              transformData={transformBalanceData}
+          />
+      )}
       {products.includes("investments") && (
         <>
         <Endpoint

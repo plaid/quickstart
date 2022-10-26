@@ -82,6 +82,9 @@ public class LinkTokenWithPaymentResource {
     LinkTokenCreateRequestPaymentInitiation paymentInitiation = new LinkTokenCreateRequestPaymentInitiation()
       .paymentId(paymentId);
 
+    // This should correspond to a unique id for the current user.
+    // Typically, this will be a user ID number from your application.
+    // Personally identifiable information, such as an email address or phone number, should not be used here.
     String clientUserId = Long.toString((new Date()).getTime());
     LinkTokenCreateRequestUser user = new LinkTokenCreateRequestUser()
 		.clientUserId(clientUserId);
@@ -89,7 +92,9 @@ public class LinkTokenWithPaymentResource {
 		LinkTokenCreateRequest request = new LinkTokenCreateRequest()
 			.user(user)
 			.clientName("Quickstart Client")
+      // The 'payment_initiation' product has to be the only element in the 'products' list.
 			.products(Arrays.asList(Products.PAYMENT_INITIATION))
+      // Institutions from all listed countries will be shown.
 			.countryCodes(Arrays.asList(CountryCode.GB))
 			.language("en")
       .redirectUri(this.redirectUri)

@@ -398,10 +398,13 @@ def nil_if_empty_envvar(field)
   end
 end
 
-# This functionality is only relevant for the UK Payment Initiation product.
+# This functionality is only relevant for the UK/EU Payment Initiation product.
 # Sets the payment token in memory on the server side. We generate a new
 # payment token so that the developer is not required to supply one.
 # This makes the quickstart easier to use.
+# See:
+# - https://plaid.com/docs/payment-initiation/
+# - https://plaid.com/docs/#payment-initiation-create-link-token-request
 post '/api/create_link_token_for_payment' do
   begin
     payment_initiation_recipient_create_request = Plaid::PaymentInitiationRecipientCreateRequest.new(
@@ -451,12 +454,24 @@ post '/api/create_link_token_for_payment' do
 
     link_token_create_request = Plaid::LinkTokenCreateRequest.new(
       {
-        user: { client_user_id: 'user-id' },
-        client_name: 'Plaid Quickstart',
-        products: ENV['PLAID_PRODUCTS'].split(','),
+        client_name: 'Plaid Quickstart',  
+        user: { 
+          # This should correspond to a unique id for the current user.
+          # Typically, this will be a user ID number from your application.
+          # Personally identifiable information, such as an email address or phone number, should not be used here.
+          client_user_id: 'user-id' 
+        },
+        
+        # Institutions from all listed countries will be shown.
         country_codes: ENV['PLAID_COUNTRY_CODES'].split(','),
         language: 'en',
-        payment_initiation: { payment_id: payment_id },
+
+        # The 'payment_initiation' product has to be the only element in the 'products' list.
+        products: ['payment_initiation'],
+        
+        payment_initiation: { 
+          payment_id: payment_id 
+        },
         redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI')
       }
     )

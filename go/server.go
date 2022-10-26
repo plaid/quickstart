@@ -172,10 +172,13 @@ func getAccessToken(c *gin.Context) {
 	})
 }
 
-// This functionality is only relevant for the UK Payment Initiation product.
+// This functionality is only relevant for the UK/EU Payment Initiation product.
 // Creates a link token configured for payment initiation. The payment
 // information will be associated with the link token, and will not have to be
 // passed in again when we initialize Plaid Link.
+// See:
+// - https://plaid.com/docs/payment-initiation/
+// - https://plaid.com/docs/#payment-initiation-create-link-token-request
 func createLinkTokenForPayment(c *gin.Context) {
 	ctx := context.Background()
 
@@ -206,9 +209,12 @@ func createLinkTokenForPayment(c *gin.Context) {
 		return
 	}
 
+	// We store the payment_id in memory for demo purposes - in production, store it in a secure
+	// persistent data store along with the Payment metadata, such as userId.
 	paymentID = paymentCreateResp.GetPaymentId()
 	fmt.Println("payment id: " + paymentID)
 
+	// Create the link_token
 	linkTokenCreateReqPaymentInitiation := plaid.NewLinkTokenCreateRequestPaymentInitiation(paymentID)
 	linkToken, err := linkTokenCreate(linkTokenCreateReqPaymentInitiation)
 	if err != nil {
@@ -496,10 +502,14 @@ func linkTokenCreate(
 	paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
 ) (string, error) {
 	ctx := context.Background()
+
+	// Institutions from all listed countries will be shown.
 	countryCodes := convertCountryCodes(strings.Split(PLAID_COUNTRY_CODES, ","))
-	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
 	redirectURI := PLAID_REDIRECT_URI
 
+	// This should correspond to a unique id for the current user.
+	// Typically, this will be a user ID number from your application.
+	// Personally identifiable information, such as an email address or phone number, should not be used here.
 	user := plaid.LinkTokenCreateRequestUser{
 		ClientUserId: time.Now().String(),
 	}
@@ -511,14 +521,17 @@ func linkTokenCreate(
 		user,
 	)
 
-	request.SetProducts(products)
+	if paymentInitiation != nil {
+		request.SetPaymentInitiation(*paymentInitiation)
+		// The 'payment_initiation' product has to be the only element in the 'products' list.
+		request.SetProducts([]plaid.Products{plaid.PRODUCTS_PAYMENT_INITIATION})
+	} else {
+		products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
+		request.SetProducts(products)
+	}
 
 	if redirectURI != "" {
 		request.SetRedirectUri(redirectURI)
-	}
-
-	if paymentInitiation != nil {
-		request.SetPaymentInitiation(*paymentInitiation)
 	}
 
 	linkTokenCreateResp, _, err := client.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
