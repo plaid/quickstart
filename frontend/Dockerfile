@@ -10,7 +10,7 @@ ENV PATH /app/node_modules/.bin:$PATH
 # install app dependencies
 COPY ./frontend/.npmrc ./
 COPY ./frontend/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # add app
 COPY ./frontend ./
