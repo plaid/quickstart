@@ -221,6 +221,7 @@ def create_link_token():
         )
         if PLAID_REDIRECT_URI!=None:
             request['redirect_uri']=PLAID_REDIRECT_URI
+        pretty_print_response(request)
     # create link token
         response = client.link_token_create(request)
         return jsonify(response.to_dict())

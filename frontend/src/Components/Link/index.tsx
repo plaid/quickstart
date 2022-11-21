@@ -63,7 +63,8 @@ const Link = () => {
   if (window.location.href.includes("?oauth_state_id=")) {
     // TODO: figure out how to delete this ts-ignore
     // @ts-ignore
-    config.receivedRedirectUri = window.location.href;
+    config.receivedRedirectUri = window.location.href + "?oauth_state_id=oauth_state_id=9d5feadd-a873-43eb-97ba-422f35ce849b";
+    console.log(config)
     isOauth = true;
   }
 
