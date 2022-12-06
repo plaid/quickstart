@@ -236,7 +236,11 @@ Make sure to add the redirect URI to the Allowed Redirect URIs list in the [Plai
 
 ### "Connectivity not supported"
 
-If you get a "Connectivity not supported" error when after selecting a financial institution in Link, you probably specified some products in your .env file that the target financial institution doesn't support. Remove the unsupported products and try again.
+If you get a "Connectivity not supported" error after selecting a financial institution in Link, you probably specified some products in your .env file that the target financial institution doesn't support. Remove the unsupported products and try again.
+
+### "You need to update your app" or "institution not supported"
+
+If you get a "You need to update your app" or "institution not supported" error after selecting a financial institution in Link, you're probably running the Quickstart in Development and attempting to link an institution, such as Chase or Wells Fargo, that requires an OAuth-based connection. In order to make OAuth connections to US-based institutions in Development or Production, you must have Production access approval, and certain institutions may also require additional steps. To use this institution, [apply for Production access](https://dashboard.plaid.com/overview/production) and see the [OAuth insitutions page](https://dashboard.plaid.com/team/oauth-institutions) for any other required steps.
 
 ## Testing OAuth
 
