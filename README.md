@@ -35,7 +35,6 @@ This Quickstart is designed to show as many products and configurations as possi
 - [Test credentials](#test-credentials)
 - [Troubleshooting](#troubleshooting)
 - [Testing OAuth](#testing-oauth)
-- [Payment Initiation](#payment-initiation)
 
 <!-- tocstop -->
 
@@ -294,12 +293,6 @@ with this line instead:
 
 After starting up the Quickstart, you can now view it at https://localhost:3000. If you are on Windows, you
 may still get an invalid certificate warning on your browser. If so, click on "advanced" and proceed. Also on Windows, the frontend may still try to load http://localhost:3000 and you may have to access https://localhost:3000 manually.
-
-## Payment Initiation
-
-If you want to use the [Payment
-Initiation][payment-initiation] product, you will need to [contact Sales][contact-sales] to get this
-product enabled.
 
 [quickstart]: https://plaid.com/docs/quickstart
 [libraries]: https://plaid.com/docs/api/libraries
