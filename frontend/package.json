@@ -28,7 +28,7 @@
   "peerDependencies": {
     "chalk": "^4.1.2"
   },
-  "proxy": "http://localhost:8000",
+  "proxy": "http://127.0.0.1:8000",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
