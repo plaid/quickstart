@@ -12,7 +12,7 @@ GEM
       ruby2_keywords (~> 0.0.1)
     plaid (14.10.0)
       faraday (~> 1.0, >= 1.0.1)
-    rack (2.2.4)
+    rack (2.2.6.4)
     rack-protection (2.0.8.1)
       rack
     ruby2_keywords (0.0.2)
