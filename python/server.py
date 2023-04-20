@@ -127,8 +127,8 @@ access_token = None
 # persistent data store.
 payment_id = None
 # The transfer_id is only relevant for Transfer ACH product.
-# We store the transfer_id in memomory - in produciton, store it in a secure
-# persistent data store
+# We store the transfer_id in memory - in production, store it in a secure
+# persistent data store.
 transfer_id = None
 
 item_id = None
