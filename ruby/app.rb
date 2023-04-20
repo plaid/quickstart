@@ -36,8 +36,8 @@ payment_id = nil
 item_id = nil
 
 # The transfer_id is only relevant for Transfer ACH product.
-# We store the transfer_id in memomory - in produciton, store it in a secure
-# persistent data store
+# We store the transfer_id in memory - in production, store it in a secure
+# persistent data store.
 transfer_id = nil
 
 post '/api/info' do

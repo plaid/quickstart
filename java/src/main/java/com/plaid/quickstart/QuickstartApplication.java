@@ -36,9 +36,9 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
   // We store the paymentId in memory - in production, store it in a secure
   // persistent data store.
   public static String paymentId;
-  // The transfer_id is only relevant for Transfer ACH product.
-  // We store the transfer_id in memomory - in produciton, store it in a secure
-  // persistent data store
+  // The transferId is only relevant for Transfer ACH product.
+  // We store the transferId in memory - in production, store it in a secure
+  // persistent data store.
   public static String transferId;
 
   private PlaidApi plaidClient;
