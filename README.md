@@ -79,7 +79,12 @@ the dashboard: https://dashboard.plaid.com/account/keys
 > NOTE: `.env` files are a convenient local development tool. Never run a production application
 > using an environment file with secrets in it.
 
-## 3. Run the Quickstart
+## 3. Set up your redirect URI
+
+You will also need to register this localhost redirect URI in the
+[Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section].
+
+## 4. Run the Quickstart
 
 There are two ways to run the various language quickstarts in this repository. You can choose to run the
 code directly or you can run it in Docker. If you would like to run the code via Docker, skip to the
@@ -249,18 +254,22 @@ If you get a "You need to update your app" or "institution not supported" error 
 
 If you get the console error "oauth uri does not contain a valid oauth_state_id query parameter", you are attempting to initialize Link with a redirect uri when it is not necessary to do so. The `receivedRedirectUri` should not be set when initializing Link for the first time. It is used when initializing Link for the second time, after returning from the OAuth redirect.
 
-## Testing OAuth
+## Testing OAuth 
 
-Some institutions (primarily in Europe, but a small number in the US) require an OAuth redirect
+Some institutions require an OAuth redirect
 authentication flow, where the end user is redirected to the bank’s website or mobile app to
-authenticate. To test this flow in sandbox, you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to register this localhost redirect URI in the
-[Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section].
+authenticate. 
 
-To test the OAuth flow in sandbox, choose 'Playtypus OAuth Bank' from the list of financial institutions in Plaid Link.
+To test the OAuth flow in Sandbox, select any institution that uses an OAuth connection with Plaid (a partial list can be found on the [Dashboard OAuth Institutions page](https://dashboard.plaid.com/team/oauth-institutions), or choose 'Playtypus OAuth Bank' from the list of financial institutions in Plaid Link.
 
-### Instructions for using https with localhost
+### Testing OAuth with a redirect URI (optional, advanced)
 
-If you want to test OAuth in development, you need to use https and set `PLAID_REDIRECT_URI=https://localhost:3000/` in `.env`. In order to run your localhost on https, you will need to create a self-signed certificate and add it to the frontend root folder. You can use the following instructions to do this. Note that self-signed certificates should be used for testing purposes only, never for actual deployments.
+To test the OAuth flow in Sandbox with a [redirect URI](https://www.plaid.com/docs/link/oauth/#create-and-register-a-redirect-uri), you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to register this localhost redirect URI in the
+[Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section]. It is not required to configure a redirect URI in the .env file to use OAuth with the Quickstart. 
+
+#### Instructions for using https with localhost
+
+If you want to test OAuth in development with a redirect URI, you need to use https and set `PLAID_REDIRECT_URI=https://localhost:3000/` in `.env`. In order to run your localhost on https, you will need to create a self-signed certificate and add it to the frontend root folder. You can use the following instructions to do this. Note that self-signed certificates should be used for testing purposes only, never for actual deployments.
 
 In your terminal, change to the frontend folder:
 
