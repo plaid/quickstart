@@ -79,12 +79,7 @@ the dashboard: https://dashboard.plaid.com/account/keys
 > NOTE: `.env` files are a convenient local development tool. Never run a production application
 > using an environment file with secrets in it.
 
-## 3. Set up your redirect URI
-
-You will also need to register this localhost redirect URI in the
-[Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section].
-
-## 4. Run the Quickstart
+## 3. Run the Quickstart
 
 There are two ways to run the various language quickstarts in this repository. You can choose to run the
 code directly or you can run it in Docker. If you would like to run the code via Docker, skip to the
