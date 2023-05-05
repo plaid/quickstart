@@ -257,7 +257,7 @@ authenticate.
 
 To test the OAuth flow in Sandbox, select any institution that uses an OAuth connection with Plaid (a partial list can be found on the [Dashboard OAuth Institutions page](https://dashboard.plaid.com/team/oauth-institutions), or choose 'Playtypus OAuth Bank' from the list of financial institutions in Plaid Link.
 
-### Testing OAuth with a redirect URI (optional, advanced)
+### Testing OAuth with a redirect URI (optional)
 
 To test the OAuth flow in Sandbox with a [redirect URI](https://www.plaid.com/docs/link/oauth/#create-and-register-a-redirect-uri), you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to register this localhost redirect URI in the
 [Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section]. It is not required to configure a redirect URI in the .env file to use OAuth with the Quickstart. 
