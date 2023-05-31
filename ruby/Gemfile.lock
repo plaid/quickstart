@@ -10,7 +10,7 @@ GEM
     multipart-post (2.2.3)
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
-    plaid (14.10.0)
+    plaid (19.0.0)
       faraday (~> 1.0, >= 1.0.1)
     rack (2.2.4)
     rack-protection (2.0.8.1)
