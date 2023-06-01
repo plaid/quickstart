@@ -582,15 +582,10 @@ def authorize_and_create_transfer(access_token):
         authorization_id = response['authorization']['id']
 
         request = TransferCreateRequest(
-            idempotency_key=TransferCreateIdempotencyKey('1223abc456xyz7890001'),
             access_token=access_token,
             account_id=account_id,
             authorization_id=authorization_id,
-            type=TransferType('credit'),
-            network=TransferNetwork('ach'),
-            amount='1.34',
-            description='Payment',
-            ach_class=ACHClass('ppd'),
+            description='Payment'),
         )
         response = client.transfer_create(request)
         pretty_print_response(response)

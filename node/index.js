@@ -574,26 +574,10 @@ const authorizeAndCreateTransfer = async (accessToken) => {
   const authorizationId = transferAuthorizationResponse.data.authorization.id;
 
   const transferResponse = await client.transferCreate({
-    idempotency_key: '1223abc456xyz7890001',
     access_token: accessToken,
     account_id: accountId,
     authorization_id: authorizationId,
-    type: 'credit',
-    network: 'ach',
-    amount: '12.34',
     description: 'Payment',
-    ach_class: 'ppd',
-    user: {
-      legal_name: 'FirstName LastName',
-      email_address: 'foobar@email.com',
-      address: {
-        street: '123 Main St.',
-        city: 'San Francisco',
-        region: 'CA',
-        postal_code: '94053',
-        country: 'US',
-      },
-    },
   });
   prettyPrintResponse(transferResponse);
   return transferResponse.data.transfer.id;
