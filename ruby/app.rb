@@ -81,7 +81,7 @@ get '/api/transactions' do
     added = []
     modified = []
     removed = [] # Removed transaction ids
-    has_more = TRUE
+    has_more = true
     # Iterate through each page of new transaction updates for item
     while has_more
       request = Plaid::TransactionsSyncRequest.new(
@@ -90,7 +90,6 @@ get '/api/transactions' do
           cursor: cursor
         }
       )
-      
       response = client.transactions_sync(request)
       # Add this page of results
       added += response.added
