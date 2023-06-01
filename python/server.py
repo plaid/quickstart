@@ -585,8 +585,7 @@ def authorize_and_create_transfer(access_token):
             access_token=access_token,
             account_id=account_id,
             authorization_id=authorization_id,
-            description='Payment'),
-        )
+            description='Payment')
         response = client.transfer_create(request)
         pretty_print_response(response)
         return response['transfer']['id']
