@@ -1,6 +1,14 @@
 # source /Users/tnappy/node_projects/quickstart/python/bin/activate
 # Read env vars from .env file
-from plaid.exceptions import ApiException
+import base64
+import os
+import datetime as dt
+import json
+import time
+
+from dotenv import load_dotenv
+from flask import Flask, request, jsonify
+import plaid
 from plaid.model.payment_amount import PaymentAmount
 from plaid.model.payment_amount_currency import PaymentAmountCurrency
 from plaid.model.products import Products
@@ -39,20 +47,7 @@ from plaid.model.ach_class import ACHClass
 from plaid.model.transfer_create_idempotency_key import TransferCreateIdempotencyKey
 from plaid.model.transfer_user_address_in_request import TransferUserAddressInRequest
 from plaid.api import plaid_api
-from flask import Flask
-from flask import render_template
-from flask import request
-from flask import jsonify
-from datetime import datetime
-from datetime import timedelta
-import plaid
-import base64
-import os
-import datetime
-import json
-import time
-from dotenv import load_dotenv
-from werkzeug.wrappers import response
+
 load_dotenv()
 
 
@@ -463,8 +458,8 @@ def get_holdings():
 def get_investments_transactions():
     # Pull transactions for the last 30 days
 
-    start_date = (datetime.datetime.now() - timedelta(days=(30)))
-    end_date = datetime.datetime.now()
+    start_date = (dt.datetime.now() - dt.timedelta(days=(30)))
+    end_date = dt.datetime.now()
     try:
         options = InvestmentsTransactionsGetRequestOptions()
         request = InvestmentsTransactionsGetRequest(
