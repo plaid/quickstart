@@ -539,16 +539,11 @@ def authorize_and_create_transfer(access_token, client)
     authorization_id = transfer_authorization_create_response.authorization.id
 
     transfer_create_request = Plaid::TransferCreateRequest.new({
-      idempotency_key: "1223abc456xyz7890001",
       access_token: access_token,
       account_id: account_id,
       authorization_id: authorization_id,
-      type: 'credit',
-      network: 'ach',
-      amount: '1.34',
-      description: 'Payment',
-      ach_class: 'ppd',
-      }),
+      description: 'Payment'
+    })
     transfer_create_response = client.transfer_create(transfer_create_request)
     pretty_print_response(transfer_create_response.to_hash)
     transfer_id = transfer_create_response.transfer.id
