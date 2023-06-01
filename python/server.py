@@ -398,6 +398,7 @@ def get_assets():
     # Poll for the completion of the Asset Report.
     num_retries_remaining = 20
     asset_report_json = None
+    err = None
     while num_retries_remaining > 0:
         try:
             request = AssetReportGetRequest(
@@ -409,16 +410,16 @@ def get_assets():
         except plaid.ApiException as e:
             response = json.loads(e.body)
             if response['error_code'] == 'PRODUCT_NOT_READY':
+                err = e
                 num_retries_remaining -= 1
                 time.sleep(1)
                 continue
-        error_response = format_error(e)
-        return jsonify(error_response)
+            else:
+                error_response = format_error(e)
+                return jsonify(error_response)
     if asset_report_json is None:
-        return jsonify({'error': {'status_code': e.status, 'display_message':
+        return jsonify({'error': {'status_code': err.status, 'display_message': # type: ignore
                                   'Timed out when polling for Asset Report', 'error_code': '', 'error_type': ''}})
-
-    asset_report_pdf = None
     try:
         request = AssetReportPDFGetRequest(
             asset_report_token=asset_report_token,
@@ -607,4 +608,4 @@ def authorize_and_create_transfer(access_token):
 
 
 if __name__ == '__main__':
-    app.run(port=os.getenv('PORT', 8000))
+    app.run(port=int(os.getenv('PORT', 8000)))
