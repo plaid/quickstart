@@ -418,7 +418,7 @@ def get_assets():
                 error_response = format_error(e)
                 return jsonify(error_response)
     if asset_report_json is None:
-        return jsonify({'error': {'status_code': err.status, 'display_message': # type: ignore
+        return jsonify({'error': {'status_code': err.status, 'display_message':
                                   'Timed out when polling for Asset Report', 'error_code': '', 'error_type': ''}})
     try:
         request = AssetReportPDFGetRequest(
