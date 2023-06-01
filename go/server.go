@@ -620,13 +620,14 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 	// We call /accounts/get to obtain first account_id - in production,
 	// account_id's should be persisted in a data store and retrieved
 	// from there.
-	/*accountsGetResp, _, _ := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
+	accountsGetResp, _, _ := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
 		*plaid.NewAccountsGetRequest(accessToken),
-	).Execute()*/
+	).Execute()
 
-	//accountID := accountsGetResp.GetAccounts()[0].AccountId
+	accountID := accountsGetResp.GetAccounts()[0].AccountId
 	transferType, err := plaid.NewTransferTypeFromValue("credit")
 	transferNetwork, err := plaid.NewTransferNetworkFromValue("ach")
+	ACHClass, err := plaid.NewACHClassFromValue("ppd")
 
 	transferAuthorizationCreateUser := plaid.NewTransferAuthorizationUserInRequest("FirstName LastName")
 	transferAuthorizationCreateRequest := plaid.NewTransferAuthorizationCreateRequest(
@@ -636,7 +637,8 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 		*transferAuthorizationCreateUser)
 
 	transferAuthorizationCreateRequest.SetAccessToken(accessToken);
-
+	transferAuthorizationCreateRequest.SetAchClass(*ACHClass);
+	transferAuthorizationCreateRequest.SetAccountId(accountID);
 
 	transferAuthorizationCreateResp, _, err := client.PlaidApi.TransferAuthorizationCreate(ctx).TransferAuthorizationCreateRequest(*transferAuthorizationCreateRequest).Execute()
 	if err != nil {
@@ -646,9 +648,10 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 
 	transferCreateRequest := plaid.NewTransferCreateRequest(
 		authorizationID,
-		"my test transfer",
+		"Payment",
 	)
 	transferCreateRequest.SetAccessToken(accessToken)
+	transferCreateRequest.SetAccountId(accountID)
 
 	transferCreateResp, _, err := client.PlaidApi.TransferCreate(ctx).TransferCreateRequest(*transferCreateRequest).Execute()
 	if err != nil {
