@@ -94,13 +94,8 @@ public class AccessTokenResource {
       
       TransferCreateRequest transferCreateRequest = new TransferCreateRequest()
         .authorizationId(authorizationId)
-        .idempotencyKey("1223abc456xyz7890001")
         .accessToken(QuickstartApplication.accessToken)
         .accountId(accountId)
-        .type(TransferType.CREDIT)
-        .network(TransferNetwork.ACH)
-        .amount("1.34")
-        .achClass(ACHClass.PPD)
         .description("Payment");
 
       Response<TransferCreateResponse> transferCreateResponse = plaidClient
