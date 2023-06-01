@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM ruby:3.0
 
 WORKDIR /opt/app
 COPY . .

@@ -48,6 +48,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.8.2)
+    webrick (1.8.1)
 
 PLATFORMS
   ruby
@@ -57,6 +58,7 @@ DEPENDENCIES
   http
   plaid (= 19.0.0)
   sinatra
+  webrick
 
 BUNDLED WITH
    2.4.10
