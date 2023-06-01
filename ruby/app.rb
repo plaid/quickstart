@@ -549,18 +549,7 @@ def authorize_and_create_transfer(access_token, client)
       amount: '1.34',
       description: 'Payment',
       ach_class: 'ppd',
-      user: {
-        legal_name: 'FirstName LastName',
-        email_address: 'foobar@email.com',
-        address: {
-          street: '123 Main St.',
-          city: 'San Francisco',
-          region: 'CA',
-          postal_code: '94053',
-          country: 'US'
-        }
-      },
-    })
+      }),
     transfer_create_response = client.transfer_create(transfer_create_request)
     pretty_print_response(transfer_create_response.to_hash)
     transfer_id = transfer_create_response.transfer.id

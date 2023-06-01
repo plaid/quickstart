@@ -34,7 +34,7 @@ from plaid.model.transfer_create_request import TransferCreateRequest
 from plaid.model.transfer_get_request import TransferGetRequest
 from plaid.model.transfer_network import TransferNetwork
 from plaid.model.transfer_type import TransferType
-from plaid.model.transfer_user_in_request import TransferUserInRequest
+from plaid.model.transfer_authorization_user_in_request import TransferAuthorizationUserInRequest
 from plaid.model.ach_class import ACHClass
 from plaid.model.transfer_create_idempotency_key import TransferCreateIdempotencyKey
 from plaid.model.transfer_user_address_in_request import TransferUserAddressInRequest
@@ -565,7 +565,7 @@ def authorize_and_create_transfer(access_token):
             network=TransferNetwork('ach'),
             amount='1.34',
             ach_class=ACHClass('ppd'),
-            user=TransferUserInRequest(
+            user=TransferAuthorizationUserInRequest(
                 legal_name='FirstName LastName',
                 email_address='foobar@email.com',
                 address=TransferUserAddressInRequest(
@@ -591,17 +591,6 @@ def authorize_and_create_transfer(access_token):
             amount='1.34',
             description='Payment',
             ach_class=ACHClass('ppd'),
-            user=TransferUserInRequest(
-                legal_name='FirstName LastName',
-                email_address='foobar@email.com',
-                address=TransferUserAddressInRequest(
-                    street='123 Main St.',
-                    city='San Francisco',
-                    region='CA',
-                    postal_code='94053',
-                    country='US'
-                ),
-            ),
         )
         response = client.transfer_create(request)
         pretty_print_response(response)
