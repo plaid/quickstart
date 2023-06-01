@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.PaymentAmount;
+import com.plaid.client.model.PaymentAmountCurrency;
 import com.plaid.client.model.Products;
 import com.plaid.client.model.CountryCode;
 import com.plaid.client.model.PaymentInitiationPaymentCreateRequest;
@@ -63,7 +64,7 @@ public class LinkTokenWithPaymentResource {
     String recipientId = recipientResponse.body().getRecipientId();
 
     PaymentAmount amount = new PaymentAmount()
-    .currency(PaymentAmount.CurrencyEnum.GBP)
+    .currency(PaymentAmountCurrency.GBP)
     .value(999.99);
 
     PaymentInitiationPaymentCreateRequest paymentCreateRequest = new PaymentInitiationPaymentCreateRequest()

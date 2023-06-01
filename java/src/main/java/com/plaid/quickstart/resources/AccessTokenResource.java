@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.ItemPublicTokenExchangeRequest;
 import com.plaid.client.model.ItemPublicTokenExchangeResponse;
-import com.plaid.client.model.TransferUserInRequest;
+import com.plaid.client.model.TransferAuthorizationUserInRequest;
 import com.plaid.client.model.TransferAuthorizationCreateRequest;
 import com.plaid.client.model.TransferAuthorizationCreateResponse;
 import com.plaid.client.model.TransferCreateRequest;
@@ -74,7 +74,7 @@ public class AccessTokenResource {
 
       String accountId = accountsGetResponse.body().getAccounts().get(0).getAccountId();
 
-      TransferUserInRequest user = new TransferUserInRequest()
+      TransferAuthorizationUserInRequest user = new TransferAuthorizationUserInRequest()
         .legalName("FirstName LastName");
 
       TransferAuthorizationCreateRequest transferAuthorizationCreateRequest = new TransferAuthorizationCreateRequest()
@@ -101,8 +101,7 @@ public class AccessTokenResource {
         .network(TransferNetwork.ACH)
         .amount("1.34")
         .achClass(ACHClass.PPD)
-        .description("Payment")
-        .user(user);
+        .description("Payment");
 
       Response<TransferCreateResponse> transferCreateResponse = plaidClient
         .transferCreate(transferCreateRequest)
