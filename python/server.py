@@ -1,6 +1,14 @@
 # source /Users/tnappy/node_projects/quickstart/python/bin/activate
 # Read env vars from .env file
-from plaid.exceptions import ApiException
+import base64
+import os
+import datetime as dt
+import json
+import time
+
+from dotenv import load_dotenv
+from flask import Flask, request, jsonify
+import plaid
 from plaid.model.payment_amount import PaymentAmount
 from plaid.model.payment_amount_currency import PaymentAmountCurrency
 from plaid.model.products import Products
@@ -39,20 +47,7 @@ from plaid.model.ach_class import ACHClass
 from plaid.model.transfer_create_idempotency_key import TransferCreateIdempotencyKey
 from plaid.model.transfer_user_address_in_request import TransferUserAddressInRequest
 from plaid.api import plaid_api
-from flask import Flask
-from flask import render_template
-from flask import request
-from flask import jsonify
-from datetime import datetime
-from datetime import timedelta
-import plaid
-import base64
-import os
-import datetime
-import json
-import time
-from dotenv import load_dotenv
-from werkzeug.wrappers import response
+
 load_dotenv()
 
 
@@ -403,6 +398,7 @@ def get_assets():
     # Poll for the completion of the Asset Report.
     num_retries_remaining = 20
     asset_report_json = None
+    err = None
     while num_retries_remaining > 0:
         try:
             request = AssetReportGetRequest(
@@ -414,16 +410,16 @@ def get_assets():
         except plaid.ApiException as e:
             response = json.loads(e.body)
             if response['error_code'] == 'PRODUCT_NOT_READY':
+                err = e
                 num_retries_remaining -= 1
                 time.sleep(1)
                 continue
-        error_response = format_error(e)
-        return jsonify(error_response)
+            else:
+                error_response = format_error(e)
+                return jsonify(error_response)
     if asset_report_json is None:
-        return jsonify({'error': {'status_code': e.status, 'display_message':
+        return jsonify({'error': {'status_code': err.status, 'display_message':
                                   'Timed out when polling for Asset Report', 'error_code': '', 'error_type': ''}})
-
-    asset_report_pdf = None
     try:
         request = AssetReportPDFGetRequest(
             asset_report_token=asset_report_token,
@@ -463,8 +459,8 @@ def get_holdings():
 def get_investments_transactions():
     # Pull transactions for the last 30 days
 
-    start_date = (datetime.datetime.now() - timedelta(days=(30)))
-    end_date = datetime.datetime.now()
+    start_date = (dt.datetime.now() - dt.timedelta(days=(30)))
+    end_date = dt.datetime.now()
     try:
         options = InvestmentsTransactionsGetRequestOptions()
         request = InvestmentsTransactionsGetRequest(
@@ -612,4 +608,4 @@ def authorize_and_create_transfer(access_token):
 
 
 if __name__ == '__main__':
-    app.run(port=os.getenv('PORT', 8000))
+    app.run(port=int(os.getenv('PORT', 8000)))
