@@ -16,7 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v3/plaid"
+	plaid "github.com/plaid/plaid-go/v12/plaid"
 )
 
 var (
@@ -215,7 +215,8 @@ func createLinkTokenForPayment(c *gin.Context) {
 	fmt.Println("payment id: " + paymentID)
 
 	// Create the link_token
-	linkTokenCreateReqPaymentInitiation := plaid.NewLinkTokenCreateRequestPaymentInitiation(paymentID)
+	linkTokenCreateReqPaymentInitiation := plaid.NewLinkTokenCreateRequestPaymentInitiation();
+	linkTokenCreateReqPaymentInitiation.SetPaymentId(paymentID);
 	linkToken, err := linkTokenCreate(linkTokenCreateReqPaymentInitiation)
 	if err != nil {
 		renderError(c, err)
@@ -546,9 +547,12 @@ func linkTokenCreate(
 func assets(c *gin.Context) {
 	ctx := context.Background()
 
+	createRequest := plaid.NewAssetReportCreateRequest(10)
+	createRequest.SetAccessTokens([]string{accessToken})
+
 	// create the asset report
 	assetReportCreateResp, _, err := client.PlaidApi.AssetReportCreate(ctx).AssetReportCreateRequest(
-		*plaid.NewAssetReportCreateRequest([]string{accessToken}, 10),
+		*createRequest,
 	).Execute()
 	if err != nil {
 		renderError(c, err)
@@ -621,17 +625,21 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 	).Execute()
 
 	accountID := accountsGetResp.GetAccounts()[0].AccountId
+	transferType, err := plaid.NewTransferTypeFromValue("credit")
+	transferNetwork, err := plaid.NewTransferNetworkFromValue("ach")
+	ACHClass, err := plaid.NewACHClassFromValue("ppd")
 
-	transferAuthorizationCreateUser := plaid.NewTransferUserInRequest("FirstName LastName")
+	transferAuthorizationCreateUser := plaid.NewTransferAuthorizationUserInRequest("FirstName LastName")
 	transferAuthorizationCreateRequest := plaid.NewTransferAuthorizationCreateRequest(
-		accessToken,
-		accountID,
-		"credit",
-		"ach",
+		*transferType,
+		*transferNetwork,
 		"1.34",
-		"ppd",
-		*transferAuthorizationCreateUser,
-	)
+		*transferAuthorizationCreateUser)
+
+	transferAuthorizationCreateRequest.SetAccessToken(accessToken);
+	transferAuthorizationCreateRequest.SetAchClass(*ACHClass);
+	transferAuthorizationCreateRequest.SetAccountId(accountID);
+
 	transferAuthorizationCreateResp, _, err := client.PlaidApi.TransferAuthorizationCreate(ctx).TransferAuthorizationCreateRequest(*transferAuthorizationCreateRequest).Execute()
 	if err != nil {
 		return "", err
@@ -639,16 +647,12 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 	authorizationID := transferAuthorizationCreateResp.GetAuthorization().Id
 
 	transferCreateRequest := plaid.NewTransferCreateRequest(
-		accessToken,
-		accountID,
 		authorizationID,
-		"credit",
-		"ach",
-		"1.34",
 		"Payment",
-		"ppd",
-		*transferAuthorizationCreateUser,
 	)
+	transferCreateRequest.SetAccessToken(accessToken)
+	transferCreateRequest.SetAccountId(accountID)
+
 	transferCreateResp, _, err := client.PlaidApi.TransferCreate(ctx).TransferCreateRequest(*transferCreateRequest).Execute()
 	if err != nil {
 		return "", err

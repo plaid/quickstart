@@ -81,7 +81,7 @@ get '/api/transactions' do
     added = []
     modified = []
     removed = [] # Removed transaction ids
-    has_more = TRUE
+    has_more = true
     # Iterate through each page of new transaction updates for item
     while has_more
       request = Plaid::TransactionsSyncRequest.new(
@@ -90,7 +90,6 @@ get '/api/transactions' do
           cursor: cursor
         }
       )
-      
       response = client.transactions_sync(request)
       # Add this page of results
       added += response.added
@@ -540,26 +539,10 @@ def authorize_and_create_transfer(access_token, client)
     authorization_id = transfer_authorization_create_response.authorization.id
 
     transfer_create_request = Plaid::TransferCreateRequest.new({
-      idempotency_key: "1223abc456xyz7890001",
       access_token: access_token,
       account_id: account_id,
       authorization_id: authorization_id,
-      type: 'credit',
-      network: 'ach',
-      amount: '1.34',
-      description: 'Payment',
-      ach_class: 'ppd',
-      user: {
-        legal_name: 'FirstName LastName',
-        email_address: 'foobar@email.com',
-        address: {
-          street: '123 Main St.',
-          city: 'San Francisco',
-          region: 'CA',
-          postal_code: '94053',
-          country: 'US'
-        }
-      },
+      description: 'Payment'
     })
     transfer_create_response = client.transfer_create(transfer_create_request)
     pretty_print_response(transfer_create_response.to_hash)
