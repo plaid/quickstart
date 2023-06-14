@@ -470,7 +470,8 @@ app.get('/api/payment', function (request, response, next) {
     .catch(next);
 });
 
-//TO-DO: This endpoint will be deprecated in the near future
+// This endpoint is still supported but is no longer recommended
+// For Income best practices, see https://github.com/plaid/income-sample instead
 app.get('/api/income/verification/paystubs', function (request, response, next) {
   Promise.resolve()
   .then(async function () {
