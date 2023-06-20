@@ -10,6 +10,9 @@ If you prefer a non-React frontend platform, or a more minimal backend in one la
 
 For Identity Verification, see the [Identity Verification Quickstart](https://github.com/plaid/idv-quickstart). 
 
+For Income, see the [Income sample app](https://github.com/plaid/income-sample). 
+
+
 ![Plaid quickstart app](/assets/quickstart.jpeg)
 
 ## Table of contents
@@ -243,7 +246,7 @@ If you get a "Connectivity not supported" error after selecting a financial inst
 
 ### "You need to update your app" or "institution not supported"
 
-If you get a "You need to update your app" or "institution not supported" error after selecting a financial institution in Link, you're probably running the Quickstart in Development (or Production) and attempting to link an institution, such as Chase or Wells Fargo, that requires an OAuth-based connection. In order to make OAuth connections to US-based institutions in Development or Production, you must have Production access approval, and certain institutions may also require additional steps. To use this institution, [apply for Production access](https://dashboard.plaid.com/overview/production) and see the [OAuth insitutions page](https://dashboard.plaid.com/team/oauth-institutions) for any other required steps.
+If you get a "You need to update your app" or "institution not supported" error after selecting a financial institution in Link, you're probably running the Quickstart in Development (or Production) and attempting to link an institution, such as Chase or Wells Fargo, that requires an OAuth-based connection. In order to make OAuth connections to US-based institutions in Development or Production, you must have Production access approval, and certain institutions may also require additional approvals before you can be enabled. To use this institution, [apply for Production access](https://dashboard.plaid.com/overview/production) and see the [OAuth insitutions page](https://dashboard.plaid.com/team/oauth-institutions) for any other required steps and to track your OAuth enablement status.
 
 ### "oauth uri does not contain a valid oauth_state_id query parameter"
 
@@ -255,7 +258,7 @@ Some institutions require an OAuth redirect
 authentication flow, where the end user is redirected to the bank’s website or mobile app to
 authenticate. 
 
-To test the OAuth flow in Sandbox, select any institution that uses an OAuth connection with Plaid (a partial list can be found on the [Dashboard OAuth Institutions page](https://dashboard.plaid.com/team/oauth-institutions), or choose 'Playtypus OAuth Bank' from the list of financial institutions in Plaid Link.
+To test the OAuth flow in Sandbox, select any institution that uses an OAuth connection with Plaid (a partial list can be found on the [Dashboard OAuth Institutions page](https://dashboard.plaid.com/team/oauth-institutions)), or choose 'Platypus OAuth Bank' from the list of financial institutions in Plaid Link.
 
 ### Testing OAuth with a redirect URI (optional)
 
