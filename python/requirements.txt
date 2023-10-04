@@ -2,3 +2,4 @@ Flask==2.1.0
 plaid_python==14.0.0
 python-dotenv==0.15.0
 itsdangerous==2.0.1
+werkzeug==2.2.2
