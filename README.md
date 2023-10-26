@@ -77,7 +77,7 @@ cp .env.example .env
 
 Copy `.env.example` to a new file called `.env` and fill out the environment variables inside. At
 minimum `PLAID_CLIENT_ID` and `PLAID_SECRET` must be filled out. Get your Client ID and secrets from
-the dashboard: https://dashboard.plaid.com/account/keys
+the dashboard: [https://dashboard.plaid.com/account/keys](https://dashboard.plaid.com/developers/keys)
 
 > NOTE: `.env` files are a convenient local development tool. Never run a production application
 > using an environment file with secrets in it.
