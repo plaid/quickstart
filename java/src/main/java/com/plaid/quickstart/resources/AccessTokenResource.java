@@ -80,9 +80,9 @@ public class AccessTokenResource {
       TransferAuthorizationCreateRequest transferAuthorizationCreateRequest = new TransferAuthorizationCreateRequest()
         .accessToken(QuickstartApplication.accessToken)
         .accountId(accountId)
-        .type(TransferType.CREDIT)
+        .type(TransferType.DEBIT)
         .network(TransferNetwork.ACH)
-        .amount("1.34")
+        .amount(".01")
         .achClass(ACHClass.PPD)
         .user(user);
 
@@ -96,7 +96,7 @@ public class AccessTokenResource {
         .authorizationId(authorizationId)
         .accessToken(QuickstartApplication.accessToken)
         .accountId(accountId)
-        .description("Payment");
+        .description("Debit");
 
       Response<TransferCreateResponse> transferCreateResponse = plaidClient
         .transferCreate(transferCreateRequest)
