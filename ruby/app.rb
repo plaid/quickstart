@@ -542,7 +542,7 @@ def authorize_and_create_transfer(access_token, client)
       access_token: access_token,
       account_id: account_id,
       authorization_id: authorization_id,
-      description: 'Payment'
+      description: 'Debit'
     })
     transfer_create_response = client.transfer_create(transfer_create_request)
     pretty_print_response(transfer_create_response.to_hash)

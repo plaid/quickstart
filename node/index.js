@@ -578,7 +578,7 @@ const authorizeAndCreateTransfer = async (accessToken) => {
     access_token: accessToken,
     account_id: accountId,
     authorization_id: authorizationId,
-    description: 'Payment',
+    description: 'Debit',
   });
   prettyPrintResponse(transferResponse);
   return transferResponse.data.transfer.id;

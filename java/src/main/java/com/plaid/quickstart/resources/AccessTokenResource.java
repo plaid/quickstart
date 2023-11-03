@@ -96,7 +96,7 @@ public class AccessTokenResource {
         .authorizationId(authorizationId)
         .accessToken(QuickstartApplication.accessToken)
         .accountId(accountId)
-        .description("Payment");
+        .description("Debit");
 
       Response<TransferCreateResponse> transferCreateResponse = plaidClient
         .transferCreate(transferCreateRequest)
