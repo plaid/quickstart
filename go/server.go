@@ -16,7 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v12/plaid"
+	plaid "github.com/plaid/plaid-go/v17/plaid"
 )
 
 var (
@@ -594,7 +594,8 @@ func assets(c *gin.Context) {
 
 func pollForAssetReport(ctx context.Context, client *plaid.APIClient, assetReportToken string) (*plaid.AssetReportGetResponse, error) {
 	numRetries := 20
-	request := plaid.NewAssetReportGetRequest(assetReportToken)
+	request := plaid.NewAssetReportGetRequest()
+	request.SetAssetReportToken(assetReportToken)
 
 	for i := 0; i < numRetries; i++ {
 		response, _, err := client.PlaidApi.AssetReportGet(ctx).AssetReportGetRequest(*request).Execute()
@@ -625,20 +626,20 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 	).Execute()
 
 	accountID := accountsGetResp.GetAccounts()[0].AccountId
-	transferType, err := plaid.NewTransferTypeFromValue("credit")
+	transferType, err := plaid.NewTransferTypeFromValue("debit")
 	transferNetwork, err := plaid.NewTransferNetworkFromValue("ach")
 	ACHClass, err := plaid.NewACHClassFromValue("ppd")
 
 	transferAuthorizationCreateUser := plaid.NewTransferAuthorizationUserInRequest("FirstName LastName")
 	transferAuthorizationCreateRequest := plaid.NewTransferAuthorizationCreateRequest(
+		accessToken,
+		accountID,
 		*transferType,
 		*transferNetwork,
-		"1.34",
+		".01",
 		*transferAuthorizationCreateUser)
 
-	transferAuthorizationCreateRequest.SetAccessToken(accessToken);
 	transferAuthorizationCreateRequest.SetAchClass(*ACHClass);
-	transferAuthorizationCreateRequest.SetAccountId(accountID);
 
 	transferAuthorizationCreateResp, _, err := client.PlaidApi.TransferAuthorizationCreate(ctx).TransferAuthorizationCreateRequest(*transferAuthorizationCreateRequest).Execute()
 	if err != nil {
@@ -648,10 +649,11 @@ func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, ac
 
 	transferCreateRequest := plaid.NewTransferCreateRequest(
 		authorizationID,
-		"Payment",
+		"Debit",
 	)
-	transferCreateRequest.SetAccessToken(accessToken)
-	transferCreateRequest.SetAccountId(accountID)
+
+	transferCreateRequest.SetAccessToken(accessToken);
+	transferCreateRequest.SetAccountId(accountID);
 
 	transferCreateResp, _, err := client.PlaidApi.TransferCreate(ctx).TransferCreateRequest(*transferCreateRequest).Execute()
 	if err != nil {

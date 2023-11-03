@@ -80,9 +80,9 @@ public class AccessTokenResource {
       TransferAuthorizationCreateRequest transferAuthorizationCreateRequest = new TransferAuthorizationCreateRequest()
         .accessToken(QuickstartApplication.accessToken)
         .accountId(accountId)
-        .type(TransferType.CREDIT)
+        .type(TransferType.DEBIT)
         .network(TransferNetwork.ACH)
-        .amount("1.34")
+        .amount(".01")
         .achClass(ACHClass.PPD)
         .user(user);
 

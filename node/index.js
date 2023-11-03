@@ -555,7 +555,7 @@ const authorizeAndCreateTransfer = async (accessToken) => {
     await client.transferAuthorizationCreate({
       access_token: accessToken,
       account_id: accountId,
-      type: 'credit',
+      type: 'debit',
       network: 'ach',
       amount: '1.34',
       ach_class: 'ppd',

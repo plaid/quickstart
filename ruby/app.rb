@@ -518,7 +518,7 @@ def authorize_and_create_transfer(access_token, client)
     transfer_authorization_create_request = Plaid::TransferAuthorizationCreateRequest.new({
       access_token: access_token,
       account_id: account_id,
-      type: 'credit',
+      type: 'debit',
       network: 'ach',
       amount: '1.34',
       ach_class: 'ppd',
