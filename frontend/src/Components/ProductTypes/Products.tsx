@@ -126,14 +126,16 @@ const Products = () => {
       </>
       )}
       {products.includes("transfer") && (
-        <Endpoint
-          endpoint="transfer"
-          name="Transfer"
-          categories={transferCategories}
-          schema="/transfer/get/"
-          description="Retrieve information about your latest ACH Transfer."
-          transformData={transformTransferData}
-        />
+        <>
+          <Endpoint
+            endpoint="transfer_create"
+            name="Transfer"
+            categories={transferCategories}
+            schema="/transfer/create/"
+            description="Make a 1-dollar ACH transfer payment from the linked account"
+            transformData={transformTransferData}
+          />
+        </>
       )}
       {products.includes("income_verification") && (
         <Endpoint
