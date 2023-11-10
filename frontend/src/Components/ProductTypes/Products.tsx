@@ -127,6 +127,14 @@ const Products = () => {
       )}
       {products.includes("transfer") && (
         <>
+        <Endpoint
+            endpoint="transfer_authorize"
+            name="Transfer"
+            categories={transferCategories}
+            schema="/transfer/authorization/create"
+            description="Authorize a new ACH transfer payment from the linked account"
+            transformData={transformTransferData}
+          />
           <Endpoint
             endpoint="transfer_create"
             name="Transfer"
