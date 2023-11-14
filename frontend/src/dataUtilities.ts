@@ -621,7 +621,6 @@ export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
 
 export const transformTransferAuthorizationData = (data: TransferAuthorizationCreateResponse) => {
   const transferAuthorizationData = data.authorization;
-  console.log("transfer authorization data is" + JSON.stringify(data));
   return [
     {
       authorizationId: transferAuthorizationData.id,
