@@ -633,7 +633,6 @@ export const transformTransferAuthorizationData = (data: TransferAuthorizationCr
 };
 
 export const transformTransferData = (data: TransferCreateResponse): Array<DataItem> => {
-  console.log("transfer  data is" + JSON.stringify(data));
   const transferData = data.transfer;
   return [
     {
