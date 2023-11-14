@@ -201,9 +201,6 @@ app.post('/api/set_access_token', function (request, response, next) {
       prettyPrintResponse(tokenResponse);
       ACCESS_TOKEN = tokenResponse.data.access_token;
       ITEM_ID = tokenResponse.data.item_id;
-      if (PLAID_PRODUCTS.includes(Products.Transfer)) {
-        AUTHORIZATION_ID = await authorizeTransfer(ACCESS_TOKEN);
-      }
       response.json({
         // the 'access_token' is a private token, DO NOT pass this token to the frontend in your production environment
         access_token: ACCESS_TOKEN,
@@ -525,42 +522,40 @@ const formatError = (error) => {
   };
 };
 
-// This is a helper function to authorize and create a Transfer after successful
-// exchange of a public_token for an access_token. The TRANSFER_ID is then used
-// to obtain the data about that particular Transfer.
+app.get('/api/transfer_authorize', function (request, response, next) {
+  Promise.resolve()
+    .then(async function () {
+      const accountsResponse = await client.accountsGet({
+        access_token: ACCESS_TOKEN,
+      });
+      ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
 
-const authorizeTransfer = async (accessToken) => {
-  // We call /accounts/get to obtain first account_id - in production,
-  // account_id's should be persisted in a data store and retrieved
-  // from there.
-  const accountsResponse = await client.accountsGet({
-    access_token: accessToken,
-  });
-  ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
-
-  const transferAuthorizationResponse =
-    await client.transferAuthorizationCreate({
-      access_token: accessToken,
-      account_id: ACCOUNT_ID,
-      type: 'debit',
-      network: 'ach',
-      amount: '1.00',
-      ach_class: 'ppd',
-      user: {
-        legal_name: 'FirstName LastName',
-        email_address: 'foobar@email.com',
-        address: {
-          street: '123 Main St.',
-          city: 'San Francisco',
-          region: 'CA',
-          postal_code: '94053',
-          country: 'US',
+      const transferAuthorizationCreateResponse = await client.transferAuthorizationCreate({
+        access_token: ACCESS_TOKEN,
+        account_id: ACCOUNT_ID,
+        type: 'debit',
+        network: 'ach',
+        amount: '1.00',
+        ach_class: 'ppd',
+        user: {
+          legal_name: 'FirstName LastName',
+          email_address: 'foobar@email.com',
+          address: {
+            street: '123 Main St.',
+            city: 'San Francisco',
+            region: 'CA',
+            postal_code: '94053',
+            country: 'US',
+          },
         },
-      },
-    });
-  prettyPrintResponse(transferAuthorizationResponse);
-  return transferAuthorizationResponse.data.authorization.id;
-}
+      });
+      prettyPrintResponse(transferAuthorizationCreateResponse);
+      AUTHORIZATION_ID = transferAuthorizationCreateResponse.data.authorization.id;
+      response.json(transferAuthorizationCreateResponse.data);
+    })
+    .catch(next);
+});
+
 
 app.get('/api/transfer_create', function (request, response, next) {
   Promise.resolve()

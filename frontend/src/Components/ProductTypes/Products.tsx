@@ -15,6 +15,7 @@ import {
   assetsCategories,
   incomePaystubsCategories,
   transferCategories,
+  transferAuthorizationCategories,
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
@@ -25,6 +26,7 @@ import {
   transformPaymentData,
   transformAssetsData,
   transformTransferData,
+  transformTransferAuthorizationData,
   transformIncomePaystubsData,
 } from "../../dataUtilities";
 
@@ -130,17 +132,17 @@ const Products = () => {
         <Endpoint
             endpoint="transfer_authorize"
             name="Transfer"
-            categories={transferCategories}
+            categories={transferAuthorizationCategories}
             schema="/transfer/authorization/create"
-            description="Authorize a new ACH transfer payment from the linked account"
-            transformData={transformTransferData}
+            description="Authorize a new 1-dollar ACH transfer payment from the linked account"
+            transformData={transformTransferAuthorizationData}
           />
           <Endpoint
             endpoint="transfer_create"
             name="Transfer"
             categories={transferCategories}
             schema="/transfer/create/"
-            description="Make a 1-dollar ACH transfer payment from the linked account"
+            description="(After calling /transfer/authorization/create) Execute an authorized 1-dollar ACH transfer payment from the linked account"
             transformData={transformTransferData}
           />
         </>

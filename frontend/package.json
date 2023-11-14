@@ -13,7 +13,7 @@
     "ajv-keywords": "^5.1.0",
     "classnames": "^2.2.6",
     "immer": "^9.0.6",
-    "plaid": "^9.2.0",
+    "plaid": "^17.0.0",
     "plaid-threads": "^11.2.3",
     "react": "^16.14.0",
     "react-dev-utils": "^12.0.0",
