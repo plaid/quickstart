@@ -5,16 +5,6 @@ import java.io.IOException;
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.ItemPublicTokenExchangeRequest;
 import com.plaid.client.model.ItemPublicTokenExchangeResponse;
-import com.plaid.client.model.TransferAuthorizationUserInRequest;
-import com.plaid.client.model.TransferAuthorizationCreateRequest;
-import com.plaid.client.model.TransferAuthorizationCreateResponse;
-import com.plaid.client.model.TransferCreateRequest;
-import com.plaid.client.model.TransferCreateResponse;
-import com.plaid.client.model.TransferType;
-import com.plaid.client.model.TransferNetwork;
-import com.plaid.client.model.ACHClass;
-import com.plaid.client.model.AccountsGetRequest;
-import com.plaid.client.model.AccountsGetResponse;
 import com.plaid.quickstart.QuickstartApplication;
 import com.plaid.client.model.Products;
 
@@ -60,51 +50,6 @@ public class AccessTokenResource {
     LOG.info("public token: " + publicToken);
     LOG.info("access token: " + QuickstartApplication.accessToken);
     LOG.info("item ID: " + response.body().getItemId());
-
-    if (plaidProducts.contains("transfer")) {
-      // We call /accounts/get to obtain first account_id - in production,
-      // account_id's should be persisted in a data store and retrieved
-	    // from there.
-      AccountsGetRequest accountsGetRequest = new AccountsGetRequest()
-        .accessToken(QuickstartApplication.accessToken);
-
-      Response<AccountsGetResponse> accountsGetResponse = plaidClient
-        .accountsGet(accountsGetRequest)
-        .execute();
-
-      String accountId = accountsGetResponse.body().getAccounts().get(0).getAccountId();
-
-      TransferAuthorizationUserInRequest user = new TransferAuthorizationUserInRequest()
-        .legalName("FirstName LastName");
-
-      TransferAuthorizationCreateRequest transferAuthorizationCreateRequest = new TransferAuthorizationCreateRequest()
-        .accessToken(QuickstartApplication.accessToken)
-        .accountId(accountId)
-        .type(TransferType.DEBIT)
-        .network(TransferNetwork.ACH)
-        .amount(".01")
-        .achClass(ACHClass.PPD)
-        .user(user);
-
-      Response<TransferAuthorizationCreateResponse> transferAuthorizationCreateResponse = plaidClient
-        .transferAuthorizationCreate(transferAuthorizationCreateRequest)
-        .execute();
-  
-      String authorizationId = transferAuthorizationCreateResponse.body().getAuthorization().getId();
-      
-      TransferCreateRequest transferCreateRequest = new TransferCreateRequest()
-        .authorizationId(authorizationId)
-        .accessToken(QuickstartApplication.accessToken)
-        .accountId(accountId)
-        .description("Debit");
-
-      Response<TransferCreateResponse> transferCreateResponse = plaidClient
-        .transferCreate(transferCreateRequest)
-        .execute();
-
-      QuickstartApplication.transferId = transferCreateResponse.body().getTransfer().getId();
-    }
-
     return new InfoResource.InfoResponse(Arrays.asList(), QuickstartApplication.accessToken,
       QuickstartApplication.itemID);
   }
