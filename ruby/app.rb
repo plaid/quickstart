@@ -35,10 +35,11 @@ access_token = nil
 payment_id = nil
 item_id = nil
 
-# The transfer_id is only relevant for Transfer ACH product.
-# We store the transfer_id in memory - in production, store it in a secure
+# The authorization_id is only relevant for Transfer ACH product.
+# We store the authorization_id in memory - in production, store it in a secure
 # persistent data store.
-transfer_id = nil
+authorization_id = nil
+account_id = nil
 
 post '/api/info' do
   content_type :json
@@ -62,9 +63,6 @@ post '/api/set_access_token' do
     )
   access_token = exchange_token_response.access_token
   item_id = exchange_token_response.item_id
-  if ENV['PLAID_PRODUCTS'].split(',').include?('transfer')
-    transfer_id = authorize_and_create_transfer(access_token, client)
-  end
   pretty_print_response(exchange_token_response.to_hash)
   content_type :json
   exchange_token_response.to_hash.to_json
@@ -331,13 +329,59 @@ end
 # This functionality is only relevant for the ACH Transfer product.
 # Retrieve Transfer for a specified Transfer ID
 
-get '/api/transfer' do
+get '/api/transfer_authorize' do
   begin
-    transfer_get_request = Plaid::TransferGetRequest.new({ transfer_id: transfer_id })
-    transfer_get_response = client.transfer_get(transfer_get_request)
-    pretty_print_response(transfer_get_response.to_hash)
+    # We call /accounts/get to obtain first account_id - in production,
+    # account_id's should be persisted in a data store and retrieved
+    # from there.
+    accounts_get_request = Plaid::AccountsGetRequest.new({ access_token: access_token })
+    accounts_get_response = client.accounts_get(accounts_get_request)
+    account_id = accounts_get_response.accounts[0].account_id
+
+    transfer_authorization_create_request = Plaid::TransferAuthorizationCreateRequest.new({
+      access_token: access_token,
+      account_id: account_id,
+      type: 'debit',
+      network: 'ach',
+      amount: '1.00',
+      ach_class: 'ppd',
+      user: {
+        legal_name: 'FirstName LastName',
+        email_address: 'foobar@email.com',
+        address: {
+          street: '123 Main St.',
+          city: 'San Francisco',
+          region: 'CA',
+          postal_code: '94053',
+          country: 'US'
+        }
+      },
+    })
+    transfer_authorization_create_response = client.transfer_authorization_create(transfer_authorization_create_request)
+    pretty_print_response(transfer_authorization_create_response.to_hash)
+    authorization_id = transfer_authorization_create_response.authorization.id
     content_type :json
-    { error: nil, transfer: transfer_get_response.transfer.to_hash}.to_json
+    transfer_authorization_create_response.to_hash.to_json
+  rescue Plaid::ApiError => e
+    error_response = format_error(e)
+    pretty_print_response(error_response)
+    content_type :json
+    error_response.to_json
+  end
+end
+
+get '/api/transfer_create' do
+  begin
+      transfer_create_request = Plaid::TransferCreateRequest.new({
+      access_token: access_token,
+      account_id: account_id,
+      authorization_id: authorization_id,
+      description: 'Debit'
+    })
+    transfer_create_response = client.transfer_create(transfer_create_request)
+    pretty_print_response(transfer_create_response.to_hash)
+    content_type :json
+    transfer_create_response.to_hash.to_json
   rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
@@ -501,57 +545,4 @@ end
 
 def pretty_print_response(response)
   puts JSON.pretty_generate(response)
-end
-
-# This is a helper function to authorize and create a Transfer after successful
-# exchange of a public_token for an access_token. The TRANSFER_ID is then used
-# to obtain the data about that particular Transfer.
-def authorize_and_create_transfer(access_token, client)
-  begin
-    # We call /accounts/get to obtain first account_id - in production,
-    # account_id's should be persisted in a data store and retrieved
-    # from there.
-    accounts_get_request = Plaid::AccountsGetRequest.new({ access_token: access_token })
-    accounts_get_response = client.accounts_get(accounts_get_request)
-    account_id = accounts_get_response.accounts[0].account_id
-
-    transfer_authorization_create_request = Plaid::TransferAuthorizationCreateRequest.new({
-      access_token: access_token,
-      account_id: account_id,
-      type: 'debit',
-      network: 'ach',
-      amount: '1.34',
-      ach_class: 'ppd',
-      user: {
-        legal_name: 'FirstName LastName',
-        email_address: 'foobar@email.com',
-        address: {
-          street: '123 Main St.',
-          city: 'San Francisco',
-          region: 'CA',
-          postal_code: '94053',
-          country: 'US'
-        }
-      },
-    })
-    transfer_authorization_create_response = client.transfer_authorization_create(transfer_authorization_create_request)
-    pretty_print_response(transfer_authorization_create_response.to_hash)
-    authorization_id = transfer_authorization_create_response.authorization.id
-
-    transfer_create_request = Plaid::TransferCreateRequest.new({
-      access_token: access_token,
-      account_id: account_id,
-      authorization_id: authorization_id,
-      description: 'Debit'
-    })
-    transfer_create_response = client.transfer_create(transfer_create_request)
-    pretty_print_response(transfer_create_response.to_hash)
-    transfer_id = transfer_create_response.transfer.id
-    return transfer_id
-  rescue Plaid::ApiError => e
-    error_response = format_error(e)
-    pretty_print_response(error_response)
-  end
-
-
 end
