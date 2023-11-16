@@ -113,7 +113,8 @@ func main() {
 	r.GET("/api/investments_transactions", investmentTransactions)
 	r.GET("/api/holdings", holdings)
 	r.GET("/api/assets", assets)
-	r.GET("/api/transfer", transfer)
+	r.GET("/api/transfer_authorize", transferAuthorize)
+	r.GET("/api/transfer_create", transferCreate)
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
@@ -128,10 +129,11 @@ var itemID string
 
 var paymentID string
 
-// The transfer_id is only relevant for the Transfer ACH product.
-// We store the transfer_id in memory - in production, store it in a secure
+// The authorizationID is only relevant for the Transfer ACH product.
+// We store the authorizationID in memory - in production, store it in a secure
 // persistent data store
-var transferID string
+var authorizationID string
+var accountID string
 
 func renderError(c *gin.Context, originalErr error) {
 	if plaidError, err := plaid.ToPlaidError(originalErr); err == nil {
@@ -158,9 +160,6 @@ func getAccessToken(c *gin.Context) {
 
 	accessToken = exchangePublicTokenResp.GetAccessToken()
 	itemID = exchangePublicTokenResp.GetItemId()
-	if itemExists(strings.Split(PLAID_PRODUCTS, ","), "transfer") {
-		transferID, err = authorizeAndCreateTransfer(ctx, client, accessToken)
-	}
 
 	fmt.Println("public token: " + publicToken)
 	fmt.Println("access token: " + accessToken)
@@ -390,21 +389,65 @@ func payment(c *gin.Context) {
 }
 
 // This functionality is only relevant for the ACH Transfer product.
-// Retrieve Transfer for a specified Transfer ID
-func transfer(c *gin.Context) {
-	ctx := context.Background()
+// Create Transfer for a specified Authorization ID
 
-	transferGetResp, _, err := client.PlaidApi.TransferGet(ctx).TransferGetRequest(
-		*plaid.NewTransferGetRequest(transferID),
+func transferAuthorize(c *gin.Context) {
+	ctx := context.Background()
+	accountsGetResp, _, err := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
+		*plaid.NewAccountsGetRequest(accessToken),
 	).Execute()
+
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"transfer": transferGetResp.GetTransfer(),
-	})
+	accountID = accountsGetResp.GetAccounts()[0].AccountId
+	transferType, err := plaid.NewTransferTypeFromValue("debit")
+	transferNetwork, err := plaid.NewTransferNetworkFromValue("ach")
+	ACHClass, err := plaid.NewACHClassFromValue("ppd")
+
+	transferAuthorizationCreateUser := plaid.NewTransferAuthorizationUserInRequest("FirstName LastName")
+	transferAuthorizationCreateRequest := plaid.NewTransferAuthorizationCreateRequest(
+		accessToken,
+		accountID,
+		*transferType,
+		*transferNetwork,
+		"1.00",
+		*transferAuthorizationCreateUser)
+
+	transferAuthorizationCreateRequest.SetAchClass(*ACHClass);
+	transferAuthorizationCreateResp, _, err := client.PlaidApi.TransferAuthorizationCreate(ctx).TransferAuthorizationCreateRequest(*transferAuthorizationCreateRequest).Execute()
+
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	authorizationID = transferAuthorizationCreateResp.GetAuthorization().Id
+
+	c.JSON(http.StatusOK, transferAuthorizationCreateResp)
+}
+
+func transferCreate(c *gin.Context) {
+	ctx := context.Background()
+
+	transferCreateRequest := plaid.NewTransferCreateRequest(
+		authorizationID,
+		"Debit",
+	)
+
+	transferCreateRequest.SetAccessToken(accessToken);
+	transferCreateRequest.SetAccountId(accountID);
+
+	transferCreateResp, _, err := client.PlaidApi.TransferCreate(ctx).TransferCreateRequest(*transferCreateRequest).Execute()
+
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, transferCreateResp)
 }
 
 func investmentTransactions(c *gin.Context) {
@@ -612,64 +655,4 @@ func pollForAssetReport(ctx context.Context, client *plaid.APIClient, assetRepor
 		}
 	}
 	return nil, errors.New("Timed out when polling for an asset report.")
-}
-
-// This is a helper function to authorize and create a Transfer after successful
-// exchange of a public_token for an access_token. The transfer_id is then used
-// to obtain the data about that particular Transfer.
-func authorizeAndCreateTransfer(ctx context.Context, client *plaid.APIClient, accessToken string) (string, error) {
-	// We call /accounts/get to obtain first account_id - in production,
-	// account_id's should be persisted in a data store and retrieved
-	// from there.
-	accountsGetResp, _, _ := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
-		*plaid.NewAccountsGetRequest(accessToken),
-	).Execute()
-
-	accountID := accountsGetResp.GetAccounts()[0].AccountId
-	transferType, err := plaid.NewTransferTypeFromValue("debit")
-	transferNetwork, err := plaid.NewTransferNetworkFromValue("ach")
-	ACHClass, err := plaid.NewACHClassFromValue("ppd")
-
-	transferAuthorizationCreateUser := plaid.NewTransferAuthorizationUserInRequest("FirstName LastName")
-	transferAuthorizationCreateRequest := plaid.NewTransferAuthorizationCreateRequest(
-		accessToken,
-		accountID,
-		*transferType,
-		*transferNetwork,
-		".01",
-		*transferAuthorizationCreateUser)
-
-	transferAuthorizationCreateRequest.SetAchClass(*ACHClass);
-
-	transferAuthorizationCreateResp, _, err := client.PlaidApi.TransferAuthorizationCreate(ctx).TransferAuthorizationCreateRequest(*transferAuthorizationCreateRequest).Execute()
-	if err != nil {
-		return "", err
-	}
-	authorizationID := transferAuthorizationCreateResp.GetAuthorization().Id
-
-	transferCreateRequest := plaid.NewTransferCreateRequest(
-		authorizationID,
-		"Debit",
-	)
-
-	transferCreateRequest.SetAccessToken(accessToken);
-	transferCreateRequest.SetAccountId(accountID);
-
-	transferCreateResp, _, err := client.PlaidApi.TransferCreate(ctx).TransferCreateRequest(*transferCreateRequest).Execute()
-	if err != nil {
-		return "", err
-	}
-
-	return transferCreateResp.GetTransfer().Id, nil
-}
-
-// Helper function to determine if Transfer is in Plaid product array
-func itemExists(array []string, product string) bool {
-	for _, item := range array {
-		if item == product {
-			return true
-		}
-	}
-
-	return false
 }

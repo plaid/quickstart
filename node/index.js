@@ -46,13 +46,15 @@ const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || '';
 let ACCESS_TOKEN = null;
 let PUBLIC_TOKEN = null;
 let ITEM_ID = null;
+let ACCOUNT_ID = null;
 // The payment_id is only relevant for the UK/EU Payment Initiation product.
 // We store the payment_id in memory - in production, store it in a secure
 // persistent data store along with the Payment metadata, such as userId .
 let PAYMENT_ID = null;
-// The transfer_id is only relevant for Transfer ACH product.
+// The transfer_id and authorization_id are only relevant for Transfer ACH product.
 // We store the transfer_id in memory - in production, store it in a secure
 // persistent data store
+let AUTHORIZATION_ID = null;
 let TRANSFER_ID = null;
 
 // Initialize the Plaid client
@@ -199,9 +201,6 @@ app.post('/api/set_access_token', function (request, response, next) {
       prettyPrintResponse(tokenResponse);
       ACCESS_TOKEN = tokenResponse.data.access_token;
       ITEM_ID = tokenResponse.data.item_id;
-      if (PLAID_PRODUCTS.includes(Products.Transfer)) {
-        TRANSFER_ID = await authorizeAndCreateTransfer(ACCESS_TOKEN);
-      }
       response.json({
         // the 'access_token' is a private token, DO NOT pass this token to the frontend in your production environment
         access_token: ACCESS_TOKEN,
@@ -441,21 +440,6 @@ app.get('/api/assets', function (request, response, next) {
     .catch(next);
 });
 
-app.get('/api/transfer', function (request, response, next) {
-  Promise.resolve()
-    .then(async function () {
-      const transferGetResponse = await client.transferGet({
-        transfer_id: TRANSFER_ID,
-      });
-      prettyPrintResponse(transferGetResponse);
-      response.json({
-        error: null,
-        transfer: transferGetResponse.data.transfer,
-      });
-    })
-    .catch(next);
-});
-
 // This functionality is only relevant for the UK/EU Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
 app.get('/api/payment', function (request, response, next) {
@@ -538,48 +522,56 @@ const formatError = (error) => {
   };
 };
 
-// This is a helper function to authorize and create a Transfer after successful
-// exchange of a public_token for an access_token. The TRANSFER_ID is then used
-// to obtain the data about that particular Transfer.
+app.get('/api/transfer_authorize', function (request, response, next) {
+  Promise.resolve()
+    .then(async function () {
+      const accountsResponse = await client.accountsGet({
+        access_token: ACCESS_TOKEN,
+      });
+      ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
 
-const authorizeAndCreateTransfer = async (accessToken) => {
-  // We call /accounts/get to obtain first account_id - in production,
-  // account_id's should be persisted in a data store and retrieved
-  // from there.
-  const accountsResponse = await client.accountsGet({
-    access_token: accessToken,
-  });
-  const accountId = accountsResponse.data.accounts[0].account_id;
-
-  const transferAuthorizationResponse =
-    await client.transferAuthorizationCreate({
-      access_token: accessToken,
-      account_id: accountId,
-      type: 'debit',
-      network: 'ach',
-      amount: '1.34',
-      ach_class: 'ppd',
-      user: {
-        legal_name: 'FirstName LastName',
-        email_address: 'foobar@email.com',
-        address: {
-          street: '123 Main St.',
-          city: 'San Francisco',
-          region: 'CA',
-          postal_code: '94053',
-          country: 'US',
+      const transferAuthorizationCreateResponse = await client.transferAuthorizationCreate({
+        access_token: ACCESS_TOKEN,
+        account_id: ACCOUNT_ID,
+        type: 'debit',
+        network: 'ach',
+        amount: '1.00',
+        ach_class: 'ppd',
+        user: {
+          legal_name: 'FirstName LastName',
+          email_address: 'foobar@email.com',
+          address: {
+            street: '123 Main St.',
+            city: 'San Francisco',
+            region: 'CA',
+            postal_code: '94053',
+            country: 'US',
+          },
         },
-      },
-    });
-  prettyPrintResponse(transferAuthorizationResponse);
-  const authorizationId = transferAuthorizationResponse.data.authorization.id;
+      });
+      prettyPrintResponse(transferAuthorizationCreateResponse);
+      AUTHORIZATION_ID = transferAuthorizationCreateResponse.data.authorization.id;
+      response.json(transferAuthorizationCreateResponse.data);
+    })
+    .catch(next);
+});
 
-  const transferResponse = await client.transferCreate({
-    access_token: accessToken,
-    account_id: accountId,
-    authorization_id: authorizationId,
-    description: 'Debit',
-  });
-  prettyPrintResponse(transferResponse);
-  return transferResponse.data.transfer.id;
-};
+
+app.get('/api/transfer_create', function (request, response, next) {
+  Promise.resolve()
+    .then(async function () {
+      const transferCreateResponse = await client.transferCreate({
+        access_token: ACCESS_TOKEN,
+        account_id: ACCOUNT_ID,
+        authorization_id: AUTHORIZATION_ID,
+        description: 'Debit',
+      });
+      prettyPrintResponse(transferCreateResponse);
+      TRANSFER_ID = transferCreateResponse.data.transfer.id
+      response.json({
+        error: null,
+        transfer: transferCreateResponse.data.transfer,
+      });
+    })
+    .catch(next);
+});

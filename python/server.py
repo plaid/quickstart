@@ -240,8 +240,6 @@ def get_access_token():
         exchange_response = client.item_public_token_exchange(exchange_request)
         access_token = exchange_response['access_token']
         item_id = exchange_response['item_id']
-        if 'transfer' in PLAID_PRODUCTS:
-            transfer_id = authorize_and_create_transfer(access_token)
         return jsonify(exchange_response.to_dict())
     except plaid.ApiException as e:
         return json.loads(e.body)
@@ -480,20 +478,59 @@ def get_investments_transactions():
         return jsonify(error_response)
 
 # This functionality is only relevant for the ACH Transfer product.
-# Retrieve Transfer for a specified Transfer ID
+# Authorize a transfer
 
-@app.route('/api/transfer', methods=['GET'])
-def transfer():
-    global transfer_id
+@app.route('/api/transfer_authorize', methods=['GET'])
+def transfer_authorization():
+    global authorization_id 
+    global account_id
+    request = AccountsGetRequest(access_token=access_token)
+    response = client.accounts_get(request)
+    account_id = response['accounts'][0]['account_id']
     try:
-        request = TransferGetRequest(transfer_id=transfer_id)
-        response = client.transfer_get(request)
+        request = TransferAuthorizationCreateRequest(
+            access_token=access_token,
+            account_id=account_id,
+            type=TransferType('debit'),
+            network=TransferNetwork('ach'),
+            amount='1.00',
+            ach_class=ACHClass('ppd'),
+            user=TransferAuthorizationUserInRequest(
+                legal_name='FirstName LastName',
+                email_address='foobar@email.com',
+                address=TransferUserAddressInRequest(
+                    street='123 Main St.',
+                    city='San Francisco',
+                    region='CA',
+                    postal_code='94053',
+                    country='US'
+                ),
+            ),
+        )
+        response = client.transfer_authorization_create(request)
         pretty_print_response(response.to_dict())
-        return jsonify({'error': None, 'transfer': response['transfer'].to_dict()})
+        authorization_id = response['authorization']['id']
+        return jsonify(response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
 
+# Create Transfer for a specified Transfer ID
+
+@app.route('/api/transfer_create', methods=['GET'])
+def transfer():
+    try:
+        request = TransferCreateRequest(
+            access_token=access_token,
+            account_id=account_id,
+            authorization_id=authorization_id,
+            description='Debit')
+        response = client.transfer_create(request)
+        pretty_print_response(response.to_dict())
+        return jsonify(response.to_dict())
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID
@@ -541,54 +578,6 @@ def format_error(e):
     response = json.loads(e.body)
     return {'error': {'status_code': e.status, 'display_message':
                       response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type']}}
-
-# This is a helper function to authorize and create a Transfer after successful
-# exchange of a public_token for an access_token. The transfer_id is then used
-# to obtain the data about that particular Transfer.
-def authorize_and_create_transfer(access_token):
-    try:
-        # We call /accounts/get to obtain first account_id - in production,
-        # account_id's should be persisted in a data store and retrieved
-        # from there.
-        request = AccountsGetRequest(access_token=access_token)
-        response = client.accounts_get(request)
-        account_id = response['accounts'][0]['account_id']
-
-        request = TransferAuthorizationCreateRequest(
-            access_token=access_token,
-            account_id=account_id,
-            type=TransferType('debit'),
-            network=TransferNetwork('ach'),
-            amount='1.34',
-            ach_class=ACHClass('ppd'),
-            user=TransferAuthorizationUserInRequest(
-                legal_name='FirstName LastName',
-                email_address='foobar@email.com',
-                address=TransferUserAddressInRequest(
-                    street='123 Main St.',
-                    city='San Francisco',
-                    region='CA',
-                    postal_code='94053',
-                    country='US'
-                ),
-            ),
-        )
-        response = client.transfer_authorization_create(request)
-        pretty_print_response(response)
-        authorization_id = response['authorization']['id']
-
-        request = TransferCreateRequest(
-            access_token=access_token,
-            account_id=account_id,
-            authorization_id=authorization_id,
-            description='Debit')
-        response = client.transfer_create(request)
-        pretty_print_response(response)
-        return response['transfer']['id']
-    except plaid.ApiException as e:
-        error_response = format_error(e)
-        return jsonify(error_response)
-
 
 if __name__ == '__main__':
     app.run(port=int(os.getenv('PORT', 8000)))

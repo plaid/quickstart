@@ -15,6 +15,7 @@ import {
   assetsCategories,
   incomePaystubsCategories,
   transferCategories,
+  transferAuthorizationCategories,
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
@@ -25,6 +26,7 @@ import {
   transformPaymentData,
   transformAssetsData,
   transformTransferData,
+  transformTransferAuthorizationData,
   transformIncomePaystubsData,
 } from "../../dataUtilities";
 
@@ -126,14 +128,24 @@ const Products = () => {
       </>
       )}
       {products.includes("transfer") && (
+        <>
         <Endpoint
-          endpoint="transfer"
-          name="Transfer"
-          categories={transferCategories}
-          schema="/transfer/get/"
-          description="Retrieve information about your latest ACH Transfer."
-          transformData={transformTransferData}
-        />
+            endpoint="transfer_authorize"
+            name="Transfer"
+            categories={transferAuthorizationCategories}
+            schema="/transfer/authorization/create"
+            description="Authorize a new 1-dollar ACH transfer payment from the linked account"
+            transformData={transformTransferAuthorizationData}
+          />
+          <Endpoint
+            endpoint="transfer_create"
+            name="Transfer"
+            categories={transferCategories}
+            schema="/transfer/create/"
+            description="(After calling /transfer/authorization/create) Execute an authorized 1-dollar ACH transfer payment from the linked account"
+            transformData={transformTransferData}
+          />
+        </>
       )}
       {products.includes("income_verification") && (
         <Endpoint

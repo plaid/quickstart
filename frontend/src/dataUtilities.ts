@@ -11,7 +11,8 @@ import {
   PaymentInitiationPaymentGetResponse,
   AssetReportGetResponse,
   AssetReport,
-  TransferGetResponse,
+  TransferCreateResponse,
+  TransferAuthorizationCreateResponse,
   IncomeVerificationPaystubsGetResponse,
   Paystub,
   Earnings,
@@ -104,8 +105,15 @@ interface TransferDataItem {
   transferId: string;
   amount: string;
   type: string;
-  achClass: string;
+  achClass: string | null;
   network: string;
+}
+
+interface TransferAuthorizationDataItem {
+  authorizationId: string;
+  authorizationDecision: string;
+  decisionRationaleCode: string | null;
+  decisionRationaleDescription: string | null;
 }
 
 interface IncomePaystubsDataItem {
@@ -135,6 +143,7 @@ export type DataItem =
   | PaymentDataItem
   | AssetsDataItem
   | TransferDataItem
+  | TransferAuthorizationDataItem
   | IncomePaystubsDataItem;
 
 export type Data = Array<DataItem>;
@@ -371,6 +380,26 @@ export const transferCategories: Array<Categories> = [
   },
 ];
 
+export const transferAuthorizationCategories: Array<Categories> = [
+  { 
+    title: "Authorization ID",
+    field: "authorizationId"
+  },
+  {
+    title: "Authorization Decision",
+    field: "authorizationDecision"
+  },
+  {
+    title: "Decision rationale code",
+    field: "decisionRationaleCode"
+  },
+  {
+    title: "Decision rationale description",
+    field: "decisionRationaleDescription"
+  },
+];
+
+
 export const incomePaystubsCategories: Array<Categories> = [
   {
     title: "Description",
@@ -590,14 +619,26 @@ export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
   return credit!.concat(mortgages!).concat(student!);
 };
 
-export const transformTransferData = (data: TransferGetResponse): Array<DataItem> => {
+export const transformTransferAuthorizationData = (data: TransferAuthorizationCreateResponse) => {
+  const transferAuthorizationData = data.authorization;
+  return [
+    {
+      authorizationId: transferAuthorizationData.id,
+      authorizationDecision: transferAuthorizationData.decision,
+      decisionRationaleCode: (transferAuthorizationData.decision_rationale != null) ? transferAuthorizationData.decision_rationale.code : "null",
+      decisionRationaleDescription: (transferAuthorizationData.decision_rationale != null) ? transferAuthorizationData.decision_rationale.description : "null",
+    },
+  ];
+};
+
+export const transformTransferData = (data: TransferCreateResponse): Array<DataItem> => {
   const transferData = data.transfer;
   return [
     {
       transferId: transferData.id,
       amount: transferData.amount,
       type: transferData.type,
-      achClass: transferData.ach_class,
+      achClass: transferData.ach_class || null,
       network: transferData.network,
       status: transferData.status,
     },
