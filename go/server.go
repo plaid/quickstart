@@ -16,7 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v17/plaid"
+	plaid "github.com/plaid/plaid-go/v18/plaid"
 )
 
 var (
@@ -433,12 +433,11 @@ func transferCreate(c *gin.Context) {
 	ctx := context.Background()
 
 	transferCreateRequest := plaid.NewTransferCreateRequest(
+		accessToken,
+		accountID,
 		authorizationID,
 		"Debit",
 	)
-
-	transferCreateRequest.SetAccessToken(accessToken);
-	transferCreateRequest.SetAccountId(accountID);
 
 	transferCreateResp, _, err := client.PlaidApi.TransferCreate(ctx).TransferCreateRequest(*transferCreateRequest).Execute()
 
