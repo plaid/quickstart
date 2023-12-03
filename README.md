@@ -263,7 +263,7 @@ To test the OAuth flow in Sandbox, select any institution that uses an OAuth con
 ### Testing OAuth with a redirect URI (optional)
 
 To test the OAuth flow in Sandbox with a [redirect URI](https://www.plaid.com/docs/link/oauth/#create-and-register-a-redirect-uri), you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to register this localhost redirect URI in the
-[Plaid dashboard under Team Settings > API > Allowed redirect URIs][dashboard-api-section]. It is not required to configure a redirect URI in the .env file to use OAuth with the Quickstart. 
+[Plaid dashboard under Developers > API > Allowed redirect URIs][dashboard-api-section]. It is not required to configure a redirect URI in the .env file to use OAuth with the Quickstart. 
 
 #### Instructions for using https with localhost
 
@@ -314,5 +314,5 @@ may still get an invalid certificate warning on your browser. If so, click on "a
 [java-example]: /java
 [go-example]: /go
 [docker]: https://www.docker.com
-[dashboard-api-section]: https://dashboard.plaid.com/team/api
+[dashboard-api-section]: https://dashboard.plaid.com/developers/api
 [contact-sales]: https://plaid.com/contact
