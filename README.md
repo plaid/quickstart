@@ -107,7 +107,7 @@ Once started with one of the commands below, the quickstart will be running on h
 
 ```bash
 $ cd ./node
-$ npm ci
+$ npm install
 $ ./start.sh
 ```
 
