@@ -7,11 +7,13 @@ import Context from "./Context";
 
 import styles from "./App.module.scss";
 
+const API_URL = process.env.REACT_APP_API_HOST || ''
+
 const App = () => {
   const { linkSuccess, isItemAccess, isPaymentInitiation, dispatch } = useContext(Context);
 
   const getInfo = useCallback(async () => {
-    const response = await fetch("/api/info", { method: "POST" });
+    const response = await fetch(`${API_URL}/api/info`, { method: "POST" });
     if (!response.ok) {
       dispatch({ type: "SET_STATE", state: { backend: false } });
       return { paymentInitiation: false };
@@ -36,7 +38,7 @@ const App = () => {
       const path = isPaymentInitiation
         ? "/api/create_link_token_for_payment"
         : "/api/create_link_token";
-      const response = await fetch(path, {
+      const response = await fetch(`${API_URL}${path}`, {
         method: "POST",
       });
       if (!response.ok) {
