@@ -2,9 +2,11 @@ import React, { useEffect, useContext } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
-import API_URL from "../../App";
+//import API_URL from "../../App";
 import Context from "../../Context";
 import { Products } from "plaid";
+
+const API_URL = process.env.REACT_APP_API_HOST || ''
 
 const Link = () => {
   const { linkToken, isPaymentInitiation, dispatch } = useContext(Context);
