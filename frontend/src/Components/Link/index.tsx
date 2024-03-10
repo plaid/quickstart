@@ -2,7 +2,7 @@ import React, { useEffect, useContext } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
-import API_URL from "../../constants";
+import { API_URL } from "../../constants";
 import Context from "../../Context";
 import { Products } from "plaid";
 
