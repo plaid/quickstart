@@ -202,8 +202,6 @@ app.post('/api/set_access_token', function (request, response, next) {
       ACCESS_TOKEN = tokenResponse.data.access_token;
       ITEM_ID = tokenResponse.data.item_id;
       response.json({
-        // the 'access_token' is a private token, DO NOT pass this token to the frontend in your production environment
-        access_token: ACCESS_TOKEN,
         item_id: ITEM_ID,
         error: null,
       });

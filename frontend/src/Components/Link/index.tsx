@@ -37,7 +37,7 @@ const Link = () => {
           type: "SET_STATE",
           state: {
             itemId: data.item_id,
-            accessToken: data.access_token,
+            accessToken: "This should not be passed to the front end",
             isItemAccess: true,
           },
         });
