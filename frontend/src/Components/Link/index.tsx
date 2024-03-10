@@ -2,8 +2,9 @@ import React, { useEffect, useContext } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
+import API_URL from "../../App";
 import Context from "../../Context";
-import {Products} from "plaid";
+import { Products } from "plaid";
 
 const Link = () => {
   const { linkToken, isPaymentInitiation, dispatch } = useContext(Context);
@@ -12,7 +13,7 @@ const Link = () => {
     (public_token: string) => {
       // If the access_token is needed, send public_token to server
       const exchangePublicTokenForAccessToken = async () => {
-        const response = await fetch("/api/set_access_token", {
+        const response = await fetch(`${API_URL}/api/set_access_token`, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
@@ -42,7 +43,7 @@ const Link = () => {
       };
 
       // 'payment_initiation' products do not require the public_token to be exchanged for an access_token.
-      if (isPaymentInitiation){
+      if (isPaymentInitiation) {
         dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
       } else {
         exchangePublicTokenForAccessToken();

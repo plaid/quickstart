@@ -5,6 +5,7 @@ import Note from "plaid-threads/Note";
 import Table from "../Table";
 import Error from "../Error";
 import { DataItem, Categories, ErrorDataItem, Data } from "../../dataUtilities";
+import API_URL from "../../App";
 
 import styles from "./index.module.scss";
 
@@ -26,7 +27,7 @@ const Endpoint = (props: Props) => {
 
   const getData = async () => {
     setIsLoading(true);
-    const response = await fetch(`/api/${props.endpoint}`, { method: "GET" });
+    const response = await fetch(`${API_URL}/api/${props.endpoint}`, { method: "GET" });
     const data = await response.json();
     if (data.error != null) {
       setError(data.error);
