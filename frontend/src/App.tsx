@@ -7,7 +7,7 @@ import Context from "./Context";
 
 import styles from "./App.module.scss";
 
-const API_URL = process.env.REACT_APP_API_HOST || ''
+import API_URL from "./constants";
 
 const App = () => {
   const { linkSuccess, isItemAccess, isPaymentInitiation, dispatch } = useContext(Context);
