@@ -22,19 +22,17 @@ const Header = () => {
 
   return (
     <div className={styles.grid}>
-      <h3 className={styles.title}>Plaid Quickstart</h3>
+      <h3 className={styles.title}>Spirit Cat</h3>
 
       {!linkSuccess ? (
         <>
           <h4 className={styles.subtitle}>
-            A sample end-to-end integration with Plaid
+            All of your transactions in one place
           </h4>
           <p className={styles.introPar}>
-            The Plaid flow begins when your user wants to connect their bank
-            account to your app. Simulate this by clicking the button below to
-            launch Link - the client-side component that your users will
-            interact with in order to link their accounts to Plaid and allow you
-            to access their accounts via the Plaid API.
+            With Spirit Cat, you can easily categorize and customize your
+            spending habits. Know exactly how much you've spent and what on 
+            instantly. Effortlessly compare your spend month over month.
           </p>
           {/* message if backend is not running and there is no link token */}
           {!backend ? (
