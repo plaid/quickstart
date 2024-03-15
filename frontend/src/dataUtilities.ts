@@ -14,6 +14,7 @@ import {
   TransferCreateResponse,
   TransferAuthorizationCreateResponse,
   IncomeVerificationPaystubsGetResponse,
+  SignalEvaluateResponse,
   Paystub,
   Earnings,
 } from "plaid/dist/api";
@@ -109,11 +110,20 @@ interface TransferDataItem {
   network: string;
 }
 
+
 interface TransferAuthorizationDataItem {
   authorizationId: string;
   authorizationDecision: string;
   decisionRationaleCode: string | null;
   decisionRationaleDescription: string | null;
+}
+
+interface SignalDataItem {
+  customerInitiatedReturnRiskScore: number | undefined | null;
+  customerInitiatedReturnRiskTier: number | undefined | null;
+  bankInitiatedReturnRiskScore: number | undefined | null;
+  bankInitiatedReturnRiskTier: number | undefined | null;
+  daysSinceFirstPlaidConnection: number | undefined | null;
 }
 
 interface IncomePaystubsDataItem {
@@ -144,7 +154,8 @@ export type DataItem =
   | AssetsDataItem
   | TransferDataItem
   | TransferAuthorizationDataItem
-  | IncomePaystubsDataItem;
+  | IncomePaystubsDataItem
+  | SignalDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -399,6 +410,31 @@ export const transferAuthorizationCategories: Array<Categories> = [
   },
 ];
 
+export const signalCategories: Array<Categories> = [
+  {
+    title: "Customer-initiated return risk score",
+    field: "customerInitiatedReturnRiskScore"
+  },
+
+  {
+    title: "Customer-initiated return risk tier",
+    field: "customerInitiatedReturnRiskTier"
+  },
+  {
+    title: "Bank-initiated return risk score",
+    field: "bankInitiatedReturnRiskScore"
+  },
+  {
+    title: "Bank-initiated return risk tier",
+    field: "bankInitiatedReturnRiskTier"
+  },
+  {
+    title: "Sample core attribute: Days since first Plaid connection",
+    field: "daysSinceFirstPlaidConnection"
+  },
+];
+
+
 
 export const incomePaystubsCategories: Array<Categories> = [
   {
@@ -619,7 +655,20 @@ export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
   return credit!.concat(mortgages!).concat(student!);
 };
 
-export const transformTransferAuthorizationData = (data: TransferAuthorizationCreateResponse) => {
+export const transformSignalData = (data: SignalEvaluateResponse) => {
+  return [
+    {
+      customerInitiatedReturnRiskTier: data.scores.customer_initiated_return_risk!.risk_tier,
+      customerInitiatedReturnRiskScore: data.scores.customer_initiated_return_risk!.score,
+      bankInitiatedReturnRiskTier: data.scores.bank_initiated_return_risk!.risk_tier,
+      bankInitiatedReturnRiskScore: data.scores.bank_initiated_return_risk!.score,
+      daysSinceFirstPlaidConnection: data.core_attributes!.days_since_first_plaid_connection,
+    },
+  ];
+};
+
+
+export const transformTransferAuthorizationData = (data: TransferAuthorizationCreateResponse): Array<DataItem> => {
   const transferAuthorizationData = data.authorization;
   return [
     {
