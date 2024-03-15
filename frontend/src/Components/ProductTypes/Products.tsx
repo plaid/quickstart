@@ -161,6 +161,27 @@ const Products = () => {
           />
         </>
       )}
+      {products.includes("statements") && (
+        <>
+        <Endpoint
+            endpoint="statements_list"
+            name="Statements"
+            categories={statementsListCategories}
+            schema="/statements/list"
+            description="Get a list of recent statements from the linked account"
+            transformData={transformStatementsListData}
+          />
+        <Endpoint
+            endpoint="statements_download"
+            name="Statements"
+            categories={signalCategories}
+            schema="/statements/list"
+            description="(After calling /statements/list) Download the most recent statement available"
+            transformData={transformStatmentsDownloadData}
+          />
+        </>
+      )}
+
       {products.includes("income_verification") && (
         <Endpoint
           endpoint="/income/verification/paystubs"
