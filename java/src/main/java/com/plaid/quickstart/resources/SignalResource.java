@@ -19,12 +19,12 @@ import javax.ws.rs.core.MediaType;
 
 import retrofit2.Response;
 
-@Path("/identity")
+@Path("/signal_evaluate")
 @Produces(MediaType.APPLICATION_JSON)
 public class SignalResource {
   private final PlaidApi plaidClient;
 
-  public IdentityResource(PlaidApi plaidClient) {
+  public SignalResource(PlaidApi plaidClient) {
     this.plaidClient = plaidClient;
   }
 
@@ -52,3 +52,4 @@ public class SignalResource {
       return signalEvaluateResponse.body();
 
   }
+}
