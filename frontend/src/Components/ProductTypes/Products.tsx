@@ -144,7 +144,7 @@ const Products = () => {
             name="Transfer"
             categories={transferCategories}
             schema="/transfer/create/"
-            description="(After calling /transfer/authorization/create) Execute an authorized 1-dollar ACH transfer payment from the linked account"
+            description="(After calling /transfer/authorization/create) Execute an authorized 1-dollar ACH transfer payment from the first linked account"
             transformData={transformTransferData}
           />
         </>
@@ -156,7 +156,7 @@ const Products = () => {
             name="Signal"
             categories={signalCategories}
             schema="/signal/evaluate"
-            description="Evaluate the return risk of a proposed $100 transfer from the Item's first account"
+            description="Evaluate the return risk of a proposed $100 transfer on first linked account (in Sandbox, results are randomly generated)"
             transformData={transformSignalData}
           />
         </>

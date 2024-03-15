@@ -124,7 +124,6 @@ interface SignalDataItem {
   bankInitiatedReturnRiskScore: number | undefined | null;
   bankInitiatedReturnRiskTier: number | undefined | null;
   daysSinceFirstPlaidConnection: number | undefined | null;
-  isSavingsOrMoneyMarketAccount: string | undefined | null;
 }
 
 interface IncomePaystubsDataItem {
@@ -430,12 +429,8 @@ export const signalCategories: Array<Categories> = [
     field: "bankInitiatedReturnRiskTier"
   },
   {
-    title: "Days since first Plaid connection",
+    title: "Sample core attribute: Days since first Plaid connection",
     field: "daysSinceFirstPlaidConnection"
-  },
-  {
-    title: "Is savings or money market account?",
-    field: "isSavingsOrMoneyMarketAccount"
   },
 ];
 
@@ -668,7 +663,6 @@ export const transformSignalData = (data: SignalEvaluateResponse) => {
       bankInitiatedReturnRiskTier: data.scores.bank_initiated_return_risk!.risk_tier,
       bankInitiatedReturnRiskScore: data.scores.bank_initiated_return_risk!.score,
       daysSinceFirstPlaidConnection: data.core_attributes!.days_since_first_plaid_connection,
-      isSavingsOrMoneyMarketAccount: data.core_attributes!.is_savings_or_money_market_account? "true" : "false"
     },
   ];
 };
