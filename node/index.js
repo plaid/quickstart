@@ -575,3 +575,23 @@ app.get('/api/transfer_create', function (request, response, next) {
     })
     .catch(next);
 });
+
+app.get('/api/signal_evaluate', function (request, response, next) {
+  Promise.resolve()
+    .then(async function () {
+      const accountsResponse = await client.accountsGet({
+        access_token: ACCESS_TOKEN,
+      });
+      ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
+
+      const signalEvaluateResponse = await client.signalEvaluate({
+        access_token: ACCESS_TOKEN,
+        account_id: ACCOUNT_ID,
+        client_transaction_id: 'txn1234',
+        amount: 100.00,
+      });
+      prettyPrintResponse(signalEvaluateResponse);
+      response.json(signalEvaluateResponse.data);
+    })
+    .catch(next);
+});

@@ -17,6 +17,7 @@ import com.plaid.quickstart.resources.LinkTokenResource;
 import com.plaid.quickstart.resources.LinkTokenWithPaymentResource;
 import com.plaid.quickstart.resources.PaymentInitiationResource;
 import com.plaid.quickstart.resources.PublicTokenResource;
+import com.plaid.quickstart.resources.SignalResource;
 import com.plaid.quickstart.resources.TransactionsResource;
 import com.plaid.quickstart.resources.TransferAuthorizeResource;
 import com.plaid.quickstart.resources.TransferCreateResource;
@@ -114,6 +115,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new LinkTokenWithPaymentResource(plaidClient, plaidProducts, countryCodes, redirectUri));
     environment.jersey().register(new PaymentInitiationResource(plaidClient));
     environment.jersey().register(new PublicTokenResource(plaidClient));
+    environment.jersey().register(new SignalResource(plaidClient));
     environment.jersey().register(new TransactionsResource(plaidClient));
     environment.jersey().register(new TransferAuthorizeResource(plaidClient));
     environment.jersey().register(new TransferCreateResource(plaidClient));

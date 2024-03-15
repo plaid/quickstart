@@ -115,6 +115,7 @@ func main() {
 	r.GET("/api/assets", assets)
 	r.GET("/api/transfer_authorize", transferAuthorize)
 	r.GET("/api/transfer_create", transferCreate)
+	r.GET("/api/signal_evaluate", signalEvaluate)
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
@@ -447,6 +448,35 @@ func transferCreate(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, transferCreateResp)
+}
+
+func signalEvaluate(c *gin.Context) {
+	ctx := context.Background()
+	accountsGetResp, _, err := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
+		*plaid.NewAccountsGetRequest(accessToken),
+	).Execute()
+
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	accountID = accountsGetResp.GetAccounts()[0].AccountId
+
+	signalEvaluateRequest := plaid.NewSignalEvaluateRequest(
+		accessToken,
+		accountID,
+		"txn1234",
+		100.00)
+
+	signalEvaluateResp, _, err := client.PlaidApi.SignalEvaluate(ctx).SignalEvaluateRequest(*signalEvaluateRequest).Execute()
+
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, signalEvaluateResp)
 }
 
 func investmentTransactions(c *gin.Context) {

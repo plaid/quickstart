@@ -370,6 +370,33 @@ get '/api/transfer_authorize' do
   end
 end
 
+get '/api/signal_evaluate' do
+  begin
+    # We call /accounts/get to obtain first account_id - in production,
+    # account_id's should be persisted in a data store and retrieved
+    # from there.
+    accounts_get_request = Plaid::AccountsGetRequest.new({ access_token: access_token })
+    accounts_get_response = client.accounts_get(accounts_get_request)
+    account_id = accounts_get_response.accounts[0].account_id
+
+    signal_evaluate_request = Plaid::SignalEvaluateRequest.new({
+      access_token: access_token,
+      account_id: account_id,
+      client_transaction_id: 'tx1234',
+      amount: 100.00
+    })
+    signal_evaluate_response = client.signal_evaluate(signal_evaluate_request)
+    pretty_print_response(signal_evaluate_response.to_hash)
+    content_type :json
+    signal_evaluate_response.to_hash.to_json
+  rescue Plaid::ApiError => e
+    error_response = format_error(e)
+    pretty_print_response(error_response)
+    content_type :json
+    error_response.to_json
+  end
+end
+
 get '/api/transfer_create' do
   begin
       transfer_create_request = Plaid::TransferCreateRequest.new({
