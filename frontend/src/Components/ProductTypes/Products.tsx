@@ -156,7 +156,7 @@ const Products = () => {
             name="Signal"
             categories={signalCategories}
             schema="/signal/evaluate"
-            description="Evaluate the return risk of a proposed $100 transfer on first linked account (in Sandbox, results are randomly generated)"
+            description="Evaluate the return risk of a proposed $100 debit from the first linked account (in Sandbox, results are randomly generated)"
             transformData={transformSignalData}
           />
         </>
