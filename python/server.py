@@ -46,6 +46,7 @@ from plaid.model.transfer_authorization_user_in_request import TransferAuthoriza
 from plaid.model.ach_class import ACHClass
 from plaid.model.transfer_create_idempotency_key import TransferCreateIdempotencyKey
 from plaid.model.transfer_user_address_in_request import TransferUserAddressInRequest
+from plaid.model.signal_evaluate_request import SignalEvaluateRequest
 from plaid.api import plaid_api
 
 load_dotenv()
@@ -531,6 +532,26 @@ def transfer():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
+
+@app.route('/api/signal_evaluate', methods=['GET'])
+def signal():
+    global account_id
+    request = AccountsGetRequest(access_token=access_token)
+    response = client.accounts_get(request)
+    account_id = response['accounts'][0]['account_id']
+    try:
+        request = SignalEvaluateRequest(
+            access_token=access_token,
+            account_id=account_id,
+            client_transaction_id="txn1234",
+            amount=100),
+        response = client.signal_evaluate(request)
+        pretty_print_response(response.to_dict())
+        return jsonify(response.to_dict())
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
+
 
 # This functionality is only relevant for the UK Payment Initiation product.
 # Retrieve Payment for a specified Payment ID

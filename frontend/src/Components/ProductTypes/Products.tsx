@@ -16,6 +16,7 @@ import {
   incomePaystubsCategories,
   transferCategories,
   transferAuthorizationCategories,
+  signalCategories,
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
@@ -28,6 +29,7 @@ import {
   transformTransferData,
   transformTransferAuthorizationData,
   transformIncomePaystubsData,
+  transformSignalData,
 } from "../../dataUtilities";
 
 const Products = () => {
@@ -144,6 +146,18 @@ const Products = () => {
             schema="/transfer/create/"
             description="(After calling /transfer/authorization/create) Execute an authorized 1-dollar ACH transfer payment from the linked account"
             transformData={transformTransferData}
+          />
+        </>
+      )}
+      {products.includes("signal") && (
+        <>
+        <Endpoint
+            endpoint="signal_evaluate"
+            name="Signal"
+            categories={signalCategories}
+            schema="/signal/evaluate"
+            description="Evaluate the return risk of a proposed $100 transfer from the account"
+            transformData={transformSignalData}
           />
         </>
       )}

@@ -14,6 +14,7 @@ import {
   TransferCreateResponse,
   TransferAuthorizationCreateResponse,
   IncomeVerificationPaystubsGetResponse,
+  SignalEvaluateResponse,
   Paystub,
   Earnings,
 } from "plaid/dist/api";
@@ -116,6 +117,15 @@ interface TransferAuthorizationDataItem {
   decisionRationaleDescription: string | null;
 }
 
+interface SignalDataItem {
+  customerInitiatedReturnRiskScore: number;
+  customerInitiatedReturnRiskTier: number;
+  bankInitiatedReturnRiskScore: number;
+  bankInitiatedReturnRiskTier: number;
+  daysSinceFirstPlaidConnection: number;
+  isSavingsOrMoneyMarketAccount: boolean;
+}
+
 interface IncomePaystubsDataItem {
   description: string;
   currentAmount: number | null;
@@ -144,7 +154,8 @@ export type DataItem =
   | AssetsDataItem
   | TransferDataItem
   | TransferAuthorizationDataItem
-  | IncomePaystubsDataItem;
+  | IncomePaystubsDataItem
+  | SignalDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -399,6 +410,34 @@ export const transferAuthorizationCategories: Array<Categories> = [
   },
 ];
 
+export const signalCategories: Array<Categories> = [
+  {
+    title: "Customer-initiated return risk score",
+    field: "customerInitiatedReturnRiskScore"
+  },
+  {
+    title: "Bank-initiated return risk score",
+    field: "bankInitiatedReturnRiskScore"
+  },
+  {
+    title: "Customer-initiated return risk tier",
+    field: "customerInitiatedReturnRiskTier"
+  },
+  {
+    title: "Bank-initiated return risk tier",
+    field: "bankInitiatedReturnRiskTier"
+  },
+  {
+    title: "Sample core attribute: Days since first Plaid connection",
+    field: "daysSinceFirstPlaidConnection"
+  },
+  {
+    title: "Sample core attribute: Is checking or money market account?",
+    field: "isSavingsOrMoneyMarketAccount"
+  },
+];
+
+
 
 export const incomePaystubsCategories: Array<Categories> = [
   {
@@ -618,6 +657,20 @@ export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
 
   return credit!.concat(mortgages!).concat(student!);
 };
+
+export const transformSignalData = (data: SignalEvaluateResponse) => {
+  return [
+    {
+      customerInitiatedReturnRiskTier: data.scores.customer_initiated_return_risk.risk_tier,
+      customerInitiatedReturnRiskScore: data.scores.customer_initiated_return_risk.score,
+      bankInitiatedReturnRiskTier: data.scores.bank_initiated_return_risk.risk_tier,
+      bankInitiatedReturnRiskScore: data.scores.bank_initiated_return_risk.score,
+      daysSinceFirstPlaidConnection: data.core_attributes.days_since_first_plaid_connection,
+      isSavingsOrMoneyMarketAccount: data.core_attributes.is_savings_or_money_market_account
+    },
+  ];
+};
+
 
 export const transformTransferAuthorizationData = (data: TransferAuthorizationCreateResponse) => {
   const transferAuthorizationData = data.authorization;
