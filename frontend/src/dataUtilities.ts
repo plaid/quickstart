@@ -110,6 +110,7 @@ interface TransferDataItem {
   network: string;
 }
 
+
 interface TransferAuthorizationDataItem {
   authorizationId: string;
   authorizationDecision: string;
@@ -118,12 +119,12 @@ interface TransferAuthorizationDataItem {
 }
 
 interface SignalDataItem {
-  customerInitiatedReturnRiskScore: number;
-  customerInitiatedReturnRiskTier: number;
-  bankInitiatedReturnRiskScore: number;
-  bankInitiatedReturnRiskTier: number;
-  daysSinceFirstPlaidConnection: number;
-  isSavingsOrMoneyMarketAccount: boolean;
+  customerInitiatedReturnRiskScore: number | undefined | null;
+  customerInitiatedReturnRiskTier: number | undefined | null;
+  bankInitiatedReturnRiskScore: number | undefined | null;
+  bankInitiatedReturnRiskTier: number | undefined | null;
+  daysSinceFirstPlaidConnection: number | undefined | null;
+  isSavingsOrMoneyMarketAccount: string | undefined | null;
 }
 
 interface IncomePaystubsDataItem {
@@ -415,24 +416,25 @@ export const signalCategories: Array<Categories> = [
     title: "Customer-initiated return risk score",
     field: "customerInitiatedReturnRiskScore"
   },
-  {
-    title: "Bank-initiated return risk score",
-    field: "bankInitiatedReturnRiskScore"
-  },
+
   {
     title: "Customer-initiated return risk tier",
     field: "customerInitiatedReturnRiskTier"
+  },
+  {
+    title: "Bank-initiated return risk score",
+    field: "bankInitiatedReturnRiskScore"
   },
   {
     title: "Bank-initiated return risk tier",
     field: "bankInitiatedReturnRiskTier"
   },
   {
-    title: "Sample core attribute: Days since first Plaid connection",
+    title: "Days since first Plaid connection",
     field: "daysSinceFirstPlaidConnection"
   },
   {
-    title: "Sample core attribute: Is checking or money market account?",
+    title: "Is savings or money market account?",
     field: "isSavingsOrMoneyMarketAccount"
   },
 ];
@@ -661,18 +663,18 @@ export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
 export const transformSignalData = (data: SignalEvaluateResponse) => {
   return [
     {
-      customerInitiatedReturnRiskTier: data.scores.customer_initiated_return_risk.risk_tier,
-      customerInitiatedReturnRiskScore: data.scores.customer_initiated_return_risk.score,
-      bankInitiatedReturnRiskTier: data.scores.bank_initiated_return_risk.risk_tier,
-      bankInitiatedReturnRiskScore: data.scores.bank_initiated_return_risk.score,
-      daysSinceFirstPlaidConnection: data.core_attributes.days_since_first_plaid_connection,
-      isSavingsOrMoneyMarketAccount: data.core_attributes.is_savings_or_money_market_account
+      customerInitiatedReturnRiskTier: data.scores.customer_initiated_return_risk!.risk_tier,
+      customerInitiatedReturnRiskScore: data.scores.customer_initiated_return_risk!.score,
+      bankInitiatedReturnRiskTier: data.scores.bank_initiated_return_risk!.risk_tier,
+      bankInitiatedReturnRiskScore: data.scores.bank_initiated_return_risk!.score,
+      daysSinceFirstPlaidConnection: data.core_attributes!.days_since_first_plaid_connection,
+      isSavingsOrMoneyMarketAccount: data.core_attributes!.is_savings_or_money_market_account? "true" : "false"
     },
   ];
 };
 
 
-export const transformTransferAuthorizationData = (data: TransferAuthorizationCreateResponse) => {
+export const transformTransferAuthorizationData = (data: TransferAuthorizationCreateResponse): Array<DataItem> => {
   const transferAuthorizationData = data.authorization;
   return [
     {

@@ -156,7 +156,7 @@ const Products = () => {
             name="Signal"
             categories={signalCategories}
             schema="/signal/evaluate"
-            description="Evaluate the return risk of a proposed $100 transfer from the account"
+            description="Evaluate the return risk of a proposed $100 transfer from the Item's first account"
             transformData={transformSignalData}
           />
         </>

@@ -543,8 +543,8 @@ def signal():
         request = SignalEvaluateRequest(
             access_token=access_token,
             account_id=account_id,
-            client_transaction_id="txn1234",
-            amount=100),
+            client_transaction_id='txn1234',
+            amount=100.00)
         response = client.signal_evaluate(request)
         pretty_print_response(response.to_dict())
         return jsonify(response.to_dict())
