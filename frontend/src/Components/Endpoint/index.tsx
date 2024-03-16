@@ -74,7 +74,7 @@ const Endpoint = (props: Props) => {
               wide
               className={styles.pdf}
               href={`data:application/pdf;base64,${pdf}`}
-              componentProps={{ download: "Asset Report.pdf" }}
+              componentProps={{ download: (props.name=="Assets")? "Asset Report.pdf" : "Statement.pdf"}}
             >
               Download PDF
             </Button>

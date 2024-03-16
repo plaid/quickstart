@@ -17,6 +17,7 @@ import {
   transferCategories,
   transferAuthorizationCategories,
   signalCategories,
+  statementsCategories,
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
@@ -30,6 +31,7 @@ import {
   transformTransferAuthorizationData,
   transformIncomePaystubsData,
   transformSignalData,
+  transformStatementsData
 } from "../../dataUtilities";
 
 const Products = () => {
@@ -82,7 +84,7 @@ const Products = () => {
           endpoint="assets"
           name="Assets"
           categories={assetsCategories}
-          schema="/assets_report/get/"
+          schema="/asset_report/get/"
           description="Create and retrieve assets information an asset report"
           transformData={transformAssetsData}
         />
@@ -164,20 +166,12 @@ const Products = () => {
       {products.includes("statements") && (
         <>
         <Endpoint
-            endpoint="statements_list"
+            endpoint="statements"
             name="Statements"
-            categories={statementsListCategories}
-            schema="/statements/list"
-            description="Get a list of recent statements from the linked account"
-            transformData={transformStatementsListData}
-          />
-        <Endpoint
-            endpoint="statements_download"
-            name="Statements"
-            categories={signalCategories}
-            schema="/statements/list"
-            description="(After calling /statements/list) Download the most recent statement available"
-            transformData={transformStatmentsDownloadData}
+            categories={statementsCategories}
+            schema="/statements/list and /statements/download"
+            description="Get a list of recent statements and download the most recent"
+            transformData={transformStatementsData}
           />
         </>
       )}
