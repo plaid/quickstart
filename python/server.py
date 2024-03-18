@@ -228,7 +228,6 @@ def create_link_token():
                 end_date=today,
                 start_date=(today-delta)
             )
-            print(statements)
             request['statements']=statements
     # create link token
         response = client.link_token_create(request)
