@@ -223,7 +223,7 @@ def create_link_token():
             request['redirect_uri']=PLAID_REDIRECT_URI
         if Products('statements') in products:
             today = date.today()
-            delta = timedelta(days=90)
+            delta = timedelta(days=30)
             statements=LinkTokenCreateRequestStatements(
                 end_date=today,
                 start_date=(today-delta)
