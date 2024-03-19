@@ -113,6 +113,13 @@ app.post('/api/create_link_token', function (request, response, next) {
       if (PLAID_ANDROID_PACKAGE_NAME !== '') {
         configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME;
       }
+      if (PLAID_PRODUCTS.includes(Products.Statements)) {
+        const statementConfig = {
+          end_date: moment().format('YYYY-MM-DD'),
+          start_date: moment().subtract(30, 'days').format('YYYY-MM-DD'),
+        }
+        configs.statements = statementConfig;
+      }
       const createTokenResponse = await client.linkTokenCreate(configs);
       prettyPrintResponse(createTokenResponse);
       response.json(createTokenResponse.data);
@@ -440,6 +447,28 @@ app.get('/api/assets', function (request, response, next) {
     .catch(next);
 });
 
+app.get('/api/statements', function (request, response, next) {
+  Promise.resolve()
+    .then(async function () {
+      const statementsListResponse = await client.statementsList({access_token: ACCESS_TOKEN});
+      prettyPrintResponse(statementsListResponse);
+      const pdfRequest = {
+        access_token: ACCESS_TOKEN,
+        statement_id: statementsListResponse.data.accounts[0].statements[0].statement_id  
+      };
+
+      const statementsDownloadResponse = await client.statementsDownload(pdfRequest, {
+        responseType: 'arraybuffer',
+      });
+      prettyPrintResponse(statementsDownloadResponse);
+      response.json({
+        json: statementsListResponse.data,
+        pdf: statementsDownloadResponse.data.toString('base64'),
+      });
+    })
+    .catch(next);
+});
+
 // This functionality is only relevant for the UK/EU Payment Initiation product.
 // Retrieve Payment for a specified Payment ID
 app.get('/api/payment', function (request, response, next) {
@@ -469,6 +498,7 @@ app.get('/api/income/verification/paystubs', function (request, response, next) 
 })
 
 app.use('/api', function (error, request, response, next) {
+  console.log(error);
   prettyPrintResponse(error.response);
   response.json(formatError(error.response));
 });
