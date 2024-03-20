@@ -11,6 +11,9 @@ import com.plaid.quickstart.QuickstartApplication;
 import okhttp3.ResponseBody;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Base64;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -28,7 +31,7 @@ public class StatementsResource {
   }
 
   @GET
-  public StatementsListResponse statementsList() throws IOException {
+  public Map statementsList() throws IOException {
 
       StatementsListRequest statementsListRequest = new StatementsListRequest()
         .accessToken(QuickstartApplication.accessToken);
@@ -45,7 +48,13 @@ public class StatementsResource {
         .statementsDownload(statementsDownloadRequest)
         .execute();
 
-      return statementsListResponse.body();
+      String pdf = Base64.getEncoder().encodeToString(statementsDownloadResponse.body().bytes());
+
+      Map<String, Object> responseMap = new HashMap<>();
+      responseMap.put("json", statementsListResponse.body());
+      responseMap.put("pdf", pdf);
+
+      return responseMap;
 
   }
 }
