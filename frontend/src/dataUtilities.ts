@@ -14,6 +14,7 @@ import {
   TransferAuthorizationCreateResponse,
   IncomeVerificationPaystubsGetResponse,
   SignalEvaluateResponse,
+  StatementsListResponse,
   Paystub,
 } from "plaid/dist/api";
 
@@ -115,6 +116,11 @@ interface TransferAuthorizationDataItem {
   decisionRationaleDescription: string | null;
 }
 
+interface StatementsDataItem {
+  account: string | null;
+  date: string | null;
+}
+
 interface SignalDataItem {
   customerInitiatedReturnRiskScore: number | undefined | null;
   customerInitiatedReturnRiskTier: number | undefined | null;
@@ -152,7 +158,8 @@ export type DataItem =
   | TransferDataItem
   | TransferAuthorizationDataItem
   | IncomePaystubsDataItem
-  | SignalDataItem;
+  | SignalDataItem
+  | StatementsDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -431,6 +438,17 @@ export const signalCategories: Array<Categories> = [
   },
 ];
 
+export const statementsCategories: Array<Categories> = [
+  { 
+    title: "Account name",
+    field: "account"
+  },
+  {
+    title: "Statement Date",
+    field: "date"
+  }
+];
+
 export const incomePaystubsCategories: Array<Categories> = [
   {
     title: "Description",
@@ -460,6 +478,18 @@ export const transformAuthData = (data: AuthGetResponse) => {
       routing: achNumbers.routing!,
     };
     return obj;
+  });
+};
+
+export const transformStatementsData = (data: {json: StatementsListResponse}) => {
+  const account = data.json.accounts[0]!.account_name;
+  const statements = data.json.accounts[0]!.statements;
+  return statements!.map((s) => {
+    const item: DataItem = {
+      date: Intl.DateTimeFormat('en', { month: 'long', year:'numeric' }).format(new Date(s.year!, s.month!)),
+      account: account,
+    };
+    return item;
   });
 };
 

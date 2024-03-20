@@ -17,6 +17,7 @@ import {
   transferCategories,
   transferAuthorizationCategories,
   signalCategories,
+  statementsCategories,
   transformAuthData,
   transformTransactionsData,
   transformBalanceData,
@@ -30,6 +31,7 @@ import {
   transformTransferAuthorizationData,
   transformIncomePaystubsData,
   transformSignalData,
+  transformStatementsData
 } from "../../dataUtilities";
 
 const Products = () => {
@@ -82,7 +84,7 @@ const Products = () => {
           endpoint="assets"
           name="Assets"
           categories={assetsCategories}
-          schema="/assets_report/get/"
+          schema="/asset_report/get/"
           description="Create and retrieve assets information an asset report"
           transformData={transformAssetsData}
         />
@@ -161,6 +163,19 @@ const Products = () => {
           />
         </>
       )}
+      {products.includes("statements") && (
+        <>
+        <Endpoint
+            endpoint="statements"
+            name="Statements"
+            categories={statementsCategories}
+            schema="/statements/list and /statements/download"
+            description="List out and download the most recent statement"
+            transformData={transformStatementsData}
+          />
+        </>
+      )}
+
       {products.includes("income_verification") && (
         <Endpoint
           endpoint="/income/verification/paystubs"

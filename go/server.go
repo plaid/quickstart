@@ -16,7 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v18/plaid"
+	plaid "github.com/plaid/plaid-go/v21/plaid"
 )
 
 var (
@@ -116,6 +116,8 @@ func main() {
 	r.GET("/api/transfer_authorize", transferAuthorize)
 	r.GET("/api/transfer_create", transferCreate)
 	r.GET("/api/signal_evaluate", signalEvaluate)
+	r.GET("/api/statements", statements)
+
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
@@ -570,6 +572,15 @@ func convertProducts(productStrs []string) []plaid.Products {
 	return products
 }
 
+func containsProduct(products []plaid.Products, product plaid.Products) bool {
+	for _, p := range products {
+		if p == product {
+			return true
+		}
+	}
+	return false
+}
+
 // linkTokenCreate creates a link token using the specified parameters
 func linkTokenCreate(
 	paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
@@ -592,15 +603,22 @@ func linkTokenCreate(
 		"en",
 		countryCodes,
 		user,
-	)
+	)		
 
+	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
 	if paymentInitiation != nil {
 		request.SetPaymentInitiation(*paymentInitiation)
 		// The 'payment_initiation' product has to be the only element in the 'products' list.
 		request.SetProducts([]plaid.Products{plaid.PRODUCTS_PAYMENT_INITIATION})
 	} else {
-		products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
 		request.SetProducts(products)
+	}
+
+	if (containsProduct(products, plaid.PRODUCTS_STATEMENTS)) {
+		statementConfig := plaid.NewLinkTokenCreateRequestStatements();
+		statementConfig.SetStartDate(time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02"));
+		statementConfig.SetEndDate(time.Now().Local().Format("2006-01-02"));
+		request.SetStatements(*statementConfig);
 	}
 
 	if redirectURI != "" {
@@ -614,6 +632,37 @@ func linkTokenCreate(
 	}
 
 	return linkTokenCreateResp.GetLinkToken(), nil
+}
+
+func statements(c *gin.Context) {
+	ctx := context.Background()
+	statementsListResp, _, err := client.PlaidApi.StatementsList(ctx).StatementsListRequest(
+		*plaid.NewStatementsListRequest(accessToken),
+	).Execute()
+	statementId := statementsListResp.GetAccounts()[0].GetStatements()[0].StatementId
+
+	statementsDownloadResp, _, err := client.PlaidApi.StatementsDownload(ctx).StatementsDownloadRequest(
+		*plaid.NewStatementsDownloadRequest(accessToken, statementId),
+	).Execute()
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	reader := bufio.NewReader(statementsDownloadResp)
+	content, err := ioutil.ReadAll(reader)
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	// convert pdf to base64
+	encodedPdf := base64.StdEncoding.EncodeToString(content)
+
+	c.JSON(http.StatusOK, gin.H{
+		"json": statementsListResp,
+		"pdf":  encodedPdf,
+	})
 }
 
 func assets(c *gin.Context) {

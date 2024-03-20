@@ -297,6 +297,31 @@ get '/api/assets' do
     pdf: Base64.encode64(File.read(asset_report_pdf)) }.to_json
 end
 
+get '/api/statements' do
+  begin
+    statements_list_request = Plaid::StatementsListRequest.new(
+      {
+        access_token: access_token
+      }
+    )
+    statements_list_response =
+      client.statements_list(statements_list_request)
+    pretty_print_response(statements_list_response.to_hash)
+  rescue Plaid::ApiError => e
+    error_response = format_error(e)
+    pretty_print_response(error_response)
+    content_type :json
+    error_response.to_json
+  end
+  statement_id = statements_list_response.accounts[0].statements[0].statement_id
+  statements_download_request = Plaid::StatementsDownloadRequest.new({ access_token: access_token, statement_id: statement_id })
+  statement_pdf = client.statements_download(statements_download_request)
+
+  content_type :json
+  { json: statements_list_response.to_hash,
+    pdf: Base64.encode64(File.read(statement_pdf)) }.to_json
+end
+
 # rubocop:enable Metrics/BlockLength
 
 # Retrieve high-level information about an Item
@@ -446,6 +471,14 @@ post '/api/create_link_token' do
         redirect_uri: nil_if_empty_envvar('PLAID_REDIRECT_URI')
       }
     )
+    if ENV['PLAID_PRODUCTS'].split(',').include?("statements")
+      today = Date.today
+      statements = Plaid::LinkTokenCreateRequestStatements.new(
+        end_date: today,
+        start_date: today-30
+      )
+      link_token_create_request.statements=statements
+    end
     link_response = client.link_token_create(link_token_create_request)
     pretty_print_response(link_response.to_hash)
     content_type :json

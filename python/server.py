@@ -5,6 +5,7 @@ import os
 import datetime as dt
 import json
 import time
+from datetime import date, timedelta
 
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
@@ -47,6 +48,9 @@ from plaid.model.ach_class import ACHClass
 from plaid.model.transfer_create_idempotency_key import TransferCreateIdempotencyKey
 from plaid.model.transfer_user_address_in_request import TransferUserAddressInRequest
 from plaid.model.signal_evaluate_request import SignalEvaluateRequest
+from plaid.model.statements_list_request import StatementsListRequest
+from plaid.model.link_token_create_request_statements import LinkTokenCreateRequestStatements
+from plaid.model.statements_download_request import StatementsDownloadRequest
 from plaid.api import plaid_api
 
 load_dotenv()
@@ -217,10 +221,17 @@ def create_link_token():
         )
         if PLAID_REDIRECT_URI!=None:
             request['redirect_uri']=PLAID_REDIRECT_URI
+        if Products('statements') in products:
+            statements=LinkTokenCreateRequestStatements(
+                end_date=date.today(),
+                start_date=date.today()-timedelta(days=30)
+            )
+            request['statements']=statements
     # create link token
         response = client.link_token_create(request)
         return jsonify(response.to_dict())
     except plaid.ApiException as e:
+        print(e)
         return json.loads(e.body)
 
 
@@ -532,6 +543,33 @@ def transfer():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
+
+@app.route('/api/statements', methods=['GET'])
+def statements():
+    try:
+        request = StatementsListRequest(access_token=access_token)
+        response = client.statements_list(request)
+        pretty_print_response(response.to_dict())
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
+    try:
+        request = StatementsDownloadRequest(
+            access_token=access_token,
+            statement_id=response['accounts'][0]['statements'][0]['statement_id']
+        )
+        pdf = client.statements_download(request)
+        return jsonify({
+            'error': None,
+            'json': response.to_dict(),
+            'pdf': base64.b64encode(pdf.read()).decode('utf-8'),
+        })
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
+
+
+
 
 @app.route('/api/signal_evaluate', methods=['GET'])
 def signal():
