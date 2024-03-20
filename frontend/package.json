@@ -19,11 +19,14 @@
     "react-dev-utils": "^12.0.0",
     "react-dom": "^16.14.0",
     "react-plaid-link": "^3.2.1",
-    "react-scripts": "^5.0.1",
     "sass": "^1.32.8",
     "sass-loader": "^10.1.1",
     "typescript": "^4.0.3",
     "web-vitals": "^0.2.4"
+  },
+  "devDependencies": {
+    "@types/classnames": "^2.2.11",
+    "react-scripts": "^5.0.1"
   },
   "peerDependencies": {
     "chalk": "^4.1.2"
@@ -52,9 +55,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@types/classnames": "^2.2.11"
   },
   "engines": {
     "node": ">=14.0.0"
