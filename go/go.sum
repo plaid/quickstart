@@ -222,6 +222,8 @@ github.com/plaid/plaid-go/v17 v17.0.0 h1:byLAb7hKw2JQldWZSPIIcQgBAh6SufyULQvbXU5
 github.com/plaid/plaid-go/v17 v17.0.0/go.mod h1:OnQINLy+PW++58PtJ0aeVP45SeNksIbAJCCiaTuXJcw=
 github.com/plaid/plaid-go/v18 v18.0.0 h1:Gpr8+/DgDDhkUNGHp1N7gkFbXk2vV9FPRk9msPSH7z8=
 github.com/plaid/plaid-go/v18 v18.0.0/go.mod h1:F3o0GI+LVJ9dtwWSsVrEekptDR451hYP5U4kASyPXPU=
+github.com/plaid/plaid-go/v21 v21.0.0 h1:psCUbGQqQtqq10YL3qADIplfyR40I9Kli4utlA1hCC8=
+github.com/plaid/plaid-go/v21 v21.0.0/go.mod h1:wZm5QTGViiuxtF6lMKucUskdXlIken40AEmJdAD4OgM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
