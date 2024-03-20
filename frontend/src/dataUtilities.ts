@@ -9,7 +9,6 @@ import {
   InstitutionsGetByIdResponse,
   LiabilitiesGetResponse,
   PaymentInitiationPaymentGetResponse,
-  AssetReportGetResponse,
   AssetReport,
   TransferCreateResponse,
   TransferAuthorizationCreateResponse,
@@ -17,7 +16,6 @@ import {
   SignalEvaluateResponse,
   StatementsListResponse,
   Paystub,
-  Earnings,
 } from "plaid/dist/api";
 
 const formatCurrency = (
@@ -110,7 +108,6 @@ interface TransferDataItem {
   achClass: string | null;
   network: string;
 }
-
 
 interface TransferAuthorizationDataItem {
   authorizationId: string;
@@ -399,45 +396,45 @@ export const transferCategories: Array<Categories> = [
 ];
 
 export const transferAuthorizationCategories: Array<Categories> = [
-  { 
+  {
     title: "Authorization ID",
-    field: "authorizationId"
+    field: "authorizationId",
   },
   {
     title: "Authorization Decision",
-    field: "authorizationDecision"
+    field: "authorizationDecision",
   },
   {
     title: "Decision rationale code",
-    field: "decisionRationaleCode"
+    field: "decisionRationaleCode",
   },
   {
     title: "Decision rationale description",
-    field: "decisionRationaleDescription"
+    field: "decisionRationaleDescription",
   },
 ];
 
 export const signalCategories: Array<Categories> = [
   {
     title: "Customer-initiated return risk score",
-    field: "customerInitiatedReturnRiskScore"
+    field: "customerInitiatedReturnRiskScore",
   },
 
   {
     title: "Customer-initiated return risk tier",
-    field: "customerInitiatedReturnRiskTier"
+    field: "customerInitiatedReturnRiskTier",
   },
   {
     title: "Bank-initiated return risk score",
-    field: "bankInitiatedReturnRiskScore"
+    field: "bankInitiatedReturnRiskScore",
   },
   {
     title: "Bank-initiated return risk tier",
-    field: "bankInitiatedReturnRiskTier"
+    field: "bankInitiatedReturnRiskTier",
   },
   {
     title: "Sample core attribute: Days since first Plaid connection",
-    field: "daysSinceFirstPlaidConnection"
+    field: "daysSinceFirstPlaidConnection",
   },
 ];
 
@@ -464,8 +461,8 @@ export const incomePaystubsCategories: Array<Categories> = [
   {
     title: "Currency",
     field: "currency",
-  }
-]
+  },
+];
 
 export const transformAuthData = (data: AuthGetResponse) => {
   return data.numbers.ach!.map((achNumbers) => {
@@ -496,7 +493,9 @@ export const transformStatementsData = (data: {json: StatementsListResponse}) =>
   });
 };
 
-export const transformTransactionsData = (data: {latest_transactions: Transaction[]}): Array<DataItem> => {
+export const transformTransactionsData = (data: {
+  latest_transactions: Transaction[];
+}): Array<DataItem> => {
   return data.latest_transactions!.map((t) => {
     const item: DataItem = {
       name: t.name!,
@@ -602,11 +601,17 @@ interface InvestmentsTransactionData {
   investments_transactions: InvestmentsTransactionsGetResponse;
 }
 
-export const transformInvestmentTransactionsData = (data: InvestmentsTransactionData) => {
-  const investmentTransactionsData = data.investments_transactions.investment_transactions!.sort(function (a,b) {
-    if (a.account_id > b.account_id) return 1;
-    return -1;
-  });
+export const transformInvestmentTransactionsData = (
+  data: InvestmentsTransactionData
+) => {
+  const investmentTransactionsData =
+    data.investments_transactions.investment_transactions!.sort(function (
+      a,
+      b
+    ) {
+      if (a.account_id > b.account_id) return 1;
+      return -1;
+    });
   return investmentTransactionsData.map((investmentTransaction) => {
     const security = data.investments_transactions.securities!.filter(
       (sec) => sec.security_id === investmentTransaction.security_id
@@ -684,29 +689,43 @@ export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
 export const transformSignalData = (data: SignalEvaluateResponse) => {
   return [
     {
-      customerInitiatedReturnRiskTier: data.scores.customer_initiated_return_risk!.risk_tier,
-      customerInitiatedReturnRiskScore: data.scores.customer_initiated_return_risk!.score,
-      bankInitiatedReturnRiskTier: data.scores.bank_initiated_return_risk!.risk_tier,
-      bankInitiatedReturnRiskScore: data.scores.bank_initiated_return_risk!.score,
-      daysSinceFirstPlaidConnection: data.core_attributes!.days_since_first_plaid_connection,
+      customerInitiatedReturnRiskTier:
+        data.scores.customer_initiated_return_risk!.risk_tier,
+      customerInitiatedReturnRiskScore:
+        data.scores.customer_initiated_return_risk!.score,
+      bankInitiatedReturnRiskTier:
+        data.scores.bank_initiated_return_risk!.risk_tier,
+      bankInitiatedReturnRiskScore:
+        data.scores.bank_initiated_return_risk!.score,
+      daysSinceFirstPlaidConnection:
+        data.core_attributes!.days_since_first_plaid_connection,
     },
   ];
 };
 
-
-export const transformTransferAuthorizationData = (data: TransferAuthorizationCreateResponse): Array<DataItem> => {
+export const transformTransferAuthorizationData = (
+  data: TransferAuthorizationCreateResponse
+): Array<DataItem> => {
   const transferAuthorizationData = data.authorization;
   return [
     {
       authorizationId: transferAuthorizationData.id,
       authorizationDecision: transferAuthorizationData.decision,
-      decisionRationaleCode: (transferAuthorizationData.decision_rationale != null) ? transferAuthorizationData.decision_rationale.code : "null",
-      decisionRationaleDescription: (transferAuthorizationData.decision_rationale != null) ? transferAuthorizationData.decision_rationale.description : "null",
+      decisionRationaleCode:
+        transferAuthorizationData.decision_rationale != null
+          ? transferAuthorizationData.decision_rationale.code
+          : "null",
+      decisionRationaleDescription:
+        transferAuthorizationData.decision_rationale != null
+          ? transferAuthorizationData.decision_rationale.description
+          : "null",
     },
   ];
 };
 
-export const transformTransferData = (data: TransferCreateResponse): Array<DataItem> => {
+export const transformTransferData = (
+  data: TransferCreateResponse
+): Array<DataItem> => {
   const transferData = data.transfer;
   return [
     {
@@ -795,22 +814,25 @@ export const transformAssetsData = (data: AssetResponseData) => {
 };
 
 interface IncomePaystub {
-  paystubs: IncomeVerificationPaystubsGetResponse,
+  paystubs: IncomeVerificationPaystubsGetResponse;
 }
 
 export const transformIncomePaystubsData = (data: IncomePaystub) => {
-  const paystubsItemsArray: Array<Paystub> = data.paystubs.paystubs
-  var finalArray: Array<IncomePaystubsDataItem> = []
-  for (var i = 0; i < paystubsItemsArray.length; i++){
-    var ActualEarningVariable: any = paystubsItemsArray[i].earnings
-    for (var j = 0; j < ActualEarningVariable.breakdown.length; j++){
+  const paystubsItemsArray: Array<Paystub> = data.paystubs.paystubs;
+  var finalArray: Array<IncomePaystubsDataItem> = [];
+  for (var i = 0; i < paystubsItemsArray.length; i++) {
+    var ActualEarningVariable: any = paystubsItemsArray[i].earnings;
+    for (var j = 0; j < ActualEarningVariable.breakdown.length; j++) {
       var payStubItem: IncomePaystubsDataItem = {
-        description: paystubsItemsArray[i].employer.name + '_' + ActualEarningVariable.breakdown[j].description,
+        description:
+          paystubsItemsArray[i].employer.name +
+          "_" +
+          ActualEarningVariable.breakdown[j].description,
         currentAmount: ActualEarningVariable.breakdown[j].current_amount,
-        currency: ActualEarningVariable.breakdown[j].iso_currency_code
-      }
-    finalArray.push(payStubItem)
+        currency: ActualEarningVariable.breakdown[j].iso_currency_code,
+      };
+      finalArray.push(payStubItem);
+    }
   }
-}
-  return finalArray
-}
+  return finalArray;
+};
