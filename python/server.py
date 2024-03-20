@@ -550,7 +550,6 @@ def statements():
         request = StatementsListRequest(access_token=access_token)
         response = client.statements_list(request)
         pretty_print_response(response.to_dict())
-       # return jsonify(response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
