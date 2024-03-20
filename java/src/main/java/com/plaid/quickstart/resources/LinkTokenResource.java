@@ -9,12 +9,14 @@ import com.plaid.client.model.CountryCode;
 import com.plaid.client.model.LinkTokenCreateRequest;
 import com.plaid.client.model.LinkTokenCreateRequestUser;
 import com.plaid.client.model.LinkTokenCreateResponse;
+import com.plaid.client.model.LinkTokenCreateRequestStatements;
 import com.plaid.client.model.Products;
 
 import java.util.List;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.time.LocalDate;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -68,6 +70,7 @@ public class LinkTokenResource {
       this.correctedCountryCodes.add(CountryCode.fromValue(this.countryCodes.get(i)));
     };
 
+
 		LinkTokenCreateRequest request = new LinkTokenCreateRequest()
 			.user(user)
 			.clientName("Quickstart Client")
@@ -75,6 +78,13 @@ public class LinkTokenResource {
 			.countryCodes(this.correctedCountryCodes)
 			.language("en")
       .redirectUri(this.redirectUri);
+
+    if (this.correctedPlaidProducts.contains(Products.STATEMENTS)) {
+      LinkTokenCreateRequestStatements statementsConfig = new LinkTokenCreateRequestStatements()
+        .startDate(LocalDate.now().minusDays(30))
+        .endDate(LocalDate.now());
+      request.setStatements(statementsConfig);
+    }
 
     	Response<LinkTokenCreateResponse> response =plaidClient
 			.linkTokenCreate(request)
