@@ -170,7 +170,7 @@ const Products = () => {
             name="Statements"
             categories={statementsCategories}
             schema="/statements/list and /statements/download"
-            description="Get a list of recent statements and download the most recent"
+            description="List out and download the most recent statement"
             transformData={transformStatementsData}
           />
         </>
