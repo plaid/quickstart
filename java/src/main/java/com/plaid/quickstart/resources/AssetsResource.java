@@ -59,6 +59,7 @@ public class AssetsResource {
 
     Response<AssetReportGetResponse> assetReportGetResponse = null;
 
+    //In a real integration, we would wait for a webhook rather than polling like this
     for (int i = 0; i < 5; i++){
       assetReportGetResponse = plaidClient.assetReportGet(assetReportGetRequest).execute();
       if (assetReportGetResponse.isSuccessful()){
