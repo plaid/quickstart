@@ -33,28 +33,28 @@ public class StatementsResource {
   @GET
   public Map statementsList() throws IOException {
 
-      StatementsListRequest statementsListRequest = new StatementsListRequest()
-        .accessToken(QuickstartApplication.accessToken);
+    StatementsListRequest statementsListRequest = new StatementsListRequest()
+      .accessToken(QuickstartApplication.accessToken);
 
-      Response<StatementsListResponse> statementsListResponse = plaidClient
-        .statementsList(statementsListRequest)
-        .execute();
+    Response<StatementsListResponse> statementsListResponse = plaidClient
+      .statementsList(statementsListRequest)
+      .execute();
 
-      StatementsDownloadRequest statementsDownloadRequest = new StatementsDownloadRequest()
-        .accessToken(QuickstartApplication.accessToken)
-        .statementId(statementsListResponse.body().getAccounts().get(0).getStatements().get(0).getStatementId());
-        
-      Response<ResponseBody> statementsDownloadResponse = plaidClient
-        .statementsDownload(statementsDownloadRequest)
-        .execute();
+    StatementsDownloadRequest statementsDownloadRequest = new StatementsDownloadRequest()
+      .accessToken(QuickstartApplication.accessToken)
+      .statementId(statementsListResponse.body().getAccounts().get(0).getStatements().get(0).getStatementId());
+      
+    Response<ResponseBody> statementsDownloadResponse = plaidClient
+      .statementsDownload(statementsDownloadRequest)
+      .execute();
 
-      String pdf = Base64.getEncoder().encodeToString(statementsDownloadResponse.body().bytes());
+    String pdf = Base64.getEncoder().encodeToString(statementsDownloadResponse.body().bytes());
 
-      Map<String, Object> responseMap = new HashMap<>();
-      responseMap.put("json", statementsListResponse.body());
-      responseMap.put("pdf", pdf);
+    Map<String, Object> responseMap = new HashMap<>();
+    responseMap.put("json", statementsListResponse.body());
+    responseMap.put("pdf", pdf);
 
-      return responseMap;
+    return responseMap;
 
   }
 }

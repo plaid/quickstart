@@ -6,6 +6,7 @@ import java.util.HashMap;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.plaid.quickstart.resources.AccessTokenResource;
 import com.plaid.quickstart.resources.AccountsResource;
+import com.plaid.quickstart.resources.AssetsResource;
 import com.plaid.quickstart.resources.AuthResource;
 import com.plaid.quickstart.resources.BalanceResource;
 import com.plaid.quickstart.resources.HoldingsResource;
@@ -105,6 +106,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
 
     environment.jersey().register(new AccessTokenResource(plaidClient, plaidProducts));
     environment.jersey().register(new AccountsResource(plaidClient));
+    environment.jersey().register(new AssetsResource(plaidClient));
     environment.jersey().register(new AuthResource(plaidClient));
     environment.jersey().register(new BalanceResource(plaidClient));
     environment.jersey().register(new HoldingsResource(plaidClient));
