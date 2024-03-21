@@ -39,7 +39,6 @@ public class AssetsResource {
 
   @GET
   public Map getAssetReport() throws IOException {
-
     ArrayList<String> accessTokens = new ArrayList<>();
     accessTokens.add(QuickstartApplication.accessToken);
 
@@ -52,13 +51,10 @@ public class AssetsResource {
       .execute();
 
     String assetReportToken = assetReportCreateResponse.body().getAssetReportToken();
-
-
     AssetReportGetRequest assetReportGetRequest = new AssetReportGetRequest()
       .assetReportToken(assetReportToken);
-
     Response<AssetReportGetResponse> assetReportGetResponse = null;
-
+    
     //In a real integration, we would wait for a webhook rather than polling like this
     for (int i = 0; i < 5; i++){
       assetReportGetResponse = plaidClient.assetReportGet(assetReportGetRequest).execute();
@@ -80,18 +76,15 @@ public class AssetsResource {
     AssetReportPDFGetRequest assetReportPDFGetRequest = new AssetReportPDFGetRequest()
       .assetReportToken(assetReportToken);
 
-        
-      Response<ResponseBody> assetReportPDFGetResponse = plaidClient
-        .assetReportPdfGet(assetReportPDFGetRequest)
-        .execute();
+    Response<ResponseBody> assetReportPDFGetResponse = plaidClient
+      .assetReportPdfGet(assetReportPDFGetRequest)
+      .execute();
 
-      String pdf = Base64.getEncoder().encodeToString(assetReportPDFGetResponse.body().bytes());
-
-      Map<String, Object> responseMap = new HashMap<>();
-      responseMap.put("json", assetReportGetResponse.body().getReport());
-      responseMap.put("pdf", pdf);
-
-      return responseMap;
+    String pdf = Base64.getEncoder().encodeToString(assetReportPDFGetResponse.body().bytes());
+    Map<String, Object> responseMap = new HashMap<>();
+    responseMap.put("json", assetReportGetResponse.body().getReport());
+    responseMap.put("pdf", pdf);
+    return responseMap;
 
   }
 }
