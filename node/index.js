@@ -30,8 +30,9 @@ app.use(cors());
 app.use("/auth", require("./auth"));
 app.use('/api', require('./api'));
 
+
 // error handling endware
-app.use((err, _, res) => {
+app.use((err, req, res, next) => {
   console.error(err);
   console.error(err.stack);
   res.status(err.status || 500).send(err.message || "Internal server error.");
