@@ -27,7 +27,7 @@ const Endpoint = (props: Props) => {
 
   const getData = async () => {
     setIsLoading(true);
-    const response = await fetch(`${API_URL}/api/${props.endpoint}`, { method: "GET" });
+    const response = await fetch(`${API_URL}/api/plaid/${props.endpoint}`, { method: "GET" });
     const data = await response.json();
     if (data.error != null) {
       setError(data.error);

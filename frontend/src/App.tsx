@@ -13,7 +13,7 @@ const App = () => {
   const { linkSuccess, isItemAccess, isPaymentInitiation, dispatch } = useContext(Context);
 
   const getInfo = useCallback(async () => {
-    const response = await fetch(`${API_URL}/api/info`, { method: "POST" });
+    const response = await fetch(`${API_URL}/api/plaid/info`, { method: "POST" });
     if (!response.ok) {
       dispatch({ type: "SET_STATE", state: { backend: false } });
       return { paymentInitiation: false };
@@ -36,8 +36,8 @@ const App = () => {
     async (isPaymentInitiation) => {
       // Link tokens for 'payment_initiation' use a different creation flow in your backend.
       const path = isPaymentInitiation
-        ? "/api/create_link_token_for_payment"
-        : "/api/create_link_token";
+        ? "/api/plaid/create_link_token_for_payment"
+        : "/api/plaid/create_link_token";
       const response = await fetch(`${API_URL}${path}`, {
         method: "POST",
       });

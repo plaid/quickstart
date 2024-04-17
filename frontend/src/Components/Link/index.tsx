@@ -14,7 +14,7 @@ const Link = () => {
     (public_token: string) => {
       // If the access_token is needed, send public_token to server
       const exchangePublicTokenForAccessToken = async () => {
-        const response = await fetch(`${API_URL}/api/set_access_token`, {
+        const response = await fetch(`${API_URL}/api/plaid/set_access_token`, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",

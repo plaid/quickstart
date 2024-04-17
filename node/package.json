@@ -1,25 +1,31 @@
 {
-  "name": "plaid-node-walkthrough",
-  "version": "0.1.0",
-  "description": "A sample app and accompanying walkthrough for the Plaid API.",
+  "name": "spirit_cat",
+  "version": "0.0.1",
+  "description": "A simple app to help you track your finances",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "watch": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "developers@plaid.com",
-  "repository": "https://github.com/plaid/quickstart",
+  "author": "robert.david.west@gmail.com",
+  "repository": "https://github.com/robertdavidwest/spirit-cat",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "body-parser": "1.18.x",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "ejs": "2.5.x",
     "express": "4.16.x",
+    "install": "^0.13.0",
+    "jsonwebtoken": "^9.0.2",
     "moment": "2.22.x",
+    "morgan": "^1.10.0",
     "nodemon": "^2.0.20",
+    "pg": "^8.11.5",
     "plaid": "^14.0.0",
+    "sequelize": "^6.37.3",
     "uuid": "^9.0.0"
   }
 }

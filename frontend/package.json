@@ -1,6 +1,7 @@
 {
-  "name": "plaid_react_quickstart",
-  "version": "0.1.0",
+  "name": "spirit_cat",
+  "version": "0.0.1",
+  "description": "A simple app to help you track your finances",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
