@@ -1,13 +1,14 @@
 import React, { useEffect, useContext, useCallback } from "react";
 
 import Header from "./Components/Headers";
+import Signup from "./Components/Signup";
 import Products from "./Components/ProductTypes/Products";
 import Items from "./Components/ProductTypes/Items";
 import Context from "./Context";
 
 import styles from "./App.module.scss";
 
-import { API_URL } from "./constants";
+import { API_URL, USER_ID} from "./constants";
 
 const App = () => {
   const { linkSuccess, isItemAccess, isPaymentInitiation, dispatch } = useContext(Context);
@@ -40,6 +41,12 @@ const App = () => {
         : "/api/plaid/create_link_token";
       const response = await fetch(`${API_URL}${path}`, {
         method: "POST",
+        headers: {
+         'Accept': 'application/json',
+         'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          user_id: USER_ID })
       });
       if (!response.ok) {
         dispatch({ type: "SET_STATE", state: { linkToken: null } });
@@ -88,6 +95,7 @@ const App = () => {
     <div className={styles.App}>
       <div className={styles.container}>
         <Header />
+        <Signup />
         {linkSuccess && (
           <>
             {isPaymentInitiation && (

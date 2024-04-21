@@ -6,6 +6,8 @@ const moment = require('moment');
 const util = require('util');
 const { v4: uuidv4 } = require('uuid');
 
+const { models: { AccessToken, Item } } = require("../db");
+
 module.exports = router;
 //router.use("/users", require("./users"));
 
@@ -42,7 +44,6 @@ const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || '';
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
 let ACCESS_TOKEN = null;
-let PUBLIC_TOKEN = null;
 let ITEM_ID = null;
 let ACCOUNT_ID = null;
 // The payment_id is only relevant for the UK/EU Payment Initiation product.
@@ -83,14 +84,15 @@ router.post('/info', function (request, response, next) {
 // Create a link token with configs which we can then use to initialize Plaid Link client-side.
 // See https://plaid.com/docs/#create-link-token
 router.post('/create_link_token', function (request, response, next) {
+  const { user_id } = request.body;
   Promise.resolve()
     .then(async function () {
       const configs = {
         user: {
           // This should correspond to a unique id for the current user.
-          client_user_id: 'user-id',
+          client_user_id: String(user_id)
         },
-        client_name: 'Plaid Quickstart',
+        client_name: 'Spirit Cat',
         products: PLAID_PRODUCTS,
         country_codes: PLAID_COUNTRY_CODES,
         language: 'en',
@@ -182,17 +184,29 @@ router.post(
 // an API access_token
 // https://plaid.com/docs/#exchange-token-flow
 router.post('/set_access_token', function (request, response, next) {
-  PUBLIC_TOKEN = request.body.public_token;
+  const { user_id, public_token } = request.body;
   Promise.resolve()
     .then(async function () {
       const tokenResponse = await client.itemPublicTokenExchange({
-        public_token: PUBLIC_TOKEN,
+        public_token: public_token,
       });
       prettyPrintResponse(tokenResponse);
-      ACCESS_TOKEN = tokenResponse.data.access_token;
-      ITEM_ID = tokenResponse.data.item_id;
+      const access_token = tokenResponse.data.access_token;
+      const item_id = tokenResponse.data.item_id;
+
+      const access_token_tbl = AccessToken.create({
+        access_token,
+        item_id,
+        userId: user_id
+      });
+
+      Item.create({
+        accessTokenId: access_token_tbl.id,
+        item_id: item_id,
+      });
+
       response.json({
-        item_id: ITEM_ID,
+        item_id: item_id,
         error: null,
       });
     })

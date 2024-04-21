@@ -2,7 +2,7 @@ import React, { useEffect, useContext } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
-import { API_URL } from "../../constants";
+import { API_URL, USER_ID } from "../../constants";
 import Context from "../../Context";
 import { Products } from "plaid";
 
@@ -17,9 +17,12 @@ const Link = () => {
         const response = await fetch(`${API_URL}/api/plaid/set_access_token`, {
           method: "POST",
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+           'Accept': 'application/json',
+           'Content-Type': 'application/json'
           },
-          body: `public_token=${public_token}`,
+          body: JSON.stringify({
+            public_token: public_token,
+            user_id: USER_ID}),
         });
         if (!response.ok) {
           dispatch({
