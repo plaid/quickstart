@@ -32,7 +32,6 @@ var (
 
 var environments = map[string]plaid.Environment{
 	"sandbox":     plaid.Sandbox,
-	"development": plaid.Development,
 	"production":  plaid.Production,
 }
 
