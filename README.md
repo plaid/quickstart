@@ -230,7 +230,7 @@ make stop language=node
 
 In Sandbox, you can log in to any supported institution (except Capital One) using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`.
 
-In Development or Production, use real-life credentials.
+In Production, use real-life credentials.
 
 ## Troubleshooting
 
@@ -247,7 +247,7 @@ If you get a "Connectivity not supported" error after selecting a financial inst
 
 ### "You need to update your app" or "institution not supported"
 
-If you get a "You need to update your app" or "institution not supported" error after selecting a financial institution in Link, you're probably running the Quickstart in Development (or Production) and attempting to link an institution, such as Chase or Wells Fargo, that requires an OAuth-based connection. In order to make OAuth connections to US-based institutions in Development or Production, you must have Production access approval, and certain institutions may also require additional approvals before you can be enabled. To use this institution, [apply for Production access](https://dashboard.plaid.com/overview/production) and see the [OAuth insitutions page](https://dashboard.plaid.com/team/oauth-institutions) for any other required steps and to track your OAuth enablement status.
+If you get a "You need to update your app" or "institution not supported" error after selecting a financial institution in Link, you're probably running the Quickstart in Production and attempting to link an institution, such as Chase or Wells Fargo, that requires an OAuth-based connection. In order to make OAuth connections to US-based institutions in Production, you must have full Production access approval, and certain institutions may also require additional approvals before you can be enabled. To use this institution, [apply for full Production access](https://dashboard.plaid.com/overview/production) and see the [OAuth insitutions page](https://dashboard.plaid.com/team/oauth-institutions) for any other required steps and to track your OAuth enablement status.
 
 ### "oauth uri does not contain a valid oauth_state_id query parameter"
 
