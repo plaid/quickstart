@@ -119,6 +119,14 @@ $ npm start
 
 ### Run with Docker
 
+```bash
+# Start:
+docker compose up
+
+# To stop use Ctrl+C and then
+docker compose down
+```
+
 #### Pre-requisites
 
 - Docker installed and running on your machine: https://docs.docker.com/get-docker/

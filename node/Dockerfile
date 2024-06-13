@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM docker.io/node:alpine
 
 WORKDIR /opt/app
 RUN chown -R node:node /opt/app

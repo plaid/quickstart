@@ -1,33 +1,24 @@
-version: "3.5"
-x-environment:
-  &QUICKSTART_ENVIRONMENT # These are read from .env file. The values in the .env file maybe overriden by shell envvars
-  PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
-  PLAID_SECRET: ${PLAID_SECRET}
-  PLAID_PRODUCTS: ${PLAID_PRODUCTS}
-  PLAID_COUNTRY_CODES: ${PLAID_COUNTRY_CODES}
-  PLAID_REDIRECT_URI: ${PLAID_REDIRECT_URI}
-  PLAID_ENV: ${PLAID_ENV}
+version: "3.8"
+
+networks:
+  plaid-quickstart:
+    name: plaid-quickstart
 services:
-  node:
+  plaid-server:
     networks:
-      - "plaid-quickstart"
-    depends_on:
-      - "frontend"
+      - plaid-quickstart
     build:
-      context: .
       dockerfile: ./node/Dockerfile
     ports: ["8000:8000"]
+    env_file:
+      - .env
+  plaid-frontend:
     environment:
-      <<: *QUICKSTART_ENVIRONMENT
-  frontend:
-    environment:
-      - REACT_APP_API_HOST
+      REACT_APP_API_HOST: http://plaid-server:8000
     networks:
-      - "plaid-quickstart"
+      - plaid-quickstart
+    depends_on:
+      - plaid-server
     build:
-      context: .
       dockerfile: ./frontend/Dockerfile
     ports: ["3000:3000"]
-networks:
-  quickstart:
-    name: plaid-quickstart
