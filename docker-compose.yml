@@ -8,31 +8,9 @@ x-environment:
   PLAID_REDIRECT_URI: ${PLAID_REDIRECT_URI}
   PLAID_ENV: ${PLAID_ENV}
 services:
-  go:
-    networks:
-      - "quickstart"
-    depends_on:
-      - "frontend"
-    build:
-      context: .
-      dockerfile: ./go/Dockerfile
-    ports: ["8000:8000"]
-    environment:
-      <<: *QUICKSTART_ENVIRONMENT
-  java:
-    networks:
-      - "quickstart"
-    depends_on:
-      - "frontend"
-    build:
-      context: .
-      dockerfile: ./java/Dockerfile
-    ports: ["8000:8000"]
-    environment:
-      <<: *QUICKSTART_ENVIRONMENT
   node:
     networks:
-      - "quickstart"
+      - "plaid-quickstart"
     depends_on:
       - "frontend"
     build:
@@ -41,37 +19,15 @@ services:
     ports: ["8000:8000"]
     environment:
       <<: *QUICKSTART_ENVIRONMENT
-  python:
-    networks:
-      - "quickstart"
-    depends_on:
-      - "frontend"
-    build:
-      context: .
-      dockerfile: ./python/Dockerfile
-    ports: ["8000:8000"]
-    environment:
-      <<: *QUICKSTART_ENVIRONMENT
-  ruby:
-    networks:
-      - "quickstart"
-    depends_on:
-      - "frontend"
-    build:
-      context: .
-      dockerfile: ./ruby/Dockerfile
-    ports: ["8000:8000"]
-    environment:
-      <<: *QUICKSTART_ENVIRONMENT
   frontend:
     environment:
       - REACT_APP_API_HOST
     networks:
-      - "quickstart"
+      - "plaid-quickstart"
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
     ports: ["3000:3000"]
 networks:
   quickstart:
-    name: quickstart
+    name: plaid-quickstart

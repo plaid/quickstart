@@ -51,14 +51,14 @@ For a more in-depth Transfer Quickstart, see the [Transfer Quickstart](https://g
 Using https:
 
 ```bash
-git clone https://github.com/plaid/quickstart
+git clone https://github.com/Provasoft/plaid.quickstart quickstart
 cd quickstart
 ```
 
 Alternatively, if you use ssh:
 
 ```bash
-git clone git@github.com:plaid/quickstart.git
+git clone git@github.com:Provasoft/plaid.quickstart.git quickstart
 cd quickstart
 ```
 
@@ -67,7 +67,7 @@ cd quickstart
 Note - because this repository makes use of symbolic links, to run this on a Windows machine, make sure you have checked the "enable symbolic links" box when you download Git to your local machine. Then you can run the above commands to clone the quickstart. Otherwise, you may open your Git Bash terminal as an administrator and use the following command when cloning the project
 
 ```bash
-git clone -c core.symlinks=true https://github.com/plaid/quickstart
+git clone -c core.symlinks=true https://github.com/Provasoft/plaid.quickstart quickstart
 ```
 
 ## 2. Set up your environment variables
@@ -112,60 +112,6 @@ $ npm install
 $ ./start.sh
 ```
 
-##### Python
-
-**:warning: As `python2` has reached its end of life, only `python3` is supported.**
-
-```bash
-cd ./python
-
-# If you use virtualenv
-# virtualenv venv
-# source venv/bin/activate
-
-pip3 install -r requirements.txt
-./start.sh
-```
-
-If you get this error message:
-
-```txt
-ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:749)
-```
-
-You may need to run the following command in your terminal for your particular version of python in order to install SSL certificates:
-
-```bash
-# examples:
-open /Applications/Python\ 3.9/Install\ Certificates.command
-# or
-open /Applications/Python\ 3.6/Install\ Certificates.command
-```
-
-##### Ruby
-
-```bash
-cd ./ruby
-bundle
-./start.sh
-```
-
-##### Go
-
-```bash
-cd ./go
-go build
-./start.sh
-```
-
-##### Java
-
-```bash
-cd ./java
-mvn clean package
-./start.sh
-```
-
 ##### .NET
 
 A community-supported implementation of the Plaid Quickstart using the [Going.Plaid](https://github.com/viceroypenguin/Going.Plaid) client library can be found at [PlaidQuickstartBlazor](https://github.com/jcoliz/PlaidQuickstartBlazor). Note that Plaid does not provide first-party support for .NET client libraries and that this Quickstart and client library are not created, reviewed, or supported by Plaid. 
@@ -182,49 +128,9 @@ $ npm start
 
 #### Pre-requisites
 
-- `make` available at your command line
 - Docker installed and running on your machine: https://docs.docker.com/get-docker/
 - Your environment variables populated in `.env`
 - If using Windows, a working Linux installation on Windows 10. If you are using Windows and do not already have WSL or Cygwin configured, we recommend [running without Docker](#run-without-docker).
-
-#### Running
-
-There are three basic `make` commands available
-
-- `up`: builds and starts the container
-- `logs`: tails logs
-- `stop`: stops the container
-
-Each of these should be used with a `language` argument, which is one of `node`, `python`, `ruby`,
-`java`, or `go`. If unspecified, the default is `node`.
-
-##### Start the container
-
-```bash
-make up language=node
-```
-
-The quickstart backend is now running on http://localhost:8000 and frontend on http://localhost:3000.
-
-If you make changes to one of the server files such as `index.js`, `server.go`, etc, or to the
-`.env` file, simply run `make up language=node` again to rebuild and restart the container.
-
-If you experience a Docker connection error when running the command above, try the following:
-
-- Make sure Docker is running
-- Try running the command prefixed with `sudo`
-
-##### View the logs
-
-```bash
-make logs language=node
-```
-
-##### Stop the container
-
-```bash
-make stop language=node
-```
 
 ## Test credentials
 
@@ -310,10 +216,6 @@ may still get an invalid certificate warning on your browser. If so, click on "a
 [libraries]: https://plaid.com/docs/api/libraries
 [payment-initiation]: https://plaid.com/docs/payment-initiation/
 [node-example]: /node
-[ruby-example]: /ruby
-[python-example]: /python
-[java-example]: /java
-[go-example]: /go
 [docker]: https://www.docker.com
 [dashboard-api-section]: https://dashboard.plaid.com/developers/api
 [contact-sales]: https://plaid.com/contact
