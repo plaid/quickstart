@@ -298,12 +298,6 @@ def get_transactions():
                 cursor=cursor,
             )
             response = client.transactions_sync(request).to_dict()
-            # Add this page of results
-            added.extend(response['added'])
-            modified.extend(response['modified'])
-            removed.extend(response['removed'])
-            has_more = response['has_more']
-            # Update cursor to the next cursor
             cursor = response['next_cursor']
             # If no transactions are available yet, wait and poll the endpoint.
             # Normally, we would listen for a webhook before calling 
@@ -311,9 +305,15 @@ def get_transactions():
             # support webhooks. For a webhook example, see 
             # https://github.com/plaid/tutorial-resources or
             # https://github.com/plaid/pattern
-            if cursor is None:
+            if cursor == '':
                 time.sleep(2)
                 continue  
+            # If cursor is not an empty string, we got results, 
+            # so add this page of results
+            added.extend(response['added'])
+            modified.extend(response['modified'])
+            removed.extend(response['removed'])
+            has_more = response['has_more']
             pretty_print_response(response)
 
         # Return the 8 most recent transactions
