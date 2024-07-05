@@ -215,6 +215,7 @@ def create_link_token():
             client_name="Plaid Quickstart",
             country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
             language='en',
+            webhook='https://webhook.site/4cc0ff67-8cc8-4b71-ad9c-c2f9c9ac5a15',
             user=LinkTokenCreateRequestUser(
                 client_user_id=str(time.time())
             )
@@ -304,6 +305,15 @@ def get_transactions():
             has_more = response['has_more']
             # Update cursor to the next cursor
             cursor = response['next_cursor']
+            # If no transactions are available yet, wait and poll the endpoint.
+            # Normally, we would listen for a webhook before calling 
+            # /transactions/sync instead of polling, but the Quickstart doesn't 
+            # support webhooks. For a webhook example, see 
+            # https://github.com/plaid/tutorial-resources or
+            # https://github.com/plaid/pattern
+            if cursor is None:
+                time.sleep(2)
+                continue  
             pretty_print_response(response)
 
         # Return the 8 most recent transactions
