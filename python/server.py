@@ -215,7 +215,6 @@ def create_link_token():
             client_name="Plaid Quickstart",
             country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
             language='en',
-            webhook='https://webhook.site/4cc0ff67-8cc8-4b71-ad9c-c2f9c9ac5a15',
             user=LinkTokenCreateRequestUser(
                 client_user_id=str(time.time())
             )
