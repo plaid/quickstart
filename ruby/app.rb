@@ -89,13 +89,24 @@ get '/api/transactions' do
         }
       )
       response = client.transactions_sync(request)
+      cursor = response.next_cursor
+
+      # If no transactions are available yet, wait and poll the endpoint.
+      # Normally, we would listen for a webhook before calling 
+      # /transactions/sync instead of polling, but the Quickstart doesn't 
+      # support webhooks. For a webhook example, see 
+      # https://github.com/plaid/tutorial-resources or
+      # https://github.com/plaid/pattern
+      if cursor == ""
+        sleep 2 
+        next 
+      end
+    
       # Add this page of results
       added += response.added
       modified += response.modified
       removed += response.removed
       has_more = response.has_more
-      # Update cursor to the next cursor
-      cursor = response.next_cursor
       pretty_print_response(response.to_hash)
     end
     # Return the 8 most recent transactions
