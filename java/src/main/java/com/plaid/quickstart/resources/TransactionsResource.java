@@ -53,8 +53,7 @@ public class TransactionsResource {
       cursor = responseBody.getNextCursor();
 
       // If no transactions are available yet, wait and poll the endpoint.
-      // Normally, we would listen for a webhook before calling
-      // /transactions/sync instead of polling, but the Quickstart doesn't
+      // Normally, we would listen for a webhook, but the Quickstart doesn't
       // support webhooks. For a webhook example, see
       // https://github.com/plaid/tutorial-resources or
       // https://github.com/plaid/pattern
