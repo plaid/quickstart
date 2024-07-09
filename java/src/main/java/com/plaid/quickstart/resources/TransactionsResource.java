@@ -32,7 +32,7 @@ public class TransactionsResource {
   }
 
   @GET
-  public TransactionsResponse getTransactions() throws IOException {
+  public TransactionsResponse getTransactions() throws IOException, InterruptedException {
     // Set cursor to empty to receive all historical updates
     String cursor = null;
 
@@ -50,13 +50,23 @@ public class TransactionsResource {
       Response<TransactionsSyncResponse> response = plaidClient.transactionsSync(request).execute();
       TransactionsSyncResponse responseBody = response.body();
 
+      cursor = responseBody.getNextCursor();
+
+      // If no transactions are available yet, wait and poll the endpoint.
+      // Normally, we would listen for a webhook, but the Quickstart doesn't
+      // support webhooks. For a webhook example, see
+      // https://github.com/plaid/tutorial-resources or
+      // https://github.com/plaid/pattern
+
+      if (cursor.equals("")) {
+          Thread.sleep(2000); 
+          continue; 
+      }
       // Add this page of results
       added.addAll(responseBody.getAdded());
       modified.addAll(responseBody.getModified());
       removed.addAll(responseBody.getRemoved());
       hasMore = responseBody.getHasMore();
-      // Update cursor to the next cursor
-      cursor = responseBody.getNextCursor();
     }
 
     // Return the 8 most recent transactions

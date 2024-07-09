@@ -15,6 +15,8 @@ const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
 const PLAID_SECRET = process.env.PLAID_SECRET;
 const PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
@@ -254,13 +256,24 @@ app.get('/api/transactions', function (request, response, next) {
         };
         const response = await client.transactionsSync(request)
         const data = response.data;
+
+        // If no transactions are available yet, wait and poll the endpoint.
+        // Normally, we would listen for a webhook, but the Quickstart doesn't
+        // support webhooks. For a webhook example, see
+        // https://github.com/plaid/tutorial-resources or
+        // https://github.com/plaid/pattern
+        cursor = data.next_cursor;
+        if (cursor === "") {
+          await sleep(2000);
+          continue; 
+      }
+  
         // Add this page of results
         added = added.concat(data.added);
         modified = modified.concat(data.modified);
         removed = removed.concat(data.removed);
         hasMore = data.has_more;
-        // Update cursor to the next cursor
-        cursor = data.next_cursor;
+        
         prettyPrintResponse(response);
       }
 

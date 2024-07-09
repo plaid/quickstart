@@ -117,7 +117,6 @@ func main() {
 	r.GET("/api/signal_evaluate", signalEvaluate)
 	r.GET("/api/statements", statements)
 
-
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
 		panic("unable to start server")
@@ -216,8 +215,8 @@ func createLinkTokenForPayment(c *gin.Context) {
 	fmt.Println("payment id: " + paymentID)
 
 	// Create the link_token
-	linkTokenCreateReqPaymentInitiation := plaid.NewLinkTokenCreateRequestPaymentInitiation();
-	linkTokenCreateReqPaymentInitiation.SetPaymentId(paymentID);
+	linkTokenCreateReqPaymentInitiation := plaid.NewLinkTokenCreateRequestPaymentInitiation()
+	linkTokenCreateReqPaymentInitiation.SetPaymentId(paymentID)
 	linkToken, err := linkTokenCreate(linkTokenCreateReqPaymentInitiation)
 	if err != nil {
 		renderError(c, err)
@@ -351,14 +350,26 @@ func transactions(c *gin.Context) {
 			return
 		}
 
+		// Update cursor to the next cursor
+		nextCursor := resp.GetNextCursor()
+		cursor = &nextCursor
+
+		// If no transactions are available yet, wait and poll the endpoint.
+		// Normally, we would listen for a webhook, but the Quickstart doesn't
+		// support webhooks. For a webhook example, see
+		// https://github.com/plaid/tutorial-resources or
+		// https://github.com/plaid/pattern
+
+		if *cursor == "" {
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
 		// Add this page of results
 		added = append(added, resp.GetAdded()...)
 		modified = append(modified, resp.GetModified()...)
 		removed = append(removed, resp.GetRemoved()...)
 		hasMore = resp.GetHasMore()
-		// Update cursor to the next cursor
-		nextCursor := resp.GetNextCursor()
-		cursor = &nextCursor
 	}
 
 	sort.Slice(added, func(i, j int) bool {
@@ -418,7 +429,7 @@ func transferAuthorize(c *gin.Context) {
 		"1.00",
 		*transferAuthorizationCreateUser)
 
-	transferAuthorizationCreateRequest.SetAchClass(*ACHClass);
+	transferAuthorizationCreateRequest.SetAchClass(*ACHClass)
 	transferAuthorizationCreateResp, _, err := client.PlaidApi.TransferAuthorizationCreate(ctx).TransferAuthorizationCreateRequest(*transferAuthorizationCreateRequest).Execute()
 
 	if err != nil {
@@ -602,7 +613,7 @@ func linkTokenCreate(
 		"en",
 		countryCodes,
 		user,
-	)		
+	)
 
 	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
 	if paymentInitiation != nil {
@@ -613,11 +624,11 @@ func linkTokenCreate(
 		request.SetProducts(products)
 	}
 
-	if (containsProduct(products, plaid.PRODUCTS_STATEMENTS)) {
-		statementConfig := plaid.NewLinkTokenCreateRequestStatements();
-		statementConfig.SetStartDate(time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02"));
-		statementConfig.SetEndDate(time.Now().Local().Format("2006-01-02"));
-		request.SetStatements(*statementConfig);
+	if containsProduct(products, plaid.PRODUCTS_STATEMENTS) {
+		statementConfig := plaid.NewLinkTokenCreateRequestStatements()
+		statementConfig.SetStartDate(time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02"))
+		statementConfig.SetEndDate(time.Now().Local().Format("2006-01-02"))
+		request.SetStatements(*statementConfig)
 	}
 
 	if redirectURI != "" {
