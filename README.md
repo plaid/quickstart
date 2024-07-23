@@ -173,9 +173,9 @@ A community-supported implementation of the Plaid Quickstart using the [Going.Pl
 #### 2. Running the frontend
 
 ```bash
-$ cd ./frontend
-$ npm ci
-$ npm start
+cd ./frontend
+npm ci
+npm start
 ```
 
 ### Run with Docker
