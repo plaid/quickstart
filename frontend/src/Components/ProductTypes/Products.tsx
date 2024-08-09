@@ -31,11 +31,17 @@ import {
   transformTransferAuthorizationData,
   transformIncomePaystubsData,
   transformSignalData,
-  transformStatementsData
+  transformStatementsData,
+  checkReportGetCategories,
+  transformCheckReportGetData,
+  transformIncomeInsightsData,
+  checkReportInsightsCategories,
+  transformPartnerInsightsData,
+  checkReportPartnerInsightsCategories
 } from "../../dataUtilities";
 
 const Products = () => {
-  const { products } = useContext(Context);
+  const { products, isCreditProductOnly } = useContext(Context);
   return (
     <ProductTypesContainer productType="Products">
       {products.includes("payment_initiation") && (
@@ -89,7 +95,7 @@ const Products = () => {
           transformData={transformAssetsData}
         />
       )}
-      {!products.includes("payment_initiation") && (
+      {(!products.includes("payment_initiation") && !isCreditProductOnly) && (
           <Endpoint
               endpoint="balance"
               name="Balance"
@@ -185,6 +191,39 @@ const Products = () => {
           description="(Deprecated) Retrieve information from the paystubs used for income verification"
           transformData={transformIncomePaystubsData}
           />
+      )}
+
+      {products.includes("cra_base_report") && (
+        <Endpoint
+          endpoint="/cra/check_report"
+          name="CRA Base Report"
+          categories={checkReportGetCategories}
+          schema="/cra/check_report/base_report/get"
+          description="Retrieve a Consumer Report powered by Plaid Check"
+          transformData={transformCheckReportGetData}
+        />
+      )}
+
+      {products.includes("cra_base_report") && (
+        <Endpoint
+          endpoint="/cra/income_insights"
+          name="CRA Income Insights"
+          categories={checkReportInsightsCategories}
+          schema="/cra/check_report/income_insights/get"
+          description="Retrieve cash flow information from your user's banks"
+          transformData={transformIncomeInsightsData}
+        />
+      )}
+
+      {products.includes("cra_partner_insights") && (
+        <Endpoint
+          endpoint="/cra/partner_insights"
+          name="CRA Partner Insights"
+          categories={checkReportPartnerInsightsCategories}
+          schema="/cra/check_report/partner_insights/get"
+          description="Retrieve cash flow insights from partners"
+          transformData={transformPartnerInsightsData}
+        />
       )}
     </ProductTypesContainer>
   );

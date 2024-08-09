@@ -12,9 +12,11 @@ const Header = () => {
   const {
     itemId,
     accessToken,
+    userToken,
     linkToken,
     linkSuccess,
     isItemAccess,
+    isCreditProductOnly,
     backend,
     linkTokenError,
     isPaymentInitiation,
@@ -132,19 +134,24 @@ const Header = () => {
                 </h4>
             )}
             <div className={styles.itemAccessContainer}>
-              <p className={styles.itemAccessRow}>
+              {itemId && <p className={styles.itemAccessRow}>
                 <span className={styles.idName}>item_id</span>
                 <span className={styles.tokenText}>{itemId}</span>
-              </p>
+              </p>}
 
-              <p className={styles.itemAccessRow}>
+              {accessToken && <p className={styles.itemAccessRow}>
                 <span className={styles.idName}>access_token</span>
                 <span className={styles.tokenText}>{accessToken}</span>
-              </p>
+              </p>}
+
+             {userToken && (<p className={styles.itemAccessRow}>
+                <span className={styles.idName}>user_token</span>
+                <span className={styles.tokenText}>{userToken}</span>
+              </p>)}
             </div>
             {isItemAccess && (
                 <p className={styles.requests}>
-                  Now that you have an access_token, you can make all of the
+                  Now that you have {accessToken && "an access_token"} {accessToken && userToken && " and "} {userToken && "a user_token"}, you can make all of the
                   following requests:
                 </p>
             )}

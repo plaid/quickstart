@@ -4,8 +4,11 @@ interface QuickstartState {
   linkSuccess: boolean;
   isItemAccess: boolean;
   isPaymentInitiation: boolean;
+  isUserTokenFlow: boolean;
+  isCreditProductOnly: boolean;
   linkToken: string | null;
   accessToken: string | null;
+  userToken: string | null;
   itemId: string | null;
   isError: boolean;
   backend: boolean;
@@ -21,7 +24,10 @@ const initialState: QuickstartState = {
   linkSuccess: false,
   isItemAccess: true,
   isPaymentInitiation: false,
+  isCreditProductOnly: false,
+  isUserTokenFlow: false,
   linkToken: "", // Don't set to null or error message will show up briefly when site loads
+  userToken: "", // Don't set to null or error message will show up briefly when site loads
   accessToken: null,
   itemId: null,
   isError: false,
