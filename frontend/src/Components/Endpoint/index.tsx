@@ -44,13 +44,15 @@ const Endpoint = (props: Props) => {
   const getPdfName = () => {
     switch(props.name) {
       case 'Assets':
-        return "Asset Report.pdf"
+        return "Asset Report.pdf";
       case "CRA Base Report":
-        return "Plaid Check Report.pdf"
+        return "Plaid Check Report.pdf";
+      case "CRA Income Insights":
+        return "Plaid Check Report with Insights.pdf";
       default: 
-        return "Statement.pdf"
+        return "Statement.pdf";
     }
-  }
+  };
 
   return (
     <>

@@ -16,7 +16,6 @@ const Header = () => {
     linkToken,
     linkSuccess,
     isItemAccess,
-    isCreditProductOnly,
     backend,
     linkTokenError,
     isPaymentInitiation,
@@ -151,7 +150,7 @@ const Header = () => {
             </div>
             {isItemAccess && (
                 <p className={styles.requests}>
-                  Now that you have {accessToken && "an access_token"} {accessToken && userToken && " and "} {userToken && "a user_token"}, you can make all of the
+                  Now that you have {accessToken && "an access_token"}{accessToken && userToken && " and "}{userToken && "a user_token"}, you can make all of the
                   following requests:
                 </p>
             )}

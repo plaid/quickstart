@@ -142,16 +142,16 @@ interface CreditReportGetItem {
   institution: string;
   accountName: string;
   averageDaysBetweenTransactions: string | null;
-  averageInflowAmount: number | null;
-  averageOutflowAmount: number | null;
+  averageInflowAmount: string | null;
+  averageOutflowAmount: string  | null;
   averageBalance: string | null;
   balance: string | null;
 }
 
 interface CreditInsightsGetItem {
   incomeSourcesCount: number | null;
-  historicalAnnualIncome: number | null;
-  forecastedAnnualIncome: number | null;
+  historicalAnnualIncome: string | null;
+  forecastedAnnualIncome: string | null;
 }
 
 interface CreditPartnerInsightsGetItem {
@@ -922,14 +922,16 @@ export const transformCheckReportGetData = (data: CraCheckReportBaseReportGetRes
   const report = data.report;
   return report.items.flatMap((item) =>
     item.accounts.map((account) => {
-      const accountInsights = account.account_insights
+      const accountInsights = account.account_insights;
+      const averageInflow = accountInsights?.average_inflow_amount?.pop()?.total_amount;
+      const averageOutflow = accountInsights?.average_outflow_amount?.pop()?.total_amount;
       return {
         accountName: account.name,
         averageDaysBetweenTransactions: accountInsights?.average_days_between_transactions?.toFixed(2),
-        averageInflowAmount: accountInsights?.average_inflow_amount?.pop()?.total_amount?.amount,
-        averageOutflowAmount: accountInsights?.average_outflow_amount?.pop()?.total_amount?.amount,
-        averageBalance: account.balances.average_balance?.toFixed(2),
-        balance: account.balances.available?.toFixed(2)
+        averageInflowAmount:  formatCurrency(averageInflow?.amount, averageInflow?.iso_currency_code),
+        averageOutflowAmount: formatCurrency(averageOutflow?.amount, averageOutflow?.iso_currency_code),
+        averageBalance: formatCurrency(account.balances.average_balance, account.balances.iso_currency_code),
+        balance: formatCurrency(account.balances.available, account.balances.iso_currency_code)
       };
     })) as Array<CreditReportGetItem>;
 };
@@ -937,12 +939,13 @@ export const transformCheckReportGetData = (data: CraCheckReportBaseReportGetRes
 
 export const transformIncomeInsightsData = (data: CraCheckReportIncomeInsightsGetResponse) => {
   const report = data.report?.bank_income_summary
+  const historicalIncome = report?.historical_annual_income?.pop()
+  const forecastedIncome = report?.forecasted_annual_income?.pop()
   return [
     {
       incomeSourcesCount: report?.income_sources_count,
-      historicalAnnualIncome: report?.historical_annual_income?.pop()?.amount,
-      forecastedAnnualIncome: report?.forecasted_annual_income?.pop()?.amount
-      // forecastedMonthlyIncome: report?.forecasted_average_monthly_income?.pop()?.amount
+      historicalAnnualIncome: formatCurrency(historicalIncome?.amount, historicalIncome?.iso_currency_code),
+      forecastedAnnualIncome: formatCurrency(forecastedIncome?.amount, forecastedIncome?.iso_currency_code)
     }
   ] as Array<CreditInsightsGetItem>;
 };
@@ -954,7 +957,6 @@ export const transformPartnerInsightsData = (data: CraCheckReportPartnerInsights
     {
       cashScore: report?.cash_score?.score,
       firstDetectScore: report?.first_detect?.score,
-      // forecastedMonthlyIncome: report?.forecasted_average_monthly_income?.pop()?.amount
     }
   ] as Array<CreditPartnerInsightsGetItem>;
 };

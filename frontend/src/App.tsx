@@ -9,7 +9,7 @@ import styles from "./App.module.scss";
 import {CraCheckReportProduct} from "plaid";
 
 const App = () => {
-  const { linkSuccess, isItemAccess, isPaymentInitiation, isCreditProductOnly, dispatch } = useContext(Context);
+  const { linkSuccess, isItemAccess, isPaymentInitiation, itemId, dispatch } = useContext(Context);
 
   const getInfo = useCallback(async () => {
     const response = await fetch("/api/info", { method: "POST" });
@@ -21,15 +21,15 @@ const App = () => {
     const paymentInitiation: boolean = data.products.includes(
       "payment_initiation"
     );
-    const isUserTokenFlow: boolean = data.products.includes(CraCheckReportProduct.BaseReport);
-    const enumValues = Object.values(CraCheckReportProduct);
-    const isCreditProductOnly: boolean = data.products.every((product: CraCheckReportProduct) => enumValues.includes(product));
+    const craEnumValues = Object.values(CraCheckReportProduct);
+    const isUserTokenFlow: boolean = data.products.some((product: CraCheckReportProduct) => craEnumValues.includes(product));
+    const isCraProductsExclusively: boolean = data.products.every((product: CraCheckReportProduct) => craEnumValues.includes(product));
     dispatch({
       type: "SET_STATE",
       state: {
         products: data.products,
         isPaymentInitiation: paymentInitiation,
-        isCreditProductOnly: isCreditProductOnly,
+        isCraProductsExclusively: isCraProductsExclusively,
         isUserTokenFlow: isUserTokenFlow
       },
     });
@@ -129,7 +129,7 @@ const App = () => {
               <>
                 <Products />
                 {
-                  !isCreditProductOnly && (
+                  itemId && (
                     <Items />
                   )
                 }

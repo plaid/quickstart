@@ -41,7 +41,7 @@ import {
 } from "../../dataUtilities";
 
 const Products = () => {
-  const { products, isCreditProductOnly } = useContext(Context);
+  const { products, isCraProductsExclusively } = useContext(Context);
   return (
     <ProductTypesContainer productType="Products">
       {products.includes("payment_initiation") && (
@@ -95,7 +95,7 @@ const Products = () => {
           transformData={transformAssetsData}
         />
       )}
-      {(!products.includes("payment_initiation") && !isCreditProductOnly) && (
+      {!products.includes("payment_initiation") && !isCraProductsExclusively && (
           <Endpoint
               endpoint="balance"
               name="Balance"
@@ -193,7 +193,7 @@ const Products = () => {
           />
       )}
 
-      {products.includes("cra_base_report") && (
+      {(products.includes("cra_base_report") || products.includes("cra_income_insights")) && (
         <Endpoint
           endpoint="/cra/check_report"
           name="CRA Base Report"
@@ -204,7 +204,7 @@ const Products = () => {
         />
       )}
 
-      {products.includes("cra_base_report") && (
+      {(products.includes("cra_base_report") || products.includes("cra_income_insights")) && (
         <Endpoint
           endpoint="/cra/income_insights"
           name="CRA Income Insights"
