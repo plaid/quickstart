@@ -3,7 +3,7 @@ import {
   AssetReport,
   AuthGetResponse,
   CraCheckReportBaseReportGetResponse,
-  CraCheckReportCreateResponse, CraCheckReportIncomeInsightsGetResponse,
+  CraCheckReportIncomeInsightsGetResponse,
   CraCheckReportPartnerInsightsGetResponse,
   IdentityGetResponse,
   IncomeVerificationPaystubsGetResponse,

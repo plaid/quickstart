@@ -9,7 +9,7 @@ import styles from "./App.module.scss";
 import { CraCheckReportProduct } from "plaid";
 
 const App = () => {
-  const { linkSuccess, isItemAccess, isPaymentInitiation, itemId, dispatch } =
+  const { linkSuccess, isPaymentInitiation, itemId, dispatch } =
     useContext(Context);
 
   const getInfo = useCallback(async () => {
