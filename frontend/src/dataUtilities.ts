@@ -492,7 +492,7 @@ export const incomePaystubsCategories: Array<Categories> = [
 ];
 
 
-export const checkReportGetCategories: Array<Categories> = [
+export const checkReportBaseReportCategories: Array<Categories> = [
   {
     title: "Account Name",
     field: "accountName"
@@ -918,7 +918,7 @@ export const transformIncomePaystubsData = (data: IncomePaystub) => {
   return finalArray;
 };
 
-export const transformCheckReportGetData = (data: CraCheckReportBaseReportGetResponse) => {
+export const transformBaseReportGetData = (data: CraCheckReportBaseReportGetResponse) => {
   const report = data.report;
   return report.items.flatMap((item) =>
     item.accounts.map((account) => {

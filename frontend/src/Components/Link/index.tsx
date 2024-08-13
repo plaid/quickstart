@@ -45,7 +45,7 @@ const Link = () => {
         dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
       } else if (isCraProductsExclusively){
         // When only CRA products are enabled, only user_token is needed. access_token/public_token exchange is not needed.
-        dispatch({ type: "SET_STATE", state: { isItemAccess: true } });
+        dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
       } else {
         exchangePublicTokenForAccessToken();
       }

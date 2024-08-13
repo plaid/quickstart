@@ -667,7 +667,7 @@ app.get('/api/signal_evaluate', function (request, response, next) {
 // Retrieve CRA Base Report and PDF
 // Base report: https://plaid.com/docs/check/api/#cracheck_reportbase_reportget
 // PDF: https://plaid.com/docs/check/api/#cracheck_reportpdfget
-app.get('/api/cra/check_report', function (request, response, next) {
+app.get('/api/cra/get_base_report', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
       const getResponse = await getCraBaseReportWithRetries(client, USER_TOKEN);
@@ -703,7 +703,7 @@ const getCraBaseReportWithRetries = (
 // Retrieve CRA Income Insights and PDF with Insights
 // Income insights: https://plaid.com/docs/check/api/#cracheck_reportincome_insightsget
 // PDF w/ income insights: https://plaid.com/docs/check/api/#cracheck_reportpdfget
-app.get('/api/cra/income_insights', async (req, res, next) => {
+app.get('/api/cra/get_income_insights', async (req, res, next) => {
   Promise.resolve()
     .then(async function () {
       const getResponse = await getCheckInsightsWithRetries(client, USER_TOKEN)
@@ -740,7 +740,7 @@ const getCheckInsightsWithRetries = (
 
 // Retrieve CRA Partner Insights
 // https://plaid.com/docs/check/api/#cracheck_reportpartner_insightsget
-app.get('/api/cra/partner_insights', async (req, res, next) => {
+app.get('/api/cra/get_partner_insights', async (req, res, next) => {
   Promise.resolve()
     .then(async function () {
       const response = await getCheckParnterInsightsWithRetries(client, USER_TOKEN);

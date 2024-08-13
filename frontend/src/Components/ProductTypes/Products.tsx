@@ -32,9 +32,9 @@ import {
   transformIncomePaystubsData,
   transformSignalData,
   transformStatementsData,
-  checkReportGetCategories,
-  transformCheckReportGetData,
+  transformBaseReportGetData,
   transformIncomeInsightsData,
+  checkReportBaseReportCategories,
   checkReportInsightsCategories,
   transformPartnerInsightsData,
   checkReportPartnerInsightsCategories
@@ -195,18 +195,18 @@ const Products = () => {
 
       {(products.includes("cra_base_report") || products.includes("cra_income_insights")) && (
         <Endpoint
-          endpoint="/cra/check_report"
+          endpoint="/cra/get_base_report"
           name="CRA Base Report"
-          categories={checkReportGetCategories}
+          categories={checkReportBaseReportCategories}
           schema="/cra/check_report/base_report/get"
           description="Retrieve a Consumer Report powered by Plaid Check"
-          transformData={transformCheckReportGetData}
+          transformData={transformBaseReportGetData}
         />
       )}
 
       {(products.includes("cra_base_report") || products.includes("cra_income_insights")) && (
         <Endpoint
-          endpoint="/cra/income_insights"
+          endpoint="/cra/get_income_insights"
           name="CRA Income Insights"
           categories={checkReportInsightsCategories}
           schema="/cra/check_report/income_insights/get"
@@ -217,7 +217,7 @@ const Products = () => {
 
       {products.includes("cra_partner_insights") && (
         <Endpoint
-          endpoint="/cra/partner_insights"
+          endpoint="/cra/get_partner_insights"
           name="CRA Partner Insights"
           categories={checkReportPartnerInsightsCategories}
           schema="/cra/check_report/partner_insights/get"

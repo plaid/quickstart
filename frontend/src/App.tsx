@@ -6,10 +6,11 @@ import Items from "./Components/ProductTypes/Items";
 import Context from "./Context";
 
 import styles from "./App.module.scss";
-import {CraCheckReportProduct} from "plaid";
+import { CraCheckReportProduct } from "plaid";
 
 const App = () => {
-  const { linkSuccess, isItemAccess, isPaymentInitiation, itemId, dispatch } = useContext(Context);
+  const { linkSuccess, isItemAccess, isPaymentInitiation, itemId, dispatch } =
+    useContext(Context);
 
   const getInfo = useCallback(async () => {
     const response = await fetch("/api/info", { method: "POST" });
@@ -18,26 +19,29 @@ const App = () => {
       return { paymentInitiation: false };
     }
     const data = await response.json();
-    const paymentInitiation: boolean = data.products.includes(
-      "payment_initiation"
-    );
+    const paymentInitiation: boolean =
+      data.products.includes("payment_initiation");
     const craEnumValues = Object.values(CraCheckReportProduct);
-    const isUserTokenFlow: boolean = data.products.some((product: CraCheckReportProduct) => craEnumValues.includes(product));
-    const isCraProductsExclusively: boolean = data.products.every((product: CraCheckReportProduct) => craEnumValues.includes(product));
+    const isUserTokenFlow: boolean = data.products.some(
+      (product: CraCheckReportProduct) => craEnumValues.includes(product)
+    );
+    const isCraProductsExclusively: boolean = data.products.every(
+      (product: CraCheckReportProduct) => craEnumValues.includes(product)
+    );
     dispatch({
       type: "SET_STATE",
       state: {
         products: data.products,
         isPaymentInitiation: paymentInitiation,
         isCraProductsExclusively: isCraProductsExclusively,
-        isUserTokenFlow: isUserTokenFlow
+        isUserTokenFlow: isUserTokenFlow,
       },
     });
     return { paymentInitiation, isUserTokenFlow };
   }, [dispatch]);
 
   const generateUserToken = useCallback(async () => {
-    const response = await fetch ("api/create_user_token", {method: "POST"});
+    const response = await fetch("api/create_user_token", { method: "POST" });
     if (!response.ok) {
       dispatch({ type: "SET_STATE", state: { userToken: null } });
       return;
@@ -55,7 +59,7 @@ const App = () => {
         return;
       }
       dispatch({ type: "SET_STATE", state: { userToken: data.user_token } });
-      return data.user_token
+      return data.user_token;
     }
   }, [dispatch]);
 
@@ -121,21 +125,8 @@ const App = () => {
         <Header />
         {linkSuccess && (
           <>
-            {isPaymentInitiation && (
-              <Products />
-            )}
-
-            {isItemAccess && (
-              <>
-                <Products />
-                {
-                  itemId && (
-                    <Items />
-                  )
-                }
-               
-              </>
-            )}
+            <Products />
+            {!isPaymentInitiation && itemId && <Items />}
           </>
         )}
       </div>

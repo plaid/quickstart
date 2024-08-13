@@ -16,6 +16,7 @@ const Header = () => {
     linkToken,
     linkSuccess,
     isItemAccess,
+    isCraProductsExclusively,
     backend,
     linkTokenError,
     isPaymentInitiation,
@@ -125,6 +126,10 @@ const Header = () => {
                   </InlineLink>
                   .
                 </h4>
+            ) : userToken ? (
+                <h4 className={styles.subtitle}>
+                  Congrats! You have successfully linked data to a User. 
+                </h4>
             ) : (
                 <h4 className={styles.subtitle}>
                   <Callout warning>
@@ -148,7 +153,7 @@ const Header = () => {
                 <span className={styles.tokenText}>{userToken}</span>
               </p>)}
             </div>
-            {isItemAccess && (
+            {(isItemAccess || userToken) && (
                 <p className={styles.requests}>
                   Now that you have {accessToken && "an access_token"}{accessToken && userToken && " and "}{userToken && "a user_token"}, you can make all of the
                   following requests:
