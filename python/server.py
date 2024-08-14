@@ -5,6 +5,7 @@ import datetime as dt
 import json
 import time
 from datetime import date, timedelta
+import uuid
 
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
@@ -22,6 +23,8 @@ from plaid.model.link_token_create_request_payment_initiation import LinkTokenCr
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.user_create_request import UserCreateRequest
+from plaid.model.consumer_report_user_identity import ConsumerReportUserIdentity
 from plaid.model.asset_report_create_request import AssetReportCreateRequest
 from plaid.model.asset_report_create_request_options import AssetReportCreateRequestOptions
 from plaid.model.asset_report_user import AssetReportUser
@@ -49,7 +52,14 @@ from plaid.model.transfer_user_address_in_request import TransferUserAddressInRe
 from plaid.model.signal_evaluate_request import SignalEvaluateRequest
 from plaid.model.statements_list_request import StatementsListRequest
 from plaid.model.link_token_create_request_statements import LinkTokenCreateRequestStatements
+from plaid.model.link_token_create_request_cra_options import LinkTokenCreateRequestCraOptions
 from plaid.model.statements_download_request import StatementsDownloadRequest
+from plaid.model.consumer_report_permissible_purpose import ConsumerReportPermissiblePurpose
+from plaid.model.cra_check_report_base_report_get_request import CraCheckReportBaseReportGetRequest
+from plaid.model.cra_check_report_pdf_get_request import CraCheckReportPDFGetRequest
+from plaid.model.cra_check_report_income_insights_get_request import CraCheckReportIncomeInsightsGetRequest
+from plaid.model.cra_check_report_partner_insights_get_request import CraCheckReportPartnerInsightsGetRequest
+from plaid.model.cra_pdf_add_ons import CraPDFAddOns
 from plaid.api import plaid_api
 
 load_dotenv()
@@ -62,7 +72,6 @@ PLAID_SECRET = os.getenv('PLAID_SECRET')
 PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
 PLAID_PRODUCTS = os.getenv('PLAID_PRODUCTS', 'transactions').split(',')
 PLAID_COUNTRY_CODES = os.getenv('PLAID_COUNTRY_CODES', 'US').split(',')
-
 
 def empty_to_none(field):
     value = os.getenv(field)
@@ -115,6 +124,9 @@ payment_id = None
 # We store the transfer_id in memory - in production, store it in a secure
 # persistent data store.
 transfer_id = None
+# We store the user_token in memory - in production, store it in a secure
+# persistent data store.
+user_token = None
 
 item_id = None
 
@@ -194,6 +206,7 @@ def create_link_token_for_payment():
 
 @app.route('/api/create_link_token', methods=['POST'])
 def create_link_token():
+    global user_token
     try:
         request = LinkTokenCreateRequest(
             products=products,
@@ -212,12 +225,56 @@ def create_link_token():
                 start_date=date.today()-timedelta(days=30)
             )
             request['statements']=statements
+
+        cra_products = ["cra_base_report", "cra_income_insights", "cra_partner_insights"]
+        if any(product in cra_products for product in PLAID_PRODUCTS):
+            request['user_token'] = user_token
+            request['consumer_report_permissible_purpose'] = ConsumerReportPermissiblePurpose('ACCOUNT_REVIEW_CREDIT')
+            request['cra_options'] = LinkTokenCreateRequestCraOptions(
+                days_requested=60
+            )
     # create link token
         response = client.link_token_create(request)
         return jsonify(response.to_dict())
     except plaid.ApiException as e:
         print(e)
         return json.loads(e.body)
+
+# Create a user token which can be used for Plaid Check, Income, or Multi-Item link flows
+# https://plaid.com/docs/api/users/#usercreate
+@app.route('/api/create_user_token', methods=['POST'])
+def create_user_token():
+    global user_token
+    try:
+        consumer_report_user_identity = None
+        user_create_request = UserCreateRequest(
+            # Typically this will be a user ID number from your application. 
+            client_user_id="user_" + str(uuid.uuid4())
+        )
+
+        cra_products = ["cra_base_report", "cra_income_insights", "cra_partner_insights"]
+        if any(product in cra_products for product in PLAID_PRODUCTS):
+            consumer_report_user_identity = ConsumerReportUserIdentity(
+                first_name="Harry",
+                last_name="Potter",
+                phone_numbers= ['+16174567890'],
+                emails= ['harrypotter@example.com'],
+                primary_address= {
+                    "city": 'New York',
+                    "region": 'NY',
+                    "street": '4 Privet Drive',
+                    "postal_code": '11111',
+                    "country": 'US'
+                }
+            )
+            user_create_request["consumer_report_user_identity"] = consumer_report_user_identity
+
+        user_response = client.user_create(user_create_request)
+        user_token = user_response['user_token']
+        return jsonify(user_response.to_dict())
+    except plaid.ApiException as e:
+        print(e)
+        return jsonify(json.loads(e.body)), e.status
 
 
 # Exchange token flow - exchange a Link public_token for
@@ -394,36 +451,14 @@ def get_assets():
         response = client.asset_report_create(request)
         pretty_print_response(response.to_dict())
         asset_report_token = response['asset_report_token']
-    except plaid.ApiException as e:
-        error_response = format_error(e)
-        return jsonify(error_response)
 
-    # Poll for the completion of the Asset Report.
-    num_retries_remaining = 20
-    asset_report_json = None
-    err = None
-    while num_retries_remaining > 0:
-        try:
-            request = AssetReportGetRequest(
-                asset_report_token=asset_report_token,
-            )
-            response = client.asset_report_get(request)
-            asset_report_json = response['report']
-            break
-        except plaid.ApiException as e:
-            response = json.loads(e.body)
-            if response['error_code'] == 'PRODUCT_NOT_READY':
-                err = e
-                num_retries_remaining -= 1
-                time.sleep(1)
-                continue
-            else:
-                error_response = format_error(e)
-                return jsonify(error_response)
-    if asset_report_json is None:
-        return jsonify({'error': {'status_code': err.status, 'display_message':
-                                  'Timed out when polling for Asset Report', 'error_code': '', 'error_type': ''}})
-    try:
+        # Poll for the completion of the Asset Report.
+        request = AssetReportGetRequest(
+            asset_report_token=asset_report_token,
+        )
+        response = poll_with_retries(lambda: client.asset_report_get(request))
+        asset_report_json = response['report']
+
         request = AssetReportPDFGetRequest(
             asset_report_token=asset_report_token,
         )
@@ -622,6 +657,86 @@ def item():
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
+
+# Retrieve CRA Base Report and PDF
+# Base report: https://plaid.com/docs/check/api/#cracheck_reportbase_reportget
+# PDF: https://plaid.com/docs/check/api/#cracheck_reportpdfget
+@app.route('/api/cra/get_base_report', methods=['GET'])
+def cra_check_report():
+    try:
+        get_response = poll_with_retries(lambda: client.cra_check_report_base_report_get(
+            CraCheckReportBaseReportGetRequest(user_token=user_token, item_ids=[])
+        ))
+        pretty_print_response(get_response.to_dict())
+
+        pdf_response = client.cra_check_report_pdf_get(
+            CraCheckReportPDFGetRequest(user_token=user_token)
+        )
+
+        return jsonify({
+            'report': get_response.to_dict()['report'],
+            'pdf': base64.b64encode(pdf_response.data).decode('utf-8')
+        })
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
+
+# Retrieve CRA Income Insights and PDF with Insights
+# Income insights: https://plaid.com/docs/check/api/#cracheck_reportincome_insightsget
+# PDF w/ income insights: https://plaid.com/docs/check/api/#cracheck_reportpdfget
+@app.route('/api/cra/get_income_insights', methods=['GET'])
+def cra_income_insights():
+    try:
+        get_response = poll_with_retries(lambda: client.cra_check_report_income_insights_get(
+            CraCheckReportIncomeInsightsGetRequest(user_token=user_token))
+        )
+        pretty_print_response(get_response.to_dict())
+
+        pdf_response = client.cra_check_report_pdf_get(
+            CraCheckReportPDFGetRequest(user_token=user_token, add_ons=[CraPDFAddOns('cra_income_insights')])
+        )
+
+        return jsonify({
+            'report': get_response.to_dict()['report'],
+            'pdf': base64.b64encode(pdf_response.data).decode('utf-8')
+        })
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
+
+# Retrieve CRA Partner Insights
+# https://plaid.com/docs/check/api/#cracheck_reportpartner_insightsget
+@app.route('/api/cra/get_partner_insights', methods=['GET'])
+def cra_partner_insights():
+    try:
+        response = poll_with_retries(lambda: client.cra_check_report_partner_insights_get(
+            CraCheckReportPartnerInsightsGetRequest(user_token=user_token)
+        ))
+        pretty_print_response(response.to_dict())
+
+        return jsonify(response.to_dict())
+    except plaid.ApiException as e:
+        error_response = format_error(e)
+        return jsonify(error_response)
+
+# Since this quickstart does not support webhooks, this function can be used to poll
+# an API that would otherwise be triggered by a webhook.
+# For a webhook example, see
+# https://github.com/plaid/tutorial-resources or
+# https://github.com/plaid/pattern
+def poll_with_retries(request_callback, ms=1000, retries_left=20):
+    while retries_left > 0:
+        try:
+            return request_callback()
+        except plaid.ApiException as e:
+            response = json.loads(e.body)
+            if response['error_code'] != 'PRODUCT_NOT_READY':
+                raise e
+            elif retries_left == 0:
+                raise Exception('Ran out of retries while polling') from e
+            else:
+                retries_left -= 1
+                time.sleep(ms / 1000)
 
 def pretty_print_response(response):
   print(json.dumps(response, indent=2, sort_keys=True, default=str))
