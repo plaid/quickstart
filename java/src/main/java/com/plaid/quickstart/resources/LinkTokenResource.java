@@ -1,29 +1,29 @@
 package com.plaid.quickstart.resources;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import com.plaid.client.request.PlaidApi;
+import com.plaid.client.model.ConsumerReportPermissiblePurpose;
 import com.plaid.client.model.CountryCode;
+import com.plaid.client.model.CraCheckReportProduct;
 import com.plaid.client.model.LinkTokenCreateRequest;
+import com.plaid.client.model.LinkTokenCreateRequestCraOptions;
+import com.plaid.client.model.LinkTokenCreateRequestStatements;
 import com.plaid.client.model.LinkTokenCreateRequestUser;
 import com.plaid.client.model.LinkTokenCreateResponse;
-import com.plaid.client.model.LinkTokenCreateRequestStatements;
 import com.plaid.client.model.Products;
-
-import java.util.List;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.time.LocalDate;
+import com.plaid.client.request.PlaidApi;
+import com.plaid.quickstart.QuickstartApplication;
+import retrofit2.Response;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import retrofit2.Response;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 @Path("/create_link_token")
 @Produces(MediaType.APPLICATION_JSON)
@@ -84,6 +84,15 @@ public class LinkTokenResource {
         .startDate(LocalDate.now().minusDays(30))
         .endDate(LocalDate.now());
       request.setStatements(statementsConfig);
+    }
+
+    List<CraCheckReportProduct> craCheckReportProducts = Arrays.asList(CraCheckReportProduct.values());
+    if (craCheckReportProducts.stream().map(CraCheckReportProduct::toString).anyMatch(plaidProducts::contains)) {
+      request.userToken(QuickstartApplication.userToken);
+      request.consumerReportPermissiblePurpose(ConsumerReportPermissiblePurpose.ACCOUNT_REVIEW_CREDIT);
+      LinkTokenCreateRequestCraOptions options = new LinkTokenCreateRequestCraOptions();
+      options.daysRequested(60);
+      request.craOptions(options);
     }
 
     	Response<LinkTokenCreateResponse> response =plaidClient
