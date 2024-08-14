@@ -41,6 +41,19 @@ const Endpoint = (props: Props) => {
     setIsLoading(false);
   };
 
+  const getPdfName = () => {
+    switch(props.name) {
+      case 'Assets':
+        return "Asset Report.pdf";
+      case "CRA Base Report":
+        return "Plaid Check Report.pdf";
+      case "CRA Income Insights":
+        return "Plaid Check Report with Insights.pdf";
+      default: 
+        return "Statement.pdf";
+    }
+  };
+
   return (
     <>
       <div className={styles.endpointContainer}>
@@ -74,7 +87,7 @@ const Endpoint = (props: Props) => {
               wide
               className={styles.pdf}
               href={`data:application/pdf;base64,${pdf}`}
-              componentProps={{ download: (props.name=="Assets")? "Asset Report.pdf" : "Statement.pdf"}}
+              componentProps={{ download: getPdfName()}}
             >
               Download PDF
             </Button>

@@ -2,7 +2,7 @@
 
 // read env vars from .env file
 require('dotenv').config();
-const { Configuration, PlaidApi, Products, PlaidEnvironments} = require('plaid');
+const { Configuration, PlaidApi, Products, PlaidEnvironments, CraCheckReportProduct } = require('plaid');
 const util = require('util');
 const { v4: uuidv4 } = require('uuid');
 const express = require('express');
@@ -46,6 +46,7 @@ const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || '';
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
 let ACCESS_TOKEN = null;
+let USER_TOKEN = null;
 let PUBLIC_TOKEN = null;
 let ITEM_ID = null;
 let ACCOUNT_ID = null;
@@ -122,12 +123,55 @@ app.post('/api/create_link_token', function (request, response, next) {
         }
         configs.statements = statementConfig;
       }
+
+      const craEnumValues = Object.values(CraCheckReportProduct);
+      if (PLAID_PRODUCTS.some(product => craEnumValues.includes(product))) {
+        configs.user_token = USER_TOKEN;
+        configs.cra_options = {
+          days_requested: 60
+        };
+        configs.consumer_report_permissible_purpose = 'ACCOUNT_REVIEW_CREDIT';
+      }
       const createTokenResponse = await client.linkTokenCreate(configs);
       prettyPrintResponse(createTokenResponse);
       response.json(createTokenResponse.data);
     })
     .catch(next);
 });
+
+// Create a user token which can be used for Plaid Check, Income, or Multi-Item link flows
+// https://plaid.com/docs/api/users/#usercreate
+app.post('/api/create_user_token', function (request, response, next) {
+  Promise.resolve()
+    .then(async function () {
+
+      const request = {
+         // Typically this will be a user ID number from your application. 
+        client_user_id: 'user_' + uuidv4()
+      }
+      
+      const craEnumValues = Object.values(CraCheckReportProduct);
+      if (PLAID_PRODUCTS.some(product => craEnumValues.includes(product))) {
+        request.consumer_report_user_identity = {
+          first_name: 'Harry',
+          last_name: 'Potter',
+          phone_numbers: ['+16174567890'],
+          emails: ['harrypotter@example.com'],
+          primary_address: {
+            city: 'New York',
+            region: 'NY',
+            street: '4 Privet Drive',
+            postal_code: '11111',
+            country: 'US'
+          }
+        }
+      }
+      const user = await client.userCreate(request);
+      USER_TOKEN = user.data.user_token
+      response.json(user.data);
+    }).catch(next);
+});
+
 
 // Create a link token with configs which we can then use to initialize Plaid Link client-side
 // for a 'payment-initiation' flow.
@@ -265,22 +309,22 @@ app.get('/api/transactions', function (request, response, next) {
         cursor = data.next_cursor;
         if (cursor === "") {
           await sleep(2000);
-          continue; 
-      }
-  
+          continue;
+        }
+
         // Add this page of results
         added = added.concat(data.added);
         modified = modified.concat(data.modified);
         removed = removed.concat(data.removed);
         hasMore = data.has_more;
-        
+
         prettyPrintResponse(response);
       }
 
       const compareTxnsByDateAscending = (a, b) => (a.date > b.date) - (a.date < b.date);
       // Return the 8 most recent transactions
       const recently_added = [...added].sort(compareTxnsByDateAscending).slice(-8);
-      response.json({latest_transactions: recently_added});
+      response.json({ latest_transactions: recently_added });
     })
     .catch(next);
 });
@@ -463,11 +507,11 @@ app.get('/api/assets', function (request, response, next) {
 app.get('/api/statements', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const statementsListResponse = await client.statementsList({access_token: ACCESS_TOKEN});
+      const statementsListResponse = await client.statementsList({ access_token: ACCESS_TOKEN });
       prettyPrintResponse(statementsListResponse);
       const pdfRequest = {
         access_token: ACCESS_TOKEN,
-        statement_id: statementsListResponse.data.accounts[0].statements[0].statement_id  
+        statement_id: statementsListResponse.data.accounts[0].statements[0].statement_id
       };
 
       const statementsDownloadResponse = await client.statementsDownload(pdfRequest, {
@@ -500,21 +544,15 @@ app.get('/api/payment', function (request, response, next) {
 // For Income best practices, see https://github.com/plaid/income-sample instead
 app.get('/api/income/verification/paystubs', function (request, response, next) {
   Promise.resolve()
-  .then(async function () {
-    const paystubsGetResponse = await client.incomeVerificationPaystubsGet({
-      access_token: ACCESS_TOKEN
-    });
-    prettyPrintResponse(paystubsGetResponse);
-    response.json({ error: null, paystubs: paystubsGetResponse.data})
-  })
-  .catch(next);
+    .then(async function () {
+      const paystubsGetResponse = await client.incomeVerificationPaystubsGet({
+        access_token: ACCESS_TOKEN
+      });
+      prettyPrintResponse(paystubsGetResponse);
+      response.json({ error: null, paystubs: paystubsGetResponse.data })
+    })
+    .catch(next);
 })
-
-app.use('/api', function (error, request, response, next) {
-  console.log(error);
-  prettyPrintResponse(error.response);
-  response.json(formatError(error.response));
-});
 
 const server = app.listen(APP_PORT, function () {
   console.log('plaid-quickstart server listening on port ' + APP_PORT);
@@ -534,30 +572,17 @@ const getAssetReportWithRetries = (
   asset_report_token,
   ms = 1000,
   retriesLeft = 20,
-) =>
-  new Promise((resolve, reject) => {
-    const request = {
-      asset_report_token,
-    };
+) => {
+  const request = {
+    asset_report_token,
+  };
 
-    plaidClient
-      .assetReportGet(request)
-      .then(resolve)
-      .catch(() => {
-        setTimeout(() => {
-          if (retriesLeft === 1) {
-            reject('Ran out of retries while polling for asset report');
-            return;
-          }
-          getAssetReportWithRetries(
-            plaidClient,
-            asset_report_token,
-            ms,
-            retriesLeft - 1,
-          ).then(resolve);
-        }, ms);
-      });
-  });
+  return pollWithRetries(
+    async () => {
+      return await plaidClient.assetReportGet(request);
+    }
+  );
+}
 
 const formatError = (error) => {
   return {
@@ -637,4 +662,139 @@ app.get('/api/signal_evaluate', function (request, response, next) {
       response.json(signalEvaluateResponse.data);
     })
     .catch(next);
+});
+
+// Retrieve CRA Base Report and PDF
+// Base report: https://plaid.com/docs/check/api/#cracheck_reportbase_reportget
+// PDF: https://plaid.com/docs/check/api/#cracheck_reportpdfget
+app.get('/api/cra/get_base_report', function (request, response, next) {
+  Promise.resolve()
+    .then(async function () {
+      const getResponse = await getCraBaseReportWithRetries(client, USER_TOKEN);
+      prettyPrintResponse(getResponse);
+
+      const pdfResponse = await client.craCheckReportPdfGet({
+        user_token: USER_TOKEN,
+      }, {
+        responseType: 'arraybuffer'
+      });
+
+      response.json({
+        report: getResponse.data.report,
+        pdf: pdfResponse.data.toString('base64'),
+      });
+    })
+    .catch(next);
+});
+
+const getCraBaseReportWithRetries = (
+  plaidClient,
+  userToken
+) => pollWithRetries(
+  async () => {
+    return await plaidClient.craCheckReportBaseReportGet(
+      {
+        user_token: userToken
+      }
+    )
+  }
+);
+
+// Retrieve CRA Income Insights and PDF with Insights
+// Income insights: https://plaid.com/docs/check/api/#cracheck_reportincome_insightsget
+// PDF w/ income insights: https://plaid.com/docs/check/api/#cracheck_reportpdfget
+app.get('/api/cra/get_income_insights', async (req, res, next) => {
+  Promise.resolve()
+    .then(async function () {
+      const getResponse = await getCheckInsightsWithRetries(client, USER_TOKEN)
+      prettyPrintResponse(getResponse);
+
+      const pdfResponse = await client.craCheckReportPdfGet({
+        user_token: USER_TOKEN,
+        add_ons: ['cra_income_insights']
+      }, {
+        responseType: 'arraybuffer'
+      });
+
+      res.json({
+        report: getResponse.data.report,
+        pdf: pdfResponse.data.toString('base64'),
+      });
+    })
+    .catch(next);
+});
+
+
+const getCheckInsightsWithRetries = (
+  plaidClient,
+  userToken
+) => pollWithRetries(
+  async () => {
+    return await plaidClient.craCheckReportIncomeInsightsGet(
+      {
+        user_token: userToken
+      }
+    );
+  }
+);
+
+// Retrieve CRA Partner Insights
+// https://plaid.com/docs/check/api/#cracheck_reportpartner_insightsget
+app.get('/api/cra/get_partner_insights', async (req, res, next) => {
+  Promise.resolve()
+    .then(async function () {
+      const response = await getCheckParnterInsightsWithRetries(client, USER_TOKEN);
+      prettyPrintResponse(response);
+
+      res.json(response.data);
+    })
+    .catch(next);
+});
+
+
+const getCheckParnterInsightsWithRetries = (
+  plaidClient,
+  userToken
+) => pollWithRetries(
+  async () => {
+    return await plaidClient.craCheckReportPartnerInsightsGet(
+      {
+        user_token: userToken
+      }
+    );
+  }
+);
+
+// Since this quickstart does not support webhooks, this function can be used to poll
+// an API that would otherwise be triggered by a webhook.
+// For a webhook example, see
+// https://github.com/plaid/tutorial-resources or
+// https://github.com/plaid/pattern
+const pollWithRetries = (
+  requestCallback,
+  ms = 1000,
+  retriesLeft = 20,
+) =>
+  new Promise((resolve, reject) => {
+    requestCallback()
+      .then(resolve)
+      .catch(() => {
+        setTimeout(() => {
+          if (retriesLeft === 1) {
+            reject('Ran out of retries while polling');
+            return;
+          }
+          pollWithRetries(
+            requestCallback,
+            ms,
+            retriesLeft - 1,
+          ).then(resolve);
+        }, ms);
+      });
+  });
+
+app.use('/api', function (error, request, response, next) {
+  console.log(error);
+  prettyPrintResponse(error.response);
+  response.json(formatError(error.response));
 });

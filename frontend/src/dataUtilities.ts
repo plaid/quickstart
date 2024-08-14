@@ -1,21 +1,24 @@
 import {
+  AccountsGetResponse,
+  AssetReport,
   AuthGetResponse,
-  Transaction,
+  CraCheckReportBaseReportGetResponse,
+  CraCheckReportIncomeInsightsGetResponse,
+  CraCheckReportPartnerInsightsGetResponse,
   IdentityGetResponse,
+  IncomeVerificationPaystubsGetResponse,
+  InstitutionsGetByIdResponse,
   InvestmentsHoldingsGetResponse,
   InvestmentsTransactionsGetResponse,
-  AccountsGetResponse,
   ItemGetResponse,
-  InstitutionsGetByIdResponse,
   LiabilitiesGetResponse,
   PaymentInitiationPaymentGetResponse,
-  AssetReport,
-  TransferCreateResponse,
-  TransferAuthorizationCreateResponse,
-  IncomeVerificationPaystubsGetResponse,
+  Paystub,
   SignalEvaluateResponse,
   StatementsListResponse,
-  Paystub,
+  Transaction,
+  TransferAuthorizationCreateResponse,
+  TransferCreateResponse,
 } from "plaid/dist/api";
 
 const formatCurrency = (
@@ -135,6 +138,27 @@ interface IncomePaystubsDataItem {
   currency: number | null;
 }
 
+interface CreditReportGetItem {
+  institution: string;
+  accountName: string;
+  averageDaysBetweenTransactions: string | null;
+  averageInflowAmount: string | null;
+  averageOutflowAmount: string  | null;
+  averageBalance: string | null;
+  balance: string | null;
+}
+
+interface CreditInsightsGetItem {
+  incomeSourcesCount: number | null;
+  historicalAnnualIncome: string | null;
+  forecastedAnnualIncome: string | null;
+}
+
+interface CreditPartnerInsightsGetItem {
+  firstDetectScore: number | null;
+  cashScore: number | null;
+}
+
 export interface ErrorDataItem {
   error_type: string;
   error_code: string;
@@ -159,7 +183,10 @@ export type DataItem =
   | TransferAuthorizationDataItem
   | IncomePaystubsDataItem
   | SignalDataItem
-  | StatementsDataItem;
+  | StatementsDataItem
+  | CreditReportGetItem
+  | CreditInsightsGetItem
+  | CreditPartnerInsightsGetItem;
 
 export type Data = Array<DataItem>;
 
@@ -462,6 +489,60 @@ export const incomePaystubsCategories: Array<Categories> = [
     title: "Currency",
     field: "currency",
   },
+];
+
+
+export const checkReportBaseReportCategories: Array<Categories> = [
+  {
+    title: "Account Name",
+    field: "accountName"
+  },
+  {
+    title: "Balance",
+    field: "balance"
+  },
+  {
+    title: "Avg. Balance",
+    field: "averageBalance"
+  },
+  {
+    title: "Avg. Inflow Amount",
+    field: "averageInflowAmount"
+  },
+  {
+    title: "Avg. Outflow Amount",
+    field: "averageOutflowAmount"
+  },
+  {
+    title: "Avg. Days Between Transactions",
+    field: "averageDaysBetweenTransactions"
+  }
+];
+
+export const checkReportInsightsCategories: Array<Categories> = [
+  {
+    title: "Income Sources",
+    field: "incomeSourcesCount",
+  },
+  {
+    title: "Historical Annual Income",
+    field: "historicalAnnualIncome",
+  },
+  {
+    title: "Forecasted Annual Income",
+    field: "forecastedAnnualIncome",
+  }
+];
+
+export const checkReportPartnerInsightsCategories: Array<Categories> = [
+  {
+    title: "CashScore®",
+    field: "cashScore",
+  },
+  {
+    title: "FirstDetect Score",
+    field: "firstDetectScore",
+  }
 ];
 
 export const transformAuthData = (data: AuthGetResponse) => {
@@ -835,4 +916,47 @@ export const transformIncomePaystubsData = (data: IncomePaystub) => {
     }
   }
   return finalArray;
+};
+
+export const transformBaseReportGetData = (data: CraCheckReportBaseReportGetResponse) => {
+  const report = data.report;
+  return report.items.flatMap((item) =>
+    item.accounts.map((account) => {
+      const accountInsights = account.account_insights;
+      const averageInflow = accountInsights?.average_inflow_amount?.pop()?.total_amount;
+      const averageOutflow = accountInsights?.average_outflow_amount?.pop()?.total_amount;
+      return {
+        accountName: account.name,
+        averageDaysBetweenTransactions: accountInsights?.average_days_between_transactions?.toFixed(2),
+        averageInflowAmount:  formatCurrency(averageInflow?.amount, averageInflow?.iso_currency_code),
+        averageOutflowAmount: formatCurrency(averageOutflow?.amount, averageOutflow?.iso_currency_code),
+        averageBalance: formatCurrency(account.balances.average_balance, account.balances.iso_currency_code),
+        balance: formatCurrency(account.balances.available, account.balances.iso_currency_code)
+      };
+    })) as Array<CreditReportGetItem>;
+};
+
+
+export const transformIncomeInsightsData = (data: CraCheckReportIncomeInsightsGetResponse) => {
+  const report = data.report?.bank_income_summary
+  const historicalIncome = report?.historical_annual_income?.pop()
+  const forecastedIncome = report?.forecasted_annual_income?.pop()
+  return [
+    {
+      incomeSourcesCount: report?.income_sources_count,
+      historicalAnnualIncome: formatCurrency(historicalIncome?.amount, historicalIncome?.iso_currency_code),
+      forecastedAnnualIncome: formatCurrency(forecastedIncome?.amount, forecastedIncome?.iso_currency_code)
+    }
+  ] as Array<CreditInsightsGetItem>;
+};
+
+
+export const transformPartnerInsightsData = (data: CraCheckReportPartnerInsightsGetResponse) => {
+  const report = data.report?.prism
+  return [
+    {
+      cashScore: report?.cash_score?.score,
+      firstDetectScore: report?.first_detect?.score,
+    }
+  ] as Array<CreditPartnerInsightsGetItem>;
 };
