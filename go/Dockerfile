@@ -1,4 +1,4 @@
-FROM golang:1.17 AS build
+FROM golang:1.22 AS build
 
 WORKDIR /opt/src
 COPY . .
@@ -7,7 +7,7 @@ WORKDIR /opt/src/go
 RUN go get -d -v ./...
 RUN go build -o quickstart
 
-FROM gcr.io/distroless/base-debian10
+FROM gcr.io/distroless/base-debian12
 
 COPY --from=build /opt/src/go/quickstart /
 COPY .env /.env
