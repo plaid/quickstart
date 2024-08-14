@@ -672,10 +672,9 @@ def cra_check_report():
         pdf_response = client.cra_check_report_pdf_get(
             CraCheckReportPDFGetRequest(user_token=user_token)
         )
-
         return jsonify({
             'report': get_response.to_dict()['report'],
-            'pdf': base64.b64encode(pdf_response.data).decode('utf-8')
+            'pdf': base64.b64encode(pdf_response.read()).decode('utf-8')
         })
     except plaid.ApiException as e:
         error_response = format_error(e)
@@ -693,12 +692,12 @@ def cra_income_insights():
         pretty_print_response(get_response.to_dict())
 
         pdf_response = client.cra_check_report_pdf_get(
-            CraCheckReportPDFGetRequest(user_token=user_token, add_ons=[CraPDFAddOns('cra_income_insights')])
+            CraCheckReportPDFGetRequest(user_token=user_token, add_ons=[CraPDFAddOns('cra_income_insights')]),
         )
 
         return jsonify({
             'report': get_response.to_dict()['report'],
-            'pdf': base64.b64encode(pdf_response.data).decode('utf-8')
+            'pdf': base64.b64encode(pdf_response.read()).decode('utf-8')
         })
     except plaid.ApiException as e:
         error_response = format_error(e)
