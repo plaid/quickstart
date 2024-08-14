@@ -6,11 +6,12 @@ GEM
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
     dotenv (2.8.1)
-    faraday (2.9.0)
+    faraday (2.10.1)
       faraday-net_http (>= 2.0, < 3.2)
+      logger
     faraday-multipart (1.0.4)
       multipart-post (~> 2)
-    faraday-net_http (3.1.0)
+    faraday-net_http (3.1.1)
       net-http
     ffi (1.15.5)
     ffi-compiler (1.0.1)
@@ -27,12 +28,13 @@ GEM
     llhttp-ffi (0.4.0)
       ffi-compiler (~> 1.0)
       rake (~> 13.0)
-    multipart-post (2.4.0)
+    logger (1.6.0)
+    multipart-post (2.4.1)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
     net-http (0.4.1)
       uri
-    plaid (25.0.0)
+    plaid (30.0.0)
       faraday (>= 1.0.1, < 3.0)
       faraday-multipart (>= 1.0.1, < 2.0)
     public_suffix (5.0.1)
@@ -59,7 +61,7 @@ PLATFORMS
 DEPENDENCIES
   dotenv (~> 2.7)
   http
-  plaid (= 25.0.0)
+  plaid (= 30.0.0)
   sinatra
   webrick
 
