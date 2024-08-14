@@ -4,9 +4,8 @@ import (
 	"bufio"
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v21/plaid"
+	plaid "github.com/plaid/plaid-go/v27/plaid"
 )
 
 var (
@@ -31,8 +30,8 @@ var (
 )
 
 var environments = map[string]plaid.Environment{
-	"sandbox":     plaid.Sandbox,
-	"production":  plaid.Production,
+	"sandbox":    plaid.Sandbox,
+	"production": plaid.Production,
 }
 
 func init() {
@@ -109,6 +108,7 @@ func main() {
 	r.GET("/api/payment", payment)
 	r.GET("/api/create_public_token", createPublicToken)
 	r.POST("/api/create_link_token", createLinkToken)
+	r.POST("/api/create_user_token", createUserToken)
 	r.GET("/api/investments_transactions", investmentTransactions)
 	r.GET("/api/holdings", holdings)
 	r.GET("/api/assets", assets)
@@ -116,6 +116,9 @@ func main() {
 	r.GET("/api/transfer_create", transferCreate)
 	r.GET("/api/signal_evaluate", signalEvaluate)
 	r.GET("/api/statements", statements)
+	r.GET("/api/cra/get_base_report", getCraBaseReportHandler)
+	r.GET("/api/cra/get_income_insights", getCraIncomeInsightsHandler)
+	r.GET("/api/cra/get_partner_insights", getCraPartnerInsightsHandler)
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
@@ -123,9 +126,10 @@ func main() {
 	}
 }
 
-// We store the access_token in memory - in production, store it in a secure
+// We store the access_token and user_token in memory - in production, store it in a secure
 // persistent data store.
 var accessToken string
+var userToken string
 var itemID string
 
 var paymentID string
@@ -562,6 +566,15 @@ func createLinkToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"link_token": linkToken})
 }
 
+func createUserToken(c *gin.Context) {
+	userToken, err := userTokenCreate()
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"user_token": userToken})
+}
+
 func convertCountryCodes(countryCodeStrs []string) []plaid.CountryCode {
 	countryCodes := []plaid.CountryCode{}
 
@@ -625,10 +638,19 @@ func linkTokenCreate(
 	}
 
 	if containsProduct(products, plaid.PRODUCTS_STATEMENTS) {
-		statementConfig := plaid.NewLinkTokenCreateRequestStatements()
-		statementConfig.SetStartDate(time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02"))
-		statementConfig.SetEndDate(time.Now().Local().Format("2006-01-02"))
+		statementConfig := plaid.NewLinkTokenCreateRequestStatements(
+			time.Now().Local().Add(-30*24*time.Hour).Format("2006-01-02"),
+			time.Now().Local().Format("2006-01-02"),
+		)
 		request.SetStatements(*statementConfig)
+	}
+
+	if containsProduct(products, plaid.PRODUCTS_CRA_BASE_REPORT) ||
+		containsProduct(products, plaid.PRODUCTS_CRA_INCOME_INSIGHTS) ||
+		containsProduct(products, plaid.PRODUCTS_CRA_PARTNER_INSIGHTS) {
+		request.SetUserToken(userToken)
+		request.SetConsumerReportPermissiblePurpose(plaid.CONSUMERREPORTPERMISSIBLEPURPOSE_ACCOUNT_REVIEW_CREDIT)
+		request.SetCraOptions(*plaid.NewLinkTokenCreateRequestCraOptions(60))
 	}
 
 	if redirectURI != "" {
@@ -642,6 +664,53 @@ func linkTokenCreate(
 	}
 
 	return linkTokenCreateResp.GetLinkToken(), nil
+}
+
+// Create a user token which can be used for Plaid Check, Income, or Multi-Item link flows
+// https://plaid.com/docs/api/users/#usercreate
+func userTokenCreate() (string, error) {
+	ctx := context.Background()
+
+	request := plaid.NewUserCreateRequest(
+		// Typically this will be a user ID number from your application.
+		time.Now().String(),
+	)
+
+	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
+	if containsProduct(products, plaid.PRODUCTS_CRA_BASE_REPORT) ||
+		containsProduct(products, plaid.PRODUCTS_CRA_INCOME_INSIGHTS) ||
+		containsProduct(products, plaid.PRODUCTS_CRA_PARTNER_INSIGHTS) {
+		city := "New York"
+		region := "NY"
+		street := "4 Privet Drive"
+		postalCode := "11111"
+		country := "US"
+		addressData := plaid.AddressData{
+			City:       *plaid.NewNullableString(&city),
+			Region:     *plaid.NewNullableString(&region),
+			Street:     street,
+			PostalCode: *plaid.NewNullableString(&postalCode),
+			Country:    *plaid.NewNullableString(&country),
+		}
+
+		request.SetConsumerReportUserIdentity(*plaid.NewConsumerReportUserIdentity(
+			"Harry",
+			"Potter",
+			[]string{"+16174567890"},
+			[]string{"harrypotter@example.com"},
+			addressData,
+		))
+	}
+
+	userCreateResp, _, err := client.PlaidApi.UserCreate(ctx).UserCreateRequest(*request).Execute()
+
+	if err != nil {
+		return "", err
+	}
+
+	userToken = userCreateResp.GetUserToken()
+
+	return userCreateResp.GetUserToken(), nil
 }
 
 func statements(c *gin.Context) {
@@ -660,7 +729,7 @@ func statements(c *gin.Context) {
 	}
 
 	reader := bufio.NewReader(statementsDownloadResp)
-	content, err := ioutil.ReadAll(reader)
+	content, err := io.ReadAll(reader)
 	if err != nil {
 		renderError(c, err)
 		return
@@ -708,7 +777,7 @@ func assets(c *gin.Context) {
 	}
 
 	reader := bufio.NewReader(pdfFile)
-	content, err := ioutil.ReadAll(reader)
+	content, err := io.ReadAll(reader)
 	if err != nil {
 		renderError(c, err)
 		return
@@ -724,23 +793,140 @@ func assets(c *gin.Context) {
 }
 
 func pollForAssetReport(ctx context.Context, client *plaid.APIClient, assetReportToken string) (*plaid.AssetReportGetResponse, error) {
-	numRetries := 20
-	request := plaid.NewAssetReportGetRequest()
-	request.SetAssetReportToken(assetReportToken)
-
-	for i := 0; i < numRetries; i++ {
+	return pollWithRetries(func() (*plaid.AssetReportGetResponse, error) {
+		request := plaid.NewAssetReportGetRequest()
+		request.SetAssetReportToken(assetReportToken)
 		response, _, err := client.PlaidApi.AssetReportGet(ctx).AssetReportGetRequest(*request).Execute()
-		if err != nil {
-			plaidErr, err := plaid.ToPlaidError(err)
-			if plaidErr.ErrorCode == "PRODUCT_NOT_READY" {
-				time.Sleep(1 * time.Second)
-				continue
-			} else {
-				return nil, err
-			}
-		} else {
-			return &response, nil
-		}
+		return &response, err
+	}, 1000, 20)
+}
+
+// Retrieve CRA Base Report and PDF
+// Base report: https://plaid.com/docs/check/api/#cracheck_reportbase_reportget
+// PDF: https://plaid.com/docs/check/api/#cracheck_reportpdfget
+func getCraBaseReportHandler(c *gin.Context) {
+	ctx := context.Background()
+	getResponse, err := getCraBaseReportWithRetries(ctx, userToken)
+	if err != nil {
+		renderError(c, err)
+		return
 	}
-	return nil, errors.New("Timed out when polling for an asset report.")
+
+	pdfRequest := plaid.NewCraCheckReportPDFGetRequest(userToken)
+	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	reader := bufio.NewReader(pdfResponse)
+	content, err := io.ReadAll(reader)
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	// convert pdf to base64
+	encodedPdf := base64.StdEncoding.EncodeToString(content)
+
+	c.JSON(http.StatusOK, gin.H{
+		"report": getResponse.Report,
+		"pdf":    encodedPdf,
+	})
+}
+
+func getCraBaseReportWithRetries(ctx context.Context, userToken string) (*plaid.CraCheckReportBaseReportGetResponse, error) {
+	return pollWithRetries(func() (*plaid.CraCheckReportBaseReportGetResponse, error) {
+		request := plaid.CraCheckReportBaseReportGetRequest{UserToken: userToken}
+		response, _, err := client.PlaidApi.CraCheckReportBaseReportGet(ctx).CraCheckReportBaseReportGetRequest(request).Execute()
+		return &response, err
+	}, 1000, 20)
+}
+
+// Retrieve CRA Income Insights and PDF with Insights
+// Income insights: https://plaid.com/docs/check/api/#cracheck_reportincome_insightsget
+// PDF w/ income insights: https://plaid.com/docs/check/api/#cracheck_reportpdfget
+func getCraIncomeInsightsHandler(c *gin.Context) {
+	ctx := context.Background()
+	getResponse, err := getCraIncomeInsightsWithRetries(ctx, userToken)
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	pdfRequest := plaid.NewCraCheckReportPDFGetRequest(userToken)
+	pdfRequest.SetAddOns([]plaid.CraPDFAddOns{plaid.CRAPDFADDONS_CRA_INCOME_INSIGHTS})
+	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	reader := bufio.NewReader(pdfResponse)
+	content, err := io.ReadAll(reader)
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	// convert pdf to base64
+	encodedPdf := base64.StdEncoding.EncodeToString(content)
+
+	c.JSON(http.StatusOK, gin.H{
+		"report": getResponse.Report,
+		"pdf":    encodedPdf,
+	})
+}
+
+func getCraIncomeInsightsWithRetries(ctx context.Context, userToken string) (*plaid.CraCheckReportIncomeInsightsGetResponse, error) {
+	return pollWithRetries(func() (*plaid.CraCheckReportIncomeInsightsGetResponse, error) {
+		request := plaid.CraCheckReportIncomeInsightsGetRequest{UserToken: userToken}
+		response, _, err := client.PlaidApi.CraCheckReportIncomeInsightsGet(ctx).CraCheckReportIncomeInsightsGetRequest(request).Execute()
+		return &response, err
+	}, 1000, 20)
+}
+
+// Retrieve CRA Partner Insights
+// https://plaid.com/docs/check/api/#cracheck_reportpartner_insightsget
+func getCraPartnerInsightsHandler(c *gin.Context) {
+	ctx := context.Background()
+	getResponse, err := getCraPartnerInsightsWithRetries(ctx, userToken)
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"report": getResponse.Report,
+	})
+}
+
+func getCraPartnerInsightsWithRetries(ctx context.Context, userToken string) (*plaid.CraCheckReportPartnerInsightsGetResponse, error) {
+	return pollWithRetries(func() (*plaid.CraCheckReportPartnerInsightsGetResponse, error) {
+		request := plaid.CraCheckReportPartnerInsightsGetRequest{UserToken: userToken}
+		response, _, err := client.PlaidApi.CraCheckReportPartnerInsightsGet(ctx).CraCheckReportPartnerInsightsGetRequest(request).Execute()
+		return &response, err
+	}, 1000, 20)
+}
+
+// Since this quickstart does not support webhooks, this function can be used to poll
+// an API that would otherwise be triggered by a webhook.
+// For a webhook example, see
+// https://github.com/plaid/tutorial-resources or
+// https://github.com/plaid/pattern
+func pollWithRetries[T any](requestCallback func() (T, error), ms int, retriesLeft int) (T, error) {
+	var zero T
+	if retriesLeft == 0 {
+		return zero, fmt.Errorf("ran out of retries while polling")
+	}
+	response, err := requestCallback()
+	if err != nil {
+		plaidErr, err := plaid.ToPlaidError(err)
+		if plaidErr.ErrorCode != "PRODUCT_NOT_READY" {
+			return zero, err
+		}
+		time.Sleep(time.Duration(ms) * time.Millisecond)
+		return pollWithRetries[T](requestCallback, ms, retriesLeft-1)
+	}
+	return response, nil
 }
