@@ -119,6 +119,7 @@ func main() {
 	r.GET("/api/cra/get_base_report", getCraBaseReportHandler)
 	r.GET("/api/cra/get_income_insights", getCraIncomeInsightsHandler)
 	r.GET("/api/cra/get_partner_insights", getCraPartnerInsightsHandler)
+	r.GET("/api/last_month_transactions", transactions)
 
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
