@@ -14,6 +14,7 @@ let
   tools = with pkgs; {
     cli = [
       coreutils
+      gh
       nixpkgs-fmt
     ];
     node = [ node ];
