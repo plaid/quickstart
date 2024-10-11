@@ -17,10 +17,10 @@ let
       gh
       nixpkgs-fmt
     ];
-    node = [ node ];
-    npm = with node.pkgs; [
-      prettier
-      yarn
+    go = [
+      go
+      go-tools
+      gopls
     ];
     scripts = pkgs.lib.attrsets.attrValues scripts;
   };

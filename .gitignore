@@ -65,3 +65,4 @@ result
 .nix-profile/
 .nix-channels/
 .nixpkgs/
+.direnv
