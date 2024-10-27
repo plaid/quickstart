@@ -1,5 +1,4 @@
-Flask==3.0.0
+Django==3.2.9
+djangorestframework==3.12.4
 plaid_python==24.0.0
 python-dotenv==0.15.0
-itsdangerous==2.1.2
-werkzeug==3.0.1
