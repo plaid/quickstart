@@ -11,7 +11,7 @@ import com.plaid.client.model.ItemGetResponse;
 import com.plaid.client.model.InstitutionsGetByIdRequest;
 import com.plaid.client.model.InstitutionsGetByIdResponse;
 import com.plaid.client.model.Institution;
-import com.plaid.client.model.Item;
+import com.plaid.client.model.ItemWithConsentFields;
 import com.plaid.quickstart.QuickstartApplication;
 
 import javax.ws.rs.GET;
@@ -55,12 +55,12 @@ public class ItemResource {
 
   public static class ItemResponse {
     @JsonProperty
-    public Item item;
+    public ItemWithConsentFields item;
 
     @JsonProperty
     public Institution institution;
 
-    public ItemResponse(Item item, Institution institution) {
+    public ItemResponse(ItemWithConsentFields item, Institution institution) {
       this.item = item;
       this.institution = institution;
     }

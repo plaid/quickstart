@@ -124,8 +124,7 @@ app.post('/api/create_link_token', function (request, response, next) {
         configs.statements = statementConfig;
       }
 
-      const craEnumValues = Object.values(CraCheckReportProduct);
-      if (PLAID_PRODUCTS.some(product => craEnumValues.includes(product))) {
+      if (PLAID_PRODUCTS.some(product => product.startsWith("cra_"))) {
         configs.user_token = USER_TOKEN;
         configs.cra_options = {
           days_requested: 60
@@ -150,8 +149,7 @@ app.post('/api/create_user_token', function (request, response, next) {
         client_user_id: 'user_' + uuidv4()
       }
       
-      const craEnumValues = Object.values(CraCheckReportProduct);
-      if (PLAID_PRODUCTS.some(product => craEnumValues.includes(product))) {
+      if (PLAID_PRODUCTS.some(product => product.startsWith("cra_"))) {
         request.consumer_report_user_identity = {
           first_name: 'Harry',
           last_name: 'Potter',

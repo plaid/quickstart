@@ -3,7 +3,6 @@ package com.plaid.quickstart.resources;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.plaid.client.model.ConsumerReportPermissiblePurpose;
 import com.plaid.client.model.CountryCode;
-import com.plaid.client.model.CraCheckReportProduct;
 import com.plaid.client.model.LinkTokenCreateRequest;
 import com.plaid.client.model.LinkTokenCreateRequestCraOptions;
 import com.plaid.client.model.LinkTokenCreateRequestStatements;
@@ -86,8 +85,7 @@ public class LinkTokenResource {
       request.setStatements(statementsConfig);
     }
 
-    List<CraCheckReportProduct> craCheckReportProducts = Arrays.asList(CraCheckReportProduct.values());
-    if (craCheckReportProducts.stream().map(CraCheckReportProduct::toString).anyMatch(plaidProducts::contains)) {
+    if (plaidProducts.stream().anyMatch(product -> product.startsWith("cra_"))) {
       request.userToken(QuickstartApplication.userToken);
       request.consumerReportPermissiblePurpose(ConsumerReportPermissiblePurpose.ACCOUNT_REVIEW_CREDIT);
       LinkTokenCreateRequestCraOptions options = new LinkTokenCreateRequestCraOptions();
