@@ -15,7 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v27/plaid"
+	plaid "github.com/plaid/plaid-go/v31/plaid"
 )
 
 var (
@@ -812,7 +812,8 @@ func getCraBaseReportHandler(c *gin.Context) {
 		return
 	}
 
-	pdfRequest := plaid.NewCraCheckReportPDFGetRequest(userToken)
+	pdfRequest := plaid.NewCraCheckReportPDFGetRequest()
+	pdfRequest.SetUserToken(userToken)
 	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
 	if err != nil {
 		renderError(c, err)
@@ -837,8 +838,9 @@ func getCraBaseReportHandler(c *gin.Context) {
 
 func getCraBaseReportWithRetries(ctx context.Context, userToken string) (*plaid.CraCheckReportBaseReportGetResponse, error) {
 	return pollWithRetries(func() (*plaid.CraCheckReportBaseReportGetResponse, error) {
-		request := plaid.CraCheckReportBaseReportGetRequest{UserToken: userToken}
-		response, _, err := client.PlaidApi.CraCheckReportBaseReportGet(ctx).CraCheckReportBaseReportGetRequest(request).Execute()
+		request := plaid.NewCraCheckReportBaseReportGetRequest()
+		request.SetUserToken(userToken)
+		response, _, err := client.PlaidApi.CraCheckReportBaseReportGet(ctx).CraCheckReportBaseReportGetRequest(*request).Execute()
 		return &response, err
 	}, 1000, 20)
 }
@@ -854,7 +856,8 @@ func getCraIncomeInsightsHandler(c *gin.Context) {
 		return
 	}
 
-	pdfRequest := plaid.NewCraCheckReportPDFGetRequest(userToken)
+	pdfRequest := plaid.NewCraCheckReportPDFGetRequest()
+	pdfRequest.SetUserToken(userToken)
 	pdfRequest.SetAddOns([]plaid.CraPDFAddOns{plaid.CRAPDFADDONS_CRA_INCOME_INSIGHTS})
 	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
 	if err != nil {
@@ -880,8 +883,9 @@ func getCraIncomeInsightsHandler(c *gin.Context) {
 
 func getCraIncomeInsightsWithRetries(ctx context.Context, userToken string) (*plaid.CraCheckReportIncomeInsightsGetResponse, error) {
 	return pollWithRetries(func() (*plaid.CraCheckReportIncomeInsightsGetResponse, error) {
-		request := plaid.CraCheckReportIncomeInsightsGetRequest{UserToken: userToken}
-		response, _, err := client.PlaidApi.CraCheckReportIncomeInsightsGet(ctx).CraCheckReportIncomeInsightsGetRequest(request).Execute()
+		request := plaid.NewCraCheckReportIncomeInsightsGetRequest()
+		request.SetUserToken(userToken)
+		response, _, err := client.PlaidApi.CraCheckReportIncomeInsightsGet(ctx).CraCheckReportIncomeInsightsGetRequest(*request).Execute()
 		return &response, err
 	}, 1000, 20)
 }
@@ -903,8 +907,9 @@ func getCraPartnerInsightsHandler(c *gin.Context) {
 
 func getCraPartnerInsightsWithRetries(ctx context.Context, userToken string) (*plaid.CraCheckReportPartnerInsightsGetResponse, error) {
 	return pollWithRetries(func() (*plaid.CraCheckReportPartnerInsightsGetResponse, error) {
-		request := plaid.CraCheckReportPartnerInsightsGetRequest{UserToken: userToken}
-		response, _, err := client.PlaidApi.CraCheckReportPartnerInsightsGet(ctx).CraCheckReportPartnerInsightsGetRequest(request).Execute()
+		request := plaid.NewCraCheckReportPartnerInsightsGetRequest()
+		request.SetUserToken(userToken)
+		response, _, err := client.PlaidApi.CraCheckReportPartnerInsightsGet(ctx).CraCheckReportPartnerInsightsGetRequest(*request).Execute()
 		return &response, err
 	}, 1000, 20)
 }

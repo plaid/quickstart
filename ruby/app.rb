@@ -491,8 +491,7 @@ post '/api/create_link_token' do
       )
       link_token_create_request.statements=statements
     end
-    cra_enum_values = Plaid::CraCheckReportProduct.constants.map { |c| Plaid::CraCheckReportProduct.const_get(c) }
-    if products.any? { |product| cra_enum_values.include?(product) }
+    if products.any? { |product| product.start_with?("cra_") }
       link_token_create_request.cra_options = Plaid::LinkTokenCreateRequestCraOptions.new(
         days_requested: 60
       )
@@ -521,8 +520,7 @@ post '/api/create_user_token' do
       client_user_id: 'user_' + SecureRandom.uuid
     }
 
-    cra_enum_values = Plaid::CraCheckReportProduct.constants.map { |c| Plaid::CraCheckReportProduct.const_get(c) }
-    if products.any? { |product| cra_enum_values.include?(product) }
+    if products.any? { |product| product.start_with?("cra_") }
       request_data[:consumer_report_user_identity] = {
         first_name: 'Harry',
         last_name: 'Potter',

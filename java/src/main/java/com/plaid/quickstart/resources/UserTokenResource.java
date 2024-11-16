@@ -2,7 +2,6 @@ package com.plaid.quickstart.resources;
 
 import com.plaid.client.model.AddressData;
 import com.plaid.client.model.ConsumerReportUserIdentity;
-import com.plaid.client.model.CraCheckReportProduct;
 import com.plaid.client.model.UserCreateRequest;
 import com.plaid.client.model.UserCreateResponse;
 import com.plaid.client.request.PlaidApi;
@@ -38,8 +37,7 @@ public class UserTokenResource {
       // Typically, this will be a user ID number from your application.
       .clientUserId("user_" + UUID.randomUUID());
 
-    List<CraCheckReportProduct> craCheckReportProducts = Arrays.asList(CraCheckReportProduct.values());
-    if (craCheckReportProducts.stream().map(CraCheckReportProduct::toString).anyMatch(plaidProducts::contains)) {
+    if (plaidProducts.stream().anyMatch(product -> product.startsWith("cra_"))) {
       AddressData addressData = new AddressData()
         .city("New York")
         .region("NY")
