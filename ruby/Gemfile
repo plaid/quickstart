@@ -9,3 +9,6 @@ gem "dotenv", "~> 2.7"
 gem "plaid", "= 34.0.0"
 
 gem "webrick"
+
+gem "rackup", "~> 2.2"
+gem "puma", "~> 6.5"
