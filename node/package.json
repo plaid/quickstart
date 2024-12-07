@@ -12,7 +12,7 @@
   "repository": "https://github.com/plaid/quickstart",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "1.18.x",
+    "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.10",
