@@ -228,9 +228,13 @@ make stop language=node
 
 ## Test credentials
 
-In Sandbox, you can log in to any supported institution using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`.
+In Sandbox, you can log in to any supported institution using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`. In Production, use real-life credentials.
 
-In Production, use real-life credentials.
+### Transactions test credentials
+For Transactions, you will get the most realistic results using `user_transactions_dynamic` as the username, and any non-blank string as the password. For more details on the special capabilities of this test user, see the [docs](https://plaid.com/docs/transactions/transactions-data/#testing-pending-and-posted-transactions).
+
+### Credit test credentials
+For credit and underwriting products like Assets and Statements, you will get the most realistic results using one of the [credit and underwriting tests credentials](https://plaid.com/docs/sandbox/test-credentials/#credit-and-income-testing-credentials), like `user_bank_income` / `{}`.
 
 ## Troubleshooting
 
