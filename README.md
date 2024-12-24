@@ -14,6 +14,8 @@ For Income, see the [Income sample app](https://github.com/plaid/income-sample).
 
 For a more in-depth Transfer Quickstart, see the [Transfer Quickstart](https://github.com/plaid/transfer-quickstart) (Node only).
 
+For a more in-depth Transactions tutorial, see the [Transactions tutorial](https://github.com/plaid/tutorial-resources/tree/main/transactions) (Node only).
+
 ![Plaid quickstart app](/assets/quickstart.jpeg)
 
 ## Table of contents
