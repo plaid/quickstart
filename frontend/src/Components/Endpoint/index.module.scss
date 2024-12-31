@@ -2,9 +2,9 @@
 
 .endpointContainer {
   display: grid;
-  grid-template-columns: 15% 57% 28%;
+  grid-template-columns: 100% 100% 100%;
   width: 100%;
-  border-top: 1px solid $black200;
+  border-top: 1px solid $200;
 }
 
 .post {
@@ -44,10 +44,10 @@
 
 .sendRequest {
   margin: 2 * $unit 2 * $unit $unit 3 * $unit;
-  width: 70%;
+  width: 100%;
 }
 
 .pdf {
   margin: 0 2 * $unit 0 3 * $unit;
-  width: 70%;
+  width: 100%;
 }
