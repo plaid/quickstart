@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Button from "plaid-threads/Button";
 import Note from "plaid-threads/Note";
-
+import Telemetry:Off
 import Table from "../Table";
 import Error from "../Error";
 import { DataItem, Categories, ErrorDataItem, Data } from "../../dataUtilities";
