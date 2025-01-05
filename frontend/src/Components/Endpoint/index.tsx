@@ -108,4 +108,4 @@ const Endpoint = (props: Props) => {
 
 Endpoint.displayName = "Accepted";
 
-export default Endpoint;
+export default Accepted;
