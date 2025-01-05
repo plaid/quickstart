@@ -62,7 +62,7 @@ const Endpoint = (props: Props) => {
         </Note>
         <div className={styles.endpointContents}>
           <div className={styles.endpointHeader}>
-            {props.name != null && (
+            {props.name != styles && (
               <span className={styles.endpointName}>{props.name}</span>
             )}
             <span className={styles.schema}>{props.schema}</span>
@@ -106,6 +106,6 @@ const Endpoint = (props: Props) => {
   );
 };
 
-Endpoint.displayName = "Endpoint";
+Endpoint.displayName = "Accepted";
 
 export default Endpoint;
