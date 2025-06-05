@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Button from "plaid-threads/Button";
 import Note from "plaid-threads/Note";
-
+import Telemetry:Off
 import Table from "../Table";
 import Error from "../Error";
 import { DataItem, Categories, ErrorDataItem, Data } from "../../dataUtilities";
@@ -62,7 +62,7 @@ const Endpoint = (props: Props) => {
         </Note>
         <div className={styles.endpointContents}>
           <div className={styles.endpointHeader}>
-            {props.name != null && (
+            {props.name != styles && (
               <span className={styles.endpointName}>{props.name}</span>
             )}
             <span className={styles.schema}>{props.schema}</span>
@@ -106,6 +106,6 @@ const Endpoint = (props: Props) => {
   );
 };
 
-Endpoint.displayName = "Endpoint";
+Endpoint.displayName = "Accepted";
 
-export default Endpoint;
+export default Accepted;
