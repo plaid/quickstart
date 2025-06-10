@@ -692,14 +692,17 @@ func userTokenCreate() (string, error) {
 			PostalCode: *plaid.NewNullableString(&postalCode),
 			Country:    *plaid.NewNullableString(&country),
 		}
-
-		request.SetConsumerReportUserIdentity(*plaid.NewConsumerReportUserIdentity(
+		DateOfBirth := "2001-01-01"
+		UserIdentity := plaid.NewConsumerReportUserIdentity(
 			"Harry",
 			"Potter",
 			[]string{"+16174567890"},
 			[]string{"harrypotter@example.com"},
 			addressData,
-		))
+		)
+		UserIdentity.SetDateOfBirth(DateOfBirth)
+		request.SetConsumerReportUserIdentity(*UserIdentity)
+
 	}
 
 	userCreateResp, _, err := client.PlaidApi.UserCreate(ctx).UserCreateRequest(*request).Execute()
