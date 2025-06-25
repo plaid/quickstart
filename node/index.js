@@ -145,12 +145,13 @@ app.post('/api/create_user_token', function (request, response, next) {
     .then(async function () {
 
       const request = {
-         // Typically this will be a user ID number from your application. 
+        // Typically this will be a user ID number from your application. 
         client_user_id: 'user_' + uuidv4()
       }
-      
+
       if (PLAID_PRODUCTS.some(product => product.startsWith("cra_"))) {
         request.consumer_report_user_identity = {
+          date_of_birth: '1980-07-31',
           first_name: 'Harry',
           last_name: 'Potter',
           phone_numbers: ['+16174567890'],

@@ -257,6 +257,7 @@ def create_user_token():
             consumer_report_user_identity = ConsumerReportUserIdentity(
                 first_name="Harry",
                 last_name="Potter",
+                date_of_birth= date(1980, 7, 31),
                 phone_numbers= ['+16174567890'],
                 emails= ['harrypotter@example.com'],
                 primary_address= {
