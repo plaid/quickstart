@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -41,10 +42,11 @@ public class UserTokenResource {
       AddressData addressData = new AddressData()
         .city("New York")
         .region("NY")
-        .street("4 Priver Drive")
+        .street("4 Privet Drive")
         .postalCode("11111")
         .country("US");
       userCreateRequest.consumerReportUserIdentity(new ConsumerReportUserIdentity()
+        .dateOfBirth(LocalDate.parse("1980-07-31"))
         .firstName("Harry")
         .lastName("Potter")
         .phoneNumbers(Arrays.asList("+16174567890"))

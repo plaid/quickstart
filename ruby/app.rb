@@ -525,6 +525,7 @@ post '/api/create_user_token' do
       request_data[:consumer_report_user_identity] = {
         first_name: 'Harry',
         last_name: 'Potter',
+        date_of_birth: '1980-07-31',
         phone_numbers: ['+16174567890'],
         emails: ['harrypotter@example.com'],
         primary_address: {
