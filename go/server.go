@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	plaid "github.com/plaid/plaid-go/v40/plaid"
 )
@@ -271,9 +272,8 @@ func accounts(c *gin.Context) {
 func balance(c *gin.Context) {
 	ctx := context.Background()
 
-	// Get accounts
-	accountsGetResp, _, err := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
-		*plaid.NewAccountsGetRequest(accessToken),
+	accountsGetResp, _, err := client.PlaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(
+		*plaid.NewAccountsBalanceGetRequest(accessToken),
 	).Execute()
 
 	if err != nil {
@@ -281,56 +281,8 @@ func balance(c *gin.Context) {
 		return
 	}
 
-	accountID = accountsGetResp.GetAccounts()[0].AccountId
-
-	// Call signal evaluate
-	signalEvaluateRequest := plaid.NewSignalEvaluateRequest(
-		accessToken,
-		accountID,
-		"txn1234",
-		100.00)
-
-	if SIGNAL_RULESET_KEY != "" {
-		signalEvaluateRequest.SetRulesetKey(SIGNAL_RULESET_KEY)
-	}
-
-	signalEvaluateResp, _, err := client.PlaidApi.SignalEvaluate(ctx).SignalEvaluateRequest(*signalEvaluateRequest).Execute()
-
-	if err != nil {
-		renderError(c, err)
-		return
-	}
-
-	// Transform signal response to match balance response format
-	accounts := accountsGetResp.GetAccounts()
-	for i := range accounts {
-		if signalEvaluateResp.CoreAttributes != nil {
-			if signalEvaluateResp.CoreAttributes.AvailableBalance.IsSet() {
-				availableBalance := signalEvaluateResp.CoreAttributes.AvailableBalance.Get()
-				accounts[i].Balances.Available = *plaid.NewNullableFloat64(availableBalance)
-			}
-			if signalEvaluateResp.CoreAttributes.CurrentBalance.IsSet() {
-				currentBalance := signalEvaluateResp.CoreAttributes.CurrentBalance.Get()
-				accounts[i].Balances.Current = *plaid.NewNullableFloat64(currentBalance)
-			}
-		}
-	}
-
-	// Extract signal ruleset data
-	var rulesetKey *string
-	var outcome *string
-	if signalEvaluateResp.Ruleset.IsSet() {
-		ruleset := signalEvaluateResp.Ruleset.Get()
-		rulesetKey = ruleset.RulesetKey
-		outcome = ruleset.Outcome
-	}
-
 	c.JSON(http.StatusOK, gin.H{
-		"accounts": accounts,
-		"signal_ruleset": gin.H{
-			"ruleset_key": rulesetKey,
-			"outcome":     outcome,
-		},
+		"accounts": accountsGetResp.GetAccounts(),
 	})
 }
 
@@ -530,10 +482,13 @@ func signalEvaluate(c *gin.Context) {
 
 	accountID = accountsGetResp.GetAccounts()[0].AccountId
 
+	// Generate unique transaction ID using timestamp and random component
+	clientTransactionID := fmt.Sprintf("txn-%d-%s", time.Now().UnixNano(), uuid.New().String()[:8])
+
 	signalEvaluateRequest := plaid.NewSignalEvaluateRequest(
 		accessToken,
 		accountID,
-		"txn1234",
+		clientTransactionID,
 		100.00)
 
 	if SIGNAL_RULESET_KEY != "" {

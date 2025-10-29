@@ -56,13 +56,19 @@ interface IdentityDataItem {
   names: string;
 }
 
-interface BalanceDataItem {
+interface AccountsDataItem {
   balance: string;
   subtype: string | null;
   mask: string;
   name: string;
-  rulesetKey: string | null;
-  rulesetOutcome: string | null;
+}
+
+interface BalanceDataItem {
+  current: string;
+  available: string;
+  subtype: string | null;
+  mask: string;
+  name: string;
 }
 
 interface InvestmentsDataItem {
@@ -127,10 +133,8 @@ interface StatementsDataItem {
 }
 
 interface SignalDataItem {
-  customerInitiatedReturnRiskScore: number | undefined | null;
-  customerInitiatedReturnRiskTier: number | undefined | null;
-  bankInitiatedReturnRiskScore: number | undefined | null;
-  bankInitiatedReturnRiskTier: number | undefined | null;
+  currentBalance: string | undefined | null;
+  availableBalance: string | undefined | null;
   daysSinceFirstPlaidConnection: number | undefined | null;
   rulesetKey: string | undefined | null;
   rulesetOutcome: string | undefined | null;
@@ -176,6 +180,7 @@ export type DataItem =
   | AuthDataItem
   | TransactionsDataItem
   | IdentityDataItem
+  | AccountsDataItem
   | BalanceDataItem
   | InvestmentsDataItem
   | InvestmentsTransactionItem
@@ -253,8 +258,12 @@ export const balanceCategories: Array<Categories> = [
     field: "name",
   },
   {
-    title: "Balance",
-    field: "balance",
+    title: "Current Balance",
+    field: "current",
+  },
+  {
+    title: "Available Balance",
+    field: "available",
   },
   {
     title: "Subtype",
@@ -263,14 +272,6 @@ export const balanceCategories: Array<Categories> = [
   {
     title: "Mask",
     field: "mask",
-  },
-  {
-    title: "Signal Ruleset Key",
-    field: "rulesetKey",
-  },
-  {
-    title: "Signal Ruleset Outcome",
-    field: "rulesetOutcome",
   },
 ];
 
@@ -455,21 +456,12 @@ export const transferAuthorizationCategories: Array<Categories> = [
 
 export const signalCategories: Array<Categories> = [
   {
-    title: "Customer-initiated return risk score",
-    field: "customerInitiatedReturnRiskScore",
-  },
-
-  {
-    title: "Customer-initiated return risk tier",
-    field: "customerInitiatedReturnRiskTier",
+    title: "Current Balance",
+    field: "currentBalance",
   },
   {
-    title: "Bank-initiated return risk score",
-    field: "bankInitiatedReturnRiskScore",
-  },
-  {
-    title: "Bank-initiated return risk tier",
-    field: "bankInitiatedReturnRiskTier",
+    title: "Available Balance",
+    field: "availableBalance",
   },
   {
     title: "Sample core attribute: Days since first Plaid connection",
@@ -651,18 +643,14 @@ export const transformIdentityData = (data: IdentityData) => {
 
 export const transformBalanceData = (data: any) => {
   const balanceData = data.accounts;
-  const signalRuleset = data.signal_ruleset || {};
 
   return balanceData.map((account: any) => {
-    const balance: number | null | undefined =
-      account.balances.available || account.balances.current;
     const obj: DataItem = {
       name: account.name,
-      balance: formatCurrency(balance, account.balances.iso_currency_code),
+      current: formatCurrency(account.balances.current, account.balances.iso_currency_code),
+      available: formatCurrency(account.balances.available, account.balances.iso_currency_code),
       subtype: account.subtype,
       mask: account.mask!,
-      rulesetKey: signalRuleset.ruleset_key || null,
-      rulesetOutcome: signalRuleset.outcome || null,
     };
     return obj;
   });
@@ -792,16 +780,13 @@ export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
 };
 
 export const transformSignalData = (data: SignalEvaluateResponse) => {
+  const currentBalance = data.core_attributes?.current_balance;
+  const availableBalance = data.core_attributes?.available_balance;
+
   return [
     {
-      customerInitiatedReturnRiskTier:
-        data.scores.customer_initiated_return_risk!.risk_tier,
-      customerInitiatedReturnRiskScore:
-        data.scores.customer_initiated_return_risk!.score,
-      bankInitiatedReturnRiskTier:
-        data.scores.bank_initiated_return_risk!.risk_tier,
-      bankInitiatedReturnRiskScore:
-        data.scores.bank_initiated_return_risk!.score,
+      currentBalance: formatCurrency(currentBalance, null),
+      availableBalance: formatCurrency(availableBalance, null),
       daysSinceFirstPlaidConnection:
         data.core_attributes!.days_since_first_plaid_connection,
       rulesetKey: data.ruleset?.ruleset_key || null,
@@ -871,8 +856,6 @@ export const transformAccountsData = (data: AccountsGetResponse) => {
       balance: formatCurrency(balance, account.balances.iso_currency_code),
       subtype: account.subtype,
       mask: account.mask!,
-      rulesetKey: null,
-      rulesetOutcome: null,
     };
     return obj;
   });

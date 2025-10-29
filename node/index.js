@@ -373,42 +373,11 @@ app.get('/api/identity', function (request, response, next) {
 app.get('/api/balance', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const accountsResponse = await client.accountsGet({
+      const balanceResponse = await client.accountsBalanceGet({
         access_token: ACCESS_TOKEN,
       });
-      ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
-
-      const signalEvaluateRequest = {
-        access_token: ACCESS_TOKEN,
-        account_id: ACCOUNT_ID,
-        client_transaction_id: 'txn1234',
-        amount: 100.00,
-      };
-
-      if (SIGNAL_RULESET_KEY) {
-        signalEvaluateRequest.ruleset_key = SIGNAL_RULESET_KEY;
-      }
-
-      const signalEvaluateResponse = await client.signalEvaluate(signalEvaluateRequest);
-      prettyPrintResponse(signalEvaluateResponse);
-
-      // Transform signal response to match balance response format
-      const balanceData = {
-        accounts: accountsResponse.data.accounts.map(account => ({
-          ...account,
-          balances: {
-            ...account.balances,
-            available: signalEvaluateResponse.data.core_attributes?.available_balance || account.balances.available,
-            current: signalEvaluateResponse.data.core_attributes?.current_balance || account.balances.current,
-          }
-        })),
-        signal_ruleset: {
-          ruleset_key: signalEvaluateResponse.data.ruleset?.ruleset_key || null,
-          outcome: signalEvaluateResponse.data.ruleset?.outcome || null,
-        }
-      };
-
-      response.json(balanceData);
+      prettyPrintResponse(balanceResponse);
+      response.json({ accounts: balanceResponse.data.accounts });
     })
     .catch(next);
 });
@@ -685,10 +654,13 @@ app.get('/api/signal_evaluate', function (request, response, next) {
       });
       ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
 
+      // Generate unique transaction ID using timestamp and random component
+      const clientTransactionId = `txn-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+
       const signalEvaluateRequest = {
         access_token: ACCESS_TOKEN,
         account_id: ACCOUNT_ID,
-        client_transaction_id: 'txn1234',
+        client_transaction_id: clientTransactionId,
         amount: 100.00,
       };
 

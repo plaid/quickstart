@@ -393,49 +393,11 @@ def get_identity():
 
 @app.route('/api/balance', methods=['GET'])
 def get_balance():
-    global account_id
     try:
-        # Get accounts
-        accounts_request = AccountsGetRequest(access_token=access_token)
-        accounts_response = client.accounts_get(accounts_request)
-        account_id = accounts_response['accounts'][0]['account_id']
-
-        # Call signal evaluate
-        signal_request_params = {
-            'access_token': access_token,
-            'account_id': account_id,
-            'client_transaction_id': 'txn1234',
-            'amount': 100.00
-        }
-
-        if SIGNAL_RULESET_KEY:
-            signal_request_params['ruleset_key'] = SIGNAL_RULESET_KEY
-
-        signal_request = SignalEvaluateRequest(**signal_request_params)
-        signal_response = client.signal_evaluate(signal_request)
-        pretty_print_response(signal_response.to_dict())
-
-        # Transform signal response to match balance response format
-        signal_dict = signal_response.to_dict()
-        balance_data = {
-            'accounts': [
-                {
-                    **account,
-                    'balances': {
-                        **account['balances'],
-                        'available': signal_dict.get('core_attributes', {}).get('available_balance') or account['balances'].get('available'),
-                        'current': signal_dict.get('core_attributes', {}).get('current_balance') or account['balances'].get('current'),
-                    }
-                }
-                for account in accounts_response['accounts']
-            ],
-            'signal_ruleset': {
-                'ruleset_key': signal_dict.get('ruleset', {}).get('ruleset_key') if signal_dict.get('ruleset') else None,
-                'outcome': signal_dict.get('ruleset', {}).get('outcome') if signal_dict.get('ruleset') else None,
-            }
-        }
-
-        return jsonify(balance_data)
+        balance_request = AccountsBalanceGetRequest(access_token=access_token)
+        balance_response = client.accounts_balance_get(balance_request)
+        pretty_print_response(balance_response.to_dict())
+        return jsonify({'accounts': balance_response['accounts']})
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -644,10 +606,13 @@ def signal():
     response = client.accounts_get(request)
     account_id = response['accounts'][0]['account_id']
     try:
+        # Generate unique transaction ID using timestamp and random component
+        client_transaction_id = f"txn-{int(time.time() * 1000)}-{uuid.uuid4().hex[:8]}"
+
         signal_request_params = {
             'access_token': access_token,
             'account_id': account_id,
-            'client_transaction_id': 'txn1234',
+            'client_transaction_id': client_transaction_id,
             'amount': 100.00
         }
 
