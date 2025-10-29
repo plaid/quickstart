@@ -801,7 +801,7 @@ export const transformSignalData = (data: SignalEvaluateResponse) => {
     {
       currentBalance: formatCurrency(currentBalance, null),
       availableBalance: formatCurrency(availableBalance, null),
-      rulesetOutcome: result || "N/A",
+      rulesetOutcome: result || "N/A - enter a RULESET_KEY in .env for results",
       stsHeader: "",
       customerInitiatedReturnScore: customerRisk?.score?.toString() ?? "N/A",
       bankInitiatedReturnScore: bankRisk?.score?.toString() ?? "N/A",

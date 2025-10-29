@@ -165,7 +165,7 @@ get '/api/balance' do
     balance_response = client.accounts_balance_get(balance_request)
     pretty_print_response(balance_response.to_hash)
     content_type :json
-    { accounts: balance_response.accounts }.to_json
+    balance_response.to_hash.to_json
   rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
