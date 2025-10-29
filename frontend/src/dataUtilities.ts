@@ -26,7 +26,8 @@ const formatCurrency = (
   code: string | null | undefined
 ) => {
   if (number != null && number !== undefined) {
-    return ` ${parseFloat(number.toFixed(2)).toLocaleString("en")} ${code}`;
+    const formattedNumber = parseFloat(number.toFixed(2)).toLocaleString("en");
+    return code ? ` ${formattedNumber} ${code}` : ` ${formattedNumber}`;
   }
   return "no data";
 };
@@ -135,9 +136,11 @@ interface StatementsDataItem {
 interface SignalDataItem {
   currentBalance: string | undefined | null;
   availableBalance: string | undefined | null;
-  daysSinceFirstPlaidConnection: number | undefined | null;
-  rulesetKey: string | undefined | null;
   rulesetOutcome: string | undefined | null;
+  stsHeader: string;
+  customerInitiatedReturnScore: string | undefined | null;
+  bankInitiatedReturnScore: string | undefined | null;
+  daysSinceFirstPlaidConnection: string | undefined | null;
 }
 
 interface IncomePaystubsDataItem {
@@ -464,16 +467,24 @@ export const signalCategories: Array<Categories> = [
     field: "availableBalance",
   },
   {
-    title: "Sample core attribute: Days since first Plaid connection",
-    field: "daysSinceFirstPlaidConnection",
-  },
-  {
-    title: "Ruleset key",
-    field: "rulesetKey",
-  },
-  {
     title: "Ruleset evaluation outcome",
     field: "rulesetOutcome",
+  },
+  {
+    title: "Fields to right returned for Signal Transaction Scores templates only:",
+    field: "stsHeader",
+  },
+  {
+    title: "Customer Initiated Return Score",
+    field: "customerInitiatedReturnScore",
+  },
+  {
+    title: "Bank Initiated Return Score",
+    field: "bankInitiatedReturnScore",
+  },
+  {
+    title: "Sample core attribute: Days since first Plaid connection",
+    field: "daysSinceFirstPlaidConnection",
   },
 ];
 
@@ -782,15 +793,20 @@ export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
 export const transformSignalData = (data: SignalEvaluateResponse) => {
   const currentBalance = data.core_attributes?.current_balance;
   const availableBalance = data.core_attributes?.available_balance;
+  const result = (data.ruleset as any)?.result;
+  const customerRisk = data.scores?.customer_initiated_return_risk;
+  const bankRisk = data.scores?.bank_initiated_return_risk;
 
   return [
     {
       currentBalance: formatCurrency(currentBalance, null),
       availableBalance: formatCurrency(availableBalance, null),
+      rulesetOutcome: result || "N/A",
+      stsHeader: "",
+      customerInitiatedReturnScore: customerRisk?.score?.toString() ?? "N/A",
+      bankInitiatedReturnScore: bankRisk?.score?.toString() ?? "N/A",
       daysSinceFirstPlaidConnection:
-        data.core_attributes!.days_since_first_plaid_connection,
-      rulesetKey: data.ruleset?.ruleset_key || null,
-      rulesetOutcome: data.ruleset?.outcome || null,
+        data.core_attributes?.days_since_first_plaid_connection?.toString() ?? "N/A",
     },
   ];
 };

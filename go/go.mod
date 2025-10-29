@@ -6,6 +6,7 @@ toolchain go1.24.9
 
 require (
 	github.com/gin-gonic/gin v1.10.0
+	github.com/google/uuid v1.1.2
 	github.com/joho/godotenv v1.5.1
 	github.com/plaid/plaid-go/v40 v40.1.0
 )
