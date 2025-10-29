@@ -53,7 +53,7 @@ public class UserTokenResource {
         .emails(List.of("harrypotter@example.com"))
         .primaryAddress(addressData));
     }
-    Response<UserCreateResponse> userResponse = plaidClient.userCreate(userCreateRequest).execute();
+    Response<UserCreateResponse> userResponse = plaidClient.userCreate(userCreateRequest, null).execute();
 
     // Ideally, we would store this somewhere more persistent
     QuickstartApplication.userToken = userResponse.body().getUserToken();

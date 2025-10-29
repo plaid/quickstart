@@ -61,6 +61,8 @@ interface BalanceDataItem {
   subtype: string | null;
   mask: string;
   name: string;
+  rulesetKey: string | null;
+  rulesetOutcome: string | null;
 }
 
 interface InvestmentsDataItem {
@@ -130,6 +132,8 @@ interface SignalDataItem {
   bankInitiatedReturnRiskScore: number | undefined | null;
   bankInitiatedReturnRiskTier: number | undefined | null;
   daysSinceFirstPlaidConnection: number | undefined | null;
+  rulesetKey: string | undefined | null;
+  rulesetOutcome: string | undefined | null;
 }
 
 interface IncomePaystubsDataItem {
@@ -259,6 +263,14 @@ export const balanceCategories: Array<Categories> = [
   {
     title: "Mask",
     field: "mask",
+  },
+  {
+    title: "Signal Ruleset Key",
+    field: "rulesetKey",
+  },
+  {
+    title: "Signal Ruleset Outcome",
+    field: "rulesetOutcome",
   },
 ];
 
@@ -463,6 +475,14 @@ export const signalCategories: Array<Categories> = [
     title: "Sample core attribute: Days since first Plaid connection",
     field: "daysSinceFirstPlaidConnection",
   },
+  {
+    title: "Ruleset key",
+    field: "rulesetKey",
+  },
+  {
+    title: "Ruleset evaluation outcome",
+    field: "rulesetOutcome",
+  },
 ];
 
 export const statementsCategories: Array<Categories> = [
@@ -629,9 +649,11 @@ export const transformIdentityData = (data: IdentityData) => {
   return final;
 };
 
-export const transformBalanceData = (data: AccountsGetResponse) => {
+export const transformBalanceData = (data: any) => {
   const balanceData = data.accounts;
-  return balanceData.map((account) => {
+  const signalRuleset = data.signal_ruleset || {};
+
+  return balanceData.map((account: any) => {
     const balance: number | null | undefined =
       account.balances.available || account.balances.current;
     const obj: DataItem = {
@@ -639,6 +661,8 @@ export const transformBalanceData = (data: AccountsGetResponse) => {
       balance: formatCurrency(balance, account.balances.iso_currency_code),
       subtype: account.subtype,
       mask: account.mask!,
+      rulesetKey: signalRuleset.ruleset_key || null,
+      rulesetOutcome: signalRuleset.outcome || null,
     };
     return obj;
   });
@@ -780,6 +804,8 @@ export const transformSignalData = (data: SignalEvaluateResponse) => {
         data.scores.bank_initiated_return_risk!.score,
       daysSinceFirstPlaidConnection:
         data.core_attributes!.days_since_first_plaid_connection,
+      rulesetKey: data.ruleset?.ruleset_key || null,
+      rulesetOutcome: data.ruleset?.outcome || null,
     },
   ];
 };

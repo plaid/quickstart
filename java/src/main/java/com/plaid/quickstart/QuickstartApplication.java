@@ -95,6 +95,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     if (configuration.getPlaidRedirectUri() != null && configuration.getPlaidRedirectUri().length() > 0) {
       redirectUri = configuration.getPlaidRedirectUri();
     }
+    String signalRulesetKey = configuration.getSignalRulesetKey();
 
     HashMap<String, String> apiKeys = new HashMap<String, String>();
     apiKeys.put("clientId", plaidClientId);
@@ -109,7 +110,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new AccountsResource(plaidClient));
     environment.jersey().register(new AssetsResource(plaidClient));
     environment.jersey().register(new AuthResource(plaidClient));
-    environment.jersey().register(new BalanceResource(plaidClient));
+    environment.jersey().register(new BalanceResource(plaidClient, signalRulesetKey));
     environment.jersey().register(new HoldingsResource(plaidClient));
     environment.jersey().register(new IdentityResource(plaidClient));
     environment.jersey().register(new InfoResource(plaidProducts));
@@ -119,7 +120,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new LinkTokenWithPaymentResource(plaidClient, plaidProducts, countryCodes, redirectUri));
     environment.jersey().register(new PaymentInitiationResource(plaidClient));
     environment.jersey().register(new PublicTokenResource(plaidClient));
-    environment.jersey().register(new SignalResource(plaidClient));
+    environment.jersey().register(new SignalResource(plaidClient, signalRulesetKey));
     environment.jersey().register(new StatementsResource(plaidClient));
     environment.jersey().register(new TransactionsResource(plaidClient));
     environment.jersey().register(new TransferAuthorizeResource(plaidClient));

@@ -228,6 +228,8 @@ github.com/pelletier/go-toml/v2 v2.2.2 h1:aYUidT7k73Pcl9nb2gScu7NSrKCSHIDE89b3+6
 github.com/pelletier/go-toml/v2 v2.2.2/go.mod h1:1t835xjRzz80PqgE6HHgN2JOsmgYu/h4qDAS4n929Rs=
 github.com/plaid/plaid-go/v31 v31.0.0 h1:1ffWhY+AZ8dUN0RiJYLXQKNl1hzfTW/NPYRcGMmXLLM=
 github.com/plaid/plaid-go/v31 v31.0.0/go.mod h1:12wSDVT0IqD47PN8nOGP8RMBRmsoXEkLD9MX0pZfEQw=
+github.com/plaid/plaid-go/v40 v40.1.0 h1:jaDD3i8SwQXZSQWNpj8ZrcUYo9uBO8pSem0pU7tBZhg=
+github.com/plaid/plaid-go/v40 v40.1.0/go.mod h1:tn8U8c+ldofh2brrDcYnJISnLrM4eC8bang+mEXgRCk=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=

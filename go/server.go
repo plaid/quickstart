@@ -15,7 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v31/plaid"
+	plaid "github.com/plaid/plaid-go/v40/plaid"
 )
 
 var (
@@ -25,6 +25,7 @@ var (
 	PLAID_PRODUCTS                       = ""
 	PLAID_COUNTRY_CODES                  = ""
 	PLAID_REDIRECT_URI                   = ""
+	SIGNAL_RULESET_KEY                   = ""
 	APP_PORT                             = ""
 	client              *plaid.APIClient = nil
 )
@@ -53,6 +54,7 @@ func init() {
 	PLAID_PRODUCTS = os.Getenv("PLAID_PRODUCTS")
 	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
 	PLAID_REDIRECT_URI = os.Getenv("PLAID_REDIRECT_URI")
+	SIGNAL_RULESET_KEY = os.Getenv("SIGNAL_RULESET_KEY")
 	APP_PORT = os.Getenv("APP_PORT")
 
 	// set defaults
@@ -269,8 +271,9 @@ func accounts(c *gin.Context) {
 func balance(c *gin.Context) {
 	ctx := context.Background()
 
-	balancesGetResp, _, err := client.PlaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(
-		*plaid.NewAccountsBalanceGetRequest(accessToken),
+	// Get accounts
+	accountsGetResp, _, err := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
+		*plaid.NewAccountsGetRequest(accessToken),
 	).Execute()
 
 	if err != nil {
@@ -278,8 +281,56 @@ func balance(c *gin.Context) {
 		return
 	}
 
+	accountID = accountsGetResp.GetAccounts()[0].AccountId
+
+	// Call signal evaluate
+	signalEvaluateRequest := plaid.NewSignalEvaluateRequest(
+		accessToken,
+		accountID,
+		"txn1234",
+		100.00)
+
+	if SIGNAL_RULESET_KEY != "" {
+		signalEvaluateRequest.SetRulesetKey(SIGNAL_RULESET_KEY)
+	}
+
+	signalEvaluateResp, _, err := client.PlaidApi.SignalEvaluate(ctx).SignalEvaluateRequest(*signalEvaluateRequest).Execute()
+
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	// Transform signal response to match balance response format
+	accounts := accountsGetResp.GetAccounts()
+	for i := range accounts {
+		if signalEvaluateResp.CoreAttributes != nil {
+			if signalEvaluateResp.CoreAttributes.AvailableBalance.IsSet() {
+				availableBalance := signalEvaluateResp.CoreAttributes.AvailableBalance.Get()
+				accounts[i].Balances.Available = *plaid.NewNullableFloat64(availableBalance)
+			}
+			if signalEvaluateResp.CoreAttributes.CurrentBalance.IsSet() {
+				currentBalance := signalEvaluateResp.CoreAttributes.CurrentBalance.Get()
+				accounts[i].Balances.Current = *plaid.NewNullableFloat64(currentBalance)
+			}
+		}
+	}
+
+	// Extract signal ruleset data
+	var rulesetKey *string
+	var outcome *string
+	if signalEvaluateResp.Ruleset.IsSet() {
+		ruleset := signalEvaluateResp.Ruleset.Get()
+		rulesetKey = ruleset.RulesetKey
+		outcome = ruleset.Outcome
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"accounts": balancesGetResp.GetAccounts(),
+		"accounts": accounts,
+		"signal_ruleset": gin.H{
+			"ruleset_key": rulesetKey,
+			"outcome":     outcome,
+		},
 	})
 }
 
@@ -485,6 +536,10 @@ func signalEvaluate(c *gin.Context) {
 		"txn1234",
 		100.00)
 
+	if SIGNAL_RULESET_KEY != "" {
+		signalEvaluateRequest.SetRulesetKey(SIGNAL_RULESET_KEY)
+	}
+
 	signalEvaluateResp, _, err := client.PlaidApi.SignalEvaluate(ctx).SignalEvaluateRequest(*signalEvaluateRequest).Execute()
 
 	if err != nil {
@@ -625,8 +680,8 @@ func linkTokenCreate(
 		"Plaid Quickstart",
 		"en",
 		countryCodes,
-		user,
 	)
+	request.SetUser(user)
 
 	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
 	if paymentInitiation != nil {
@@ -697,6 +752,7 @@ func userTokenCreate() (string, error) {
 			"Potter",
 			[]string{"+16174567890"},
 			[]string{"harrypotter@example.com"},
+			*plaid.NewNullableString(nil),
 			addressData,
 		)
 		DateOfBirth := "1980-07-31"
@@ -861,7 +917,7 @@ func getCraIncomeInsightsHandler(c *gin.Context) {
 
 	pdfRequest := plaid.NewCraCheckReportPDFGetRequest()
 	pdfRequest.SetUserToken(userToken)
-	pdfRequest.SetAddOns([]plaid.CraPDFAddOns{plaid.CRAPDFADDONS_CRA_INCOME_INSIGHTS})
+	pdfRequest.SetAddOns([]plaid.CraPDFAddOns{plaid.CRAPDFADDONS_INCOME_INSIGHTS})
 	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
 	if err != nil {
 		renderError(c, err)

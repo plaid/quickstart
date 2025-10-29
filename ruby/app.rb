@@ -160,11 +160,44 @@ end
 # https://plaid.com/docs/#balance
 get '/api/balance' do
   begin
-    balance_get_request = Plaid::AccountsBalanceGetRequest.new({ access_token: access_token })
-    balance_response = client.accounts_balance_get(balance_get_request)
-    pretty_print_response(balance_response.to_hash)
+    # Get accounts
+    accounts_get_request = Plaid::AccountsGetRequest.new({ access_token: access_token })
+    accounts_get_response = client.accounts_get(accounts_get_request)
+    account_id = accounts_get_response.accounts[0].account_id
+
+    # Call signal evaluate
+    signal_request_params = {
+      access_token: access_token,
+      account_id: account_id,
+      client_transaction_id: 'tx1234',
+      amount: 100.00
+    }
+
+    if ENV['SIGNAL_RULESET_KEY'] && !ENV['SIGNAL_RULESET_KEY'].empty?
+      signal_request_params[:ruleset_key] = ENV['SIGNAL_RULESET_KEY']
+    end
+
+    signal_evaluate_request = Plaid::SignalEvaluateRequest.new(signal_request_params)
+    signal_evaluate_response = client.signal_evaluate(signal_evaluate_request)
+    pretty_print_response(signal_evaluate_response.to_hash)
+
+    # Transform signal response to match balance response format
+    signal_hash = signal_evaluate_response.to_hash
+    balance_data = {
+      accounts: accounts_get_response.accounts.map do |account|
+        account_hash = account.to_hash
+        account_hash[:balances][:available] = signal_hash.dig(:core_attributes, :available_balance) || account_hash[:balances][:available]
+        account_hash[:balances][:current] = signal_hash.dig(:core_attributes, :current_balance) || account_hash[:balances][:current]
+        account_hash
+      end,
+      signal_ruleset: {
+        ruleset_key: signal_hash.dig(:ruleset, :ruleset_key),
+        outcome: signal_hash.dig(:ruleset, :outcome)
+      }
+    }
+
     content_type :json
-    balance_response.to_hash.to_json
+    balance_data.to_json
   rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
@@ -417,12 +450,18 @@ get '/api/signal_evaluate' do
     accounts_get_response = client.accounts_get(accounts_get_request)
     account_id = accounts_get_response.accounts[0].account_id
 
-    signal_evaluate_request = Plaid::SignalEvaluateRequest.new({
+    signal_request_params = {
       access_token: access_token,
       account_id: account_id,
       client_transaction_id: 'tx1234',
       amount: 100.00
-    })
+    }
+
+    if ENV['SIGNAL_RULESET_KEY'] && !ENV['SIGNAL_RULESET_KEY'].empty?
+      signal_request_params[:ruleset_key] = ENV['SIGNAL_RULESET_KEY']
+    end
+
+    signal_evaluate_request = Plaid::SignalEvaluateRequest.new(signal_request_params)
     signal_evaluate_response = client.signal_evaluate(signal_evaluate_request)
     pretty_print_response(signal_evaluate_response.to_hash)
     content_type :json
@@ -692,7 +731,7 @@ get '/api/cra/get_income_insights' do
     pretty_print_response(get_response.to_hash)
 
     pdf_response = client.cra_check_report_pdf_get(
-      Plaid::CraCheckReportPDFGetRequest.new({ user_token: user_token, add_ons: [Plaid::CraPDFAddOns::CRA_INCOME_INSIGHTS] })
+      Plaid::CraCheckReportPDFGetRequest.new({ user_token: user_token, add_ons: [Plaid::CraPDFAddOns::INCOME_INSIGHTS] })
     )
 
     content_type :json

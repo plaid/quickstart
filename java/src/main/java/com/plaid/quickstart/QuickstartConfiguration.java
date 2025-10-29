@@ -29,6 +29,9 @@ public class QuickstartConfiguration extends Configuration {
   // at https://dashboard.plaid.com/team/api.
   private String plaidRedirectUri;
 
+  // Parameter used for Signal ruleset key
+  private String signalRulesetKey;
+
   @JsonProperty
   public String getPlaidClientID() {
     return plaidClientID;
@@ -57,5 +60,10 @@ public class QuickstartConfiguration extends Configuration {
   @JsonProperty
   public String getPlaidRedirectUri() {
     return plaidRedirectUri;
+  }
+
+  @JsonProperty
+  public String getSignalRulesetKey() {
+    return signalRulesetKey;
   }
 }

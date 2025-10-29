@@ -100,9 +100,8 @@ const Products = () => {
               endpoint="balance"
               name="Balance"
               categories={balanceCategories}
-              schema="/accounts/balance/get/"
-              description="Check balances in real time to prevent non-sufficient funds
-        fees."
+              schema="/signal/evaluate"
+              description="Check balances in real time to prevent non-sufficient funds fees. Uses /signal/evaluate with ruleset_key for ACH NSF check use cases."
               transformData={transformBalanceData}
           />
       )}
@@ -164,7 +163,7 @@ const Products = () => {
             name="Signal"
             categories={signalCategories}
             schema="/signal/evaluate"
-            description="Evaluate the return risk of a proposed $100 debit from the first linked account (in Sandbox, results are randomly generated)"
+            description="Evaluate the return risk of a proposed $100 debit from the first linked account. Used for both Signal Transaction Scores and Balance (ACH NSF check use cases). In Sandbox, results are randomly generated."
             transformData={transformSignalData}
           />
         </>

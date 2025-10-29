@@ -75,7 +75,7 @@ public class CraResource {
 
     CraCheckReportPDFGetRequest pdfRequest = new CraCheckReportPDFGetRequest();
     pdfRequest.setUserToken(QuickstartApplication.userToken);
-    pdfRequest.addAddOnsItem(CraPDFAddOns.CRA_INCOME_INSIGHTS);
+    pdfRequest.addAddOnsItem(CraPDFAddOns.INCOME_INSIGHTS);
     Response<ResponseBody> pdfResponse = plaidClient.craCheckReportPdfGet(pdfRequest).execute();
 
     String pdfBase64 = Base64.getEncoder().encodeToString(pdfResponse.body().bytes());

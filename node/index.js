@@ -43,6 +43,9 @@ const PLAID_REDIRECT_URI = process.env.PLAID_REDIRECT_URI || '';
 // e.g. com.plaid.linksample
 const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || '';
 
+// Parameter used for Signal ruleset key
+const SIGNAL_RULESET_KEY = process.env.SIGNAL_RULESET_KEY || '';
+
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
 let ACCESS_TOKEN = null;
@@ -370,11 +373,42 @@ app.get('/api/identity', function (request, response, next) {
 app.get('/api/balance', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const balanceResponse = await client.accountsBalanceGet({
+      const accountsResponse = await client.accountsGet({
         access_token: ACCESS_TOKEN,
       });
-      prettyPrintResponse(balanceResponse);
-      response.json(balanceResponse.data);
+      ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
+
+      const signalEvaluateRequest = {
+        access_token: ACCESS_TOKEN,
+        account_id: ACCOUNT_ID,
+        client_transaction_id: 'txn1234',
+        amount: 100.00,
+      };
+
+      if (SIGNAL_RULESET_KEY) {
+        signalEvaluateRequest.ruleset_key = SIGNAL_RULESET_KEY;
+      }
+
+      const signalEvaluateResponse = await client.signalEvaluate(signalEvaluateRequest);
+      prettyPrintResponse(signalEvaluateResponse);
+
+      // Transform signal response to match balance response format
+      const balanceData = {
+        accounts: accountsResponse.data.accounts.map(account => ({
+          ...account,
+          balances: {
+            ...account.balances,
+            available: signalEvaluateResponse.data.core_attributes?.available_balance || account.balances.available,
+            current: signalEvaluateResponse.data.core_attributes?.current_balance || account.balances.current,
+          }
+        })),
+        signal_ruleset: {
+          ruleset_key: signalEvaluateResponse.data.ruleset?.ruleset_key || null,
+          outcome: signalEvaluateResponse.data.ruleset?.outcome || null,
+        }
+      };
+
+      response.json(balanceData);
     })
     .catch(next);
 });
@@ -651,12 +685,18 @@ app.get('/api/signal_evaluate', function (request, response, next) {
       });
       ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
 
-      const signalEvaluateResponse = await client.signalEvaluate({
+      const signalEvaluateRequest = {
         access_token: ACCESS_TOKEN,
         account_id: ACCOUNT_ID,
         client_transaction_id: 'txn1234',
         amount: 100.00,
-      });
+      };
+
+      if (SIGNAL_RULESET_KEY) {
+        signalEvaluateRequest.ruleset_key = SIGNAL_RULESET_KEY;
+      }
+
+      const signalEvaluateResponse = await client.signalEvaluate(signalEvaluateRequest);
       prettyPrintResponse(signalEvaluateResponse);
       response.json(signalEvaluateResponse.data);
     })

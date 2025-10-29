@@ -72,6 +72,7 @@ PLAID_SECRET = os.getenv('PLAID_SECRET')
 PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
 PLAID_PRODUCTS = os.getenv('PLAID_PRODUCTS', 'transactions').split(',')
 PLAID_COUNTRY_CODES = os.getenv('PLAID_COUNTRY_CODES', 'US').split(',')
+SIGNAL_RULESET_KEY = os.getenv('SIGNAL_RULESET_KEY', '')
 
 def empty_to_none(field):
     value = os.getenv(field)
@@ -392,13 +393,49 @@ def get_identity():
 
 @app.route('/api/balance', methods=['GET'])
 def get_balance():
+    global account_id
     try:
-        request = AccountsBalanceGetRequest(
-            access_token=access_token
-        )
-        response = client.accounts_balance_get(request)
-        pretty_print_response(response.to_dict())
-        return jsonify(response.to_dict())
+        # Get accounts
+        accounts_request = AccountsGetRequest(access_token=access_token)
+        accounts_response = client.accounts_get(accounts_request)
+        account_id = accounts_response['accounts'][0]['account_id']
+
+        # Call signal evaluate
+        signal_request_params = {
+            'access_token': access_token,
+            'account_id': account_id,
+            'client_transaction_id': 'txn1234',
+            'amount': 100.00
+        }
+
+        if SIGNAL_RULESET_KEY:
+            signal_request_params['ruleset_key'] = SIGNAL_RULESET_KEY
+
+        signal_request = SignalEvaluateRequest(**signal_request_params)
+        signal_response = client.signal_evaluate(signal_request)
+        pretty_print_response(signal_response.to_dict())
+
+        # Transform signal response to match balance response format
+        signal_dict = signal_response.to_dict()
+        balance_data = {
+            'accounts': [
+                {
+                    **account,
+                    'balances': {
+                        **account['balances'],
+                        'available': signal_dict.get('core_attributes', {}).get('available_balance') or account['balances'].get('available'),
+                        'current': signal_dict.get('core_attributes', {}).get('current_balance') or account['balances'].get('current'),
+                    }
+                }
+                for account in accounts_response['accounts']
+            ],
+            'signal_ruleset': {
+                'ruleset_key': signal_dict.get('ruleset', {}).get('ruleset_key') if signal_dict.get('ruleset') else None,
+                'outcome': signal_dict.get('ruleset', {}).get('outcome') if signal_dict.get('ruleset') else None,
+            }
+        }
+
+        return jsonify(balance_data)
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -607,11 +644,17 @@ def signal():
     response = client.accounts_get(request)
     account_id = response['accounts'][0]['account_id']
     try:
-        request = SignalEvaluateRequest(
-            access_token=access_token,
-            account_id=account_id,
-            client_transaction_id='txn1234',
-            amount=100.00)
+        signal_request_params = {
+            'access_token': access_token,
+            'account_id': account_id,
+            'client_transaction_id': 'txn1234',
+            'amount': 100.00
+        }
+
+        if SIGNAL_RULESET_KEY:
+            signal_request_params['ruleset_key'] = SIGNAL_RULESET_KEY
+
+        request = SignalEvaluateRequest(**signal_request_params)
         response = client.signal_evaluate(request)
         pretty_print_response(response.to_dict())
         return jsonify(response.to_dict())

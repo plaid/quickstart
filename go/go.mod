@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/plaid/plaid-go/v31 v31.0.0
+	github.com/plaid/plaid-go/v40 v40.1.0
 )
 
 require (
