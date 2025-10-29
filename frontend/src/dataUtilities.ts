@@ -871,6 +871,8 @@ export const transformAccountsData = (data: AccountsGetResponse) => {
       balance: formatCurrency(balance, account.balances.iso_currency_code),
       subtype: account.subtype,
       mask: account.mask!,
+      rulesetKey: null,
+      rulesetOutcome: null,
     };
     return obj;
   });
