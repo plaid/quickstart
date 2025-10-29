@@ -397,7 +397,7 @@ def get_balance():
         balance_request = AccountsBalanceGetRequest(access_token=access_token)
         balance_response = client.accounts_balance_get(balance_request)
         pretty_print_response(balance_response.to_dict())
-        return jsonify({'accounts': balance_response['accounts']})
+        return jsonify(balance_response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
