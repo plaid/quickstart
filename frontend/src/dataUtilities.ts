@@ -1,4 +1,5 @@
 import {
+  AccountBase,
   AccountsGetResponse,
   AssetReport,
   AuthGetResponse,
@@ -471,7 +472,7 @@ export const signalCategories: Array<Categories> = [
     field: "rulesetOutcome",
   },
   {
-    title: "Fields to right returned for Signal Transaction Scores templates only:",
+    title: "Fields to right returned for Signal Transaction Scores templates only ➡️",
     field: "stsHeader",
   },
   {
@@ -652,10 +653,10 @@ export const transformIdentityData = (data: IdentityData) => {
   return final;
 };
 
-export const transformBalanceData = (data: any) => {
+export const transformBalanceData = (data: AccountsGetResponse) => {
   const balanceData = data.accounts;
 
-  return balanceData.map((account: any) => {
+  return balanceData.map((account: AccountBase) => {
     const obj: DataItem = {
       name: account.name,
       current: formatCurrency(account.balances.current, account.balances.iso_currency_code),
