@@ -23,9 +23,11 @@ import retrofit2.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class SignalResource {
   private final PlaidApi plaidClient;
+  private final String signalRulesetKey;
 
-  public SignalResource(PlaidApi plaidClient) {
+  public SignalResource(PlaidApi plaidClient, String signalRulesetKey) {
     this.plaidClient = plaidClient;
+    this.signalRulesetKey = signalRulesetKey;
   }
 
   @GET
@@ -39,11 +41,20 @@ public class SignalResource {
 
       QuickstartApplication.accountId = accountsGetResponse.body().getAccounts().get(0).getAccountId();
 
+      // Generate unique transaction ID using timestamp and random component
+      String clientTransactionId = String.format("txn-%d-%s",
+        System.currentTimeMillis(),
+        java.util.UUID.randomUUID().toString().substring(0, 8));
+
       SignalEvaluateRequest signalEvaluateRequest = new SignalEvaluateRequest()
         .accessToken(QuickstartApplication.accessToken)
         .accountId(QuickstartApplication.accountId)
-        .clientTransactionId("txn1234")
+        .clientTransactionId(clientTransactionId)
         .amount(100.00);
+
+      if (signalRulesetKey != null && !signalRulesetKey.isEmpty()) {
+        signalEvaluateRequest.rulesetKey(signalRulesetKey);
+      }
 
       Response<SignalEvaluateResponse> signalEvaluateResponse = plaidClient
         .signalEvaluate(signalEvaluateRequest)

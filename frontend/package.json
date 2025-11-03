@@ -25,6 +25,7 @@
     "web-vitals": "^0.2.4"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/classnames": "^2.2.11",
     "react-scripts": "^5.0.1"
   },

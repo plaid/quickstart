@@ -14,8 +14,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v31/plaid"
+	plaid "github.com/plaid/plaid-go/v40/plaid"
 )
 
 var (
@@ -25,6 +26,7 @@ var (
 	PLAID_PRODUCTS                       = ""
 	PLAID_COUNTRY_CODES                  = ""
 	PLAID_REDIRECT_URI                   = ""
+	SIGNAL_RULESET_KEY                   = ""
 	APP_PORT                             = ""
 	client              *plaid.APIClient = nil
 )
@@ -53,6 +55,7 @@ func init() {
 	PLAID_PRODUCTS = os.Getenv("PLAID_PRODUCTS")
 	PLAID_COUNTRY_CODES = os.Getenv("PLAID_COUNTRY_CODES")
 	PLAID_REDIRECT_URI = os.Getenv("PLAID_REDIRECT_URI")
+	SIGNAL_RULESET_KEY = os.Getenv("SIGNAL_RULESET_KEY")
 	APP_PORT = os.Getenv("APP_PORT")
 
 	// set defaults
@@ -269,7 +272,7 @@ func accounts(c *gin.Context) {
 func balance(c *gin.Context) {
 	ctx := context.Background()
 
-	balancesGetResp, _, err := client.PlaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(
+	accountsGetResp, _, err := client.PlaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(
 		*plaid.NewAccountsBalanceGetRequest(accessToken),
 	).Execute()
 
@@ -279,7 +282,7 @@ func balance(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"accounts": balancesGetResp.GetAccounts(),
+		"accounts": accountsGetResp.GetAccounts(),
 	})
 }
 
@@ -479,11 +482,18 @@ func signalEvaluate(c *gin.Context) {
 
 	accountID = accountsGetResp.GetAccounts()[0].AccountId
 
+	// Generate unique transaction ID using timestamp and random component
+	clientTransactionID := fmt.Sprintf("txn-%d-%s", time.Now().UnixNano(), uuid.New().String()[:8])
+
 	signalEvaluateRequest := plaid.NewSignalEvaluateRequest(
 		accessToken,
 		accountID,
-		"txn1234",
+		clientTransactionID,
 		100.00)
+
+	if SIGNAL_RULESET_KEY != "" {
+		signalEvaluateRequest.SetRulesetKey(SIGNAL_RULESET_KEY)
+	}
 
 	signalEvaluateResp, _, err := client.PlaidApi.SignalEvaluate(ctx).SignalEvaluateRequest(*signalEvaluateRequest).Execute()
 
@@ -625,8 +635,8 @@ func linkTokenCreate(
 		"Plaid Quickstart",
 		"en",
 		countryCodes,
-		user,
 	)
+	request.SetUser(user)
 
 	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
 	if paymentInitiation != nil {
@@ -697,6 +707,7 @@ func userTokenCreate() (string, error) {
 			"Potter",
 			[]string{"+16174567890"},
 			[]string{"harrypotter@example.com"},
+			*plaid.NewNullableString(nil),
 			addressData,
 		)
 		DateOfBirth := "1980-07-31"
@@ -861,7 +872,7 @@ func getCraIncomeInsightsHandler(c *gin.Context) {
 
 	pdfRequest := plaid.NewCraCheckReportPDFGetRequest()
 	pdfRequest.SetUserToken(userToken)
-	pdfRequest.SetAddOns([]plaid.CraPDFAddOns{plaid.CRAPDFADDONS_CRA_INCOME_INSIGHTS})
+	pdfRequest.SetAddOns([]plaid.CraPDFAddOns{plaid.CRAPDFADDONS_INCOME_INSIGHTS})
 	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
 	if err != nil {
 		renderError(c, err)

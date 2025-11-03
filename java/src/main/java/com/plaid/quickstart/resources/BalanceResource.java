@@ -1,6 +1,8 @@
 package com.plaid.quickstart.resources;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.AccountsBalanceGetRequest;
@@ -19,18 +21,22 @@ import retrofit2.Response;
 public class BalanceResource {
   private final PlaidApi plaidClient;
 
-  public BalanceResource(PlaidApi plaidClient) {
+  public BalanceResource(PlaidApi plaidClient, String signalRulesetKey) {
     this.plaidClient = plaidClient;
   }
 
   @GET
-  public AccountsGetResponse getAccounts() throws IOException {
-    AccountsBalanceGetRequest request = new AccountsBalanceGetRequest()
+  public Map<String, Object> getAccounts() throws IOException {
+    AccountsBalanceGetRequest balanceRequest = new AccountsBalanceGetRequest()
       .accessToken(QuickstartApplication.accessToken);
 
-    Response<AccountsGetResponse> response = plaidClient
-      .accountsBalanceGet(request)
+    Response<AccountsGetResponse> balanceResponse = plaidClient
+      .accountsBalanceGet(balanceRequest)
       .execute();
-    return response.body();
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("accounts", balanceResponse.body().getAccounts());
+
+    return response;
   }
 }

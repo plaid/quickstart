@@ -1,4 +1,5 @@
 import {
+  AccountBase,
   AccountsGetResponse,
   AssetReport,
   AuthGetResponse,
@@ -26,7 +27,8 @@ const formatCurrency = (
   code: string | null | undefined
 ) => {
   if (number != null && number !== undefined) {
-    return ` ${parseFloat(number.toFixed(2)).toLocaleString("en")} ${code}`;
+    const formattedNumber = parseFloat(number.toFixed(2)).toLocaleString("en");
+    return code ? ` ${formattedNumber} ${code}` : ` ${formattedNumber}`;
   }
   return "no data";
 };
@@ -56,8 +58,16 @@ interface IdentityDataItem {
   names: string;
 }
 
-interface BalanceDataItem {
+interface AccountsDataItem {
   balance: string;
+  subtype: string | null;
+  mask: string;
+  name: string;
+}
+
+interface BalanceDataItem {
+  current: string;
+  available: string;
   subtype: string | null;
   mask: string;
   name: string;
@@ -125,11 +135,13 @@ interface StatementsDataItem {
 }
 
 interface SignalDataItem {
-  customerInitiatedReturnRiskScore: number | undefined | null;
-  customerInitiatedReturnRiskTier: number | undefined | null;
-  bankInitiatedReturnRiskScore: number | undefined | null;
-  bankInitiatedReturnRiskTier: number | undefined | null;
-  daysSinceFirstPlaidConnection: number | undefined | null;
+  currentBalance: string | undefined | null;
+  availableBalance: string | undefined | null;
+  rulesetOutcome: string | undefined | null;
+  stsHeader: string;
+  customerInitiatedReturnScore: string | undefined | null;
+  bankInitiatedReturnScore: string | undefined | null;
+  daysSinceFirstPlaidConnection: string | undefined | null;
 }
 
 interface IncomePaystubsDataItem {
@@ -172,6 +184,7 @@ export type DataItem =
   | AuthDataItem
   | TransactionsDataItem
   | IdentityDataItem
+  | AccountsDataItem
   | BalanceDataItem
   | InvestmentsDataItem
   | InvestmentsTransactionItem
@@ -249,8 +262,12 @@ export const balanceCategories: Array<Categories> = [
     field: "name",
   },
   {
-    title: "Balance",
-    field: "balance",
+    title: "Current Balance",
+    field: "current",
+  },
+  {
+    title: "Available Balance",
+    field: "available",
   },
   {
     title: "Subtype",
@@ -443,21 +460,28 @@ export const transferAuthorizationCategories: Array<Categories> = [
 
 export const signalCategories: Array<Categories> = [
   {
-    title: "Customer-initiated return risk score",
-    field: "customerInitiatedReturnRiskScore",
-  },
-
-  {
-    title: "Customer-initiated return risk tier",
-    field: "customerInitiatedReturnRiskTier",
+    title: "Current Balance",
+    field: "currentBalance",
   },
   {
-    title: "Bank-initiated return risk score",
-    field: "bankInitiatedReturnRiskScore",
+    title: "Available Balance",
+    field: "availableBalance",
   },
   {
-    title: "Bank-initiated return risk tier",
-    field: "bankInitiatedReturnRiskTier",
+    title: "Ruleset evaluation outcome",
+    field: "rulesetOutcome",
+  },
+  {
+    title: "Fields to right returned for Signal Transaction Scores templates only ➡️",
+    field: "stsHeader",
+  },
+  {
+    title: "Customer Initiated Return Score",
+    field: "customerInitiatedReturnScore",
+  },
+  {
+    title: "Bank Initiated Return Score",
+    field: "bankInitiatedReturnScore",
   },
   {
     title: "Sample core attribute: Days since first Plaid connection",
@@ -631,12 +655,12 @@ export const transformIdentityData = (data: IdentityData) => {
 
 export const transformBalanceData = (data: AccountsGetResponse) => {
   const balanceData = data.accounts;
-  return balanceData.map((account) => {
-    const balance: number | null | undefined =
-      account.balances.available || account.balances.current;
+
+  return balanceData.map((account: AccountBase) => {
     const obj: DataItem = {
       name: account.name,
-      balance: formatCurrency(balance, account.balances.iso_currency_code),
+      current: formatCurrency(account.balances.current, account.balances.iso_currency_code),
+      available: formatCurrency(account.balances.available, account.balances.iso_currency_code),
       subtype: account.subtype,
       mask: account.mask!,
     };
@@ -768,18 +792,22 @@ export const transformLiabilitiesData = (data: LiabilitiesDataResponse) => {
 };
 
 export const transformSignalData = (data: SignalEvaluateResponse) => {
+  const currentBalance = data.core_attributes?.current_balance;
+  const availableBalance = data.core_attributes?.available_balance;
+  const result = (data.ruleset as any)?.result;
+  const customerRisk = data.scores?.customer_initiated_return_risk;
+  const bankRisk = data.scores?.bank_initiated_return_risk;
+
   return [
     {
-      customerInitiatedReturnRiskTier:
-        data.scores.customer_initiated_return_risk!.risk_tier,
-      customerInitiatedReturnRiskScore:
-        data.scores.customer_initiated_return_risk!.score,
-      bankInitiatedReturnRiskTier:
-        data.scores.bank_initiated_return_risk!.risk_tier,
-      bankInitiatedReturnRiskScore:
-        data.scores.bank_initiated_return_risk!.score,
+      currentBalance: formatCurrency(currentBalance, null),
+      availableBalance: formatCurrency(availableBalance, null),
+      rulesetOutcome: result || "N/A - enter a RULESET_KEY in .env for results",
+      stsHeader: "",
+      customerInitiatedReturnScore: customerRisk?.score?.toString() ?? "N/A",
+      bankInitiatedReturnScore: bankRisk?.score?.toString() ?? "N/A",
       daysSinceFirstPlaidConnection:
-        data.core_attributes!.days_since_first_plaid_connection,
+        data.core_attributes?.days_since_first_plaid_connection?.toString() ?? "N/A",
     },
   ];
 };

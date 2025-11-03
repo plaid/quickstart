@@ -72,6 +72,7 @@ PLAID_SECRET = os.getenv('PLAID_SECRET')
 PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
 PLAID_PRODUCTS = os.getenv('PLAID_PRODUCTS', 'transactions').split(',')
 PLAID_COUNTRY_CODES = os.getenv('PLAID_COUNTRY_CODES', 'US').split(',')
+SIGNAL_RULESET_KEY = os.getenv('SIGNAL_RULESET_KEY', '')
 
 def empty_to_none(field):
     value = os.getenv(field)
@@ -393,12 +394,10 @@ def get_identity():
 @app.route('/api/balance', methods=['GET'])
 def get_balance():
     try:
-        request = AccountsBalanceGetRequest(
-            access_token=access_token
-        )
-        response = client.accounts_balance_get(request)
-        pretty_print_response(response.to_dict())
-        return jsonify(response.to_dict())
+        balance_request = AccountsBalanceGetRequest(access_token=access_token)
+        balance_response = client.accounts_balance_get(balance_request)
+        pretty_print_response(balance_response.to_dict())
+        return jsonify(balance_response.to_dict())
     except plaid.ApiException as e:
         error_response = format_error(e)
         return jsonify(error_response)
@@ -607,11 +606,20 @@ def signal():
     response = client.accounts_get(request)
     account_id = response['accounts'][0]['account_id']
     try:
-        request = SignalEvaluateRequest(
-            access_token=access_token,
-            account_id=account_id,
-            client_transaction_id='txn1234',
-            amount=100.00)
+        # Generate unique transaction ID using timestamp and random component
+        client_transaction_id = f"txn-{int(time.time() * 1000)}-{uuid.uuid4().hex[:8]}"
+
+        signal_request_params = {
+            'access_token': access_token,
+            'account_id': account_id,
+            'client_transaction_id': client_transaction_id,
+            'amount': 100.00
+        }
+
+        if SIGNAL_RULESET_KEY:
+            signal_request_params['ruleset_key'] = SIGNAL_RULESET_KEY
+
+        request = SignalEvaluateRequest(**signal_request_params)
         response = client.signal_evaluate(request)
         pretty_print_response(response.to_dict())
         return jsonify(response.to_dict())
