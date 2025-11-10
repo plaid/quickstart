@@ -951,8 +951,8 @@ export const transformBaseReportGetData = (data: CraCheckReportBaseReportGetResp
   return report.items.flatMap((item) =>
     item.accounts.map((account) => {
       const accountInsights = account.account_insights;
-      const averageInflow = accountInsights?.average_inflow_amount?.pop()?.total_amount;
-      const averageOutflow = accountInsights?.average_outflow_amount?.pop()?.total_amount;
+      const averageInflow = accountInsights?.average_inflow_amounts?.pop()?.total_amount;
+      const averageOutflow = accountInsights?.average_outflow_amounts?.pop()?.total_amount;
       return {
         accountName: account.name,
         averageDaysBetweenTransactions: accountInsights?.average_days_between_transactions?.toFixed(2),

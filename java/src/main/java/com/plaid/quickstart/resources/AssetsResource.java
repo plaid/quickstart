@@ -26,7 +26,7 @@ import javax.ws.rs.core.MediaType;
 
 import retrofit2.Response;
 import com.google.gson.Gson;
-import jersey.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Throwables;
 
 @Path("/assets")
 @Produces(MediaType.APPLICATION_JSON)

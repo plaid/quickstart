@@ -12,7 +12,7 @@ import com.plaid.client.model.CraPDFAddOns;
 import com.plaid.client.request.PlaidApi;
 import com.plaid.quickstart.QuickstartApplication;
 
-import jersey.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Throwables;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;

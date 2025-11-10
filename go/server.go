@@ -382,7 +382,12 @@ func transactions(c *gin.Context) {
 	sort.Slice(added, func(i, j int) bool {
 		return added[i].GetDate() < added[j].GetDate()
 	})
-	latestTransactions := added[len(added)-9:]
+
+	start := len(added) - 9
+	if start < 0 {
+		start = 0
+	}
+	latestTransactions := added[start:]
 
 	c.JSON(http.StatusOK, gin.H{
 		"latest_transactions": latestTransactions,
