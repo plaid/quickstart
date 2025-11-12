@@ -6,7 +6,7 @@ import Items from "./Components/ProductTypes/Items";
 import Context from "./Context";
 
 import styles from "./App.module.scss";
-import { CraCheckReportProduct } from "plaid";
+import { Products as PlaidProducts } from "plaid";
 
 const App = () => {
   const { linkSuccess, isPaymentInitiation, itemId, dispatch } =
@@ -21,13 +21,15 @@ const App = () => {
     const data = await response.json();
     const paymentInitiation: boolean =
       data.products.includes("payment_initiation");
-    const craEnumValues = Object.values(CraCheckReportProduct);
-    const isUserTokenFlow: boolean = data.products.some(
-      (product: CraCheckReportProduct) => craEnumValues.includes(product)
+
+    // CRA products are those that start with "cra_"
+    const craProducts = data.products.filter((product: string) =>
+      product.startsWith("cra_")
     );
-    const isCraProductsExclusively: boolean = data.products.every(
-      (product: CraCheckReportProduct) => craEnumValues.includes(product)
-    );
+    const isUserTokenFlow: boolean = craProducts.length > 0;
+    const isCraProductsExclusively: boolean =
+      craProducts.length > 0 && craProducts.length === data.products.length;
+
     dispatch({
       type: "SET_STATE",
       state: {
@@ -64,7 +66,7 @@ const App = () => {
   }, [dispatch]);
 
   const generateToken = useCallback(
-    async (isPaymentInitiation) => {
+    async (isPaymentInitiation: boolean) => {
       // Link tokens for 'payment_initiation' use a different creation flow in your backend.
       const path = isPaymentInitiation
         ? "/api/create_link_token_for_payment"

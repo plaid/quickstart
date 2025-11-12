@@ -1,4 +1,3 @@
-version: "3.5"
 x-environment:
   &QUICKSTART_ENVIRONMENT # These are read from .env file. The values in the .env file maybe overriden by shell envvars
   PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}

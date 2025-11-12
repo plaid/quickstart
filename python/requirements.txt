@@ -1,5 +1,5 @@
-Flask==3.0.0
+Flask==3.1.2
 plaid_python==37.1.0
-python-dotenv==0.15.0
-itsdangerous==2.1.2
+python-dotenv==1.2.1
+itsdangerous==2.2.0
 werkzeug==3.1.3
