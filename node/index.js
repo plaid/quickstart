@@ -132,8 +132,7 @@ app.post('/api/create_link_token', function (request, response, next) {
         // Use user_token if available, otherwise use user_id
         if (USER_TOKEN) {
           configs.user_token = USER_TOKEN;
-          // Remove user object when using user_token
-          delete configs.user;
+          // Keep user object when using user_token
         } else if (USER_ID) {
           configs.user_id = USER_ID;
           // Remove user object when using user_id
@@ -789,14 +788,18 @@ const getCraBaseReportWithRetries = (
 app.get('/api/cra/get_income_insights', async (req, res, next) => {
   Promise.resolve()
     .then(async function () {
-      // Income endpoints always use user_token
-      const getResponse = await getCheckInsightsWithRetries(client, USER_TOKEN)
+      // Use user_token if available, otherwise use user_id
+      const userIdentifier = USER_TOKEN || USER_ID;
+      const identifierKey = USER_TOKEN ? 'user_token' : 'user_id';
+
+      const getResponse = await getCheckInsightsWithRetries(client, userIdentifier, identifierKey)
       prettyPrintResponse(getResponse);
 
-      const pdfResponse = await client.craCheckReportPdfGet({
-        user_token: USER_TOKEN,
-        add_ons: ['cra_income_insights']
-      }, {
+      const pdfRequest = {};
+      pdfRequest[identifierKey] = userIdentifier;
+      pdfRequest.add_ons = ['cra_income_insights'];
+
+      const pdfResponse = await client.craCheckReportPdfGet(pdfRequest, {
         responseType: 'arraybuffer'
       });
 
@@ -811,14 +814,13 @@ app.get('/api/cra/get_income_insights', async (req, res, next) => {
 
 const getCheckInsightsWithRetries = (
   plaidClient,
-  userToken
+  userIdentifier,
+  identifierKey
 ) => pollWithRetries(
   async () => {
-    return await plaidClient.craCheckReportIncomeInsightsGet(
-      {
-        user_token: userToken
-      }
-    );
+    const request = {};
+    request[identifierKey] = userIdentifier;
+    return await plaidClient.craCheckReportIncomeInsightsGet(request);
   }
 );
 

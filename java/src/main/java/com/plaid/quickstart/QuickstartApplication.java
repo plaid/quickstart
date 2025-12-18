@@ -39,6 +39,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
   // persistent data store.
   public static String accessToken;
   public static String userToken;
+  public static String userId;
   public static String itemID;
   // The paymentId is only relevant for the UK Payment Initiation product.
   // We store the paymentId in memory - in production, store it in a secure

@@ -9,6 +9,7 @@ interface QuickstartState {
   linkToken: string | null;
   accessToken: string | null;
   userToken: string | null;
+  userId: string | null;
   itemId: string | null;
   isError: boolean;
   backend: boolean;
@@ -28,6 +29,7 @@ const initialState: QuickstartState = {
   isUserTokenFlow: false,
   linkToken: "", // Don't set to null or error message will show up briefly when site loads
   userToken: null,
+  userId: null,
   accessToken: null,
   itemId: null,
   isError: false,

@@ -45,7 +45,7 @@ const App = () => {
   const generateUserToken = useCallback(async () => {
     const response = await fetch("api/create_user_token", { method: "POST" });
     if (!response.ok) {
-      dispatch({ type: "SET_STATE", state: { userToken: null } });
+      dispatch({ type: "SET_STATE", state: { userToken: null, userId: null } });
       return;
     }
     const data = await response.json();
@@ -60,8 +60,14 @@ const App = () => {
         });
         return;
       }
-      dispatch({ type: "SET_STATE", state: { userToken: data.user_token } });
-      return data.user_token;
+      dispatch({
+        type: "SET_STATE",
+        state: {
+          userToken: data.user_token || null,
+          userId: data.user_id || null
+        }
+      });
+      return data.user_token || data.user_id;
     }
   }, [dispatch]);
 

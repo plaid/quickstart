@@ -42,13 +42,23 @@ public class CraResource {
   @Path("/get_base_report")
   public Map getBaseReport() throws IOException {
     CraCheckReportBaseReportGetRequest request = new CraCheckReportBaseReportGetRequest();
-    request.setUserToken(QuickstartApplication.userToken);
+    // Use user_token if available, otherwise use user_id
+    if (QuickstartApplication.userToken != null) {
+      request.setUserToken(QuickstartApplication.userToken);
+    } else if (QuickstartApplication.userId != null) {
+      request.setUserId(QuickstartApplication.userId);
+    }
     CraCheckReportBaseReportGetResponse baseReportResponse = pollWithRetries(
       plaidClient.craCheckReportBaseReportGet(request)
     ).body();
 
     CraCheckReportPDFGetRequest pdfRequest = new CraCheckReportPDFGetRequest();
-    pdfRequest.setUserToken(QuickstartApplication.userToken);
+    // Use user_token if available, otherwise use user_id
+    if (QuickstartApplication.userToken != null) {
+      pdfRequest.setUserToken(QuickstartApplication.userToken);
+    } else if (QuickstartApplication.userId != null) {
+      pdfRequest.setUserId(QuickstartApplication.userId);
+    }
     Response<ResponseBody> pdfResponse = plaidClient.craCheckReportPdfGet(pdfRequest).execute();
 
     String pdfBase64 = Base64.getEncoder().encodeToString(pdfResponse.body().bytes());
@@ -68,13 +78,23 @@ public class CraResource {
   @Path("/get_income_insights")
   public Map getIncomeInsigts() throws IOException {
     CraCheckReportIncomeInsightsGetRequest request = new CraCheckReportIncomeInsightsGetRequest();
-    request.setUserToken(QuickstartApplication.userToken);
+    // Use user_token if available, otherwise use user_id
+    if (QuickstartApplication.userToken != null) {
+      request.setUserToken(QuickstartApplication.userToken);
+    } else if (QuickstartApplication.userId != null) {
+      request.setUserId(QuickstartApplication.userId);
+    }
     CraCheckReportIncomeInsightsGetResponse baseReportResponse = pollWithRetries(
       plaidClient.craCheckReportIncomeInsightsGet(request)
     ).body();
 
     CraCheckReportPDFGetRequest pdfRequest = new CraCheckReportPDFGetRequest();
-    pdfRequest.setUserToken(QuickstartApplication.userToken);
+    // Use user_token if available, otherwise use user_id
+    if (QuickstartApplication.userToken != null) {
+      pdfRequest.setUserToken(QuickstartApplication.userToken);
+    } else if (QuickstartApplication.userId != null) {
+      pdfRequest.setUserId(QuickstartApplication.userId);
+    }
     pdfRequest.addAddOnsItem(CraPDFAddOns.INCOME_INSIGHTS);
     Response<ResponseBody> pdfResponse = plaidClient.craCheckReportPdfGet(pdfRequest).execute();
 
@@ -92,7 +112,12 @@ public class CraResource {
   @Path("/get_partner_insights")
   public CraCheckReportPartnerInsightsGetResponse getPartnerInsigts() throws IOException {
     CraCheckReportPartnerInsightsGetRequest request = new CraCheckReportPartnerInsightsGetRequest();
-    request.setUserToken(QuickstartApplication.userToken);
+    // Use user_token if available, otherwise use user_id
+    if (QuickstartApplication.userToken != null) {
+      request.setUserToken(QuickstartApplication.userToken);
+    } else if (QuickstartApplication.userId != null) {
+      request.setUserId(QuickstartApplication.userId);
+    }
     return pollWithRetries(plaidClient.craCheckReportPartnerInsightsGet(request)).body();
   }
 
@@ -104,7 +129,9 @@ public class CraResource {
   // https://github.com/plaid/pattern
   private <T> Response<T> pollWithRetries(Call<T> requestCallback) throws IOException {
     for (int i = 0; i <= 20; i++) {
-      Response<T> response = requestCallback.execute();
+      // Clone the call for each retry since Retrofit calls can only be executed once
+      Call<T> call = i == 0 ? requestCallback : requestCallback.clone();
+      Response<T> response = call.execute();
 
       if (response.isSuccessful()) {
         return response;
