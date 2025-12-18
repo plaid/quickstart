@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo:*)",
+      "Bash(/usr/libexec/java_home:*)",
+      "Read(//Library/Java/JavaVirtualMachines/**)",
+      "Bash(java:*)",
+      "Read(//Users/ahoffer/**)",
+      "Bash(brew --version:*)",
+      "Bash(brew list:*)",
+      "Bash(brew info:*)",
+      "Bash(source ~/.zshrc)",
+      "Bash(mvn dependency:tree:*)",
+      "Bash(export JAVA_HOME=/opt/homebrew/opt/openjdk)",
+      "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
+      "Bash(mvn clean package:*)",
+      "Read(//private/tmp/**)",
+      "Bash(/opt/homebrew/bin/grep -A 5 \"overlapping\")",
+      "Read(//tmp/**)",
+      "Bash(/usr/bin/awk:*)",
+      "Bash(cat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

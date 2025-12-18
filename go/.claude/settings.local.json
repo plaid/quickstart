@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go build:*)",
+      "Bash(go doc:*)",
+      "Read(//Users/ahoffer/quickstart/java/src/main/java/com/plaid/quickstart/**)",
+      "Read(//Users/ahoffer/quickstart/java/**)",
+      "Bash(mvn clean compile:*)",
+      "Read(//Users/ahoffer/quickstart/node/**)",
+      "Read(//Users/ahoffer/quickstart/python/**)",
+      "Read(//Users/ahoffer/quickstart/ruby/**)",
+      "Bash(ruby -e \"require ''bundler/setup''; require ''plaid''; puts Plaid::CraPDFAddOns.constants\")",
+      "Bash(/usr/libexec/java_home:*)",
+      "Bash(java -version:*)",
+      "Read(//Library/Java/JavaVirtualMachines/**)",
+      "Bash(brew list:*)",
+      "Read(//opt/homebrew/Cellar/openjdk/25.0.1/**)",
+      "Bash(export JAVA_HOME=/opt/homebrew/Cellar/openjdk/25.0.1/libexec/openjdk.jdk/Contents/Home)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

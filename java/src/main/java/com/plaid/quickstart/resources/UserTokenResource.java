@@ -38,10 +38,11 @@ public class UserTokenResource {
   // https://plaid.com/docs/api/users/#usercreate
   @POST
   public UserCreateResponse createUserToken() throws IOException {
+    String clientUserId = "user_" + UUID.randomUUID();
 
     UserCreateRequest userCreateRequest = new UserCreateRequest()
       // Typically, this will be a user ID number from your application.
-      .clientUserId("user_" + UUID.randomUUID());
+      .clientUserId(clientUserId);
 
     if (plaidProducts.stream().anyMatch(product -> product.startsWith("cra_"))) {
       // Try with Identity field first (new-style)
@@ -81,7 +82,52 @@ public class UserTokenResource {
       // Check if the response was successful
       if (!userResponse.isSuccessful()) {
         System.err.println("User create failed with code: " + userResponse.code());
-        System.err.println("Error body: " + userResponse.errorBody().string());
+        if (userResponse.errorBody() != null) {
+          String errorBody = userResponse.errorBody().string();
+          System.err.println("Error body: " + errorBody);
+
+          if (errorBody.contains("INVALID_FIELD") &&
+              plaidProducts.stream().anyMatch(product -> product.startsWith("cra_"))) {
+            UserCreateRequest retryRequest = new UserCreateRequest()
+              .clientUserId(clientUserId);
+
+            AddressData addressData = new AddressData()
+              .city("New York")
+              .region("NY")
+              .street("4 Privet Drive")
+              .postalCode("11111")
+              .country("US");
+
+            retryRequest.consumerReportUserIdentity(new ConsumerReportUserIdentity()
+              .dateOfBirth(LocalDate.parse("1980-07-31"))
+              .firstName("Harry")
+              .lastName("Potter")
+              .phoneNumbers(Arrays.asList("+16174567890"))
+              .emails(List.of("harrypotter@example.com"))
+              .primaryAddress(addressData));
+
+            Response<UserCreateResponse> retryResponse = plaidClient.userCreate(retryRequest, null).execute();
+
+            // Check if the response was successful
+            if (!retryResponse.isSuccessful()) {
+              System.err.println("User create (retry) failed with code: " + retryResponse.code());
+              if (retryResponse.errorBody() != null) {
+                System.err.println("Error body: " + retryResponse.errorBody().string());
+              }
+              throw new IOException("User create (retry) failed: " + retryResponse.code());
+            }
+
+            // Store both user_token and user_id
+            if (retryResponse.body().getUserToken() != null) {
+              QuickstartApplication.userToken = retryResponse.body().getUserToken();
+            }
+            if (retryResponse.body().getUserId() != null) {
+              QuickstartApplication.userId = retryResponse.body().getUserId();
+            }
+
+            return retryResponse.body();
+          }
+        }
         throw new IOException("User create failed: " + userResponse.code());
       }
 
@@ -95,45 +141,6 @@ public class UserTokenResource {
 
       return userResponse.body();
     } catch (IOException e) {
-      // Retry with ConsumerReportUserIdentity (old-style) if Identity fails
-      if (plaidProducts.stream().anyMatch(product -> product.startsWith("cra_"))) {
-        UserCreateRequest retryRequest = new UserCreateRequest()
-          .clientUserId("user_" + UUID.randomUUID());
-
-        AddressData addressData = new AddressData()
-          .city("New York")
-          .region("NY")
-          .street("4 Privet Drive")
-          .postalCode("11111")
-          .country("US");
-
-        retryRequest.consumerReportUserIdentity(new ConsumerReportUserIdentity()
-          .dateOfBirth(LocalDate.parse("1980-07-31"))
-          .firstName("Harry")
-          .lastName("Potter")
-          .phoneNumbers(Arrays.asList("+16174567890"))
-          .emails(List.of("harrypotter@example.com"))
-          .primaryAddress(addressData));
-
-        Response<UserCreateResponse> userResponse = plaidClient.userCreate(retryRequest, null).execute();
-
-        // Check if the response was successful
-        if (!userResponse.isSuccessful()) {
-          System.err.println("User create (retry) failed with code: " + userResponse.code());
-          System.err.println("Error body: " + userResponse.errorBody().string());
-          throw new IOException("User create (retry) failed: " + userResponse.code());
-        }
-
-        // Store both user_token and user_id
-        if (userResponse.body().getUserToken() != null) {
-          QuickstartApplication.userToken = userResponse.body().getUserToken();
-        }
-        if (userResponse.body().getUserId() != null) {
-          QuickstartApplication.userId = userResponse.body().getUserId();
-        }
-
-        return userResponse.body();
-      }
       throw e;
     }
   }

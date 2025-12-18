@@ -268,10 +268,12 @@ def create_link_token():
 def create_user_token():
     global user_token
     global user_id
+    client_user_id = "user_" + str(uuid.uuid4())
+
     try:
         user_create_request = UserCreateRequest(
             # Typically this will be a user ID number from your application.
-            client_user_id="user_" + str(uuid.uuid4())
+            client_user_id=client_user_id
         )
 
         cra_products = ["cra_base_report", "cra_income_insights", "cra_partner_insights"]
@@ -315,9 +317,8 @@ def create_user_token():
         if (error_body.get('error_code') == 'INVALID_FIELD' and
             any(product in cra_products for product in PLAID_PRODUCTS)):
             try:
-                # Retry with consumer_report_user_identity (old style)
                 retry_request = UserCreateRequest(
-                    client_user_id="user_" + str(uuid.uuid4())
+                    client_user_id=client_user_id
                 )
                 consumer_report_user_identity = ConsumerReportUserIdentity(
                     first_name="Harry",

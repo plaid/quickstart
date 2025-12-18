@@ -534,9 +534,11 @@ end
 # https://plaid.com/docs/api/users/#usercreate
 post '/api/create_user_token' do
   begin
+    client_user_id = 'user_' + SecureRandom.uuid
+
     request_data = {
       # Typically this will be a user ID number from your application.
-      client_user_id: 'user_' + SecureRandom.uuid
+      client_user_id: client_user_id
     }
 
     if products.any? { |product| product.start_with?("cra_") }
@@ -574,10 +576,11 @@ post '/api/create_user_token' do
       content_type :json
       user.to_hash.to_json
     rescue Plaid::ApiError => e
-      # Retry with ConsumerReportUserIdentity (old-style) if Identity fails
-      if products.any? { |product| product.start_with?("cra_") }
+      error_body = JSON.parse(e.response_body) rescue {}
+      if error_body['error_code'] == 'INVALID_FIELD' &&
+         products.any? { |product| product.start_with?("cra_") }
         retry_request_data = {
-          client_user_id: 'user_' + SecureRandom.uuid,
+          client_user_id: client_user_id,
           consumer_report_user_identity: {
             first_name: 'Harry',
             last_name: 'Potter',
