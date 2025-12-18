@@ -706,9 +706,11 @@ func linkTokenCreate(
 func userTokenCreate() error {
 	ctx := context.Background()
 
+	clientUserID := time.Now().String()
+
 	request := plaid.NewUserCreateRequest(
 		// Typically this will be a user ID number from your application.
-		time.Now().String(),
+		clientUserID,
 	)
 
 	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
@@ -762,10 +764,9 @@ func userTokenCreate() error {
 	userCreateResp, _, err := client.PlaidApi.UserCreate(ctx).UserCreateRequest(*request).Execute()
 
 	if err != nil {
-		// Retry with ConsumerReportUserIdentity (old-style) on error
 		plaidErr, parseErr := plaid.ToPlaidError(err)
 		if parseErr == nil && plaidErr.ErrorCode == "INVALID_FIELD" {
-			request2 := plaid.NewUserCreateRequest(time.Now().String())
+			request2 := plaid.NewUserCreateRequest(clientUserID)
 
 			products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
 			if containsProduct(products, plaid.PRODUCTS_CRA_BASE_REPORT) ||
