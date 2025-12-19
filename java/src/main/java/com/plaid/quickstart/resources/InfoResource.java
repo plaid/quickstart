@@ -27,16 +27,16 @@ public class InfoResource {
     @JsonProperty
     private final List<String> products;
 
-    public InfoResponse(List<String> plaidProducts, String accessToken, String itemID) {
+    public InfoResponse(List<String> plaidProducts, String accessToken, String itemId) {
       this.products = plaidProducts;
       this.accessToken = accessToken;
-      this.itemId = itemID;
+      this.itemId = itemId;
     }
   }
 
   @POST
   public InfoResponse getInfo() {
     return new InfoResponse(plaidProducts, QuickstartApplication.accessToken,
-      QuickstartApplication.itemID);
+      QuickstartApplication.itemId);
   }
 }
