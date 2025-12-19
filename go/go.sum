@@ -224,8 +224,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
 github.com/pelletier/go-toml/v2 v2.2.4/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
-github.com/plaid/plaid-go/v40 v40.1.0 h1:jaDD3i8SwQXZSQWNpj8ZrcUYo9uBO8pSem0pU7tBZhg=
-github.com/plaid/plaid-go/v40 v40.1.0/go.mod h1:tn8U8c+ldofh2brrDcYnJISnLrM4eC8bang+mEXgRCk=
+github.com/plaid/plaid-go/v41 v41.0.0 h1:P7aAYPpbT3L0JB0SWvCepSjbK1tVl2zEKeIf3dfT/Mg=
+github.com/plaid/plaid-go/v41 v41.0.0/go.mod h1:zcOgIXu5LmSN+dv8w/OqNNkVSLHpk7vkm1lASY1rv5c=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
