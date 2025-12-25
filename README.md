@@ -1,3 +1,40 @@
+
+sudo yum install git
+curl -sL https://rpm.nodesource.com/setup_16.x | sudo bash -
+sudo yum install -y nodejs
+
+sudo yum-config-manager --enable epel
+ sudo yum update
+ sudo yum install inotify-tools
+ sudo yum group install "Development Tools"
+sudo yum install htop
+ cd go 
+ ./start.sh
+
+
+cd quickstart-frontend
+npm install
+npm run build
+npm run strart
+
+# COPY LETS ENCRYPT CERTS
+# generate certs here.
+https://github.com/single9/docker-wildcard-letsencrypt
+sudo mkdir -p  /etc/letsencrypt/
+sudo cp -R nginx/letsencrypt  /etc/
+
+
+sudo yum install nginx
+sudo mkdir -p /etc/nginx/conf.d
+sudo cp default.conf /etc/nginx/sites-available/default (no .conf)
+
+# Make nginx start on reboot
+sudo systemctl enable nginx
+
+sudo systemctl start nginx
+sudo systemctl restart nginx
+sudo /usr/sbin/nginx -s reload
+
 # Plaid quickstart
 
 This repository accompanies Plaid's [**quickstart guide**][quickstart].
@@ -321,3 +358,4 @@ may still get an invalid certificate warning on your browser. If so, click on "a
 [docker]: https://www.docker.com
 [dashboard-api-section]: https://dashboard.plaid.com/developers/api
 [contact-sales]: https://plaid.com/contact
+
