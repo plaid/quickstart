@@ -86,7 +86,15 @@ public class LinkTokenResource {
     }
 
     if (plaidProducts.stream().anyMatch(product -> product.startsWith("cra_"))) {
-      request.userToken(QuickstartApplication.userToken);
+      // Use user_token if available, otherwise use user_id
+      if (QuickstartApplication.userToken != null) {
+        request.userToken(QuickstartApplication.userToken);
+        // Keep user object when using user_token
+      } else if (QuickstartApplication.userId != null) {
+        request.userId(QuickstartApplication.userId);
+        // Remove user object when using user_id
+        request.user(null);
+      }
       request.consumerReportPermissiblePurpose(ConsumerReportPermissiblePurpose.ACCOUNT_REVIEW_CREDIT);
       LinkTokenCreateRequestCraOptions options = new LinkTokenCreateRequestCraOptions();
       options.daysRequested(60);

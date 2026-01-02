@@ -25,6 +25,7 @@ from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.user_create_request import UserCreateRequest
 from plaid.model.consumer_report_user_identity import ConsumerReportUserIdentity
+from plaid.model.client_user_identity import ClientUserIdentity
 from plaid.model.asset_report_create_request import AssetReportCreateRequest
 from plaid.model.asset_report_create_request_options import AssetReportCreateRequestOptions
 from plaid.model.asset_report_user import AssetReportUser
@@ -128,6 +129,7 @@ transfer_id = None
 # We store the user_token in memory - in production, store it in a secure
 # persistent data store.
 user_token = None
+user_id = None
 
 item_id = None
 
@@ -208,16 +210,32 @@ def create_link_token_for_payment():
 @app.route('/api/create_link_token', methods=['POST'])
 def create_link_token():
     global user_token
+    global user_id
     try:
-        request = LinkTokenCreateRequest(
-            products=products,
-            client_name="Plaid Quickstart",
-            country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
-            language='en',
-            user=LinkTokenCreateRequestUser(
-                client_user_id=str(time.time())
+        # Build request based on whether we have user_token or user_id
+        cra_products = ["cra_base_report", "cra_income_insights", "cra_partner_insights"]
+        is_cra = any(product in cra_products for product in PLAID_PRODUCTS)
+
+        if is_cra and user_id and not user_token:
+            # For user_id, don't include user field
+            request = LinkTokenCreateRequest(
+                products=products,
+                client_name="Plaid Quickstart",
+                country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
+                language='en'
             )
-        )
+        else:
+            # For user_token or non-CRA products, include user field
+            request = LinkTokenCreateRequest(
+                products=products,
+                client_name="Plaid Quickstart",
+                country_codes=list(map(lambda x: CountryCode(x), PLAID_COUNTRY_CODES)),
+                language='en',
+                user=LinkTokenCreateRequestUser(
+                    client_user_id=str(time.time())
+                )
+            )
+
         if PLAID_REDIRECT_URI!=None:
             request['redirect_uri']=PLAID_REDIRECT_URI
         if Products('statements') in products:
@@ -227,9 +245,12 @@ def create_link_token():
             )
             request['statements']=statements
 
-        cra_products = ["cra_base_report", "cra_income_insights", "cra_partner_insights"]
-        if any(product in cra_products for product in PLAID_PRODUCTS):
-            request['user_token'] = user_token
+        if is_cra:
+            # Use user_token if available, otherwise use user_id
+            if user_token:
+                request['user_token'] = user_token
+            elif user_id:
+                request['user_id'] = user_id
             request['consumer_report_permissible_purpose'] = ConsumerReportPermissiblePurpose('ACCOUNT_REVIEW_CREDIT')
             request['cra_options'] = LinkTokenCreateRequestCraOptions(
                 days_requested=60
@@ -246,35 +267,84 @@ def create_link_token():
 @app.route('/api/create_user_token', methods=['POST'])
 def create_user_token():
     global user_token
+    global user_id
+    client_user_id = "user_" + str(uuid.uuid4())
+
     try:
-        consumer_report_user_identity = None
         user_create_request = UserCreateRequest(
-            # Typically this will be a user ID number from your application. 
-            client_user_id="user_" + str(uuid.uuid4())
+            # Typically this will be a user ID number from your application.
+            client_user_id=client_user_id
         )
 
         cra_products = ["cra_base_report", "cra_income_insights", "cra_partner_insights"]
         if any(product in cra_products for product in PLAID_PRODUCTS):
-            consumer_report_user_identity = ConsumerReportUserIdentity(
-                first_name="Harry",
-                last_name="Potter",
+            # Try with identity first (new style)
+            identity = ClientUserIdentity(
+                name={
+                    "given_name": "Harry",
+                    "family_name": "Potter"
+                },
                 date_of_birth= date(1980, 7, 31),
-                phone_numbers= ['+16174567890'],
-                emails= ['harrypotter@example.com'],
-                primary_address= {
+                phone_numbers= [{
+                    "data": '+16174567890',
+                    "primary": True
+                }],
+                emails= [{
+                    "data": 'harrypotter@example.com',
+                    "primary": True
+                }],
+                addresses= [{
+                    "street_1": '4 Privet Drive',
                     "city": 'New York',
                     "region": 'NY',
-                    "street": '4 Privet Drive',
                     "postal_code": '11111',
-                    "country": 'US'
-                }
+                    "country": 'US',
+                    "primary": True
+                }]
             )
-            user_create_request["consumer_report_user_identity"] = consumer_report_user_identity
+            user_create_request["identity"] = identity
 
         user_response = client.user_create(user_create_request)
-        user_token = user_response['user_token']
+        # Store both user_token and user_id
+        if 'user_token' in user_response:
+            user_token = user_response['user_token']
+        if 'user_id' in user_response:
+            user_id = user_response['user_id']
         return jsonify(user_response.to_dict())
     except plaid.ApiException as e:
+        # Retry with consumer_report_user_identity if identity fails
+        error_body = json.loads(e.body)
+        if (error_body.get('error_code') == 'INVALID_FIELD' and
+            any(product in cra_products for product in PLAID_PRODUCTS)):
+            try:
+                retry_request = UserCreateRequest(
+                    client_user_id=client_user_id
+                )
+                consumer_report_user_identity = ConsumerReportUserIdentity(
+                    first_name="Harry",
+                    last_name="Potter",
+                    date_of_birth= date(1980, 7, 31),
+                    phone_numbers= ['+16174567890'],
+                    emails= ['harrypotter@example.com'],
+                    primary_address= {
+                        "city": 'New York',
+                        "region": 'NY',
+                        "street": '4 Privet Drive',
+                        "postal_code": '11111',
+                        "country": 'US'
+                    }
+                )
+                retry_request["consumer_report_user_identity"] = consumer_report_user_identity
+                user_response = client.user_create(retry_request)
+                # Store both user_token and user_id
+                if 'user_token' in user_response:
+                    user_token = user_response['user_token']
+                if 'user_id' in user_response:
+                    user_id = user_response['user_id']
+                return jsonify(user_response.to_dict())
+            except plaid.ApiException as retry_error:
+                print(retry_error)
+                return jsonify(json.loads(retry_error.body)), retry_error.status
         print(e)
         return jsonify(json.loads(e.body)), e.status
 
@@ -673,14 +743,22 @@ def item():
 @app.route('/api/cra/get_base_report', methods=['GET'])
 def cra_check_report():
     try:
-        get_response = poll_with_retries(lambda: client.cra_check_report_base_report_get(
-            CraCheckReportBaseReportGetRequest(user_token=user_token, item_ids=[])
-        ))
+        # Use user_token if available, otherwise use user_id
+        if user_token:
+            base_report_request = CraCheckReportBaseReportGetRequest(user_token=user_token, item_ids=[])
+        elif user_id:
+            base_report_request = CraCheckReportBaseReportGetRequest(user_id=user_id, item_ids=[])
+
+        get_response = poll_with_retries(lambda: client.cra_check_report_base_report_get(base_report_request))
         pretty_print_response(get_response.to_dict())
 
-        pdf_response = client.cra_check_report_pdf_get(
-            CraCheckReportPDFGetRequest(user_token=user_token)
-        )
+        if user_token:
+            pdf_request = CraCheckReportPDFGetRequest(user_token=user_token)
+        elif user_id:
+            pdf_request = CraCheckReportPDFGetRequest(user_id=user_id)
+
+        pdf_response = client.cra_check_report_pdf_get(pdf_request)
+
         return jsonify({
             'report': get_response.to_dict()['report'],
             'pdf': base64.b64encode(pdf_response.read()).decode('utf-8')
@@ -695,14 +773,23 @@ def cra_check_report():
 @app.route('/api/cra/get_income_insights', methods=['GET'])
 def cra_income_insights():
     try:
-        get_response = poll_with_retries(lambda: client.cra_check_report_income_insights_get(
-            CraCheckReportIncomeInsightsGetRequest(user_token=user_token))
-        )
+        # Use user_token if available, otherwise use user_id
+        insights_request = {}
+        if user_token:
+            insights_request = CraCheckReportIncomeInsightsGetRequest(user_token=user_token)
+        elif user_id:
+            insights_request = CraCheckReportIncomeInsightsGetRequest(user_id=user_id)
+
+        get_response = poll_with_retries(lambda: client.cra_check_report_income_insights_get(insights_request))
         pretty_print_response(get_response.to_dict())
 
-        pdf_response = client.cra_check_report_pdf_get(
-            CraCheckReportPDFGetRequest(user_token=user_token, add_ons=[CraPDFAddOns('cra_income_insights')]),
-        )
+        pdf_request = {}
+        if user_token:
+            pdf_request = CraCheckReportPDFGetRequest(user_token=user_token, add_ons=[CraPDFAddOns('cra_income_insights')])
+        elif user_id:
+            pdf_request = CraCheckReportPDFGetRequest(user_id=user_id, add_ons=[CraPDFAddOns('cra_income_insights')])
+
+        pdf_response = client.cra_check_report_pdf_get(pdf_request)
 
         return jsonify({
             'report': get_response.to_dict()['report'],
@@ -717,9 +804,13 @@ def cra_income_insights():
 @app.route('/api/cra/get_partner_insights', methods=['GET'])
 def cra_partner_insights():
     try:
-        response = poll_with_retries(lambda: client.cra_check_report_partner_insights_get(
-            CraCheckReportPartnerInsightsGetRequest(user_token=user_token)
-        ))
+        # Use user_token if available, otherwise use user_id
+        if user_token:
+            partner_request = CraCheckReportPartnerInsightsGetRequest(user_token=user_token)
+        elif user_id:
+            partner_request = CraCheckReportPartnerInsightsGetRequest(user_id=user_id)
+
+        response = poll_with_retries(lambda: client.cra_check_report_partner_insights_get(partner_request))
         pretty_print_response(response.to_dict())
 
         return jsonify(response.to_dict())
