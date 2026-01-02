@@ -46,12 +46,12 @@ public class AccessTokenResource {
     // Ideally, we would store this somewhere more persistent
     QuickstartApplication.
       accessToken = response.body().getAccessToken();
-    QuickstartApplication.itemID = response.body().getItemId();
+    QuickstartApplication.itemId = response.body().getItemId();
     LOG.info("public token: " + publicToken);
     LOG.info("access token: " + QuickstartApplication.accessToken);
     LOG.info("item ID: " + response.body().getItemId());
     return new InfoResource.InfoResponse(Arrays.asList(), QuickstartApplication.accessToken,
-      QuickstartApplication.itemID);
+      QuickstartApplication.itemId);
   }
 
  

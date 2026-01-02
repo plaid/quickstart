@@ -16,7 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v40/plaid"
+	plaid "github.com/plaid/plaid-go/v41/plaid"
 )
 
 var (
@@ -129,10 +129,11 @@ func main() {
 	}
 }
 
-// We store the access_token and user_token in memory - in production, store it in a secure
+// We store the access_token, user_token, and user_id in memory - in production, store it in a secure
 // persistent data store.
 var accessToken string
 var userToken string
+var userID string
 var itemID string
 
 var paymentID string
@@ -582,12 +583,19 @@ func createLinkToken(c *gin.Context) {
 }
 
 func createUserToken(c *gin.Context) {
-	userToken, err := userTokenCreate()
+	err := userTokenCreate()
 	if err != nil {
 		renderError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"user_token": userToken})
+	response := gin.H{}
+	if userToken != "" {
+		response["user_token"] = userToken
+	}
+	if userID != "" {
+		response["user_id"] = userID
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 func convertCountryCodes(countryCodeStrs []string) []plaid.CountryCode {
@@ -663,7 +671,19 @@ func linkTokenCreate(
 	if containsProduct(products, plaid.PRODUCTS_CRA_BASE_REPORT) ||
 		containsProduct(products, plaid.PRODUCTS_CRA_INCOME_INSIGHTS) ||
 		containsProduct(products, plaid.PRODUCTS_CRA_PARTNER_INSIGHTS) {
-		request.SetUserToken(userToken)
+		// Use user_token if available, otherwise use user_id
+		if userToken != "" {
+			fmt.Println("Creating link token with user_token:", userToken)
+			request.SetUserToken(userToken)
+			// Keep user object when using user_token
+		} else if userID != "" {
+			fmt.Println("Creating link token with user_id:", userID)
+			request.SetUserId(userID)
+			// Remove user object when using user_id
+			request.User = nil
+		} else {
+			fmt.Println("ERROR: Both userToken and userID are empty!")
+		}
 		request.SetConsumerReportPermissiblePurpose(plaid.CONSUMERREPORTPERMISSIBLEPURPOSE_ACCOUNT_REVIEW_CREDIT)
 		request.SetCraOptions(*plaid.NewLinkTokenCreateRequestCraOptions(60))
 	}
@@ -683,53 +703,120 @@ func linkTokenCreate(
 
 // Create a user token which can be used for Plaid Check, Income, or Multi-Item link flows
 // https://plaid.com/docs/api/users/#usercreate
-func userTokenCreate() (string, error) {
+func userTokenCreate() error {
 	ctx := context.Background()
+
+	clientUserID := time.Now().String()
 
 	request := plaid.NewUserCreateRequest(
 		// Typically this will be a user ID number from your application.
-		time.Now().String(),
+		clientUserID,
 	)
 
 	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
 	if containsProduct(products, plaid.PRODUCTS_CRA_BASE_REPORT) ||
 		containsProduct(products, plaid.PRODUCTS_CRA_INCOME_INSIGHTS) ||
 		containsProduct(products, plaid.PRODUCTS_CRA_PARTNER_INSIGHTS) {
+		// Try with Identity field first (new-style)
+		givenName := "Harry"
+		familyName := "Potter"
+		phoneNumber := "+16174567890"
+		emailAddress := "harrypotter@example.com"
+		dateOfBirth := "1980-07-31"
+		primary := true
 		city := "New York"
 		region := "NY"
-		street := "4 Privet Drive"
 		postalCode := "11111"
 		country := "US"
-		addressData := plaid.AddressData{
-			City:       *plaid.NewNullableString(&city),
-			Region:     *plaid.NewNullableString(&region),
-			Street:     street,
-			PostalCode: *plaid.NewNullableString(&postalCode),
-			Country:    *plaid.NewNullableString(&country),
-		}
-		UserIdentity := plaid.NewConsumerReportUserIdentity(
-			"Harry",
-			"Potter",
-			[]string{"+16174567890"},
-			[]string{"harrypotter@example.com"},
-			*plaid.NewNullableString(nil),
-			addressData,
-		)
-		DateOfBirth := "1980-07-31"
-		UserIdentity.SetDateOfBirth(DateOfBirth)
-		request.SetConsumerReportUserIdentity(*UserIdentity)
 
+		ClientIdentity := plaid.ClientUserIdentity{
+			Name: *plaid.NewNullableClientUserIdentityName(&plaid.ClientUserIdentityName{
+				GivenName:  givenName,
+				FamilyName: familyName,
+			}),
+			DateOfBirth: *plaid.NewNullableString(&dateOfBirth),
+			PhoneNumbers: &[]plaid.ClientUserIdentityPhoneNumber{
+				{
+					Data:    phoneNumber,
+					Primary: primary,
+				},
+			},
+			Emails: &[]plaid.ClientUserIdentityEmail{
+				{
+					Data:    emailAddress,
+					Primary: primary,
+				},
+			},
+			Addresses: &[]plaid.ClientUserIdentityAddress{
+				{
+					Street1:    *plaid.NewNullableString(plaid.PtrString("4 Privet Drive")),
+					City:       *plaid.NewNullableString(&city),
+					Region:     *plaid.NewNullableString(&region),
+					PostalCode: *plaid.NewNullableString(&postalCode),
+					Country:    country,
+					Primary:    primary,
+				},
+			},
+		}
+		request.SetIdentity(ClientIdentity)
 	}
 
 	userCreateResp, _, err := client.PlaidApi.UserCreate(ctx).UserCreateRequest(*request).Execute()
 
 	if err != nil {
-		return "", err
+		plaidErr, parseErr := plaid.ToPlaidError(err)
+		if parseErr == nil && plaidErr.ErrorCode == "INVALID_FIELD" {
+			request2 := plaid.NewUserCreateRequest(clientUserID)
+
+			products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
+			if containsProduct(products, plaid.PRODUCTS_CRA_BASE_REPORT) ||
+				containsProduct(products, plaid.PRODUCTS_CRA_INCOME_INSIGHTS) ||
+				containsProduct(products, plaid.PRODUCTS_CRA_PARTNER_INSIGHTS) {
+				city := "New York"
+				region := "NY"
+				street := "4 Privet Drive"
+				postalCode := "11111"
+				country := "US"
+				addressData := plaid.AddressData{
+					City:       *plaid.NewNullableString(&city),
+					Region:     *plaid.NewNullableString(&region),
+					Street:     street,
+					PostalCode: *plaid.NewNullableString(&postalCode),
+					Country:    *plaid.NewNullableString(&country),
+				}
+				UserIdentity := plaid.NewConsumerReportUserIdentity(
+					"Harry",
+					"Potter",
+					[]string{"+16174567890"},
+					[]string{"harrypotter@example.com"},
+					*plaid.NewNullableString(nil),
+					addressData,
+				)
+				DateOfBirth := "1980-07-31"
+				UserIdentity.SetDateOfBirth(DateOfBirth)
+				request2.SetConsumerReportUserIdentity(*UserIdentity)
+			}
+
+			userCreateResp, _, err = client.PlaidApi.UserCreate(ctx).UserCreateRequest(*request2).Execute()
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
 	}
 
-	userToken = userCreateResp.GetUserToken()
+	// Store both user_token and user_id
+	if ut, ok := userCreateResp.GetUserTokenOk(); ok {
+		userToken = *ut
+		fmt.Println("Created user with user_token:", userToken)
+	}
+	if uid, ok := userCreateResp.GetUserIdOk(); ok {
+		userID = *uid
+		fmt.Println("Created user with user_id:", userID)
+	}
 
-	return userCreateResp.GetUserToken(), nil
+	return nil
 }
 
 func statements(c *gin.Context) {
@@ -825,14 +912,19 @@ func pollForAssetReport(ctx context.Context, client *plaid.APIClient, assetRepor
 // PDF: https://plaid.com/docs/check/api/#cracheck_reportpdfget
 func getCraBaseReportHandler(c *gin.Context) {
 	ctx := context.Background()
-	getResponse, err := getCraBaseReportWithRetries(ctx, userToken)
+	getResponse, err := getCraBaseReportWithRetries(ctx)
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	pdfRequest := plaid.NewCraCheckReportPDFGetRequest()
-	pdfRequest.SetUserToken(userToken)
+	// Use user_token if available, otherwise use user_id
+	if userToken != "" {
+		pdfRequest.SetUserToken(userToken)
+	} else if userID != "" {
+		pdfRequest.SetUserId(userID)
+	}
 	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
 	if err != nil {
 		renderError(c, err)
@@ -855,10 +947,15 @@ func getCraBaseReportHandler(c *gin.Context) {
 	})
 }
 
-func getCraBaseReportWithRetries(ctx context.Context, userToken string) (*plaid.CraCheckReportBaseReportGetResponse, error) {
+func getCraBaseReportWithRetries(ctx context.Context) (*plaid.CraCheckReportBaseReportGetResponse, error) {
 	return pollWithRetries(func() (*plaid.CraCheckReportBaseReportGetResponse, error) {
 		request := plaid.NewCraCheckReportBaseReportGetRequest()
-		request.SetUserToken(userToken)
+		// Use user_token if available, otherwise use user_id
+		if userToken != "" {
+			request.SetUserToken(userToken)
+		} else if userID != "" {
+			request.SetUserId(userID)
+		}
 		response, _, err := client.PlaidApi.CraCheckReportBaseReportGet(ctx).CraCheckReportBaseReportGetRequest(*request).Execute()
 		return &response, err
 	}, 1000, 20)
@@ -869,14 +966,19 @@ func getCraBaseReportWithRetries(ctx context.Context, userToken string) (*plaid.
 // PDF w/ income insights: https://plaid.com/docs/check/api/#cracheck_reportpdfget
 func getCraIncomeInsightsHandler(c *gin.Context) {
 	ctx := context.Background()
-	getResponse, err := getCraIncomeInsightsWithRetries(ctx, userToken)
+	getResponse, err := getCraIncomeInsightsWithRetries(ctx)
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	pdfRequest := plaid.NewCraCheckReportPDFGetRequest()
-	pdfRequest.SetUserToken(userToken)
+	// Use user_token if available, otherwise use user_id
+	if userToken != "" {
+		pdfRequest.SetUserToken(userToken)
+	} else if userID != "" {
+		pdfRequest.SetUserId(userID)
+	}
 	pdfRequest.SetAddOns([]plaid.CraPDFAddOns{plaid.CRAPDFADDONS_INCOME_INSIGHTS})
 	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
 	if err != nil {
@@ -900,10 +1002,15 @@ func getCraIncomeInsightsHandler(c *gin.Context) {
 	})
 }
 
-func getCraIncomeInsightsWithRetries(ctx context.Context, userToken string) (*plaid.CraCheckReportIncomeInsightsGetResponse, error) {
+func getCraIncomeInsightsWithRetries(ctx context.Context) (*plaid.CraCheckReportIncomeInsightsGetResponse, error) {
 	return pollWithRetries(func() (*plaid.CraCheckReportIncomeInsightsGetResponse, error) {
 		request := plaid.NewCraCheckReportIncomeInsightsGetRequest()
-		request.SetUserToken(userToken)
+		// Use user_token if available, otherwise use user_id
+		if userToken != "" {
+			request.SetUserToken(userToken)
+		} else if userID != "" {
+			request.SetUserId(userID)
+		}
 		response, _, err := client.PlaidApi.CraCheckReportIncomeInsightsGet(ctx).CraCheckReportIncomeInsightsGetRequest(*request).Execute()
 		return &response, err
 	}, 1000, 20)
@@ -913,7 +1020,7 @@ func getCraIncomeInsightsWithRetries(ctx context.Context, userToken string) (*pl
 // https://plaid.com/docs/check/api/#cracheck_reportpartner_insightsget
 func getCraPartnerInsightsHandler(c *gin.Context) {
 	ctx := context.Background()
-	getResponse, err := getCraPartnerInsightsWithRetries(ctx, userToken)
+	getResponse, err := getCraPartnerInsightsWithRetries(ctx)
 	if err != nil {
 		renderError(c, err)
 		return
@@ -924,10 +1031,15 @@ func getCraPartnerInsightsHandler(c *gin.Context) {
 	})
 }
 
-func getCraPartnerInsightsWithRetries(ctx context.Context, userToken string) (*plaid.CraCheckReportPartnerInsightsGetResponse, error) {
+func getCraPartnerInsightsWithRetries(ctx context.Context) (*plaid.CraCheckReportPartnerInsightsGetResponse, error) {
 	return pollWithRetries(func() (*plaid.CraCheckReportPartnerInsightsGetResponse, error) {
 		request := plaid.NewCraCheckReportPartnerInsightsGetRequest()
-		request.SetUserToken(userToken)
+		// Use user_token if available, otherwise use user_id
+		if userToken != "" {
+			request.SetUserToken(userToken)
+		} else if userID != "" {
+			request.SetUserId(userID)
+		}
 		response, _, err := client.PlaidApi.CraCheckReportPartnerInsightsGet(ctx).CraCheckReportPartnerInsightsGetRequest(*request).Execute()
 		return &response, err
 	}, 1000, 20)

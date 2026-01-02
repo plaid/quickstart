@@ -28,10 +28,11 @@ api_client = Plaid::ApiClient.new(
 
 client = Plaid::PlaidApi.new(api_client)
 products = ENV['PLAID_PRODUCTS'].split(',')
-# We store the access_token and user_token in memory - in production, store it in a secure
+# We store the access_token, user_token, and user_id in memory - in production, store it in a secure
 # persistent data store.
 access_token = nil
 user_token = nil
+user_id = nil
 # The payment_id is only relevant for the UK Payment Initiation product.
 # We store the payment_token in memory - in production, store it in a secure
 # persistent data store.
@@ -506,9 +507,16 @@ post '/api/create_link_token' do
       link_token_create_request.cra_options = Plaid::LinkTokenCreateRequestCraOptions.new(
         days_requested: 60
       )
-      link_token_create_request.user_token=user_token
-      link_token_create_request.consumer_report_permissible_purpose =Plaid::ConsumerReportPermissiblePurpose::ACCOUNT_REVIEW_CREDIT
-
+      # Use user_token if available, otherwise use user_id
+      if user_token
+        link_token_create_request.user_token = user_token
+        # Keep user object when using user_token
+      elsif user_id
+        link_token_create_request.user_id = user_id
+        # Remove user object when using user_id
+        link_token_create_request.user = nil
+      end
+      link_token_create_request.consumer_report_permissible_purpose = Plaid::ConsumerReportPermissiblePurpose::ACCOUNT_REVIEW_CREDIT
     end
     link_response = client.link_token_create(link_token_create_request)
     pretty_print_response(link_response.to_hash)
@@ -526,32 +534,78 @@ end
 # https://plaid.com/docs/api/users/#usercreate
 post '/api/create_user_token' do
   begin
+    client_user_id = 'user_' + SecureRandom.uuid
+
     request_data = {
       # Typically this will be a user ID number from your application.
-      client_user_id: 'user_' + SecureRandom.uuid
+      client_user_id: client_user_id
     }
 
     if products.any? { |product| product.start_with?("cra_") }
-      request_data[:consumer_report_user_identity] = {
-        first_name: 'Harry',
-        last_name: 'Potter',
+      # Try with Identity field first (new-style)
+      request_data[:identity] = {
+        name: {
+          given_name: 'Harry',
+          family_name: 'Potter'
+        },
         date_of_birth: '1980-07-31',
-        phone_numbers: ['+16174567890'],
-        emails: ['harrypotter@example.com'],
-        primary_address: {
+        phone_numbers: [{
+          data: '+16174567890',
+          primary: true
+        }],
+        emails: [{
+          data: 'harrypotter@example.com',
+          primary: true
+        }],
+        addresses: [{
+          street_1: '4 Privet Drive',
           city: 'New York',
           region: 'NY',
-          street: '4 Privet Drive',
           postal_code: '11111',
-          country: 'US'
-        }
+          country: 'US',
+          primary: true
+        }]
       }
     end
 
-    user = client.user_create(Plaid::UserCreateRequest.new(request_data))
-    user_token = user.user_token
-    content_type :json
-    user.to_hash.to_json
+    begin
+      user = client.user_create(Plaid::UserCreateRequest.new(request_data))
+      # Store both user_token and user_id
+      user_token = user.user_token if user.user_token
+      user_id = user.user_id if user.user_id
+      content_type :json
+      user.to_hash.to_json
+    rescue Plaid::ApiError => e
+      error_body = JSON.parse(e.response_body) rescue {}
+      if error_body['error_code'] == 'INVALID_FIELD' &&
+         products.any? { |product| product.start_with?("cra_") }
+        retry_request_data = {
+          client_user_id: client_user_id,
+          consumer_report_user_identity: {
+            first_name: 'Harry',
+            last_name: 'Potter',
+            date_of_birth: '1980-07-31',
+            phone_numbers: ['+16174567890'],
+            emails: ['harrypotter@example.com'],
+            primary_address: {
+              city: 'New York',
+              region: 'NY',
+              street: '4 Privet Drive',
+              postal_code: '11111',
+              country: 'US'
+            }
+          }
+        }
+        user = client.user_create(Plaid::UserCreateRequest.new(retry_request_data))
+        # Store both user_token and user_id
+        user_token = user.user_token if user.user_token
+        user_id = user.user_id if user.user_id
+        content_type :json
+        user.to_hash.to_json
+      else
+        raise e
+      end
+    end
   rescue Plaid::ApiError => e
     error_response = format_error(e)
     pretty_print_response(error_response)
@@ -665,11 +719,18 @@ end
 # PDF: https://plaid.com/docs/check/api/#cracheck_reportpdfget
 get '/api/cra/get_base_report' do
   begin
-    get_response = get_cra_base_report_with_retries(client, user_token)
+    get_response = get_cra_base_report_with_retries(client, user_token, user_id)
     pretty_print_response(get_response.to_hash)
 
+    # Use user_token if available, otherwise use user_id
+    pdf_params = {}
+    if user_token
+      pdf_params[:user_token] = user_token
+    elsif user_id
+      pdf_params[:user_id] = user_id
+    end
     pdf_response = client.cra_check_report_pdf_get(
-      Plaid::CraCheckReportPDFGetRequest.new({ user_token: user_token })
+      Plaid::CraCheckReportPDFGetRequest.new(pdf_params)
     )
 
     content_type :json
@@ -685,10 +746,17 @@ get '/api/cra/get_base_report' do
   end
 end
 
-def get_cra_base_report_with_retries(plaid_client, user_token)
+def get_cra_base_report_with_retries(plaid_client, user_token, user_id)
   poll_with_retries do
+    # Use user_token if available, otherwise use user_id
+    params = {}
+    if user_token
+      params[:user_token] = user_token
+    elsif user_id
+      params[:user_id] = user_id
+    end
     plaid_client.cra_check_report_base_report_get(
-      Plaid::CraCheckReportBaseReportGetRequest.new({ user_token: user_token })
+      Plaid::CraCheckReportBaseReportGetRequest.new(params)
     )
   end
 end
@@ -698,11 +766,18 @@ end
 # PDF w/ income insights: https://plaid.com/docs/check/api/#cracheck_reportpdfget
 get '/api/cra/get_income_insights' do
   begin
-    get_response = get_income_insights_with_retries(client, user_token)
+    get_response = get_income_insights_with_retries(client, user_token, user_id)
     pretty_print_response(get_response.to_hash)
 
+    # Use user_token if available, otherwise use user_id
+    pdf_params = { add_ons: [Plaid::CraPDFAddOns::INCOME_INSIGHTS] }
+    if user_token
+      pdf_params[:user_token] = user_token
+    elsif user_id
+      pdf_params[:user_id] = user_id
+    end
     pdf_response = client.cra_check_report_pdf_get(
-      Plaid::CraCheckReportPDFGetRequest.new({ user_token: user_token, add_ons: [Plaid::CraPDFAddOns::INCOME_INSIGHTS] })
+      Plaid::CraCheckReportPDFGetRequest.new(pdf_params)
     )
 
     content_type :json
@@ -718,10 +793,17 @@ get '/api/cra/get_income_insights' do
   end
 end
 
-def get_income_insights_with_retries(plaid_client, user_token)
+def get_income_insights_with_retries(plaid_client, user_token, user_id)
   poll_with_retries do
+    # Use user_token if available, otherwise use user_id
+    params = {}
+    if user_token
+      params[:user_token] = user_token
+    elsif user_id
+      params[:user_id] = user_id
+    end
     plaid_client.cra_check_report_income_insights_get(
-      Plaid::CraCheckReportIncomeInsightsGetRequest.new({ user_token: user_token })
+      Plaid::CraCheckReportIncomeInsightsGetRequest.new(params)
     )
   end
 end
@@ -730,7 +812,7 @@ end
 # https://plaid.com/docs/check/api/#cracheck_reportpartner_insightsget
 get '/api/cra/get_partner_insights' do
   begin
-    response = get_check_partner_insights_with_retries(client, user_token)
+    response = get_check_partner_insights_with_retries(client, user_token, user_id)
     pretty_print_response(response.to_hash)
 
     content_type :json
@@ -743,10 +825,17 @@ get '/api/cra/get_partner_insights' do
   end
 end
 
-def get_check_partner_insights_with_retries(plaid_client, user_token)
+def get_check_partner_insights_with_retries(plaid_client, user_token, user_id)
   poll_with_retries do
+    # Use user_token if available, otherwise use user_id
+    params = {}
+    if user_token
+      params[:user_token] = user_token
+    elsif user_id
+      params[:user_id] = user_id
+    end
     plaid_client.cra_check_report_partner_insights_get(
-      Plaid::CraCheckReportPartnerInsightsGetRequest.new({ user_token: user_token })
+      Plaid::CraCheckReportPartnerInsightsGetRequest.new(params)
     )
   end
 end
