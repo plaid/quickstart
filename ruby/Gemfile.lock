@@ -6,7 +6,7 @@ GEM
     base64 (0.3.0)
     domain_name (0.6.20240107)
     dotenv (3.2.0)
-    faraday (2.14.0)
+    faraday (2.14.1)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -26,7 +26,7 @@ GEM
     http-cookie (1.1.0)
       domain_name (~> 0.5)
     http-form_data (2.3.0)
-    json (2.18.0)
+    json (2.18.1)
     llhttp-ffi (0.5.1)
       ffi-compiler (~> 1.0)
       rake (~> 13.0)
@@ -37,7 +37,7 @@ GEM
     net-http (0.9.1)
       uri (>= 0.11.1)
     nio4r (2.7.5)
-    plaid (45.0.0)
+    plaid (45.1.0)
       faraday (>= 1.0.1, < 3.0)
       faraday-multipart (>= 1.0.1, < 2.0)
     public_suffix (7.0.0)
@@ -72,7 +72,7 @@ PLATFORMS
 DEPENDENCIES
   dotenv (~> 3.1)
   http (~> 5.0)
-  plaid (= 45.0.0)
+  plaid (= 45.1.0)
   puma (~> 7.1)
   rackup (~> 2.2)
   sinatra (~> 4.2)

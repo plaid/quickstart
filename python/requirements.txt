@@ -1,5 +1,5 @@
 Flask==3.1.2
-plaid_python==38.0.0
+plaid_python==38.1.0
 python-dotenv==1.2.1
 itsdangerous==2.2.0
 werkzeug==3.1.4
