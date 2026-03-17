@@ -4,13 +4,17 @@ This repository accompanies Plaid's [**quickstart guide**][quickstart].
 
 Here you'll find full example integration apps using our [**client libraries**][libraries].
 
-This Quickstart is designed to show as many products and configurations as possible, including all five officially supported client libraries and multiple Plaid APIs, against a React frontend. 
+This is the main Plaid Quickstart and is designed to show as many products and configurations as possible, including all five officially supported client libraries and multiple Plaid APIs, against a React frontend. 
+
+## Additional Quickstarts
 
 If you prefer a non-React frontend platform, or a more minimal backend in one language with one endpoint, see the [Tiny Quickstart](https://github.com/plaid/tiny-quickstart), which shows a simpler backend and is available for JavaScript, Next.js, React, and React Native frontends.
 
+For the Going.Plaid .NET SDK, see [Plaid Quickstart Blazor (Community)](https://github.com/jcoliz/PlaidQuickstartBlazor).
+
 For Identity Verification, see the [Identity Verification Quickstart](https://github.com/plaid/idv-quickstart). 
 
-For more in depth-coverage of Plaid Check (CRA) products, see the [Credit Quickstart](https://github.com/plaid/credit-quickstart).
+For Plaid Check (CRA) products, see the [Credit Quickstart](https://github.com/plaid/credit-quickstart).
 
 For a more in-depth Transfer Quickstart, see the [Transfer Quickstart](https://github.com/plaid/transfer-quickstart).
 
