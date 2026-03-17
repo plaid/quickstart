@@ -10,7 +10,7 @@ If you prefer a non-React frontend platform, or a more minimal backend in one la
 
 For Identity Verification, see the [Identity Verification Quickstart](https://github.com/plaid/idv-quickstart). 
 
-For more in depth-coverage of Plaid Check (CRA) products, see the [Credit Quickstart](https://github.com/plaid/credit-quickstart)
+For more in depth-coverage of Plaid Check (CRA) products, see the [Credit Quickstart](https://github.com/plaid/credit-quickstart).
 
 For a more in-depth Transfer Quickstart, see the [Transfer Quickstart](https://github.com/plaid/transfer-quickstart).
 
