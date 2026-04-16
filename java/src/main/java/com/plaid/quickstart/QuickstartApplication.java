@@ -107,6 +107,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
 
     plaidClient = apiClient.createService(PlaidApi.class);
 
+    environment.jersey().register(new PlaidApiExceptionMapper());
     environment.jersey().register(new AccessTokenResource(plaidClient, plaidProducts));
     environment.jersey().register(new AccountsResource(plaidClient));
     environment.jersey().register(new AssetsResource(plaidClient));

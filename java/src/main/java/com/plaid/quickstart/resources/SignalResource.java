@@ -9,6 +9,7 @@ import com.plaid.client.model.AccountsGetResponse;
 import com.plaid.client.model.AccountIdentity;
 import com.plaid.client.model.SignalEvaluateRequest;
 import com.plaid.client.model.SignalEvaluateResponse;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 
 import java.util.List;
@@ -16,8 +17,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import retrofit2.Response;
 
 @Path("/signal_evaluate")
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,11 +34,10 @@ public class SignalResource {
       AccountsGetRequest accountsGetRequest = new AccountsGetRequest()
         .accessToken(QuickstartApplication.accessToken);
 
-      Response<AccountsGetResponse> accountsGetResponse = plaidClient
-        .accountsGet(accountsGetRequest)
-        .execute();
+      AccountsGetResponse accountsGetResponseBody = PlaidApiHelper.callPlaid(
+        plaidClient.accountsGet(accountsGetRequest));
 
-      QuickstartApplication.accountId = accountsGetResponse.body().getAccounts().get(0).getAccountId();
+      QuickstartApplication.accountId = accountsGetResponseBody.getAccounts().get(0).getAccountId();
 
       // Generate unique transaction ID using timestamp and random component
       String clientTransactionId = String.format("txn-%d-%s",
@@ -56,11 +54,7 @@ public class SignalResource {
         signalEvaluateRequest.rulesetKey(signalRulesetKey);
       }
 
-      Response<SignalEvaluateResponse> signalEvaluateResponse = plaidClient
-        .signalEvaluate(signalEvaluateRequest)
-        .execute();
-
-      return signalEvaluateResponse.body();
+      return PlaidApiHelper.callPlaid(plaidClient.signalEvaluate(signalEvaluateRequest));
 
   }
 }

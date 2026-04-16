@@ -19,6 +19,12 @@ interface QuickstartState {
     error_code: string;
     error_type: string;
   };
+  linkExitError: {
+    error_message: string;
+    error_code: string;
+    error_type: string;
+    display_message: string;
+  } | null;
 }
 
 const initialState: QuickstartState = {
@@ -40,6 +46,7 @@ const initialState: QuickstartState = {
     error_code: "",
     error_message: "",
   },
+  linkExitError: null,
 };
 
 type QuickstartAction = {

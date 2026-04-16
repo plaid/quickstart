@@ -9,6 +9,7 @@ import com.plaid.client.model.AssetReportCreateResponse;
 import com.plaid.client.model.AssetReportGetRequest;
 import com.plaid.client.model.AssetReportGetResponse;
 import com.plaid.client.model.AssetReportPDFGetRequest;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 import com.plaid.client.model.PlaidError;
 import com.plaid.client.model.PlaidErrorType;
@@ -46,11 +47,10 @@ public class AssetsResource {
       .accessTokens(accessTokens)
       .daysRequested(10);
 
-    Response<AssetReportCreateResponse> assetReportCreateResponse = plaidClient
-      .assetReportCreate(assetReportCreateRequest)
-      .execute();
+    AssetReportCreateResponse assetReportCreateResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.assetReportCreate(assetReportCreateRequest));
 
-    String assetReportToken = assetReportCreateResponse.body().getAssetReportToken();
+    String assetReportToken = assetReportCreateResponseBody.getAssetReportToken();
     AssetReportGetRequest assetReportGetRequest = new AssetReportGetRequest()
       .assetReportToken(assetReportToken);
     Response<AssetReportGetResponse> assetReportGetResponse = null;
@@ -76,11 +76,10 @@ public class AssetsResource {
     AssetReportPDFGetRequest assetReportPDFGetRequest = new AssetReportPDFGetRequest()
       .assetReportToken(assetReportToken);
 
-    Response<ResponseBody> assetReportPDFGetResponse = plaidClient
-      .assetReportPdfGet(assetReportPDFGetRequest)
-      .execute();
+    ResponseBody assetReportPDFGetResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.assetReportPdfGet(assetReportPDFGetRequest));
 
-    String pdf = Base64.getEncoder().encodeToString(assetReportPDFGetResponse.body().bytes());
+    String pdf = Base64.getEncoder().encodeToString(assetReportPDFGetResponseBody.bytes());
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put("json", assetReportGetResponse.body().getReport());
     responseMap.put("pdf", pdf);

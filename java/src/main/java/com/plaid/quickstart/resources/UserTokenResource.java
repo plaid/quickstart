@@ -10,8 +10,9 @@ import com.plaid.client.model.ConsumerReportUserIdentity;
 import com.plaid.client.model.UserCreateRequest;
 import com.plaid.client.model.UserCreateResponse;
 import com.plaid.client.request.PlaidApi;
+import com.plaid.quickstart.PlaidApiException;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
-import retrofit2.Response;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -76,72 +77,48 @@ public class UserTokenResource {
       userCreateRequest.identity(identity);
     }
 
+    UserCreateResponse responseBody;
     try {
-      Response<UserCreateResponse> userResponse = plaidClient.userCreate(userCreateRequest, null).execute();
+      responseBody = PlaidApiHelper.callPlaid(
+        plaidClient.userCreate(userCreateRequest, null));
+    } catch (PlaidApiException e) {
+      // If the error is INVALID_FIELD for CRA products, retry with legacy identity format
+      String errorMessage = e.getErrorResponse().toString();
+      if (errorMessage.contains("INVALID_FIELD") &&
+          plaidProducts.stream().anyMatch(product -> product.startsWith("cra_"))) {
+        UserCreateRequest retryRequest = new UserCreateRequest()
+          .clientUserId(clientUserId);
 
-      // Check if the response was successful
-      if (!userResponse.isSuccessful()) {
-        System.err.println("User create failed with code: " + userResponse.code());
-        if (userResponse.errorBody() != null) {
-          String errorBody = userResponse.errorBody().string();
-          System.err.println("Error body: " + errorBody);
+        AddressData addressData = new AddressData()
+          .city("New York")
+          .region("NY")
+          .street("4 Privet Drive")
+          .postalCode("11111")
+          .country("US");
 
-          if (errorBody.contains("INVALID_FIELD") &&
-              plaidProducts.stream().anyMatch(product -> product.startsWith("cra_"))) {
-            UserCreateRequest retryRequest = new UserCreateRequest()
-              .clientUserId(clientUserId);
+        retryRequest.consumerReportUserIdentity(new ConsumerReportUserIdentity()
+          .dateOfBirth(LocalDate.parse("1980-07-31"))
+          .firstName("Harry")
+          .lastName("Potter")
+          .phoneNumbers(Arrays.asList("+16174567890"))
+          .emails(List.of("harrypotter@example.com"))
+          .primaryAddress(addressData));
 
-            AddressData addressData = new AddressData()
-              .city("New York")
-              .region("NY")
-              .street("4 Privet Drive")
-              .postalCode("11111")
-              .country("US");
-
-            retryRequest.consumerReportUserIdentity(new ConsumerReportUserIdentity()
-              .dateOfBirth(LocalDate.parse("1980-07-31"))
-              .firstName("Harry")
-              .lastName("Potter")
-              .phoneNumbers(Arrays.asList("+16174567890"))
-              .emails(List.of("harrypotter@example.com"))
-              .primaryAddress(addressData));
-
-            Response<UserCreateResponse> retryResponse = plaidClient.userCreate(retryRequest, null).execute();
-
-            // Check if the response was successful
-            if (!retryResponse.isSuccessful()) {
-              System.err.println("User create (retry) failed with code: " + retryResponse.code());
-              if (retryResponse.errorBody() != null) {
-                System.err.println("Error body: " + retryResponse.errorBody().string());
-              }
-              throw new IOException("User create (retry) failed: " + retryResponse.code());
-            }
-
-            // Store both user_token and user_id
-            if (retryResponse.body().getUserToken() != null) {
-              QuickstartApplication.userToken = retryResponse.body().getUserToken();
-            }
-            if (retryResponse.body().getUserId() != null) {
-              QuickstartApplication.userId = retryResponse.body().getUserId();
-            }
-
-            return retryResponse.body();
-          }
-        }
-        throw new IOException("User create failed: " + userResponse.code());
+        responseBody = PlaidApiHelper.callPlaid(
+          plaidClient.userCreate(retryRequest, null));
+      } else {
+        throw e;
       }
-
-      // Store both user_token and user_id
-      if (userResponse.body().getUserToken() != null) {
-        QuickstartApplication.userToken = userResponse.body().getUserToken();
-      }
-      if (userResponse.body().getUserId() != null) {
-        QuickstartApplication.userId = userResponse.body().getUserId();
-      }
-
-      return userResponse.body();
-    } catch (IOException e) {
-      throw e;
     }
+
+    // Store both user_token and user_id
+    if (responseBody.getUserToken() != null) {
+      QuickstartApplication.userToken = responseBody.getUserToken();
+    }
+    if (responseBody.getUserId() != null) {
+      QuickstartApplication.userId = responseBody.getUserId();
+    }
+
+    return responseBody;
   }
 }

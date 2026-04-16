@@ -7,6 +7,7 @@ import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.StatementsListRequest;
 import com.plaid.client.model.StatementsListResponse;
 import com.plaid.client.model.StatementsDownloadRequest;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 import okhttp3.ResponseBody;
 
@@ -18,8 +19,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import retrofit2.Response;
 
 @Path("/statements")
 @Produces(MediaType.APPLICATION_JSON)
@@ -36,22 +35,20 @@ public class StatementsResource {
     StatementsListRequest statementsListRequest = new StatementsListRequest()
       .accessToken(QuickstartApplication.accessToken);
 
-    Response<StatementsListResponse> statementsListResponse = plaidClient
-      .statementsList(statementsListRequest)
-      .execute();
+    StatementsListResponse statementsListResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.statementsList(statementsListRequest));
 
     StatementsDownloadRequest statementsDownloadRequest = new StatementsDownloadRequest()
       .accessToken(QuickstartApplication.accessToken)
-      .statementId(statementsListResponse.body().getAccounts().get(0).getStatements().get(0).getStatementId());
-      
-    Response<ResponseBody> statementsDownloadResponse = plaidClient
-      .statementsDownload(statementsDownloadRequest)
-      .execute();
+      .statementId(statementsListResponseBody.getAccounts().get(0).getStatements().get(0).getStatementId());
 
-    String pdf = Base64.getEncoder().encodeToString(statementsDownloadResponse.body().bytes());
+    ResponseBody statementsDownloadResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.statementsDownload(statementsDownloadRequest));
+
+    String pdf = Base64.getEncoder().encodeToString(statementsDownloadResponseBody.bytes());
 
     Map<String, Object> responseMap = new HashMap<>();
-    responseMap.put("json", statementsListResponse.body());
+    responseMap.put("json", statementsListResponseBody);
     responseMap.put("pdf", pdf);
 
     return responseMap;

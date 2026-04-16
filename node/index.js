@@ -870,17 +870,22 @@ const pollWithRetries = (
   new Promise((resolve, reject) => {
     requestCallback()
       .then(resolve)
-      .catch(() => {
+      .catch((error) => {
+        const errorCode = error?.response?.data?.error_code;
+        if (errorCode !== 'PRODUCT_NOT_READY') {
+          reject(error);
+          return;
+        }
+        if (retriesLeft === 1) {
+          reject('Ran out of retries while polling');
+          return;
+        }
         setTimeout(() => {
-          if (retriesLeft === 1) {
-            reject('Ran out of retries while polling');
-            return;
-          }
           pollWithRetries(
             requestCallback,
             ms,
             retriesLeft - 1,
-          ).then(resolve);
+          ).then(resolve).catch(reject);
         }, ms);
       });
   });

@@ -16,6 +16,7 @@ import com.plaid.client.model.PaymentInitiationRecipientCreateResponse;
 import com.plaid.client.model.PaymentInitiationAddress;
 import com.plaid.client.model.PaymentInitiationRecipientCreateRequest;
 import com.plaid.client.model.LinkTokenCreateRequestPaymentInitiation;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 
 import java.util.Arrays;
@@ -26,8 +27,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import retrofit2.Response;
 
 @Path("/create_link_token_for_payment")
 @Produces(MediaType.APPLICATION_JSON)
@@ -55,13 +54,10 @@ public class LinkTokenWithPaymentResource {
       .address(address);
 
 
-    Response<PaymentInitiationRecipientCreateResponse> recipientResponse =
-      this.plaidClient
-      .paymentInitiationRecipientCreate(recipientCreateRequest)
-      .execute();
+    PaymentInitiationRecipientCreateResponse recipientResponseBody = PlaidApiHelper.callPlaid(
+      this.plaidClient.paymentInitiationRecipientCreate(recipientCreateRequest));
 
-
-    String recipientId = recipientResponse.body().getRecipientId();
+    String recipientId = recipientResponseBody.getRecipientId();
 
     PaymentAmount amount = new PaymentAmount()
     .currency(PaymentAmountCurrency.GBP)
@@ -72,12 +68,10 @@ public class LinkTokenWithPaymentResource {
       .reference("reference")
       .amount(amount);
 
-    Response<PaymentInitiationPaymentCreateResponse> paymentResponse = plaidClient
-      .paymentInitiationPaymentCreate(paymentCreateRequest)
-      .execute();
+    PaymentInitiationPaymentCreateResponse paymentResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.paymentInitiationPaymentCreate(paymentCreateRequest));
 
-
-    String paymentId = paymentResponse.body().getPaymentId();
+    String paymentId = paymentResponseBody.getPaymentId();
      QuickstartApplication.paymentId = paymentId;
 
     LinkTokenCreateRequestPaymentInitiation paymentInitiation = new LinkTokenCreateRequestPaymentInitiation()
@@ -101,10 +95,8 @@ public class LinkTokenWithPaymentResource {
       .redirectUri(this.redirectUri)
       .paymentInitiation(paymentInitiation);
 
-    	Response<LinkTokenCreateResponse> response =plaidClient
-			.linkTokenCreate(request)
-			.execute();
-
-    return new LinkTokenResource.LinkToken(response.body().getLinkToken());
+    LinkTokenCreateResponse responseBody = PlaidApiHelper.callPlaid(
+      plaidClient.linkTokenCreate(request));
+    return new LinkTokenResource.LinkToken(responseBody.getLinkToken());
   }
 }

@@ -80,11 +80,22 @@ const App = () => {
       const response = await fetch(path, {
         method: "POST",
       });
+      const data = await response.json();
       if (!response.ok) {
-        dispatch({ type: "SET_STATE", state: { linkToken: null } });
+        dispatch({
+          type: "SET_STATE",
+          state: {
+            linkToken: null,
+            linkTokenError: data.error || {
+              error_code: data.error_code || "UNKNOWN",
+              error_type: data.error_type || "API_ERROR",
+              error_message:
+                data.error_message || `Request failed with status ${response.status}`,
+            },
+          },
+        });
         return;
       }
-      const data = await response.json();
       if (data) {
         if (data.error != null) {
           dispatch({

@@ -19,6 +19,7 @@ const Header = () => {
     isItemAccess,
     backend,
     linkTokenError,
+    linkExitError,
     isPaymentInitiation,
   } = useContext(Context);
 
@@ -89,6 +90,23 @@ const Header = () => {
             <div className={styles.linkButton}>
               <Link />
             </div>
+          )}
+          {linkExitError != null && (
+            <Callout warning>
+              <div>
+                Link exited with an error.
+              </div>
+              <div>
+                Error Code: <code>{linkExitError.error_code}</code>
+              </div>
+              <div>
+                Error Type: <code>{linkExitError.error_type}</code>
+              </div>
+              <div>Error Message: {linkExitError.error_message}</div>
+              {linkExitError.display_message && (
+                <div>Details: {linkExitError.display_message}</div>
+              )}
+            </Callout>
           )}
         </>
       ) : (
