@@ -19,6 +19,8 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import java.util.Map;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -136,11 +138,15 @@ public class CraResource {
       try {
         return PlaidApiHelper.callPlaid(call);
       } catch (PlaidApiException e) {
+        Map<String, Object> error = (Map<String, Object>) e.getErrorResponse().get("error");
+        if (error == null || !"PRODUCT_NOT_READY".equals(error.get("error_code"))) {
+          throw e;
+        }
         if (i == 20) {
           throw e;
         }
         try {
-          Thread.sleep(5000);
+          Thread.sleep(1000);
         } catch (InterruptedException ie) {
           throw Throwables.propagate(ie);
         }
