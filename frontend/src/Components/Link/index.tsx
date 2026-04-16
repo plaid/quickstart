@@ -9,7 +9,7 @@ const Link = () => {
     useContext(Context);
 
   const onSuccess = React.useCallback(
-    (public_token: string) => {
+    async (public_token: string) => {
       // If the access_token is needed, send public_token to server
       const exchangePublicTokenForAccessToken = async () => {
         const response = await fetch("/api/set_access_token", {
@@ -48,7 +48,7 @@ const Link = () => {
         // When only CRA products are enabled, only user_token is needed. access_token/public_token exchange is not needed.
         dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
       } else {
-        exchangePublicTokenForAccessToken();
+        await exchangePublicTokenForAccessToken();
       }
 
       dispatch({ type: "SET_STATE", state: { linkSuccess: true } });
