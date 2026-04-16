@@ -742,8 +742,12 @@ def poll_with_retries(request_callback, ms=1000, retries_left=20):
         try:
             return request_callback()
         except plaid.ApiException as e:
-            response = json.loads(e.body)
-            is_retryable = response['error_code'] == 'PRODUCT_NOT_READY' or e.status >= 500
+            try:
+                response = json.loads(e.body)
+                error_code = response.get('error_code', '')
+            except (json.JSONDecodeError, TypeError):
+                error_code = ''
+            is_retryable = error_code == 'PRODUCT_NOT_READY' or e.status >= 500
             if not is_retryable:
                 raise e
             elif retries_left == 0:
