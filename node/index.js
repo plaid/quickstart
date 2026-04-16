@@ -872,7 +872,9 @@ const pollWithRetries = (
       .then(resolve)
       .catch((error) => {
         const errorCode = error?.response?.data?.error_code;
-        if (errorCode !== 'PRODUCT_NOT_READY') {
+        const statusCode = error?.response?.status;
+        const isRetryable = errorCode === 'PRODUCT_NOT_READY' || (statusCode >= 500 && statusCode < 600);
+        if (!isRetryable) {
           reject(error);
           return;
         }

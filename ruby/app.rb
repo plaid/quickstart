@@ -707,7 +707,8 @@ def poll_with_retries(ms = 1000, retries_left = 20)
     yield
   rescue Plaid::ApiError => e
     json_response = JSON.parse(e.response_body)
-    raise e unless json_response['error_code'] == 'PRODUCT_NOT_READY'
+    is_retryable = json_response['error_code'] == 'PRODUCT_NOT_READY' || e.code >= 500
+    raise e unless is_retryable
 
     if retries_left > 0
       sleep(ms / 1000.0)

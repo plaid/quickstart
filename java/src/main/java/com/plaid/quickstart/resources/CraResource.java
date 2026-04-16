@@ -139,7 +139,9 @@ public class CraResource {
         return PlaidApiHelper.callPlaid(call);
       } catch (PlaidApiException e) {
         Map<String, Object> error = (Map<String, Object>) e.getErrorResponse().get("error");
-        if (error == null || !"PRODUCT_NOT_READY".equals(error.get("error_code"))) {
+        boolean isProductNotReady = error != null && "PRODUCT_NOT_READY".equals(error.get("error_code"));
+        boolean isServerError = error != null && error.get("status_code") instanceof Integer && (Integer) error.get("status_code") >= 500;
+        if (!isProductNotReady && !isServerError) {
           throw e;
         }
         if (i == 20) {

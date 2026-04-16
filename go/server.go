@@ -1057,8 +1057,10 @@ func pollWithRetries[T any](requestCallback func() (T, error), ms int, retriesLe
 	}
 	response, err := requestCallback()
 	if err != nil {
-		plaidErr, err := plaid.ToPlaidError(err)
-		if plaidErr.ErrorCode != "PRODUCT_NOT_READY" {
+		plaidErr, parseErr := plaid.ToPlaidError(err)
+		isProductNotReady := parseErr == nil && plaidErr.ErrorCode == "PRODUCT_NOT_READY"
+		isServerError := parseErr == nil && plaidErr.HasStatus() && plaidErr.GetStatus() >= 500
+		if !isProductNotReady && !isServerError {
 			return zero, err
 		}
 		time.Sleep(time.Duration(ms) * time.Millisecond)
