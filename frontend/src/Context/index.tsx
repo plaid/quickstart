@@ -24,6 +24,7 @@ interface QuickstartState {
     error_code: string;
     error_type: string;
     display_message: string;
+    institution_name: string;
   } | null;
 }
 

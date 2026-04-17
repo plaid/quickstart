@@ -892,8 +892,18 @@ const pollWithRetries = (
       });
   });
 
+app.post('/api/link_exit_error', function (request, response, next) {
+  console.log('[Link Exit Error (frontend)]');
+  console.log(util.inspect(request.body, { colors: true, depth: 4 }));
+  response.json({ status: 'logged' });
+});
+
 app.use('/api', function (error, request, response, next) {
-  console.log(error);
-  prettyPrintResponse(error.response);
-  response.json(formatError(error.response));
+  if (error.response?.data) {
+    prettyPrintResponse(error.response);
+  } else {
+    console.log(error.message || error);
+  }
+  const statusCode = error.response?.status || 500;
+  response.status(statusCode).json(formatError(error.response));
 });

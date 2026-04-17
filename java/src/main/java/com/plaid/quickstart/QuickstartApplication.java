@@ -14,6 +14,7 @@ import com.plaid.quickstart.resources.IdentityResource;
 import com.plaid.quickstart.resources.InfoResource;
 import com.plaid.quickstart.resources.InvestmentTransactionsResource;
 import com.plaid.quickstart.resources.ItemResource;
+import com.plaid.quickstart.resources.LinkExitErrorResource;
 import com.plaid.quickstart.resources.LinkTokenResource;
 import com.plaid.quickstart.resources.LinkTokenWithPaymentResource;
 import com.plaid.quickstart.resources.PaymentInitiationResource;
@@ -118,6 +119,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new InfoResource(plaidProducts));
     environment.jersey().register(new InvestmentTransactionsResource(plaidClient));
     environment.jersey().register(new ItemResource(plaidClient));
+    environment.jersey().register(new LinkExitErrorResource());
     environment.jersey().register(new LinkTokenResource(plaidClient, plaidProducts, countryCodes, redirectUri));
     environment.jersey().register(new LinkTokenWithPaymentResource(plaidClient, plaidProducts, countryCodes, redirectUri));
     environment.jersey().register(new PaymentInitiationResource(plaidClient));

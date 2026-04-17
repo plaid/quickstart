@@ -9,18 +9,23 @@ const Link = () => {
     useContext(Context);
 
   const onExit = React.useCallback(
-    (error: any) => {
+    (error: any, metadata: any) => {
       if (error != null) {
+        const linkExitError = {
+          error_type: error.error_type || "",
+          error_code: error.error_code || "",
+          error_message: error.error_message || "",
+          display_message: error.display_message || "",
+          institution_name: metadata?.institution?.name || "",
+        };
         dispatch({
           type: "SET_STATE",
-          state: {
-            linkExitError: {
-              error_type: error.error_type || "",
-              error_code: error.error_code || "",
-              error_message: error.error_message || "",
-              display_message: error.display_message || "",
-            },
-          },
+          state: { linkExitError },
+        });
+        fetch("/api/link_exit_error", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(linkExitError),
         });
       }
     },
