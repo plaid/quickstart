@@ -10,6 +10,8 @@ require 'securerandom'
 require 'sinatra'
 
 set :port, ENV['APP_PORT'] || 8000
+set :show_exceptions, false
+set :dump_errors, false
 
 # disable CSRF warning and Rack protection on localhost due to usage of local /api proxy in react app.
 # delete this for a production application.
@@ -723,23 +725,45 @@ def poll_with_retries(ms = 1000, retries_left = 20)
   end
 end
 
-error Plaid::ApiError do |e|
-  error_response = format_error(e)
-  pretty_print_response(error_response)
+post '/api/link_exit_error' do
+  request_body = JSON.parse(request.body.read)
+  puts '[Link Exit Error (frontend)]'
+  pretty_print_response(request_body)
   content_type :json
-  error_response.to_json
+  { status: 'logged' }.to_json
+end
+
+error Plaid::ApiError do |e|
+  begin
+    error_response = format_error(e)
+    pretty_print_response(error_response)
+    status e.code
+    content_type :json
+    error_response.to_json
+  rescue
+    status 500
+    content_type :json
+    { error: { status_code: 500, error_type: 'API_ERROR', error_code: 'INTERNAL_SERVER_ERROR',
+               error_message: 'An unexpected error occurred' } }.to_json
+  end
+end
+
+error do
+  status 500
+  content_type :json
+  {
+    error: {
+      status_code: 500,
+      error_type: 'API_ERROR',
+      error_code: 'INTERNAL_SERVER_ERROR',
+      error_message: 'An unexpected error occurred'
+    }
+  }.to_json
 end
 
 def format_error(err)
   body = JSON.parse(err.response_body)
-  {
-    error: {
-      status_code: err.code,
-      error_code: body['error_code'],
-      error_message: body['error_message'],
-      error_type: body['error_type']
-    }
-  }
+  { error: body.merge('status_code' => err.code) }
 end
 
 def pretty_print_response(response)

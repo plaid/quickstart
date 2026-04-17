@@ -23,6 +23,7 @@ public class PlaidApiHelper {
                 error.put("error_code", body.getOrDefault("error_code", "UNKNOWN"));
                 error.put("error_type", body.getOrDefault("error_type", "API_ERROR"));
                 error.put("error_message", body.getOrDefault("error_message", errorBody));
+                error.put("display_message", body.get("display_message"));
             } catch (Exception e) {
                 error.put("error_code", "UNKNOWN");
                 error.put("error_type", "API_ERROR");
@@ -30,7 +31,7 @@ public class PlaidApiHelper {
             }
             Map<String, Object> result = new HashMap<>();
             result.put("error", error);
-            throw new PlaidApiException(result);
+            throw new PlaidApiException(result, response.code());
         }
         return response.body();
     }

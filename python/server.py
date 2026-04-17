@@ -761,12 +761,21 @@ def pretty_print_response(response):
 
 def format_error(e):
     response = json.loads(e.body)
-    return {'error': {'status_code': e.status, 'display_message':
-                      response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type']}}
+    return {'error': {**response, 'status_code': e.status}}
+
+@app.route('/api/link_exit_error', methods=['POST'])
+def link_exit_error():
+    data = request.get_json()
+    print('[Link Exit Error (frontend)]')
+    pretty_print_response(data)
+    return jsonify({'status': 'logged'})
+
 
 @app.errorhandler(plaid.ApiException)
 def handle_plaid_error(e):
-    return jsonify(format_error(e))
+    response = format_error(e)
+    pretty_print_response(response)
+    return jsonify(response), e.status
 
 if __name__ == '__main__':
     app.run(port=int(os.getenv('PORT', 8000)))
