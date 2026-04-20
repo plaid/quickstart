@@ -43,7 +43,7 @@ const App = () => {
   }, [dispatch]);
 
   const generateUserToken = useCallback(async () => {
-    const response = await fetch("api/create_user_token", { method: "POST" });
+    const response = await fetch("/api/create_user_token", { method: "POST" });
     if (!response.ok) {
       dispatch({ type: "SET_STATE", state: { userToken: null, userId: null } });
       return;
