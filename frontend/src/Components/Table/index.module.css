@@ -1,0 +1,41 @@
+.dataTable {
+  width: 90%;
+  margin-bottom: 2.4rem;
+  border-spacing: 0px;
+  font-size: 1.4rem;
+}
+
+.headerRow {
+  text-align: left;
+  height: 3.2rem;
+}
+
+.headerField {
+  border-top: 1px solid #f6f6f6;
+  border-bottom: 1px solid #111111;
+  padding-top: 1.2rem;
+  padding-bottom: 0.8rem;
+  padding-left: 0.8rem;
+}
+
+.dataRows {
+  height: 4.8rem;
+
+  &:first-child td {
+    border-top: 0px;
+  }
+
+  &:last-child {
+    margin-bottom: 1.6rem;
+  }
+}
+
+.dataField {
+  text-align: left;
+  overflow-wrap: break-word;
+  border-top: 1px solid #f6f6f6;
+  max-width: 20rem;
+  vertical-align: top;
+  padding-top: 1.6rem;
+  padding-left: 0.8rem;
+}

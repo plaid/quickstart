@@ -1,12 +1,9 @@
 import React, { useContext } from "react";
-import { Callout } from "plaid-threads/Callout";
-import { Button } from "plaid-threads/Button";
-import { InlineLink } from "plaid-threads/InlineLink";
 
 import Link from "../Link";
 import Context from "../../Context";
 
-import styles from "./index.module.scss";
+import styles from "./index.module.css";
 
 const Header = () => {
   const {
@@ -41,14 +38,14 @@ const Header = () => {
           </p>
           {/* message if backend is not running and there is no link token */}
           {!backend ? (
-            <Callout warning>
+            <div className="rounded border border-[var(--color-gold)] bg-[var(--color-yellow-200)] p-[1.6rem]">
               Unable to fetch link_token: please make sure your backend server
               is running and that your .env file has been configured with your
               <code>PLAID_CLIENT_ID</code> and <code>PLAID_SECRET</code>.
-            </Callout>
+            </div>
           ) : /* message if backend is running and there is no link token */
           linkToken == null && backend ? (
-            <Callout warning>
+            <div className="rounded border border-[var(--color-gold)] bg-[var(--color-yellow-200)] p-[1.6rem]">
               <div>
                 Unable to fetch link_token: please make sure your backend server
                 is running and that your .env file has been configured
@@ -57,19 +54,21 @@ const Header = () => {
               <div>
                 If you are on a Windows machine, please ensure that you have
                 cloned the repo with{" "}
-                <InlineLink
+                <a
                   href="https://github.com/plaid/quickstart#special-instructions-for-windows"
                   target="_blank"
+                  className="underline"
                 >
                   symlinks turned on.
-                </InlineLink>{" "}
+                </a>{" "}
                 You can also try checking your{" "}
-                <InlineLink
+                <a
                   href="https://dashboard.plaid.com/activity/logs"
                   target="_blank"
+                  className="underline"
                 >
                   activity log
-                </InlineLink>{" "}
+                </a>{" "}
                 on your Plaid dashboard.
               </div>
               <div>
@@ -82,23 +81,27 @@ const Header = () => {
               {linkTokenError.error_code === "INVALID_LINK_CUSTOMIZATION" && (
                 <div>
                   <strong>Tip:</strong> In the{" "}
-                  <InlineLink
+                  <a
                     href="https://dashboard.plaid.com/link/data-transparency-v5"
                     target="_blank"
+                    className="underline"
                   >
                     dashboard under Link &gt; Link Customization Data
                     Transparency Messaging
-                  </InlineLink>
+                  </a>
                   , ensure at least one use case is selected. After selecting a
                   use case, make sure to click <strong>Publish Changes</strong>.
                 </div>
               )}
-            </Callout>
+            </div>
           ) : linkToken === "" ? (
             <div className={styles.linkButton}>
-              <Button large disabled>
+              <button
+                className="inline-flex items-center justify-center rounded bg-[var(--color-black-1000)] px-[2.4rem] py-[1.6rem] text-[1.6rem] font-semibold text-white opacity-50 cursor-not-allowed"
+                disabled
+              >
                 Loading...
-              </Button>
+              </button>
             </div>
           ) : (
             <div className={styles.linkButton}>
@@ -106,7 +109,7 @@ const Header = () => {
             </div>
           )}
           {linkExitError != null && (
-            <Callout warning>
+            <div className="rounded border border-[var(--color-gold)] bg-[var(--color-yellow-200)] p-[1.6rem]">
               <div>
                 Link exited with an error.
               </div>
@@ -123,13 +126,14 @@ const Header = () => {
               {linkExitError.error_code === "INVALID_LINK_CUSTOMIZATION" && (
                 <div>
                   <strong>Tip:</strong> In the{" "}
-                  <InlineLink
+                  <a
                     href="https://dashboard.plaid.com/link/data-transparency-v5"
                     target="_blank"
+                    className="underline"
                   >
                     dashboard under Link &gt; Link Customization Data
                     Transparency Messaging
-                  </InlineLink>
+                  </a>
                   , ensure at least one use case is selected. After selecting a
                   use case, make sure to click <strong>Publish Changes</strong>.
                 </div>
@@ -144,12 +148,13 @@ const Header = () => {
                   <div>
                     {linkExitError.institution_name} requires a special
                     registration process to access Production data. See{" "}
-                    <InlineLink
+                    <a
                       href="https://dashboard.plaid.com/activity/status/oauth-institutions"
                       target="_blank"
+                      className="underline"
                     >
                       OAuth institution status
-                    </InlineLink>{" "}
+                    </a>{" "}
                     for details.
                   </div>
                 ) : (
@@ -159,7 +164,7 @@ const Header = () => {
                     hours to become available after obtaining Production access.
                   </div>
                 ))}
-            </Callout>
+            </div>
           )}
         </>
       ) : (
@@ -169,16 +174,17 @@ const Header = () => {
               <h4 className={styles.subtitle}>
                 Congrats! Your payment is now confirmed.
                 <p />
-                <Callout>
+                <div className="rounded border border-[var(--color-black-300)] bg-[var(--color-black-100)] p-[1.6rem]">
                   You can see information of all your payments in the{" "}
-                  <InlineLink
+                  <a
                     href="https://dashboard.plaid.com/activity/payments"
                     target="_blank"
+                    className="underline"
                   >
                     Payments Dashboard
-                  </InlineLink>
+                  </a>
                   .
-                </Callout>
+                </div>
               </h4>
               <p className={styles.requests}>
                 Now that the 'payment_id' stored in your server, you can use it
@@ -190,12 +196,13 @@ const Header = () => {
               {isItemAccess ? (
                 <h4 className={styles.subtitle}>
                   Congrats! By linking an account, you have created an{" "}
-                  <InlineLink
+                  <a
                     href="http://plaid.com/docs/quickstart/glossary/#item"
                     target="_blank"
+                    className="underline"
                   >
                     Item
-                  </InlineLink>
+                  </a>
                   .
                 </h4>
               ) : userToken || userId ? (
@@ -204,9 +211,9 @@ const Header = () => {
                 </h4>
               ) : (
                 <h4 className={styles.subtitle}>
-                  <Callout warning>
+                  <div className="rounded border border-[var(--color-gold)] bg-[var(--color-yellow-200)] p-[1.6rem]">
                     Unable to create an item. Please check your backend server
-                  </Callout>
+                  </div>
                 </h4>
               )}
               <div className={styles.itemAccessContainer}>

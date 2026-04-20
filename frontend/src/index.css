@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Cern, Helvetica, Arial, sans-serif;
+  --font-mono: Inconsolata, Consolas, Courier, monospace;
+  --color-black-100: #fafafa;
+  --color-black-200: #f6f6f6;
+  --color-black-300: #ededed;
+  --color-black-1000: #111111;
+  --color-red-200: #ffd7dc;
+  --color-red-400: #ffaab9;
+  --color-blue-400: #b1eefc;
+  --color-yellow-200: #fefbb8;
+  --color-yellow-600: #fce76b;
+  --color-gold: #ba7d17;
+  --color-shadow: rgba(17, 17, 17, 0.08);
+}
+
+/*
+ * Base typography replicating plaid-threads
+ * $unit = 0.8rem, root font-size = 62.5% (10px base)
+ */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    -webkit-font-variant-ligatures: common-ligatures;
+    -webkit-font-smoothing: antialiased;
+    font-variant-ligatures: common-ligatures;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    font-size: 62.5%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-black-1000);
+    font-size: 1.6rem;
+    line-height: 2.4rem;
+  }
+
+  h1 {
+    font-family: var(--font-sans);
+    font-size: 6rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-family: var(--font-sans);
+    font-size: 3.6rem;
+    font-weight: 800;
+    line-height: 1.33;
+  }
+
+  h3 {
+    font-family: var(--font-sans);
+    font-size: 3.6rem;
+    line-height: 1.33;
+    font-weight: normal;
+  }
+
+  h4 {
+    font-family: var(--font-sans);
+    font-size: 2.4rem;
+    line-height: 1.33;
+    font-weight: normal;
+  }
+
+  h5 {
+    font-family: var(--font-sans);
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  p {
+    font-size: 1.6rem;
+    line-height: 1.5;
+  }
+
+  a {
+    color: var(--color-black-1000);
+    text-decoration: none;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background-color: var(--color-black-200);
+    border-radius: 0.2rem;
+    padding: 0.2rem 0.4rem;
+    color: var(--color-black-1000);
+  }
+}

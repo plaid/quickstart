@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "plaid-threads/Button";
-import { Note } from "plaid-threads/Note";
-
-import InlineLink from "plaid-threads/InlineLink";
 
 import { ErrorDataItem } from "../../dataUtilities";
 
-import styles from "./index.module.scss";
+import styles from "./index.module.css";
 
 interface Props {
   error: ErrorDataItem;
@@ -44,9 +40,11 @@ const Error = (props: Props) => {
     <>
       <div className={styles.errorTop}></div>
       <div className={styles.errorContainer}>
-        <Note error className={styles.code}>
-          {props.error.status_code ? props.error.status_code : "error"}
-        </Note>
+        <div className={styles.code}>
+          <span className="inline-block self-start rounded-sm border border-[var(--color-red-400)] bg-[var(--color-red-200)] px-[0.8rem] py-[0.2rem] font-mono text-[1.4rem] font-semibold leading-normal">
+            {props.error.status_code ? props.error.status_code : "error"}
+          </span>
+        </div>
         <div className={styles.errorContents}>
           <div className={styles.errorItem}>
             <span className={styles.errorTitle}>Error code: </span>
@@ -74,13 +72,14 @@ const Error = (props: Props) => {
           <div className={styles.errorItem}>
             <span className={styles.errorMessage}>
               <strong>Tip:</strong> In the{" "}
-              <InlineLink
+              <a
                 href="https://dashboard.plaid.com/link/data-transparency-v5"
                 target="_blank"
+                className="underline"
               >
                 dashboard under Link &gt; Link Customization Data Transparency
                 Messaging
-              </InlineLink>
+              </a>
               , ensure at least one use case is selected. After selecting a use
               case, make sure to click <strong>Publish Changes</strong>.
             </span>
@@ -93,25 +92,26 @@ const Error = (props: Props) => {
               Capital One, and American Express, may take up to 24 hours to
               become available after obtaining Production access. PNC and Charles
               Schwab require a{" "}
-              <InlineLink
+              <a
                 href="https://dashboard.plaid.com/activity/status/oauth-institutions"
                 target="_blank"
+                className="underline"
               >
                 special registration process
-              </InlineLink>{" "}
+              </a>{" "}
               to access Production data.
             </span>
           </div>
         )}
-        <Button
-          small
-          wide
-          className={styles.learnMore}
-          target="_blank"
-          href={path}
-        >
-          Learn more
-        </Button>
+        <div className={styles.learnMore}>
+          <a
+            className="inline-flex w-full items-center justify-center rounded bg-[var(--color-black-1000)] px-[1.6rem] py-[0.8rem] text-[1.4rem] font-semibold text-white no-underline hover:opacity-90"
+            target="_blank"
+            href={path}
+          >
+            Learn more
+          </a>
+        </div>
       </div>
     </>
   );

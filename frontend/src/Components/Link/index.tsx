@@ -1,6 +1,5 @@
 import React, { useEffect, useContext } from "react";
 import { usePlaidLink } from "react-plaid-link";
-import { Button } from "plaid-threads/Button";
 
 import Context from "../../Context";
 
@@ -104,9 +103,14 @@ const Link = () => {
   }, [ready, open, isOauth]);
 
   return (
-    <Button type="button" large onClick={() => open()} disabled={!ready}>
+    <button
+      type="button"
+      className="inline-flex items-center justify-center rounded bg-[var(--color-black-1000)] px-[2.4rem] py-[1.6rem] text-[1.6rem] font-semibold text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+      onClick={() => open()}
+      disabled={!ready}
+    >
       Launch Link
-    </Button>
+    </button>
   );
 };
 

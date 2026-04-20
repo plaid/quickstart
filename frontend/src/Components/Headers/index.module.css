@@ -1,0 +1,69 @@
+.grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  margin-bottom: 1.6rem;
+}
+
+.title {
+  margin-top: 7.2rem;
+  margin-bottom: 0;
+  font-weight: 800;
+  height: 4.8rem;
+}
+
+.subtitle {
+  margin-top: 0;
+  margin-bottom: 2.4rem;
+}
+
+.introPar {
+  width: 100%;
+  font-size: 1.6rem;
+  margin: 1.6rem 0;
+}
+
+.linkButton {
+  margin-top: 2.4rem;
+}
+
+.itemAccessContainer {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: 100%;
+  box-shadow: 0 0.8rem 0.8rem 0 rgba(17, 17, 17, 0.08);
+  margin-top: 2.4rem;
+  border-radius: 2px;
+}
+
+.itemAccessRow {
+  display: flex;
+  border: 1px solid #f6f6f6;
+  height: 50%;
+  margin: 0;
+
+  &:last-child {
+    border-top: 0px;
+  }
+}
+
+.idName {
+  padding: 1.6rem 2.4rem 1.6rem 4rem;
+  flex: 1;
+  font-weight: bold;
+  font-family: Inconsolata, Consolas, Courier, monospace;
+  color: #111111;
+}
+
+.tokenText {
+  padding: 1.6rem 2.4rem 1.6rem 0;
+  flex: 5;
+  font-family: Inconsolata, Consolas, Courier, monospace;
+}
+
+.requests {
+  margin-top: 5.6rem;
+  font-size: 1.6rem;
+}

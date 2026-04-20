@@ -1,0 +1,12 @@
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 56rem;
+  max-width: 96rem;
+  margin: 0 auto;
+}

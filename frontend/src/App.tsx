@@ -5,7 +5,7 @@ import Products from "./Components/ProductTypes/Products";
 import Items from "./Components/ProductTypes/Items";
 import Context from "./Context";
 
-import styles from "./App.module.scss";
+import styles from "./App.module.css";
 
 const App = () => {
   const { linkSuccess, isPaymentInitiation, itemId, dispatch } =

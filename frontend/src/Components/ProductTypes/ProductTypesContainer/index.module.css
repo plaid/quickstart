@@ -1,23 +1,21 @@
-@import "plaid-threads/scss/variables";
-
 .container {
   width: 100%;
-  border: 1px solid $black200;
+  border: 1px solid #f6f6f6;
   border-radius: 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: $shadow-small;
-  margin: 0 0 3 * $unit 0;
+  box-shadow: 0 0.8rem 0.8rem 0 rgba(17, 17, 17, 0.08);
+  margin: 0 0 2.4rem 0;
 }
 
 .header {
   width: 100%;
   border-bottom: 0px;
-  height: 13 * $unit;
+  height: 10.4rem;
   font-weight: 800;
-  padding-top: 5 * $unit;
-  padding-left: 5 * $unit;
+  padding-top: 4rem;
+  padding-left: 4rem;
   margin-top: 0;
   margin-bottom: 0;
 }

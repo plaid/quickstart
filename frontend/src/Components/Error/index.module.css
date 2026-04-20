@@ -1,9 +1,7 @@
-@import "plaid-threads/scss/variables";
-
 .errorTop {
   width: 90%;
   height: 1px;
-  border-top: 1px solid $black200;
+  border-top: 1px solid #f6f6f6;
 }
 
 .errorContainer {
@@ -15,20 +13,19 @@
 }
 
 .code {
-  margin: 2 * $unit 0px 2 * $unit 3 * $unit;
-  font: $font-stack-monospace;
+  margin: 1.6rem 0px 1.6rem 2.4rem;
+  font-family: Inconsolata, Consolas, Courier, monospace;
   font-size: 1.4rem;
 }
 
 .errorContents {
-  margin: 3 * $unit 4 * $unit;
- 
+  margin: 2.4rem 3.2rem;
 }
 
 .errorItem {
   display: grid;
   grid-template-columns: 2fr 5fr;
-  margin-bottom: $unit;
+  margin-bottom: 0.8rem;
 }
 
 .errorTitle {
@@ -38,7 +35,7 @@
 
 .errorData {
   line-height: normal;
-  font-family: $font-stack-monospace;
+  font-family: Inconsolata, Consolas, Courier, monospace;
   letter-spacing: 0.25px;
 }
 
@@ -52,7 +49,7 @@
   top: 50%;
   height: 6px;
   width: 100%;
-  background-color: $red200;
+  background-color: #ffd7dc;
   z-index: -1;
 }
 
@@ -61,7 +58,7 @@
 }
 
 .learnMore {
-  margin: 2 * $unit;
-  margin-left: 3 * $unit;
+  margin: 1.6rem;
+  margin-left: 2.4rem;
   width: 70%;
 }
