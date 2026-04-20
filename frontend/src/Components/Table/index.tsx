@@ -3,7 +3,7 @@ import React from "react";
 import { DataItem, Categories } from "../../dataUtilities";
 import Identity from "./Identity";
 
-import styles from "./index.module.scss";
+import styles from "./index.module.css";
 
 interface Props {
   data: Array<DataItem>;

@@ -1,8 +1,6 @@
-@import "plaid-threads/scss/variables";
-
 .identityTable {
   width: 90%;
-  margin-bottom: 3 * $unit;
+  margin-bottom: 2.4rem;
   font-size: 1.4rem;
   line-height: normal;
 }
@@ -10,27 +8,27 @@
 .identityHeadersRow {
   display: grid;
   grid-template-columns: 25% 25% 25% 25%;
-  grid-gap: $unit;
-  border-top: 1px solid $black200;
-  border-bottom: 1px solid $black1000;
+  grid-gap: 0.8rem;
+  border-top: 1px solid #f6f6f6;
+  border-bottom: 1px solid #111111;
   font-weight: bold;
 }
 
 .identityHeader {
-  line-height: 2 * $unit;
+  line-height: 1.6rem;
   position: relative;
   bottom: 0;
-  padding: $unit 0 0.4rem 0;
+  padding: 0.8rem 0 0.4rem 0;
 }
 
 .identityDataBody {
-  margin-top: 2 * $unit;
+  margin-top: 1.6rem;
 }
 
 .identityDataRow {
   display: grid;
   grid-template-columns: 25% 25% 25% 25%;
   word-wrap: break-word;
-  grid-gap: $unit;
+  grid-gap: 0.8rem;
   margin-bottom: 5px;
 }
