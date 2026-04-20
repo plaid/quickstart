@@ -89,7 +89,7 @@ the dashboard: [https://dashboard.plaid.com/developers/keys](https://dashboard.p
 ### Pre-requisites
 
 - The language you intend to use is installed on your machine and available at your command line.
-  This repo should generally work with active LTS versions of each language such as node >= 14,
+  This repo should generally work with active LTS versions of each language such as node >= 18,
   python >= 3.8, ruby >= 2.6, etc.
 - Your environment variables populated in `.env`
 - [npm](https://www.npmjs.com/get-npm)
@@ -240,16 +240,20 @@ mkcert localhost
 
 This will create a certificate file localhost.pem and a key file localhost-key.pem inside your client folder.
 
-Then in the package.json file in the frontend folder, replace this line on line 28
+Then in `frontend/vite.config.ts`, add the `https` option to the `server` config:
 
-```bash
-"start": "react-scripts start",
-```
+```ts
+import fs from "fs";
 
-with this line instead:
-
-```bash
-"start": "HTTPS=true SSL_CRT_FILE=localhost.pem SSL_KEY_FILE=localhost-key.pem react-scripts start",
+// inside the server config:
+server: {
+  port: 3000,
+  https: {
+    cert: fs.readFileSync("localhost.pem"),
+    key: fs.readFileSync("localhost-key.pem"),
+  },
+  // ... existing proxy config
+},
 ```
 
 After starting up the Quickstart, you can now view it at https://localhost:3000. If you are on Windows, you

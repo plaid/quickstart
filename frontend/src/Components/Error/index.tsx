@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Button from "plaid-threads/Button";
-import Note from "plaid-threads/Note";
+import { Button } from "plaid-threads/Button";
+import { Note } from "plaid-threads/Note";
 
 import InlineLink from "plaid-threads/InlineLink";
 

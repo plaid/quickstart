@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Button from "plaid-threads/Button";
-import Note from "plaid-threads/Note";
+import { Button } from "plaid-threads/Button";
+import { Note } from "plaid-threads/Note";
 
 import Table from "../Table";
 import Error from "../Error";
