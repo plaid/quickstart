@@ -10,8 +10,8 @@ import com.plaid.client.model.LinkTokenCreateRequestUser;
 import com.plaid.client.model.LinkTokenCreateResponse;
 import com.plaid.client.model.Products;
 import com.plaid.client.request.PlaidApi;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
-import retrofit2.Response;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -20,7 +20,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -47,7 +46,6 @@ public class LinkTokenResource {
   public static class LinkToken {
     @JsonProperty
     private String linkToken;
-
 
     public LinkToken(String linkToken) {
       this.linkToken = linkToken;
@@ -101,9 +99,8 @@ public class LinkTokenResource {
       request.craOptions(options);
     }
 
-    	Response<LinkTokenCreateResponse> response =plaidClient
-			.linkTokenCreate(request)
-			.execute();
-    return new LinkToken(response.body().getLinkToken());
+    LinkTokenCreateResponse responseBody = PlaidApiHelper.callPlaid(
+      plaidClient.linkTokenCreate(request));
+    return new LinkToken(responseBody.getLinkToken());
   }
 }

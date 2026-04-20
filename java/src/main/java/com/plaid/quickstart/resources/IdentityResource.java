@@ -7,6 +7,7 @@ import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.AccountIdentity;
 import com.plaid.client.model.IdentityGetRequest;
 import com.plaid.client.model.IdentityGetResponse;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 
 import java.util.List;
@@ -14,8 +15,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import retrofit2.Response;
 
 @Path("/identity")
 @Produces(MediaType.APPLICATION_JSON)
@@ -30,10 +29,9 @@ public class IdentityResource {
   public IdentityResponse getAccounts() throws IOException {
     IdentityGetRequest request = new IdentityGetRequest()
       .accessToken(QuickstartApplication.accessToken);
-    Response<IdentityGetResponse> response = plaidClient 
-    .identityGet(request)
-    .execute();
-    return new IdentityResponse(response.body());
+    IdentityGetResponse responseBody = PlaidApiHelper.callPlaid(
+      plaidClient.identityGet(request));
+    return new IdentityResponse(responseBody);
   }
 
   private static class IdentityResponse {

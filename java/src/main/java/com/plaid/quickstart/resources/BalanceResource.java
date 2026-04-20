@@ -7,14 +7,13 @@ import java.util.Map;
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.AccountsBalanceGetRequest;
 import com.plaid.client.model.AccountsGetResponse;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import retrofit2.Response;
 
 @Path("/balance")
 @Produces(MediaType.APPLICATION_JSON)
@@ -30,12 +29,11 @@ public class BalanceResource {
     AccountsBalanceGetRequest balanceRequest = new AccountsBalanceGetRequest()
       .accessToken(QuickstartApplication.accessToken);
 
-    Response<AccountsGetResponse> balanceResponse = plaidClient
-      .accountsBalanceGet(balanceRequest)
-      .execute();
+    AccountsGetResponse balanceResponse = PlaidApiHelper.callPlaid(
+      plaidClient.accountsBalanceGet(balanceRequest));
 
     Map<String, Object> response = new HashMap<>();
-    response.put("accounts", balanceResponse.body().getAccounts());
+    response.put("accounts", balanceResponse.getAccounts());
 
     return response;
   }

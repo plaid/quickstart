@@ -10,12 +10,16 @@ import com.plaid.client.model.CraCheckReportPartnerInsightsGetRequest;
 import com.plaid.client.model.CraCheckReportPartnerInsightsGetResponse;
 import com.plaid.client.model.CraPDFAddOns;
 import com.plaid.client.request.PlaidApi;
+import com.plaid.quickstart.PlaidApiException;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 
 import com.google.common.base.Throwables;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
+
+import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -49,8 +53,7 @@ public class CraResource {
       request.setUserId(QuickstartApplication.userId);
     }
     CraCheckReportBaseReportGetResponse baseReportResponse = pollWithRetries(
-      plaidClient.craCheckReportBaseReportGet(request)
-    ).body();
+      plaidClient.craCheckReportBaseReportGet(request));
 
     CraCheckReportPDFGetRequest pdfRequest = new CraCheckReportPDFGetRequest();
     // Use user_token if available, otherwise use user_id
@@ -59,9 +62,10 @@ public class CraResource {
     } else if (QuickstartApplication.userId != null) {
       pdfRequest.setUserId(QuickstartApplication.userId);
     }
-    Response<ResponseBody> pdfResponse = plaidClient.craCheckReportPdfGet(pdfRequest).execute();
+    ResponseBody pdfResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.craCheckReportPdfGet(pdfRequest));
 
-    String pdfBase64 = Base64.getEncoder().encodeToString(pdfResponse.body().bytes());
+    String pdfBase64 = Base64.getEncoder().encodeToString(pdfResponseBody.bytes());
 
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put("report", baseReportResponse.getReport());
@@ -84,9 +88,8 @@ public class CraResource {
     } else if (QuickstartApplication.userId != null) {
       request.setUserId(QuickstartApplication.userId);
     }
-    CraCheckReportIncomeInsightsGetResponse baseReportResponse = pollWithRetries(
-      plaidClient.craCheckReportIncomeInsightsGet(request)
-    ).body();
+    CraCheckReportIncomeInsightsGetResponse incomeInsightsResponse = pollWithRetries(
+      plaidClient.craCheckReportIncomeInsightsGet(request));
 
     CraCheckReportPDFGetRequest pdfRequest = new CraCheckReportPDFGetRequest();
     // Use user_token if available, otherwise use user_id
@@ -96,12 +99,13 @@ public class CraResource {
       pdfRequest.setUserId(QuickstartApplication.userId);
     }
     pdfRequest.addAddOnsItem(CraPDFAddOns.INCOME_INSIGHTS);
-    Response<ResponseBody> pdfResponse = plaidClient.craCheckReportPdfGet(pdfRequest).execute();
+    ResponseBody pdfResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.craCheckReportPdfGet(pdfRequest));
 
-    String pdfBase64 = Base64.getEncoder().encodeToString(pdfResponse.body().bytes());
+    String pdfBase64 = Base64.getEncoder().encodeToString(pdfResponseBody.bytes());
 
     Map<String, Object> responseMap = new HashMap<>();
-    responseMap.put("report", baseReportResponse.getReport());
+    responseMap.put("report", incomeInsightsResponse.getReport());
     responseMap.put("pdf", pdfBase64);
     return responseMap;
   }
@@ -118,7 +122,7 @@ public class CraResource {
     } else if (QuickstartApplication.userId != null) {
       request.setUserId(QuickstartApplication.userId);
     }
-    return pollWithRetries(plaidClient.craCheckReportPartnerInsightsGet(request)).body();
+    return pollWithRetries(plaidClient.craCheckReportPartnerInsightsGet(request));
   }
 
   // Since this quickstart does not support webhooks, this function can be used to
@@ -127,22 +131,28 @@ public class CraResource {
   // For a webhook example, see
   // https://github.com/plaid/tutorial-resources or
   // https://github.com/plaid/pattern
-  private <T> Response<T> pollWithRetries(Call<T> requestCallback) throws IOException {
+  private <T> T pollWithRetries(Call<T> requestCallback) throws IOException {
     for (int i = 0; i <= 20; i++) {
       // Clone the call for each retry since Retrofit calls can only be executed once
       Call<T> call = i == 0 ? requestCallback : requestCallback.clone();
-      Response<T> response = call.execute();
-
-      if (response.isSuccessful()) {
-        return response;
-      } else {
+      try {
+        return PlaidApiHelper.callPlaid(call);
+      } catch (PlaidApiException e) {
+        Map<String, Object> error = (Map<String, Object>) e.getErrorResponse().get("error");
+        boolean isProductNotReady = error != null && "PRODUCT_NOT_READY".equals(error.get("error_code"));
+        boolean isServerError = error != null && error.get("status_code") instanceof Integer && (Integer) error.get("status_code") >= 500;
+        if (!isProductNotReady && !isServerError) {
+          throw e;
+        }
+        if (i == 20) {
+          throw e;
+        }
         try {
-          Thread.sleep(5000);
-        } catch (Exception e) {
-          throw Throwables.propagate(e);
+          Thread.sleep(1000);
+        } catch (InterruptedException ie) {
+          throw Throwables.propagate(ie);
         }
       }
-
     }
     throw Throwables.propagate(new Exception("Ran out of retries while polling"));
   }

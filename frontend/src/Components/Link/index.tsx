@@ -8,6 +8,30 @@ const Link = () => {
   const { linkToken, isPaymentInitiation, isCraProductsExclusively, dispatch } =
     useContext(Context);
 
+  const onExit = React.useCallback(
+    (error: any, metadata: any) => {
+      if (error != null) {
+        const linkExitError = {
+          error_type: error.error_type || "",
+          error_code: error.error_code || "",
+          error_message: error.error_message || "",
+          display_message: error.display_message || "",
+          institution_name: metadata?.institution?.name || "",
+        };
+        dispatch({
+          type: "SET_STATE",
+          state: { linkExitError },
+        });
+        fetch("/api/link_exit_error", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(linkExitError),
+        });
+      }
+    },
+    [dispatch]
+  );
+
   const onSuccess = React.useCallback(
     (public_token: string) => {
       // If the access_token is needed, send public_token to server
@@ -61,6 +85,7 @@ const Link = () => {
   const config: Parameters<typeof usePlaidLink>[0] = {
     token: linkToken!,
     onSuccess,
+    onExit,
   };
 
   if (window.location.href.includes("?oauth_state_id=")) {

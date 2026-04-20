@@ -12,14 +12,13 @@ import com.plaid.client.model.TransactionsSyncRequest;
 import com.plaid.client.model.TransactionsSyncResponse;
 import com.plaid.client.model.Transaction;
 import com.plaid.client.model.RemovedTransaction;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import retrofit2.Response;
 
 @Path("/transactions")
 @Produces(MediaType.APPLICATION_JSON)
@@ -47,8 +46,8 @@ public class TransactionsResource {
         .accessToken(QuickstartApplication.accessToken)
         .cursor(cursor);
 
-      Response<TransactionsSyncResponse> response = plaidClient.transactionsSync(request).execute();
-      TransactionsSyncResponse responseBody = response.body();
+      TransactionsSyncResponse responseBody = PlaidApiHelper.callPlaid(
+        plaidClient.transactionsSync(request));
 
       cursor = responseBody.getNextCursor();
 

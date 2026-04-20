@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.ItemPublicTokenExchangeRequest;
 import com.plaid.client.model.ItemPublicTokenExchangeResponse;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 import com.plaid.client.model.Products;
 
@@ -18,8 +19,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import retrofit2.Response;
 
 @Path("/set_access_token")
 @Produces(MediaType.APPLICATION_JSON)
@@ -39,17 +38,15 @@ public class AccessTokenResource {
       ItemPublicTokenExchangeRequest request = new ItemPublicTokenExchangeRequest()
       .publicToken(publicToken);
 
-    Response<ItemPublicTokenExchangeResponse> response = plaidClient
-      .itemPublicTokenExchange(request)
-      .execute();
+    ItemPublicTokenExchangeResponse responseBody = PlaidApiHelper.callPlaid(
+      plaidClient.itemPublicTokenExchange(request));
 
     // Ideally, we would store this somewhere more persistent
-    QuickstartApplication.
-      accessToken = response.body().getAccessToken();
-    QuickstartApplication.itemId = response.body().getItemId();
+    QuickstartApplication.accessToken = responseBody.getAccessToken();
+    QuickstartApplication.itemId = responseBody.getItemId();
     LOG.info("public token: " + publicToken);
     LOG.info("access token: " + QuickstartApplication.accessToken);
-    LOG.info("item ID: " + response.body().getItemId());
+    LOG.info("item ID: " + responseBody.getItemId());
     return new InfoResource.InfoResponse(Arrays.asList(), QuickstartApplication.accessToken,
       QuickstartApplication.itemId);
   }

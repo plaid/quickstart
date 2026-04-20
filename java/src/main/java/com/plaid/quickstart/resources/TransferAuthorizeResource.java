@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.plaid.client.request.PlaidApi;
 import com.plaid.client.model.Transfer;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 import com.plaid.client.model.TransferAuthorizationUserInRequest;
 import com.plaid.client.model.TransferAuthorizationCreateRequest;
@@ -21,11 +22,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import retrofit2.Response;
-
 @Path("/transfer_authorize")
 @Produces(MediaType.APPLICATION_JSON)
 public class TransferAuthorizeResource {
@@ -40,11 +36,10 @@ public class TransferAuthorizeResource {
       AccountsGetRequest accountsGetRequest = new AccountsGetRequest()
         .accessToken(QuickstartApplication.accessToken);
 
-      Response<AccountsGetResponse> accountsGetResponse = plaidClient
-        .accountsGet(accountsGetRequest)
-        .execute();
+      AccountsGetResponse accountsGetResponseBody = PlaidApiHelper.callPlaid(
+        plaidClient.accountsGet(accountsGetRequest));
 
-      QuickstartApplication.accountId = accountsGetResponse.body().getAccounts().get(0).getAccountId();
+      QuickstartApplication.accountId = accountsGetResponseBody.getAccounts().get(0).getAccountId();
 
       TransferAuthorizationUserInRequest user = new TransferAuthorizationUserInRequest()
         .legalName("FirstName LastName");
@@ -58,11 +53,10 @@ public class TransferAuthorizeResource {
         .achClass(ACHClass.PPD)
         .user(user);
 
-      Response<TransferAuthorizationCreateResponse> transferAuthorizationCreateResponse = plaidClient
-        .transferAuthorizationCreate(transferAuthorizationCreateRequest)
-        .execute();
+      TransferAuthorizationCreateResponse responseBody = PlaidApiHelper.callPlaid(
+        plaidClient.transferAuthorizationCreate(transferAuthorizationCreateRequest));
 
-      QuickstartApplication.authorizationId = transferAuthorizationCreateResponse.body().getAuthorization().getId();    
-      return transferAuthorizationCreateResponse.body();
+      QuickstartApplication.authorizationId = responseBody.getAuthorization().getId();
+      return responseBody;
   }
 }

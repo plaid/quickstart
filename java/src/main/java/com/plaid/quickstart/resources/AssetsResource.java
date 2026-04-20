@@ -9,12 +9,11 @@ import com.plaid.client.model.AssetReportCreateResponse;
 import com.plaid.client.model.AssetReportGetRequest;
 import com.plaid.client.model.AssetReportGetResponse;
 import com.plaid.client.model.AssetReportPDFGetRequest;
+import com.plaid.quickstart.PlaidApiException;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
-import com.plaid.client.model.PlaidError;
-import com.plaid.client.model.PlaidErrorType;
 import okhttp3.ResponseBody;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,10 +22,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import retrofit2.Response;
-import com.google.gson.Gson;
-import com.google.common.base.Throwables;
 
 @Path("/assets")
 @Produces(MediaType.APPLICATION_JSON)
@@ -46,29 +41,36 @@ public class AssetsResource {
       .accessTokens(accessTokens)
       .daysRequested(10);
 
-    Response<AssetReportCreateResponse> assetReportCreateResponse = plaidClient
-      .assetReportCreate(assetReportCreateRequest)
-      .execute();
+    AssetReportCreateResponse assetReportCreateResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.assetReportCreate(assetReportCreateRequest));
 
-    String assetReportToken = assetReportCreateResponse.body().getAssetReportToken();
+    String assetReportToken = assetReportCreateResponseBody.getAssetReportToken();
     AssetReportGetRequest assetReportGetRequest = new AssetReportGetRequest()
       .assetReportToken(assetReportToken);
-    Response<AssetReportGetResponse> assetReportGetResponse = null;
-    
-    //In a real integration, we would wait for a webhook rather than polling like this
-    for (int i = 0; i < 5; i++){
-      assetReportGetResponse = plaidClient.assetReportGet(assetReportGetRequest).execute();
-      if (assetReportGetResponse.isSuccessful()){
+
+    // In a real integration, we would wait for a webhook rather than polling like this
+    AssetReportGetResponse assetReportGetResponseBody = null;
+    for (int i = 0; i <= 20; i++) {
+      try {
+        assetReportGetResponseBody = PlaidApiHelper.callPlaid(
+          plaidClient.assetReportGet(assetReportGetRequest));
         break;
-      } else {
+      } catch (PlaidApiException e) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> error = (Map<String, Object>) e.getErrorResponse().get("error");
+        boolean isProductNotReady = error != null && "PRODUCT_NOT_READY".equals(error.get("error_code"));
+        boolean isServerError = error != null && error.get("status_code") instanceof Integer && (Integer) error.get("status_code") >= 500;
+        if (!isProductNotReady && !isServerError) {
+          throw e;
+        }
+        if (i == 20) {
+          throw e;
+        }
         try {
-          Gson gson = new Gson();
-          PlaidError error = gson.fromJson(assetReportGetResponse.errorBody().string(), PlaidError.class);
-          error.getErrorType().equals(PlaidErrorType.ASSET_REPORT_ERROR);
-          error.getErrorCode().equals("PRODUCT_NOT_READY");
-          Thread.sleep(5000);
-        } catch (Exception e) {
-          throw Throwables.propagate(e);
+          Thread.sleep(1000);
+        } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+          throw new IOException("Interrupted while polling for asset report", ie);
         }
       }
     }
@@ -76,13 +78,12 @@ public class AssetsResource {
     AssetReportPDFGetRequest assetReportPDFGetRequest = new AssetReportPDFGetRequest()
       .assetReportToken(assetReportToken);
 
-    Response<ResponseBody> assetReportPDFGetResponse = plaidClient
-      .assetReportPdfGet(assetReportPDFGetRequest)
-      .execute();
+    ResponseBody assetReportPDFGetResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.assetReportPdfGet(assetReportPDFGetRequest));
 
-    String pdf = Base64.getEncoder().encodeToString(assetReportPDFGetResponse.body().bytes());
+    String pdf = Base64.getEncoder().encodeToString(assetReportPDFGetResponseBody.bytes());
     Map<String, Object> responseMap = new HashMap<>();
-    responseMap.put("json", assetReportGetResponse.body().getReport());
+    responseMap.put("json", assetReportGetResponseBody.getReport());
     responseMap.put("pdf", pdf);
     return responseMap;
 

@@ -870,23 +870,40 @@ const pollWithRetries = (
   new Promise((resolve, reject) => {
     requestCallback()
       .then(resolve)
-      .catch(() => {
+      .catch((error) => {
+        const errorCode = error?.response?.data?.error_code;
+        const statusCode = error?.response?.status;
+        const isRetryable = errorCode === 'PRODUCT_NOT_READY' || (statusCode >= 500 && statusCode < 600);
+        if (!isRetryable) {
+          reject(error);
+          return;
+        }
+        if (retriesLeft === 1) {
+          reject('Ran out of retries while polling');
+          return;
+        }
         setTimeout(() => {
-          if (retriesLeft === 1) {
-            reject('Ran out of retries while polling');
-            return;
-          }
           pollWithRetries(
             requestCallback,
             ms,
             retriesLeft - 1,
-          ).then(resolve);
+          ).then(resolve).catch(reject);
         }, ms);
       });
   });
 
+app.post('/api/link_exit_error', function (request, response, next) {
+  console.log('[Link Exit Error (frontend)]');
+  console.log(util.inspect(request.body, { colors: true, depth: 4 }));
+  response.json({ status: 'logged' });
+});
+
 app.use('/api', function (error, request, response, next) {
-  console.log(error);
-  prettyPrintResponse(error.response);
-  response.json(formatError(error.response));
+  if (error.response?.data) {
+    prettyPrintResponse(error.response);
+  } else {
+    console.log(error.message || error);
+  }
+  const statusCode = error.response?.status || 500;
+  response.status(statusCode).json(formatError(error.response));
 });

@@ -81,7 +81,26 @@ const App = () => {
         method: "POST",
       });
       if (!response.ok) {
-        dispatch({ type: "SET_STATE", state: { linkToken: null } });
+        let errorDetail;
+        try {
+          const data = await response.json();
+          errorDetail = data.error || {
+            error_code: data.error_code || "UNKNOWN",
+            error_type: data.error_type || "API_ERROR",
+            error_message:
+              data.error_message || `Request failed with status ${response.status}`,
+          };
+        } catch {
+          errorDetail = {
+            error_code: "UNKNOWN",
+            error_type: "API_ERROR",
+            error_message: `Request failed with status ${response.status}`,
+          };
+        }
+        dispatch({
+          type: "SET_STATE",
+          state: { linkToken: null, linkTokenError: errorDetail },
+        });
         return;
       }
       const data = await response.json();

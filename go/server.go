@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -98,6 +99,7 @@ func main() {
 	// 3. Re-initialize with the link token (from step 1) and the full received redirect URI
 	// from step 2.
 
+	r.POST("/api/link_exit_error", linkExitError)
 	r.POST("/api/set_access_token", getAccessToken)
 	r.POST("/api/create_link_token_for_payment", createLinkTokenForPayment)
 	r.GET("/api/auth", auth)
@@ -144,13 +146,31 @@ var paymentID string
 var authorizationID string
 var accountID string
 
+func linkExitError(c *gin.Context) {
+	var body map[string]interface{}
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
+		return
+	}
+	jsonBytes, _ := json.MarshalIndent(body, "", "  ")
+	fmt.Println("[Link Exit Error (frontend)]")
+	fmt.Println(string(jsonBytes))
+	c.JSON(http.StatusOK, gin.H{"status": "logged"})
+}
+
 func renderError(c *gin.Context, originalErr error) {
 	if plaidError, err := plaid.ToPlaidError(originalErr); err == nil {
-		// Return 200 and allow the front end to render the error.
-		c.JSON(http.StatusOK, gin.H{"error": plaidError})
+		errorJSON, _ := json.MarshalIndent(plaidError, "", "  ")
+		fmt.Println(string(errorJSON))
+		statusCode := int(plaidError.GetStatus())
+		if statusCode == 0 {
+			statusCode = http.StatusInternalServerError
+		}
+		c.JSON(statusCode, gin.H{"error": plaidError})
 		return
 	}
 
+	fmt.Println(originalErr.Error())
 	c.JSON(http.StatusInternalServerError, gin.H{"error": originalErr.Error()})
 }
 
@@ -1057,8 +1077,10 @@ func pollWithRetries[T any](requestCallback func() (T, error), ms int, retriesLe
 	}
 	response, err := requestCallback()
 	if err != nil {
-		plaidErr, err := plaid.ToPlaidError(err)
-		if plaidErr.ErrorCode != "PRODUCT_NOT_READY" {
+		plaidErr, parseErr := plaid.ToPlaidError(err)
+		isProductNotReady := parseErr == nil && plaidErr.ErrorCode == "PRODUCT_NOT_READY"
+		isServerError := parseErr == nil && plaidErr.HasStatus() && plaidErr.GetStatus() >= 500
+		if !isProductNotReady && !isServerError {
 			return zero, err
 		}
 		time.Sleep(time.Duration(ms) * time.Millisecond)

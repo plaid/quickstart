@@ -19,6 +19,7 @@ const Header = () => {
     isItemAccess,
     backend,
     linkTokenError,
+    linkExitError,
     isPaymentInitiation,
   } = useContext(Context);
 
@@ -78,6 +79,20 @@ const Header = () => {
                 Error Type: <code>{linkTokenError.error_type}</code>{" "}
               </div>
               <div>Error Message: {linkTokenError.error_message}</div>
+              {linkTokenError.error_code === "INVALID_LINK_CUSTOMIZATION" && (
+                <div>
+                  <strong>Tip:</strong> In the{" "}
+                  <InlineLink
+                    href="https://dashboard.plaid.com/link/data-transparency-v5"
+                    target="_blank"
+                  >
+                    dashboard under Link &gt; Link Customization Data
+                    Transparency Messaging
+                  </InlineLink>
+                  , ensure at least one use case is selected. After selecting a
+                  use case, make sure to click <strong>Publish Changes</strong>.
+                </div>
+              )}
             </Callout>
           ) : linkToken === "" ? (
             <div className={styles.linkButton}>
@@ -89,6 +104,62 @@ const Header = () => {
             <div className={styles.linkButton}>
               <Link />
             </div>
+          )}
+          {linkExitError != null && (
+            <Callout warning>
+              <div>
+                Link exited with an error.
+              </div>
+              <div>
+                Error Code: <code>{linkExitError.error_code}</code>
+              </div>
+              <div>
+                Error Type: <code>{linkExitError.error_type}</code>
+              </div>
+              <div>Error Message: {linkExitError.error_message}</div>
+              {linkExitError.display_message && (
+                <div>Details: {linkExitError.display_message}</div>
+              )}
+              {linkExitError.error_code === "INVALID_LINK_CUSTOMIZATION" && (
+                <div>
+                  <strong>Tip:</strong> In the{" "}
+                  <InlineLink
+                    href="https://dashboard.plaid.com/link/data-transparency-v5"
+                    target="_blank"
+                  >
+                    dashboard under Link &gt; Link Customization Data
+                    Transparency Messaging
+                  </InlineLink>
+                  , ensure at least one use case is selected. After selecting a
+                  use case, make sure to click <strong>Publish Changes</strong>.
+                </div>
+              )}
+              {linkExitError.error_code ===
+                "INSTITUTION_REGISTRATION_REQUIRED" &&
+                (["PNC", "Charles Schwab"].some((name) =>
+                  linkExitError.institution_name
+                    ?.toLowerCase()
+                    .includes(name.toLowerCase())
+                ) ? (
+                  <div>
+                    {linkExitError.institution_name} requires a special
+                    registration process to access Production data. See{" "}
+                    <InlineLink
+                      href="https://dashboard.plaid.com/activity/status/oauth-institutions"
+                      target="_blank"
+                    >
+                      OAuth institution status
+                    </InlineLink>{" "}
+                    for details.
+                  </div>
+                ) : (
+                  <div>
+                    Certain OAuth institutions, including Bank of America,
+                    Chase, Capital One, and American Express, may take up to 24
+                    hours to become available after obtaining Production access.
+                  </div>
+                ))}
+            </Callout>
           )}
         </>
       ) : (

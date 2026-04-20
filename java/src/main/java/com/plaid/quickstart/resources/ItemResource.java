@@ -12,14 +12,13 @@ import com.plaid.client.model.InstitutionsGetByIdRequest;
 import com.plaid.client.model.InstitutionsGetByIdResponse;
 import com.plaid.client.model.Institution;
 import com.plaid.client.model.ItemWithConsentFields;
+import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import retrofit2.Response;
 
 @Path("/item")
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,21 +34,19 @@ public class ItemResource {
     ItemGetRequest request = new ItemGetRequest()
       .accessToken(QuickstartApplication.accessToken);
 
-    Response<ItemGetResponse> itemResponse = plaidClient
-    .itemGet(request)
-    .execute();
-    
+    ItemGetResponse itemResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.itemGet(request));
+
     InstitutionsGetByIdRequest institutionsRequest = new InstitutionsGetByIdRequest()
-    .institutionId(itemResponse.body().getItem().getInstitutionId())
+    .institutionId(itemResponseBody.getItem().getInstitutionId())
     .addCountryCodesItem(CountryCode.US);
 
-    Response<InstitutionsGetByIdResponse> institutionsResponse = plaidClient
-    .institutionsGetById(institutionsRequest)
-    .execute();
+    InstitutionsGetByIdResponse institutionsResponseBody = PlaidApiHelper.callPlaid(
+      plaidClient.institutionsGetById(institutionsRequest));
 
     return new ItemResponse(
-      itemResponse.body().getItem(), 
-      institutionsResponse.body().getInstitution()
+      itemResponseBody.getItem(),
+      institutionsResponseBody.getInstitution()
     );
   }
 
