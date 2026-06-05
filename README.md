@@ -189,7 +189,7 @@ For credit and underwriting products like Assets and Statements, you will get th
 
 If Link works in Sandbox but fails in Production, the error is most likely one of the following:
 1) You need to set a use case for Link, which you can do in the Plaid Dashboard under [Link -> Customization -> Data Transparency Messaging](https://dashboard.plaid.com/link/data-transparency-v5).
-2) You don't yet have OAuth access for the institution you selected. This is especially common if the institution is Chase or Charles Schwab, which have longer OAuth registration turnarounds. To check your OAuth registration status and see if you have any required action items, see the [US OAuth Institutions page](https://dashboard.plaid.com/settings/compliance/us-oauth-institutions) in the Dashboard.
+2) You don't yet have OAuth access for the institution you selected. This is especially common if the institution is Chase or Charles Schwab, which have longer OAuth registration turnarounds. To check your OAuth registration status and see if you have any required action items, see the [US OAuth Institutions page](https://dashboard.plaid.com/activity/status/oauth-institutions) in the Dashboard.
    
 ### Can't get a link token, or API calls are 400ing
 
@@ -204,7 +204,7 @@ If you get a "Connectivity not supported" error after selecting a financial inst
 
 ### "You need to update your app" or "institution not supported"
 
-If you get a "You need to update your app" or "institution not supported" error after selecting a financial institution in Link, you're probably running the Quickstart in Production and attempting to link an institution, such as Chase or Wells Fargo, that requires an OAuth-based connection. In order to make OAuth connections to US-based institutions in Production, you must have full Production access approval, and certain institutions may also require additional approvals before you can be enabled. To use this institution, [apply for full Production access](https://dashboard.plaid.com/overview/production) and see the [OAuth institutions page](https://dashboard.plaid.com/team/oauth-institutions) for any other required steps and to track your OAuth enablement status.
+If you get a "You need to update your app" or "institution not supported" error after selecting a financial institution in Link, you're probably running the Quickstart in Production and attempting to link an institution, such as Chase or Wells Fargo, that requires an OAuth-based connection. In order to make OAuth connections to US-based institutions in Production, you must have full Production access approval, and certain institutions may also require additional approvals before you can be enabled. To use this institution, [apply for full Production access](https://dashboard.plaid.com/overview/production) and see the [OAuth institutions page](https://dashboard.plaid.com/activity/status/oauth-institutions) for any other required steps and to track your OAuth enablement status.
 
 ### "oauth uri does not contain a valid oauth_state_id query parameter"
 
