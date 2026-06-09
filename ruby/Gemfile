@@ -11,4 +11,4 @@ gem "plaid", "= 46.1.0"
 gem "webrick", "~> 1.8"
 
 gem "rackup", "~> 2.2"
-gem "puma", "~> 7.1"
+gem "puma", "~> 7.2"
