@@ -183,7 +183,7 @@ const Products = () => {
 
       {products.includes("income_verification") && (
         <Endpoint
-          endpoint="/income/verification/paystubs"
+          endpoint="income/verification/paystubs"
           name="Income Paystubs"
           categories={incomePaystubsCategories}
           schema="/income/verification/paystubs"
@@ -194,7 +194,7 @@ const Products = () => {
 
       {(products.includes("cra_base_report") || products.includes("cra_income_insights")) && (
         <Endpoint
-          endpoint="/cra/get_base_report"
+          endpoint="cra/get_base_report"
           name="CRA Base Report"
           categories={checkReportBaseReportCategories}
           schema="/cra/check_report/base_report/get"
@@ -205,7 +205,7 @@ const Products = () => {
 
       {(products.includes("cra_base_report") || products.includes("cra_income_insights")) && (
         <Endpoint
-          endpoint="/cra/get_income_insights"
+          endpoint="cra/get_income_insights"
           name="CRA Income Insights"
           categories={checkReportInsightsCategories}
           schema="/cra/check_report/income_insights/get"
@@ -216,7 +216,7 @@ const Products = () => {
 
       {products.includes("cra_partner_insights") && (
         <Endpoint
-          endpoint="/cra/get_partner_insights"
+          endpoint="cra/get_partner_insights"
           name="CRA Partner Insights"
           categories={checkReportPartnerInsightsCategories}
           schema="/cra/check_report/partner_insights/get"
