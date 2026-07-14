@@ -197,7 +197,7 @@ def create_link_token_for_payment():
         )
     )
 
-    if PLAID_REDIRECT_URI!=None:
+    if PLAID_REDIRECT_URI is not None:
         linkRequest['redirect_uri']=PLAID_REDIRECT_URI
     linkResponse = client.link_token_create(linkRequest)
     pretty_print_response(linkResponse.to_dict())
@@ -232,7 +232,7 @@ def create_link_token():
             )
         )
 
-    if PLAID_REDIRECT_URI!=None:
+    if PLAID_REDIRECT_URI is not None:
         request['redirect_uri']=PLAID_REDIRECT_URI
     if Products('statements') in products:
         statements=LinkTokenCreateRequestStatements(
@@ -668,6 +668,8 @@ def item():
 # PDF: https://plaid.com/docs/check/api/#cracheck_reportpdfget
 @app.route('/api/cra/get_base_report', methods=['GET'])
 def cra_check_report():
+    if not user_token and not user_id:
+        return jsonify({'error': 'You must call /api/create_user_token first'}), 400
     # Use user_token if available, otherwise use user_id
     if user_token:
         base_report_request = CraCheckReportBaseReportGetRequest(user_token=user_token, item_ids=[])
@@ -694,6 +696,8 @@ def cra_check_report():
 # PDF w/ income insights: https://plaid.com/docs/check/api/#cracheck_reportpdfget
 @app.route('/api/cra/get_income_insights', methods=['GET'])
 def cra_income_insights():
+    if not user_token and not user_id:
+        return jsonify({'error': 'You must call /api/create_user_token first'}), 400
     # Use user_token if available, otherwise use user_id
     insights_request = {}
     if user_token:
@@ -721,6 +725,8 @@ def cra_income_insights():
 # https://plaid.com/docs/check/api/#cracheck_reportpartner_insightsget
 @app.route('/api/cra/get_partner_insights', methods=['GET'])
 def cra_partner_insights():
+    if not user_token and not user_id:
+        return jsonify({'error': 'You must call /api/create_user_token first'}), 400
     # Use user_token if available, otherwise use user_id
     if user_token:
         partner_request = CraCheckReportPartnerInsightsGetRequest(user_token=user_token)
@@ -750,11 +756,10 @@ def poll_with_retries(request_callback, ms=1000, retries_left=20):
             is_retryable = error_code == 'PRODUCT_NOT_READY' or e.status >= 500
             if not is_retryable:
                 raise e
-            elif retries_left == 0:
-                raise Exception('Ran out of retries while polling') from e
             else:
                 retries_left -= 1
                 time.sleep(ms / 1000)
+    raise Exception('Ran out of retries while polling')
 
 def pretty_print_response(response):
   print(json.dumps(response, indent=2, sort_keys=True, default=str))

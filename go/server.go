@@ -41,7 +41,7 @@ func init() {
 	// load env vars from .env file
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Println("Error when loading environment variables from .env file %w", err)
+		fmt.Printf("Error when loading environment variables from .env file: %v\n", err)
 	}
 
 	// set constants from env
@@ -71,12 +71,6 @@ func init() {
 	}
 	if APP_PORT == "" {
 		APP_PORT = "8000"
-	}
-	if PLAID_CLIENT_ID == "" {
-		log.Fatal("PLAID_CLIENT_ID is not set. Make sure to fill out the .env file")
-	}
-	if PLAID_SECRET == "" {
-		log.Fatal("PLAID_SECRET is not set. Make sure to fill out the .env file")
 	}
 
 	// create Plaid client
@@ -364,6 +358,8 @@ func transactions(c *gin.Context) {
 	var modified []plaid.Transaction
 	var removed []plaid.RemovedTransaction // Removed transaction ids
 	hasMore := true
+	const maxSyncPolls = 10
+	syncPolls := 0
 	// Iterate through each page of new transaction updates for item
 	for hasMore {
 		request := plaid.NewTransactionsSyncRequest(accessToken)
@@ -389,6 +385,11 @@ func transactions(c *gin.Context) {
 		// https://github.com/plaid/pattern
 
 		if *cursor == "" {
+			syncPolls++
+			if syncPolls >= maxSyncPolls {
+				renderError(c, fmt.Errorf("timed out waiting for transactions to become available after %d polls", maxSyncPolls))
+				return
+			}
 			time.Sleep(2 * time.Second)
 			continue
 		}
@@ -450,8 +451,20 @@ func transferAuthorize(c *gin.Context) {
 
 	accountID = accountsGetResp.GetAccounts()[0].AccountId
 	transferType, err := plaid.NewTransferTypeFromValue("debit")
+	if err != nil {
+		renderError(c, err)
+		return
+	}
 	transferNetwork, err := plaid.NewTransferNetworkFromValue("ach")
+	if err != nil {
+		renderError(c, err)
+		return
+	}
 	ACHClass, err := plaid.NewACHClassFromValue("ppd")
+	if err != nil {
+		renderError(c, err)
+		return
+	}
 
 	transferAuthorizationCreateUser := plaid.NewTransferAuthorizationUserInRequest("FirstName LastName")
 	transferAuthorizationCreateRequest := plaid.NewTransferAuthorizationCreateRequest(
@@ -844,7 +857,17 @@ func statements(c *gin.Context) {
 	statementsListResp, _, err := client.PlaidApi.StatementsList(ctx).StatementsListRequest(
 		*plaid.NewStatementsListRequest(accessToken),
 	).Execute()
-	statementId := statementsListResp.GetAccounts()[0].GetStatements()[0].StatementId
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	accounts := statementsListResp.GetAccounts()
+	if len(accounts) == 0 || len(accounts[0].GetStatements()) == 0 {
+		renderError(c, fmt.Errorf("no statements available for this item"))
+		return
+	}
+	statementId := accounts[0].GetStatements()[0].StatementId
 
 	statementsDownloadResp, _, err := client.PlaidApi.StatementsDownload(ctx).StatementsDownloadRequest(
 		*plaid.NewStatementsDownloadRequest(accessToken, statementId),
