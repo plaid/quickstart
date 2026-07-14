@@ -115,9 +115,11 @@ const App = () => {
           return;
         }
         dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
+        // Save the link_token to be used later in the Oauth flow.
+        if (typeof data.link_token === "string") {
+          localStorage.setItem("link_token", data.link_token);
+        }
       }
-      // Save the link_token to be used later in the Oauth flow.
-      localStorage.setItem("link_token", data.link_token);
     },
     [dispatch]
   );

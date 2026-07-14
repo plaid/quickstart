@@ -116,7 +116,7 @@ get '/api/transactions' do
   end
   # Return the 8 most recent transactions
   content_type :json
-  { latest_transactions: added.sort_by(&:date).last(8).map(&:to_hash) }.to_json
+  { latest_transactions: added.sort_by { |t| t.date || Date.new(0) }.last(8).map(&:to_hash) }.to_json
 end
 
 # Retrieve ACH or ETF account numbers for an Item
@@ -241,7 +241,7 @@ get '/api/assets' do
     content_type :json
     return {
       error: {
-        error_code: 0,
+        error_code: 'ASSET_REPORT_TIMED_OUT',
         error_message: 'Timed out when polling for Asset Report'
       }
     }.to_json
@@ -284,7 +284,7 @@ get '/api/item' do
   institutions_get_by_id_request = Plaid::InstitutionsGetByIdRequest.new(
     {
       institution_id: item_response.item.institution_id,
-      country_codes: ['US']
+      country_codes: ENV['PLAID_COUNTRY_CODES'].split(',')
     }
   )
   institution_response =
@@ -504,7 +504,6 @@ end
 
 def nil_if_empty_envvar(field)
   val = ENV[field]
-  puts "val #{val}"
   if !val.nil? && val.length > 0
     return val
   else

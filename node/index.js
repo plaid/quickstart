@@ -6,7 +6,6 @@ const { Configuration, PlaidApi, Products, PlaidEnvironments, CraCheckReportProd
 const util = require('util');
 const { v4: uuidv4 } = require('uuid');
 const express = require('express');
-const bodyParser = require('body-parser');
 const moment = require('moment');
 const cors = require('cors');
 
@@ -82,11 +81,11 @@ const client = new PlaidApi(configuration);
 
 const app = express();
 app.use(
-  bodyParser.urlencoded({
+  express.urlencoded({
     extended: false,
   }),
 );
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 
 app.post('/api/info', function (request, response, next) {
@@ -646,7 +645,9 @@ const getAssetReportWithRetries = (
   return pollWithRetries(
     async () => {
       return await plaidClient.assetReportGet(request);
-    }
+    },
+    ms,
+    retriesLeft,
   );
 }
 

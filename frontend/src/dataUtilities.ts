@@ -120,6 +120,7 @@ interface TransferDataItem {
   type: string;
   achClass: string | null;
   network: string;
+  status: string;
 }
 
 interface TransferAuthorizationDataItem {
