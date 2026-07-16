@@ -588,7 +588,7 @@ export const transformAuthData = (data: AuthGetResponse) => {
 };
 
 export const transformStatementsData = (data: {json: StatementsListResponse}) => {
-  const account = data.json.accounts[0];
+  const account = data.json.accounts.find((a) => (a.statements ?? []).length > 0);
   if (account == null) {
     return [];
   }

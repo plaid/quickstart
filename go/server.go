@@ -862,12 +862,20 @@ func statements(c *gin.Context) {
 		return
 	}
 
-	accounts := statementsListResp.GetAccounts()
-	if len(accounts) == 0 || len(accounts[0].GetStatements()) == 0 {
-		renderError(c, fmt.Errorf("no statements available for this item"))
+	var statementId string
+	for _, account := range statementsListResp.GetAccounts() {
+		if len(account.GetStatements()) > 0 {
+			statementId = account.GetStatements()[0].StatementId
+			break
+		}
+	}
+	if statementId == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"json": statementsListResp,
+			"pdf":  nil,
+		})
 		return
 	}
-	statementId := accounts[0].GetStatements()[0].StatementId
 
 	statementsDownloadResp, _, err := client.PlaidApi.StatementsDownload(ctx).StatementsDownloadRequest(
 		*plaid.NewStatementsDownloadRequest(accessToken, statementId),
