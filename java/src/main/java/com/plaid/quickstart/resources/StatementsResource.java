@@ -38,17 +38,30 @@ public class StatementsResource {
     StatementsListResponse statementsListResponseBody = PlaidApiHelper.callPlaid(
       plaidClient.statementsList(statementsListRequest));
 
+    Map<String, Object> responseMap = new HashMap<>();
+    responseMap.put("json", statementsListResponseBody);
+
+    String statementId = null;
+    for (int i = 0; i < statementsListResponseBody.getAccounts().size(); i++) {
+      if (!statementsListResponseBody.getAccounts().get(i).getStatements().isEmpty()) {
+        statementId = statementsListResponseBody.getAccounts().get(i).getStatements().get(0).getStatementId();
+        break;
+      }
+    }
+
+    if (statementId == null) {
+      responseMap.put("pdf", null);
+      return responseMap;
+    }
+
     StatementsDownloadRequest statementsDownloadRequest = new StatementsDownloadRequest()
       .accessToken(QuickstartApplication.accessToken)
-      .statementId(statementsListResponseBody.getAccounts().get(0).getStatements().get(0).getStatementId());
+      .statementId(statementId);
 
     ResponseBody statementsDownloadResponseBody = PlaidApiHelper.callPlaid(
       plaidClient.statementsDownload(statementsDownloadRequest));
 
     String pdf = Base64.getEncoder().encodeToString(statementsDownloadResponseBody.bytes());
-
-    Map<String, Object> responseMap = new HashMap<>();
-    responseMap.put("json", statementsListResponseBody);
     responseMap.put("pdf", pdf);
 
     return responseMap;

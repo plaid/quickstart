@@ -593,9 +593,15 @@ def statements():
     request = StatementsListRequest(access_token=access_token)
     response = client.statements_list(request)
     pretty_print_response(response.to_dict())
+    account_with_statement = next(
+        (account for account in response['accounts'] if account['statements']),
+        None
+    )
+    if account_with_statement is None:
+        return jsonify({'error': None, 'json': response.to_dict(), 'pdf': None})
     request = StatementsDownloadRequest(
         access_token=access_token,
-        statement_id=response['accounts'][0]['statements'][0]['statement_id']
+        statement_id=account_with_statement['statements'][0]['statement_id']
     )
     pdf = client.statements_download(request)
     return jsonify({

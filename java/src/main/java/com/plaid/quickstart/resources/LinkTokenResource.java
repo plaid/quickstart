@@ -30,8 +30,6 @@ public class LinkTokenResource {
   private final List<String> plaidProducts;
   private final List<String> countryCodes;
   private final String redirectUri;
-  private final List<Products> correctedPlaidProducts;
-  private final List<CountryCode> correctedCountryCodes;
 
   public LinkTokenResource(PlaidApi plaidClient, List<String> plaidProducts,
     List<String> countryCodes, String redirectUri) {
@@ -39,8 +37,6 @@ public class LinkTokenResource {
     this.plaidProducts = plaidProducts;
     this.countryCodes = countryCodes;
     this.redirectUri = redirectUri;
-    this.correctedPlaidProducts = new ArrayList<>();
-    this.correctedCountryCodes = new ArrayList<>();
   }
 
   public static class LinkToken {
@@ -59,24 +55,26 @@ public class LinkTokenResource {
     LinkTokenCreateRequestUser user = new LinkTokenCreateRequestUser()
 		.clientUserId(clientUserId);
 
+    List<Products> correctedPlaidProducts = new ArrayList<>();
     for (int i = 0; i < this.plaidProducts.size(); i++){
-      this.correctedPlaidProducts.add(Products.fromValue(this.plaidProducts.get(i)));
-    };
+      correctedPlaidProducts.add(Products.fromValue(this.plaidProducts.get(i)));
+    }
 
+    List<CountryCode> correctedCountryCodes = new ArrayList<>();
     for (int i = 0; i < this.countryCodes.size(); i++){
-      this.correctedCountryCodes.add(CountryCode.fromValue(this.countryCodes.get(i)));
-    };
+      correctedCountryCodes.add(CountryCode.fromValue(this.countryCodes.get(i)));
+    }
 
 
 		LinkTokenCreateRequest request = new LinkTokenCreateRequest()
 			.user(user)
 			.clientName("Quickstart Client")
-			.products(this.correctedPlaidProducts)
-			.countryCodes(this.correctedCountryCodes)
+			.products(correctedPlaidProducts)
+			.countryCodes(correctedCountryCodes)
 			.language("en")
       .redirectUri(this.redirectUri);
 
-    if (this.correctedPlaidProducts.contains(Products.STATEMENTS)) {
+    if (correctedPlaidProducts.contains(Products.STATEMENTS)) {
       LinkTokenCreateRequestStatements statementsConfig = new LinkTokenCreateRequestStatements()
         .startDate(LocalDate.now().minusDays(30))
         .endDate(LocalDate.now());

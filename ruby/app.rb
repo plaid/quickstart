@@ -265,7 +265,13 @@ get '/api/statements' do
     client.statements_list(statements_list_request)
   pretty_print_response(statements_list_response.to_hash)
 
-  statement_id = statements_list_response.accounts[0].statements[0].statement_id
+  statement_account = statements_list_response.accounts.find { |account| !account.statements.empty? }
+  if statement_account.nil?
+    content_type :json
+    return { json: statements_list_response.to_hash, pdf: nil }.to_json
+  end
+
+  statement_id = statement_account.statements[0].statement_id
   statements_download_request = Plaid::StatementsDownloadRequest.new({ access_token: access_token, statement_id: statement_id })
   statement_pdf = client.statements_download(statements_download_request)
 
