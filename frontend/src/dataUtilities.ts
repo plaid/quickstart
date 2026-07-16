@@ -588,12 +588,14 @@ export const transformAuthData = (data: AuthGetResponse) => {
 };
 
 export const transformStatementsData = (data: {json: StatementsListResponse}) => {
-  const account = data.json.accounts[0]!.account_name;
-  const statements = data.json.accounts[0]!.statements;
-  return statements!.map((s) => {
+  const account = data.json.accounts.find((a) => (a.statements ?? []).length > 0);
+  if (account == null) {
+    return [];
+  }
+  return (account.statements ?? []).map((s) => {
     const item: DataItem = {
       date: Intl.DateTimeFormat('en', { month: 'long', year:'numeric' }).format(new Date(s.year!, s.month!)),
-      account: account,
+      account: account.account_name,
     };
     return item;
   });

@@ -574,9 +574,16 @@ app.get('/api/statements', function (request, response, next) {
     .then(async function () {
       const statementsListResponse = await client.statementsList({ access_token: ACCESS_TOKEN });
       prettyPrintResponse(statementsListResponse);
+      const accountWithStatement = statementsListResponse.data.accounts.find(
+        (account) => account.statements.length > 0
+      );
+      if (!accountWithStatement) {
+        response.json({ json: statementsListResponse.data, pdf: null });
+        return;
+      }
       const pdfRequest = {
         access_token: ACCESS_TOKEN,
-        statement_id: statementsListResponse.data.accounts[0].statements[0].statement_id
+        statement_id: accountWithStatement.statements[0].statement_id
       };
 
       const statementsDownloadResponse = await client.statementsDownload(pdfRequest, {
@@ -653,7 +660,7 @@ const getAssetReportWithRetries = (
 
 const formatError = (error) => {
   return {
-    error: { ...error.data, status_code: error.status },
+    error: { ...error?.data, status_code: error?.status },
   };
 };
 
