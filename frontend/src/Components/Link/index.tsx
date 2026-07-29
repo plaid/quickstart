@@ -1,5 +1,5 @@
 import React, { useEffect, useContext } from "react";
-import { usePlaidLink } from "react-plaid-link";
+import { usePlaidLink, PlaidLinkOptionsWithLinkToken } from "react-plaid-link";
 
 import Context from "../../Context";
 
@@ -32,7 +32,7 @@ const Link = () => {
   );
 
   const onSuccess = React.useCallback(
-    async (public_token: string) => {
+    async (public_token: string | null) => {
       // If the access_token is needed, send public_token to server
       const exchangePublicTokenForAccessToken = async () => {
         const response = await fetch("/api/set_access_token", {
@@ -81,8 +81,8 @@ const Link = () => {
   );
 
   let isOauth = false;
-  const config: Parameters<typeof usePlaidLink>[0] = {
-    token: linkToken!,
+  const config: PlaidLinkOptionsWithLinkToken = {
+    token: linkToken,
     onSuccess,
     onExit,
   };
