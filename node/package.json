@@ -14,7 +14,7 @@
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^4.22.1",
+    "express": "^5.2.1",
     "moment": "^2.30.1",
     "nodemon": "^3.1.14",
     "plaid": "^45.0.0",
