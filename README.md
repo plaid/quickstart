@@ -49,6 +49,15 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
 
 ## 1. Clone the repository
 
+> If you have the [Plaid CLI](https://plaid.com/docs/resources/cli/), one command does steps 1
+> and 2 together — it clones this repo, writes your `.env`, and prints the commands to run:
+>
+> ```bash
+> plaid samples create quickstart --language node
+> ```
+>
+> Then skip to [step 3](#3-run-the-quickstart). Otherwise, carry on below.
+
 Using https:
 
 ```bash
@@ -72,6 +81,21 @@ git clone -c core.symlinks=true https://github.com/plaid/quickstart
 ```
 
 ## 2. Set up your environment variables
+
+The [Plaid CLI](https://plaid.com/docs/resources/cli/) can write this file for you, from the root
+of the repo you just cloned:
+
+```bash
+plaid login
+plaid keys write --env sandbox
+```
+
+That fills in `PLAID_CLIENT_ID`, `PLAID_SECRET`, and `PLAID_ENV`, keeps the comments and other
+variables from `.env.example`, and writes the file readable only by you. `--env sandbox` is worth
+being explicit about: without it the CLI writes whichever environment it is currently pointed at,
+which is Production for teams that have it.
+
+To do it by hand instead:
 
 ```bash
 cp .env.example .env
@@ -172,6 +196,10 @@ cd ./frontend
 npm ci
 npm start
 ```
+
+The frontend runs on http://localhost:3000. If that port is already in use — which happens if
+you are running a second copy of the Quickstart — it will start on the next free port instead,
+and print the URL it chose.
 
 ## Test credentials
 
