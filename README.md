@@ -49,14 +49,19 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
 
 ## 1. Clone the repository
 
-> If you have the [Plaid CLI](https://plaid.com/docs/resources/cli/), one command does steps 1
-> and 2 together — it clones this repo, writes your `.env`, and prints the commands to run:
+> If you have the [Plaid CLI](https://plaid.com/docs/resources/cli/), it does steps 1 and 2
+> together — it clones this repo, writes your `.env`, and prints the commands to run:
 >
 > ```bash
+> plaid login    # or plaid register, if you don't have a Plaid account yet
 > plaid samples create quickstart --language node
 > ```
 >
-> Then skip to [step 3](#3-run-the-quickstart). Otherwise, carry on below.
+> `--language` also takes `python`, `ruby`, `go`, and `java`. Then skip to
+> [step 3](#3-run-the-quickstart).
+>
+> The CLI runs on macOS and Linux, including WSL on Windows. Otherwise, carry on below to set
+> this up by hand.
 
 Using https:
 
@@ -86,7 +91,7 @@ The [Plaid CLI](https://plaid.com/docs/resources/cli/) can write this file for y
 of the repo you just cloned:
 
 ```bash
-plaid login
+plaid login    # or plaid register, if you don't have a Plaid account yet
 plaid keys write --env sandbox
 ```
 
