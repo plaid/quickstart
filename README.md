@@ -58,7 +58,9 @@ The [Plaid CLI](https://plaid.com/docs/resources/cli/) clones this repo and writ
 client ID or secret to copy from the Dashboard.
 
 ```bash
-plaid login    # or plaid register, if you don't have a Plaid account yet
+brew install plaid/plaid-cli/plaid
+plaid register    # skip if you already have a Plaid account
+plaid login
 plaid samples create quickstart --language node
 ```
 
