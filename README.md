@@ -28,10 +28,13 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
 
 <!-- toc -->
 
-- [1. Clone the repository](#1-clone-the-repository)
-  - [Special instructions for Windows](#special-instructions-for-windows)
-- [2. Set up your environment variables](#2-set-up-your-environment-variables)
-- [3. Run the quickstart](#3-run-the-quickstart)
+- [Setup](#setup)
+  - [Setup with the Plaid CLI](#setup-with-the-plaid-cli)
+  - [Manual setup](#manual-setup)
+    - [Clone the repository](#clone-the-repository)
+      - [Special instructions for Windows](#special-instructions-for-windows)
+    - [Set up your environment variables](#set-up-your-environment-variables)
+- [Run the Quickstart](#run-the-quickstart)
   - [Pre-requisites](#pre-requisites)
   - [1. Running the backend](#1-running-the-backend)
     - [Node](#node)
@@ -43,25 +46,39 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
   - [2. Running the frontend](#2-running-the-frontend)
 - [Test credentials](#test-credentials)
 - [Troubleshooting](#troubleshooting)
-- [Testing OAuth](#testing-oauth)
+- [Testing OAuth with a redirect URI](#testing-oauth-with-a-redirect-uri-optional)
 
 <!-- tocstop -->
 
-## 1. Clone the repository
+## Setup
 
-> If you have the [Plaid CLI](https://plaid.com/docs/resources/cli/), it does steps 1 and 2
-> together — it clones this repo, writes your `.env`, and prints the commands to run:
->
-> ```bash
-> plaid login    # or plaid register, if you don't have a Plaid account yet
-> plaid samples create quickstart --language node
-> ```
->
-> `--language` also takes `python`, `ruby`, `go`, and `java`. Then skip to
-> [step 3](#3-run-the-quickstart).
->
-> The CLI runs on macOS and Linux, including WSL on Windows. Otherwise, carry on below to set
-> this up by hand.
+The [Plaid CLI](https://plaid.com/docs/resources/cli/) can do this for you, or you can set it up
+by hand. Both end in the same place: a clone of this repo with a `.env` at its root.
+
+### Setup with the Plaid CLI
+
+The CLI clones this repo and writes your `.env`, so there is no client ID or secret to copy from
+the Dashboard:
+
+```bash
+plaid login    # or plaid register, if you don't have a Plaid account yet
+plaid samples create quickstart --language node
+```
+
+`--language` also takes `python`, `ruby`, `go`, and `java`. That leaves a clone with a Sandbox
+`.env` at its root, so you can skip straight to [Run the Quickstart](#run-the-quickstart).
+
+Already cloned this repo yourself? Run `plaid keys write --env sandbox` inside it to write the
+same file. It fills in `PLAID_CLIENT_ID`, `PLAID_SECRET`, and `PLAID_ENV`, keeps the comments and
+other variables from `.env.example`, and writes the file readable only by you. Being explicit
+about `--env sandbox` is worth it: without it the CLI writes whichever environment it is pointed
+at, which is Production for teams that have it.
+
+The CLI runs on macOS and Linux, including WSL on Windows.
+
+### Manual setup
+
+#### Clone the repository
 
 Using https:
 
@@ -77,7 +94,7 @@ git clone git@github.com:plaid/quickstart.git
 cd quickstart
 ```
 
-#### Special instructions for Windows
+##### Special instructions for Windows
 
 Note - because this repository makes use of symbolic links, to run this on a Windows machine, make sure you have checked the "enable symbolic links" box when you download Git to your local machine. Then you can run the above commands to clone the quickstart. Otherwise, you may open your Git Bash terminal as an administrator and use the following command when cloning the project
 
@@ -85,24 +102,7 @@ Note - because this repository makes use of symbolic links, to run this on a Win
 git clone -c core.symlinks=true https://github.com/plaid/quickstart
 ```
 
-## 2. Set up your environment variables
-
-The [Plaid CLI](https://plaid.com/docs/resources/cli/) can write this file for you. Run it from
-the root of the repo you just cloned — like the manual steps below, it writes into whichever
-directory you are in:
-
-```bash
-cd quickstart
-plaid login    # or plaid register, if you don't have a Plaid account yet
-plaid keys write --env sandbox
-```
-
-That fills in `PLAID_CLIENT_ID`, `PLAID_SECRET`, and `PLAID_ENV`, keeps the comments and other
-variables from `.env.example`, and writes the file readable only by you. `--env sandbox` is worth
-being explicit about: without it the CLI writes whichever environment it is currently pointed at,
-which is Production for teams that have it.
-
-To do it by hand instead:
+#### Set up your environment variables
 
 ```bash
 cp .env.example .env
@@ -115,7 +115,7 @@ the dashboard: [https://dashboard.plaid.com/developers/keys](https://dashboard.p
 > NOTE: `.env` files are a convenient local development tool. Never run a production application
 > using an environment file with secrets in it.
 
-## 3. Run the Quickstart
+## Run the Quickstart
 
 ### Pre-requisites
 
