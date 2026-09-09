@@ -87,10 +87,12 @@ git clone -c core.symlinks=true https://github.com/plaid/quickstart
 
 ## 2. Set up your environment variables
 
-The [Plaid CLI](https://plaid.com/docs/resources/cli/) can write this file for you, from the root
-of the repo you just cloned:
+The [Plaid CLI](https://plaid.com/docs/resources/cli/) can write this file for you. Run it from
+the root of the repo you just cloned — like the manual steps below, it writes into whichever
+directory you are in:
 
 ```bash
+cd quickstart
 plaid login    # or plaid register, if you don't have a Plaid account yet
 plaid keys write --env sandbox
 ```
