@@ -208,6 +208,8 @@ and print the URL it chose.
 
 In Sandbox, you can log in to any supported institution using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`. In Production, use real-life credentials.
 
+Link may open on a phone number prompt before the institution list. You can skip it, or enter the Sandbox number shown in the banner and use `123456` as the one-time passcode.
+
 ### Transactions test credentials
 For Transactions, you will get the most realistic results using a non-OAuth test institution such as First Platypus Bank with `user_transactions_dynamic` as the username, and any non-blank string as the password. For more details on the special capabilities of this test user, see the [docs](https://plaid.com/docs/transactions/transactions-data/#testing-pending-and-posted-transactions).
 
