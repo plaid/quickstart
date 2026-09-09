@@ -52,29 +52,25 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
 
 ## Setup
 
-The [Plaid CLI](https://plaid.com/docs/resources/cli/) can do this for you, or you can set it up
-by hand. Both end in the same place: a clone of this repo with a `.env` at its root.
-
 ### Setup with the Plaid CLI
 
-The CLI clones this repo and writes your `.env`, so there is no client ID or secret to copy from
-the Dashboard:
+The [Plaid CLI](https://plaid.com/docs/resources/cli/) clones this repo and writes its `.env` — no
+client ID or secret to copy from the Dashboard.
 
 ```bash
 plaid login    # or plaid register, if you don't have a Plaid account yet
 plaid samples create quickstart --language node
 ```
 
-`--language` also takes `python`, `ruby`, `go`, and `java`. That leaves a clone with a Sandbox
-`.env` at its root, so you can skip straight to [Run the Quickstart](#run-the-quickstart).
+`--language` also takes `python`, `ruby`, `go`, and `java`. Then skip to
+[Run the Quickstart](#run-the-quickstart).
 
-Already cloned this repo yourself? Run `plaid keys write --env sandbox` inside it to write the
-same file. It fills in `PLAID_CLIENT_ID`, `PLAID_SECRET`, and `PLAID_ENV`, keeps the comments and
-other variables from `.env.example`, and writes the file readable only by you. Being explicit
-about `--env sandbox` is worth it: without it the CLI writes whichever environment it is pointed
-at, which is Production for teams that have it.
+Already cloned this repo? Run `plaid keys write --env sandbox` inside it for the same `.env`.
 
-The CLI runs on macOS and Linux, including WSL on Windows.
+> Pass `--env sandbox` explicitly. Without it the CLI writes whichever environment it is pointed
+> at, which is Production for teams that have it.
+
+Requires macOS or Linux; on Windows, use WSL.
 
 ### Manual setup
 
