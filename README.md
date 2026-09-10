@@ -54,7 +54,7 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
 
 ### Setup with the Plaid CLI (optional)
 
-The [Plaid CLI](https://plaid.com/docs/resources/cli/) clones this repo and writes your `.env` for you. Requires macOS, Linux, or WSL (on Windows).
+The [Plaid CLI](https://plaid.com/docs/resources/cli/) is a command-line utility for the Plaid API that streamlines common development operations and can configure the Quickstart for you. Requires macOS, Linux, or WSL (on Windows).
 
 ```bash
 brew install plaid/plaid-cli/plaid
@@ -64,14 +64,15 @@ plaid samples create quickstart --language node   # also: python, ruby, go, java
 cd quickstart
 ```
 
-Already cloned this repo?
+Or, if you've already cloned the repo and registered an account:
 
 ```bash
+brew install plaid/plaid-cli/plaid
 plaid login
 plaid keys write --env sandbox
 ```
 
-Then pick up at [Run the Quickstart](#run-the-quickstart).
+Resume at [Run the Quickstart](#run-the-quickstart).
 
 ### Manual setup
 
