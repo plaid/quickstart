@@ -29,7 +29,7 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
 <!-- toc -->
 
 - [Setup](#setup)
-  - [Setup with the Plaid CLI](#setup-with-the-plaid-cli)
+  - [Setup with the Plaid CLI (optional)](#setup-with-the-plaid-cli-optional)
   - [Manual setup](#manual-setup)
     - [Clone the repository](#clone-the-repository)
       - [Special instructions for Windows](#special-instructions-for-windows)
@@ -52,25 +52,26 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
 
 ## Setup
 
-### Setup with the Plaid CLI
+### Setup with the Plaid CLI (optional)
 
-The [Plaid CLI](https://plaid.com/docs/resources/cli/) clones this repo and writes its `.env` — no
-client ID or secret to copy from the Dashboard. It requires macOS or Linux; on Windows, use WSL.
+The [Plaid CLI](https://plaid.com/docs/resources/cli/) clones this repo and writes your `.env` for you. Requires macOS, Linux, or WSL (on Windows).
 
 ```bash
 brew install plaid/plaid-cli/plaid
 plaid register    # skip if you already have a Plaid account
 plaid login
-plaid samples create quickstart --language node
+plaid samples create quickstart --language node   # also: python, ruby, go, java
+cd quickstart
 ```
 
-`--language` also takes `python`, `ruby`, `go`, and `java`. Then `cd quickstart` and pick up at
-[Run the Quickstart](#run-the-quickstart).
+Already cloned this repo?
 
-Already cloned this repo? Run `plaid keys write --env sandbox` inside it for the same `.env`.
+```bash
+plaid login
+plaid keys write --env sandbox
+```
 
-> Pass `--env sandbox` explicitly. Without it the CLI writes whichever environment it is pointed
-> at, which is Production for teams that have it.
+Then pick up at [Run the Quickstart](#run-the-quickstart).
 
 ### Manual setup
 
