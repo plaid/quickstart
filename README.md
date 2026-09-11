@@ -28,10 +28,13 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
 
 <!-- toc -->
 
-- [1. Clone the repository](#1-clone-the-repository)
-  - [Special instructions for Windows](#special-instructions-for-windows)
-- [2. Set up your environment variables](#2-set-up-your-environment-variables)
-- [3. Run the quickstart](#3-run-the-quickstart)
+- [Setup](#setup)
+  - [Setup with the Plaid CLI (optional)](#setup-with-the-plaid-cli-optional)
+  - [Manual setup](#manual-setup)
+    - [Clone the repository](#clone-the-repository)
+      - [Special instructions for Windows](#special-instructions-for-windows)
+    - [Set up your environment variables](#set-up-your-environment-variables)
+- [Run the Quickstart](#run-the-quickstart)
   - [Pre-requisites](#pre-requisites)
   - [1. Running the backend](#1-running-the-backend)
     - [Node](#node)
@@ -43,11 +46,37 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
   - [2. Running the frontend](#2-running-the-frontend)
 - [Test credentials](#test-credentials)
 - [Troubleshooting](#troubleshooting)
-- [Testing OAuth](#testing-oauth)
+- [Testing OAuth with a redirect URI](#testing-oauth-with-a-redirect-uri-optional)
 
 <!-- tocstop -->
 
-## 1. Clone the repository
+## Setup
+
+### Setup with the Plaid CLI (optional)
+
+The [Plaid CLI](https://plaid.com/docs/resources/cli/) is a command-line utility for the Plaid API that streamlines common development operations and can configure the Quickstart for you. Requires macOS, Linux, or WSL (on Windows).
+
+```bash
+brew install plaid/plaid-cli/plaid
+plaid register    # skip if you already have a Plaid account
+plaid login
+plaid samples create quickstart --language node   # also: python, ruby, go, java
+cd quickstart
+```
+
+Or, if you've already cloned the repo and registered an account:
+
+```bash
+brew install plaid/plaid-cli/plaid
+plaid login
+plaid keys write --env sandbox
+```
+
+Resume at [Run the Quickstart](#run-the-quickstart).
+
+### Manual setup
+
+#### Clone the repository
 
 Using https:
 
@@ -63,7 +92,7 @@ git clone git@github.com:plaid/quickstart.git
 cd quickstart
 ```
 
-#### Special instructions for Windows
+##### Special instructions for Windows
 
 Note - because this repository makes use of symbolic links, to run this on a Windows machine, make sure you have checked the "enable symbolic links" box when you download Git to your local machine. Then you can run the above commands to clone the quickstart. Otherwise, you may open your Git Bash terminal as an administrator and use the following command when cloning the project
 
@@ -71,7 +100,7 @@ Note - because this repository makes use of symbolic links, to run this on a Win
 git clone -c core.symlinks=true https://github.com/plaid/quickstart
 ```
 
-## 2. Set up your environment variables
+#### Set up your environment variables
 
 ```bash
 cp .env.example .env
@@ -84,7 +113,7 @@ the dashboard: [https://dashboard.plaid.com/developers/keys](https://dashboard.p
 > NOTE: `.env` files are a convenient local development tool. Never run a production application
 > using an environment file with secrets in it.
 
-## 3. Run the Quickstart
+## Run the Quickstart
 
 ### Pre-requisites
 
@@ -173,9 +202,15 @@ npm ci
 npm start
 ```
 
+The frontend runs on http://localhost:3000. If that port is already in use — which happens if
+you are running a second copy of the Quickstart — it will start on the next free port instead,
+and print the URL it chose.
+
 ## Test credentials
 
 In Sandbox, you can log in to any supported institution using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`. In Production, use real-life credentials.
+
+Link may open on a phone number prompt before the institution list. You can skip it, or enter the Sandbox number shown in the banner and use `123456` as the one-time passcode.
 
 ### Transactions test credentials
 For Transactions, you will get the most realistic results using a non-OAuth test institution such as First Platypus Bank with `user_transactions_dynamic` as the username, and any non-blank string as the password. For more details on the special capabilities of this test user, see the [docs](https://plaid.com/docs/transactions/transactions-data/#testing-pending-and-posted-transactions).
