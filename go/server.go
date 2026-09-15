@@ -17,7 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v42/plaid"
+	plaid "github.com/plaid/plaid-go/v47/plaid"
 )
 
 var (
