@@ -5,18 +5,18 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "immer": "^11.1.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "react-plaid-link": "^5.0.0",
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
-    "@types/react": "^18.3.28",
-    "@types/react-dom": "^18.3.7",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.0.1",
     "plaid": "^47.0.0",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vite": "^8.0.9"
   },
   "scripts": {
