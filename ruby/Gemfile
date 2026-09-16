@@ -2,8 +2,6 @@ source 'https://rubygems.org'
 
 gem 'sinatra', '~> 4.2'
 
-gem 'http', '~> 5.0'
-
 gem "dotenv", "~> 3.1"
 
 gem "plaid", "= 51.0.0"
@@ -11,4 +9,4 @@ gem "plaid", "= 51.0.0"
 gem "webrick", "~> 1.8"
 
 gem "rackup", "~> 2.2"
-gem "puma", "~> 7.1"
+gem "puma", "~> 8.0"
