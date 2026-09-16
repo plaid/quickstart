@@ -10,10 +10,10 @@ import com.plaid.client.model.PaymentInitiationPaymentGetResponse;
 import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 
 // This functionality is only relevant for the UK Payment Initiation product.
 @Path("/payment")
