@@ -1,6 +1,6 @@
 package com.plaid.quickstart;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.plaid.client.ApiClient;
 import com.plaid.client.request.PlaidApi;
 import com.plaid.quickstart.resources.AccessTokenResource;
@@ -25,11 +25,11 @@ import com.plaid.quickstart.resources.TransactionsResource;
 import com.plaid.quickstart.resources.TransferAuthorizeResource;
 import com.plaid.quickstart.resources.TransferCreateResource;
 import com.plaid.quickstart.resources.UserTokenResource;
-import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -67,7 +67,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
 
   @Override
   public void initialize(final Bootstrap<QuickstartConfiguration> bootstrap) {
-    bootstrap.getObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+    bootstrap.getObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     bootstrap.setConfigurationSourceProvider(
       new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
         new EnvironmentVariableSubstitutor(false)
