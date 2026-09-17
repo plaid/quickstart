@@ -248,7 +248,7 @@ If you get the console error "oauth uri does not contain a valid oauth_state_id 
 ### Testing OAuth with a redirect URI (optional)
 
 To test the OAuth flow in Sandbox with a [redirect URI](https://www.plaid.com/docs/link/oauth/#create-and-register-a-redirect-uri), you should set `PLAID_REDIRECT_URI=http://localhost:3000/` in `.env`. You will also need to register this localhost redirect URI in the
-[Plaid dashboard under Developers > API > Allowed redirect URIs][dashboard-api-section]. It is not required to configure a redirect URI in the .env file to use OAuth with the Quickstart, since redirect URIs are only needed for mobile clients (recommended for best conversion on mobile web, and required when using a Plaid mobile SDK). 
+[Plaid dashboard under Build > API > Allowed redirect URIs][dashboard-api-section]. It is not required to configure a redirect URI in the .env file to use OAuth with the Quickstart, since redirect URIs are only needed for mobile clients (recommended for best conversion on mobile web, and required when using a Plaid mobile SDK). 
 
 #### Instructions for using https with localhost
 
