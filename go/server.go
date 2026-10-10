@@ -17,7 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v47/plaid"
+	plaid "github.com/plaid/plaid-go/v48/plaid"
 )
 
 var (
@@ -813,7 +813,7 @@ func userTokenCreate() error {
 				addressData := plaid.AddressData{
 					City:       *plaid.NewNullableString(&city),
 					Region:     *plaid.NewNullableString(&region),
-					Street:     street,
+					Street:     *plaid.NewNullableString(&street),
 					PostalCode: *plaid.NewNullableString(&postalCode),
 					Country:    *plaid.NewNullableString(&country),
 				}
