@@ -4,7 +4,7 @@ gem 'sinatra', '~> 4.2'
 
 gem "dotenv", "~> 3.1"
 
-gem "plaid", "= 51.0.0"
+gem "plaid", "= 52.0.0"
 
 gem "webrick", "~> 1.8"
 
