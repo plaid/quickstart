@@ -632,7 +632,9 @@ export const transformIdentityData = (data: IdentityData) => {
       return phone.data;
     });
     const addresses = owner.addresses.map((address) => {
-      return `${address.data.street} ${address.data.city}, ${address.data.region} ${address.data.postal_code}`;
+      const { street, city, region, postal_code } = address.data;
+      const cityRegion = [city, region].filter(Boolean).join(", ");
+      return [street, cityRegion, postal_code].filter(Boolean).join(" ");
     });
 
     const num = Math.max(
