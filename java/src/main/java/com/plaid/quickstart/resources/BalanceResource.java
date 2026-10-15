@@ -20,7 +20,7 @@ import jakarta.ws.rs.core.MediaType;
 public class BalanceResource {
   private final PlaidApi plaidClient;
 
-  public BalanceResource(PlaidApi plaidClient, String signalRulesetKey) {
+  public BalanceResource(PlaidApi plaidClient) {
     this.plaidClient = plaidClient;
   }
 
