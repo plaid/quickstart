@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -17,25 +17,33 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	plaid "github.com/plaid/plaid-go/v48/plaid"
+
+	plaid "github.com/plaid/plaid-go/v49"
+	plaidclient "github.com/plaid/plaid-go/v49/client"
+	"github.com/plaid/plaid-go/v49/core"
+	"github.com/plaid/plaid-go/v49/option"
+	"github.com/plaid/plaid-go/v49/transfer"
 )
 
 var (
-	PLAID_CLIENT_ID                      = ""
-	PLAID_SECRET                         = ""
-	PLAID_ENV                            = ""
-	PLAID_PRODUCTS                       = ""
-	PLAID_COUNTRY_CODES                  = ""
-	PLAID_REDIRECT_URI                   = ""
-	SIGNAL_RULESET_KEY                   = ""
-	APP_PORT                             = ""
-	client              *plaid.APIClient = nil
+	PLAID_CLIENT_ID     = ""
+	PLAID_SECRET        = ""
+	PLAID_ENV           = ""
+	PLAID_PRODUCTS      = ""
+	PLAID_COUNTRY_CODES = ""
+	PLAID_REDIRECT_URI  = ""
+	SIGNAL_RULESET_KEY  = ""
+	APP_PORT            = ""
+	client              *plaidclient.Client
 )
 
-var environments = map[string]plaid.Environment{
-	"sandbox":    plaid.Sandbox,
-	"production": plaid.Production,
+var environments = map[string]string{
+	"sandbox":    plaid.Environments.Sandbox,
+	"production": plaid.Environments.Production,
 }
+
+// plaidAPIVersion is the Plaid API version this sample is written against.
+const plaidAPIVersion = "2020-09-14"
 
 func init() {
 	// load env vars from .env file
@@ -73,12 +81,22 @@ func init() {
 		APP_PORT = "8000"
 	}
 
-	// create Plaid client
-	configuration := plaid.NewConfiguration()
-	configuration.AddDefaultHeader("PLAID-CLIENT-ID", PLAID_CLIENT_ID)
-	configuration.AddDefaultHeader("PLAID-SECRET", PLAID_SECRET)
-	configuration.UseEnvironment(environments[PLAID_ENV])
-	client = plaid.NewAPIClient(configuration)
+	baseURL := environments[PLAID_ENV]
+	// An empty base URL would send requests to production, so fail fast.
+	if baseURL == "" {
+		log.Fatalf("Error: unknown PLAID_ENV %q", PLAID_ENV)
+	}
+
+	client = newPlaidClient(baseURL)
+}
+
+func newPlaidClient(baseURL string) *plaidclient.Client {
+	return plaidclient.NewClient(
+		option.WithClientID(plaid.String(PLAID_CLIENT_ID)),
+		option.WithSecret(PLAID_SECRET),
+		option.WithVersion(plaid.String(plaidAPIVersion)),
+		option.WithBaseURL(baseURL),
+	)
 }
 
 func main() {
@@ -152,11 +170,35 @@ func linkExitError(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "logged"})
 }
 
+// plaidErrorBody is satisfied by every typed error in package plaid
+// (BadRequestError, ServerError, ...).
+type plaidErrorBody interface {
+	GetBody() *plaid.PlaidError
+}
+
+func toPlaidError(err error) (*plaid.PlaidError, int, bool) {
+	var typed plaidErrorBody
+	var apiErr *core.APIError
+	status := 0
+	if errors.As(err, &apiErr) {
+		status = apiErr.StatusCode
+	}
+	if errors.As(err, &typed) && typed.GetBody() != nil {
+		return typed.GetBody(), status, true
+	}
+	// Non-JSON error bodies (e.g. a proxy's HTML 502) come back as a bare
+	// *core.APIError, not as one of the typed errors.
+	return nil, status, false
+}
+
 func renderError(c *gin.Context, originalErr error) {
-	if plaidError, err := plaid.ToPlaidError(originalErr); err == nil {
+	if plaidError, status, ok := toPlaidError(originalErr); ok {
 		errorJSON, _ := json.MarshalIndent(plaidError, "", "  ")
 		fmt.Println(string(errorJSON))
-		statusCode := int(plaidError.GetStatus())
+		statusCode := status
+		if plaidError.Status != nil {
+			statusCode = *plaidError.Status
+		}
 		if statusCode == 0 {
 			statusCode = http.StatusInternalServerError
 		}
@@ -173,16 +215,16 @@ func getAccessToken(c *gin.Context) {
 	ctx := context.Background()
 
 	// exchange the public_token for an access_token
-	exchangePublicTokenResp, _, err := client.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
-		*plaid.NewItemPublicTokenExchangeRequest(publicToken),
-	).Execute()
+	exchangePublicTokenResp, err := client.Item.ExchangePublicToken(ctx, &plaid.ItemPublicTokenExchangeRequest{
+		PublicToken: publicToken,
+	})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	accessToken = exchangePublicTokenResp.GetAccessToken()
-	itemID = exchangePublicTokenResp.GetItemId()
+	accessToken = exchangePublicTokenResp.AccessToken
+	itemID = exchangePublicTokenResp.ItemID
 
 	fmt.Println("public token: " + publicToken)
 	fmt.Println("access token: " + accessToken)
@@ -205,27 +247,27 @@ func createLinkTokenForPayment(c *gin.Context) {
 	ctx := context.Background()
 
 	// Create payment recipient
-	paymentRecipientRequest := plaid.NewPaymentInitiationRecipientCreateRequest("Harry Potter")
-	paymentRecipientRequest.SetIban("GB33BUKB20201555555555")
-	paymentRecipientRequest.SetAddress(*plaid.NewPaymentInitiationAddress(
-		[]string{"4 Privet Drive"},
-		"Little Whinging",
-		"11111",
-		"GB",
-	))
-	paymentRecipientCreateResp, _, err := client.PlaidApi.PaymentInitiationRecipientCreate(ctx).PaymentInitiationRecipientCreateRequest(*paymentRecipientRequest).Execute()
+	paymentRecipientCreateResp, err := client.PaymentInitiation.CreateRecipient(ctx, &plaid.PaymentInitiationRecipientCreateRequest{
+		Name: "Harry Potter",
+		Iban: plaid.String("GB33BUKB20201555555555"),
+		Address: &plaid.PaymentInitiationAddress{
+			Street:     []string{"4 Privet Drive"},
+			City:       "Little Whinging",
+			PostalCode: "11111",
+			Country:    "GB",
+		},
+	})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	// Create payment
-	paymentCreateRequest := plaid.NewPaymentInitiationPaymentCreateRequest(
-		paymentRecipientCreateResp.GetRecipientId(),
-		"paymentRef",
-		*plaid.NewPaymentAmount("GBP", 1.34),
-	)
-	paymentCreateResp, _, err := client.PlaidApi.PaymentInitiationPaymentCreate(ctx).PaymentInitiationPaymentCreateRequest(*paymentCreateRequest).Execute()
+	paymentCreateResp, err := client.PaymentInitiation.CreatePayment(ctx, &plaid.PaymentInitiationPaymentCreateRequest{
+		RecipientID: paymentRecipientCreateResp.RecipientID,
+		Reference:   "paymentRef",
+		Amount:      &plaid.PaymentAmount{Currency: plaid.PaymentAmountCurrencyGbp, Value: 1.34},
+	})
 	if err != nil {
 		renderError(c, err)
 		return
@@ -233,13 +275,13 @@ func createLinkTokenForPayment(c *gin.Context) {
 
 	// We store the payment_id in memory for demo purposes - in production, store it in a secure
 	// persistent data store along with the Payment metadata, such as userId.
-	paymentID = paymentCreateResp.GetPaymentId()
+	paymentID = paymentCreateResp.PaymentID
 	fmt.Println("payment id: " + paymentID)
 
 	// Create the link_token
-	linkTokenCreateReqPaymentInitiation := plaid.NewLinkTokenCreateRequestPaymentInitiation()
-	linkTokenCreateReqPaymentInitiation.SetPaymentId(paymentID)
-	linkToken, err := linkTokenCreate(linkTokenCreateReqPaymentInitiation)
+	linkToken, err := linkTokenCreate(&plaid.LinkTokenCreateRequestPaymentInitiation{
+		PaymentID: plaid.String(paymentID),
+	})
 	if err != nil {
 		renderError(c, err)
 		return
@@ -252,98 +294,86 @@ func createLinkTokenForPayment(c *gin.Context) {
 func auth(c *gin.Context) {
 	ctx := context.Background()
 
-	authGetResp, _, err := client.PlaidApi.AuthGet(ctx).AuthGetRequest(
-		*plaid.NewAuthGetRequest(accessToken),
-	).Execute()
-
+	authGetResp, err := client.Auth.Get(ctx, &plaid.AuthGetRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"accounts": authGetResp.GetAccounts(),
-		"numbers":  authGetResp.GetNumbers(),
+		"accounts": authGetResp.Accounts,
+		"numbers":  authGetResp.Numbers,
 	})
 }
 
 func accounts(c *gin.Context) {
 	ctx := context.Background()
 
-	accountsGetResp, _, err := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
-		*plaid.NewAccountsGetRequest(accessToken),
-	).Execute()
-
+	accountsGetResp, err := client.Accounts.Get(ctx, &plaid.AccountsGetRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"accounts": accountsGetResp.GetAccounts(),
+		"accounts": accountsGetResp.Accounts,
 	})
 }
 
 func balance(c *gin.Context) {
 	ctx := context.Background()
 
-	accountsGetResp, _, err := client.PlaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(
-		*plaid.NewAccountsBalanceGetRequest(accessToken),
-	).Execute()
-
+	accountsGetResp, err := client.Accounts.GetBalance(ctx, &plaid.AccountsBalanceGetRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"accounts": accountsGetResp.GetAccounts(),
+		"accounts": accountsGetResp.Accounts,
 	})
 }
 
 func item(c *gin.Context) {
 	ctx := context.Background()
 
-	itemGetResp, _, err := client.PlaidApi.ItemGet(ctx).ItemGetRequest(
-		*plaid.NewItemGetRequest(accessToken),
-	).Execute()
-
+	itemGetResp, err := client.Item.Get(ctx, &plaid.ItemGetRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	institutionGetByIdResp, _, err := client.PlaidApi.InstitutionsGetById(ctx).InstitutionsGetByIdRequest(
-		*plaid.NewInstitutionsGetByIdRequest(
-			*itemGetResp.GetItem().InstitutionId.Get(),
-			convertCountryCodes(strings.Split(PLAID_COUNTRY_CODES, ",")),
-		),
-	).Execute()
+	if itemGetResp.Item == nil || itemGetResp.Item.InstitutionID == nil {
+		renderError(c, fmt.Errorf("item has no institution_id"))
+		return
+	}
 
+	institutionGetByIDResp, err := client.Institutions.GetByID(ctx, &plaid.InstitutionsGetByIDRequest{
+		InstitutionID: *itemGetResp.Item.InstitutionID,
+		CountryCodes:  convertCountryCodes(strings.Split(PLAID_COUNTRY_CODES, ",")),
+	})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"item":        itemGetResp.GetItem(),
-		"institution": institutionGetByIdResp.GetInstitution(),
+		"item":        itemGetResp.Item,
+		"institution": institutionGetByIDResp.Institution,
 	})
 }
 
 func identity(c *gin.Context) {
 	ctx := context.Background()
 
-	identityGetResp, _, err := client.PlaidApi.IdentityGet(ctx).IdentityGetRequest(
-		*plaid.NewIdentityGetRequest(accessToken),
-	).Execute()
+	identityGetResp, err := client.Identity.Get(ctx, &plaid.IdentityGetRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"identity": identityGetResp.GetAccounts(),
+		"identity": identityGetResp.Accounts,
 	})
 }
 
@@ -354,28 +384,25 @@ func transactions(c *gin.Context) {
 	var cursor *string
 
 	// New transaction updates since "cursor"
-	var added []plaid.Transaction
-	var modified []plaid.Transaction
-	var removed []plaid.RemovedTransaction // Removed transaction ids
+	var added []*plaid.Transaction
+	var modified []*plaid.Transaction
+	var removed []*plaid.RemovedTransaction // Removed transaction ids
 	hasMore := true
 	const maxSyncPolls = 10
 	syncPolls := 0
 	// Iterate through each page of new transaction updates for item
 	for hasMore {
-		request := plaid.NewTransactionsSyncRequest(accessToken)
-		if cursor != nil {
-			request.SetCursor(*cursor)
-		}
-		resp, _, err := client.PlaidApi.TransactionsSync(
-			ctx,
-		).TransactionsSyncRequest(*request).Execute()
+		resp, err := client.Transactions.Sync(ctx, &plaid.TransactionsSyncRequest{
+			AccessToken: accessToken,
+			Cursor:      cursor,
+		})
 		if err != nil {
 			renderError(c, err)
 			return
 		}
 
 		// Update cursor to the next cursor
-		nextCursor := resp.GetNextCursor()
+		nextCursor := resp.NextCursor
 		cursor = &nextCursor
 
 		// If no transactions are available yet, wait and poll the endpoint.
@@ -395,14 +422,14 @@ func transactions(c *gin.Context) {
 		}
 
 		// Add this page of results
-		added = append(added, resp.GetAdded()...)
-		modified = append(modified, resp.GetModified()...)
-		removed = append(removed, resp.GetRemoved()...)
-		hasMore = resp.GetHasMore()
+		added = append(added, resp.Added...)
+		modified = append(modified, resp.Modified...)
+		removed = append(removed, resp.Removed...)
+		hasMore = resp.HasMore
 	}
 
 	sort.Slice(added, func(i, j int) bool {
-		return added[i].GetDate() < added[j].GetDate()
+		return added[i].Date.Before(added[j].Date)
 	})
 
 	start := len(added) - 9
@@ -421,10 +448,9 @@ func transactions(c *gin.Context) {
 func payment(c *gin.Context) {
 	ctx := context.Background()
 
-	paymentGetResp, _, err := client.PlaidApi.PaymentInitiationPaymentGet(ctx).PaymentInitiationPaymentGetRequest(
-		*plaid.NewPaymentInitiationPaymentGetRequest(paymentID),
-	).Execute()
-
+	paymentGetResp, err := client.PaymentInitiation.GetPayment(ctx, &plaid.PaymentInitiationPaymentGetRequest{
+		PaymentID: paymentID,
+	})
 	if err != nil {
 		renderError(c, err)
 		return
@@ -440,50 +466,46 @@ func payment(c *gin.Context) {
 
 func transferAuthorize(c *gin.Context) {
 	ctx := context.Background()
-	accountsGetResp, _, err := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
-		*plaid.NewAccountsGetRequest(accessToken),
-	).Execute()
-
+	accountsGetResp, err := client.Accounts.Get(ctx, &plaid.AccountsGetRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	accountID = accountsGetResp.GetAccounts()[0].AccountId
-	transferType, err := plaid.NewTransferTypeFromValue("debit")
+	accountID = accountsGetResp.Accounts[0].AccountID
+	transferType, err := plaid.NewTransferTypeFromString("debit")
 	if err != nil {
 		renderError(c, err)
 		return
 	}
-	transferNetwork, err := plaid.NewTransferNetworkFromValue("ach")
+	transferNetwork, err := plaid.NewTransferNetworkFromString("ach")
 	if err != nil {
 		renderError(c, err)
 		return
 	}
-	ACHClass, err := plaid.NewACHClassFromValue("ppd")
-	if err != nil {
-		renderError(c, err)
-		return
-	}
-
-	transferAuthorizationCreateUser := plaid.NewTransferAuthorizationUserInRequest("FirstName LastName")
-	transferAuthorizationCreateRequest := plaid.NewTransferAuthorizationCreateRequest(
-		accessToken,
-		accountID,
-		*transferType,
-		*transferNetwork,
-		"1.00",
-		*transferAuthorizationCreateUser)
-
-	transferAuthorizationCreateRequest.SetAchClass(*ACHClass)
-	transferAuthorizationCreateResp, _, err := client.PlaidApi.TransferAuthorizationCreate(ctx).TransferAuthorizationCreateRequest(*transferAuthorizationCreateRequest).Execute()
-
+	achClass, err := plaid.NewAchClassFromString("ppd")
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	authorizationID = transferAuthorizationCreateResp.GetAuthorization().Id
+	transferAuthorizationCreateResp, err := client.Transfer.Authorization.Create(ctx, &transfer.TransferAuthorizationCreateRequest{
+		AccessToken: accessToken,
+		AccountID:   accountID,
+		Type:        transferType,
+		Network:     transferNetwork,
+		Amount:      "1.00",
+		AchClass:    achClass.Ptr(),
+		User: &plaid.TransferAuthorizationUserInRequest{
+			LegalName: "FirstName LastName",
+		},
+	})
+	if err != nil {
+		renderError(c, err)
+		return
+	}
+
+	authorizationID = transferAuthorizationCreateResp.Authorization.ID
 
 	c.JSON(http.StatusOK, transferAuthorizationCreateResp)
 }
@@ -491,15 +513,12 @@ func transferAuthorize(c *gin.Context) {
 func transferCreate(c *gin.Context) {
 	ctx := context.Background()
 
-	transferCreateRequest := plaid.NewTransferCreateRequest(
-		accessToken,
-		accountID,
-		authorizationID,
-		"Debit",
-	)
-
-	transferCreateResp, _, err := client.PlaidApi.TransferCreate(ctx).TransferCreateRequest(*transferCreateRequest).Execute()
-
+	transferCreateResp, err := client.Transfer.Create(ctx, &plaid.TransferCreateRequest{
+		AccessToken:     accessToken,
+		AccountID:       accountID,
+		AuthorizationID: authorizationID,
+		Description:     "Debit",
+	})
 	if err != nil {
 		renderError(c, err)
 		return
@@ -510,32 +529,28 @@ func transferCreate(c *gin.Context) {
 
 func signalEvaluate(c *gin.Context) {
 	ctx := context.Background()
-	accountsGetResp, _, err := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
-		*plaid.NewAccountsGetRequest(accessToken),
-	).Execute()
-
+	accountsGetResp, err := client.Accounts.Get(ctx, &plaid.AccountsGetRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	accountID = accountsGetResp.GetAccounts()[0].AccountId
+	accountID = accountsGetResp.Accounts[0].AccountID
 
 	// Generate unique transaction ID using timestamp and random component
 	clientTransactionID := fmt.Sprintf("txn-%d-%s", time.Now().UnixNano(), uuid.New().String()[:8])
 
-	signalEvaluateRequest := plaid.NewSignalEvaluateRequest(
-		accessToken,
-		accountID,
-		clientTransactionID,
-		100.00)
-
+	signalEvaluateRequest := &plaid.SignalEvaluateRequest{
+		AccessToken:         accessToken,
+		AccountID:           accountID,
+		ClientTransactionID: clientTransactionID,
+		Amount:              100.00,
+	}
 	if SIGNAL_RULESET_KEY != "" {
-		signalEvaluateRequest.SetRulesetKey(SIGNAL_RULESET_KEY)
+		signalEvaluateRequest.RulesetKey = plaid.String(SIGNAL_RULESET_KEY)
 	}
 
-	signalEvaluateResp, _, err := client.PlaidApi.SignalEvaluate(ctx).SignalEvaluateRequest(*signalEvaluateRequest).Execute()
-
+	signalEvaluateResp, err := client.Signal.Evaluate(ctx, signalEvaluateRequest)
 	if err != nil {
 		renderError(c, err)
 		return
@@ -547,28 +562,28 @@ func signalEvaluate(c *gin.Context) {
 func investmentTransactions(c *gin.Context) {
 	ctx := context.Background()
 
-	endDate := time.Now().Local().Format("2006-01-02")
-	startDate := time.Now().Local().Add(-30 * 24 * time.Hour).Format("2006-01-02")
+	endDate := time.Now().Local()
+	startDate := time.Now().Local().Add(-30 * 24 * time.Hour)
 
-	request := plaid.NewInvestmentsTransactionsGetRequest(accessToken, startDate, endDate)
-	invTxResp, _, err := client.PlaidApi.InvestmentsTransactionsGet(ctx).InvestmentsTransactionsGetRequest(*request).Execute()
-
+	page, err := client.Investments.GetTransactions(ctx, &plaid.InvestmentsTransactionsGetRequest{
+		AccessToken: accessToken,
+		StartDate:   startDate,
+		EndDate:     endDate,
+	})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"investments_transactions": invTxResp,
+		"investments_transactions": page.Response,
 	})
 }
 
 func holdings(c *gin.Context) {
 	ctx := context.Background()
 
-	holdingsGetResp, _, err := client.PlaidApi.InvestmentsHoldingsGet(ctx).InvestmentsHoldingsGetRequest(
-		*plaid.NewInvestmentsHoldingsGetRequest(accessToken),
-	).Execute()
+	holdingsGetResp, err := client.Investments.GetHoldings(ctx, &plaid.InvestmentsHoldingsGetRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
@@ -592,17 +607,14 @@ func createPublicToken(c *gin.Context) {
 
 	// Create a one-time use public_token for the Item.
 	// This public_token can be used to initialize Link in update mode for a user
-	publicTokenCreateResp, _, err := client.PlaidApi.ItemCreatePublicToken(ctx).ItemPublicTokenCreateRequest(
-		*plaid.NewItemPublicTokenCreateRequest(accessToken),
-	).Execute()
-
+	publicTokenCreateResp, err := client.Item.CreatePublicToken(ctx, &plaid.ItemPublicTokenCreateRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"public_token": publicTokenCreateResp.GetPublicToken(),
+		"public_token": publicTokenCreateResp.PublicToken,
 	})
 }
 
@@ -660,6 +672,12 @@ func containsProduct(products []plaid.Products, product plaid.Products) bool {
 	return false
 }
 
+func isCraProductList(products []plaid.Products) bool {
+	return containsProduct(products, plaid.ProductsCraBaseReport) ||
+		containsProduct(products, plaid.ProductsCraIncomeInsights) ||
+		containsProduct(products, plaid.ProductsCraPartnerInsights)
+}
+
 // linkTokenCreate creates a link token using the specified parameters
 func linkTokenCreate(
 	paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
@@ -673,65 +691,59 @@ func linkTokenCreate(
 	// This should correspond to a unique id for the current user.
 	// Typically, this will be a user ID number from your application.
 	// Personally identifiable information, such as an email address or phone number, should not be used here.
-	user := plaid.LinkTokenCreateRequestUser{
-		ClientUserId: time.Now().String(),
+	request := &plaid.LinkTokenCreateRequest{
+		ClientName:   "Plaid Quickstart",
+		Language:     "en",
+		CountryCodes: countryCodes,
+		User: &plaid.LinkTokenCreateRequestUser{
+			ClientUserID: time.Now().String(),
+		},
 	}
-
-	request := plaid.NewLinkTokenCreateRequest(
-		"Plaid Quickstart",
-		"en",
-		countryCodes,
-	)
-	request.SetUser(user)
 
 	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
 	if paymentInitiation != nil {
-		request.SetPaymentInitiation(*paymentInitiation)
+		request.PaymentInitiation = paymentInitiation
 		// The 'payment_initiation' product has to be the only element in the 'products' list.
-		request.SetProducts([]plaid.Products{plaid.PRODUCTS_PAYMENT_INITIATION})
+		request.Products = []plaid.Products{plaid.ProductsPaymentInitiation}
 	} else {
-		request.SetProducts(products)
+		request.Products = products
 	}
 
-	if containsProduct(products, plaid.PRODUCTS_STATEMENTS) {
-		statementConfig := plaid.NewLinkTokenCreateRequestStatements(
-			time.Now().Local().Add(-30*24*time.Hour).Format("2006-01-02"),
-			time.Now().Local().Format("2006-01-02"),
-		)
-		request.SetStatements(*statementConfig)
+	if containsProduct(products, plaid.ProductsStatements) {
+		request.Statements = &plaid.LinkTokenCreateRequestStatements{
+			StartDate: time.Now().Local().Add(-30 * 24 * time.Hour),
+			EndDate:   time.Now().Local(),
+		}
 	}
 
-	if containsProduct(products, plaid.PRODUCTS_CRA_BASE_REPORT) ||
-		containsProduct(products, plaid.PRODUCTS_CRA_INCOME_INSIGHTS) ||
-		containsProduct(products, plaid.PRODUCTS_CRA_PARTNER_INSIGHTS) {
+	if isCraProductList(products) {
 		// Use user_token if available, otherwise use user_id
 		if userToken != "" {
 			fmt.Println("Creating link token with user_token:", userToken)
-			request.SetUserToken(userToken)
+			request.UserToken = plaid.String(userToken)
 			// Keep user object when using user_token
 		} else if userID != "" {
 			fmt.Println("Creating link token with user_id:", userID)
-			request.SetUserId(userID)
+			request.UserID = plaid.String(userID)
 			// Remove user object when using user_id
 			request.User = nil
 		} else {
 			fmt.Println("ERROR: Both userToken and userID are empty!")
 		}
-		request.SetConsumerReportPermissiblePurpose(plaid.CONSUMERREPORTPERMISSIBLEPURPOSE_ACCOUNT_REVIEW_CREDIT)
-		request.SetCraOptions(*plaid.NewLinkTokenCreateRequestCraOptions(60))
+		request.ConsumerReportPermissiblePurpose = plaid.ConsumerReportPermissiblePurposeAccountReviewCredit.Ptr()
+		request.CraOptions = &plaid.LinkTokenCreateRequestCraOptions{DaysRequested: 60}
 	}
 
 	if redirectURI != "" {
-		request.SetRedirectUri(redirectURI)
+		request.RedirectURI = plaid.String(redirectURI)
 	}
 
-	linkTokenCreateResp, _, err := client.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
-
+	linkTokenCreateResp, err := client.Link.CreateToken(ctx, request)
 	if err != nil {
 		return "", err
 	}
 
-	return linkTokenCreateResp.GetLinkToken(), nil
+	return linkTokenCreateResp.LinkToken, nil
 }
 
 // Create a user token which can be used for Plaid Check, Income, or Multi-Item link flows
@@ -741,96 +753,65 @@ func userTokenCreate() error {
 
 	clientUserID := time.Now().String()
 
-	request := plaid.NewUserCreateRequest(
+	request := &plaid.UserCreateRequest{
 		// Typically this will be a user ID number from your application.
-		clientUserID,
-	)
+		ClientUserID: clientUserID,
+	}
 
 	products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
-	if containsProduct(products, plaid.PRODUCTS_CRA_BASE_REPORT) ||
-		containsProduct(products, plaid.PRODUCTS_CRA_INCOME_INSIGHTS) ||
-		containsProduct(products, plaid.PRODUCTS_CRA_PARTNER_INSIGHTS) {
+	if isCraProductList(products) {
 		// Try with Identity field first (new-style)
-		givenName := "Harry"
-		familyName := "Potter"
-		phoneNumber := "+16174567890"
-		emailAddress := "harrypotter@example.com"
-		dateOfBirth := "1980-07-31"
-		primary := true
-		city := "New York"
-		region := "NY"
-		postalCode := "11111"
-		country := "US"
-
-		ClientIdentity := plaid.ClientUserIdentity{
-			Name: *plaid.NewNullableClientUserIdentityName(&plaid.ClientUserIdentityName{
-				GivenName:  givenName,
-				FamilyName: familyName,
-			}),
-			DateOfBirth: *plaid.NewNullableString(&dateOfBirth),
-			PhoneNumbers: &[]plaid.ClientUserIdentityPhoneNumber{
-				{
-					Data:    phoneNumber,
-					Primary: primary,
-				},
+		request.Identity = &plaid.ClientUserIdentity{
+			Name: &plaid.ClientUserIdentityName{
+				GivenName:  "Harry",
+				FamilyName: "Potter",
 			},
-			Emails: &[]plaid.ClientUserIdentityEmail{
-				{
-					Data:    emailAddress,
-					Primary: primary,
-				},
+			DateOfBirth: plaid.Time(plaid.MustParseDate("1980-07-31")),
+			PhoneNumbers: []*plaid.ClientUserIdentityPhoneNumber{
+				{Data: "+16174567890", Primary: true},
 			},
-			Addresses: &[]plaid.ClientUserIdentityAddress{
+			Emails: []*plaid.ClientUserIdentityEmail{
+				{Data: "harrypotter@example.com", Primary: true},
+			},
+			Addresses: []*plaid.ClientUserIdentityAddress{
 				{
-					Street1:    *plaid.NewNullableString(plaid.PtrString("4 Privet Drive")),
-					City:       *plaid.NewNullableString(&city),
-					Region:     *plaid.NewNullableString(&region),
-					PostalCode: *plaid.NewNullableString(&postalCode),
-					Country:    country,
-					Primary:    primary,
+					Street1:    plaid.String("4 Privet Drive"),
+					City:       plaid.String("New York"),
+					Region:     plaid.String("NY"),
+					PostalCode: plaid.String("11111"),
+					Country:    "US",
+					Primary:    true,
 				},
 			},
 		}
-		request.SetIdentity(ClientIdentity)
 	}
 
-	userCreateResp, _, err := client.PlaidApi.UserCreate(ctx).UserCreateRequest(*request).Execute()
-
+	userCreateResp, err := client.User.Create(ctx, request)
 	if err != nil {
-		plaidErr, parseErr := plaid.ToPlaidError(err)
-		if parseErr == nil && plaidErr.ErrorCode == "INVALID_FIELD" {
-			request2 := plaid.NewUserCreateRequest(clientUserID)
+		plaidErr, _, ok := toPlaidError(err)
+		if ok && plaidErr.ErrorCode == "INVALID_FIELD" {
+			request2 := &plaid.UserCreateRequest{ClientUserID: clientUserID}
 
-			products := convertProducts(strings.Split(PLAID_PRODUCTS, ","))
-			if containsProduct(products, plaid.PRODUCTS_CRA_BASE_REPORT) ||
-				containsProduct(products, plaid.PRODUCTS_CRA_INCOME_INSIGHTS) ||
-				containsProduct(products, plaid.PRODUCTS_CRA_PARTNER_INSIGHTS) {
-				city := "New York"
-				region := "NY"
-				street := "4 Privet Drive"
-				postalCode := "11111"
-				country := "US"
-				addressData := plaid.AddressData{
-					City:       *plaid.NewNullableString(&city),
-					Region:     *plaid.NewNullableString(&region),
-					Street:     *plaid.NewNullableString(&street),
-					PostalCode: *plaid.NewNullableString(&postalCode),
-					Country:    *plaid.NewNullableString(&country),
+			if isCraProductList(products) {
+				request2.ConsumerReportUserIdentity = &plaid.ConsumerReportUserIdentity{
+					FirstName:    "Harry",
+					LastName:     "Potter",
+					PhoneNumbers: []string{"+16174567890"},
+					Emails:       []string{"harrypotter@example.com"},
+					DateOfBirth:  plaid.Time(plaid.MustParseDate("1980-07-31")),
+					PrimaryAddress: &plaid.AddressData{
+						City:       plaid.String("New York"),
+						Region:     plaid.String("NY"),
+						Street:     plaid.String("4 Privet Drive"),
+						PostalCode: plaid.String("11111"),
+						Country:    plaid.String("US"),
+					},
 				}
-				UserIdentity := plaid.NewConsumerReportUserIdentity(
-					"Harry",
-					"Potter",
-					[]string{"+16174567890"},
-					[]string{"harrypotter@example.com"},
-					*plaid.NewNullableString(nil),
-					addressData,
-				)
-				DateOfBirth := "1980-07-31"
-				UserIdentity.SetDateOfBirth(DateOfBirth)
-				request2.SetConsumerReportUserIdentity(*UserIdentity)
+				// Legacy sent "ssn_last_4": null via NewNullableString(nil); keep that wire shape.
+				request2.ConsumerReportUserIdentity.SetSsnLast4(nil)
 			}
 
-			userCreateResp, _, err = client.PlaidApi.UserCreate(ctx).UserCreateRequest(*request2).Execute()
+			userCreateResp, err = client.User.Create(ctx, request2)
 			if err != nil {
 				return err
 			}
@@ -840,12 +821,12 @@ func userTokenCreate() error {
 	}
 
 	// Store both user_token and user_id
-	if ut, ok := userCreateResp.GetUserTokenOk(); ok {
-		userToken = *ut
+	if userCreateResp.UserToken != nil {
+		userToken = *userCreateResp.UserToken
 		fmt.Println("Created user with user_token:", userToken)
 	}
-	if uid, ok := userCreateResp.GetUserIdOk(); ok {
-		userID = *uid
+	if userCreateResp.UserID != "" {
+		userID = userCreateResp.UserID
 		fmt.Println("Created user with user_id:", userID)
 	}
 
@@ -854,22 +835,20 @@ func userTokenCreate() error {
 
 func statements(c *gin.Context) {
 	ctx := context.Background()
-	statementsListResp, _, err := client.PlaidApi.StatementsList(ctx).StatementsListRequest(
-		*plaid.NewStatementsListRequest(accessToken),
-	).Execute()
+	statementsListResp, err := client.Statements.List(ctx, &plaid.StatementsListRequest{AccessToken: accessToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	var statementId string
-	for _, account := range statementsListResp.GetAccounts() {
-		if len(account.GetStatements()) > 0 {
-			statementId = account.GetStatements()[0].StatementId
+	var statementID string
+	for _, account := range statementsListResp.Accounts {
+		if len(account.Statements) > 0 {
+			statementID = account.Statements[0].StatementID
 			break
 		}
 	}
-	if statementId == "" {
+	if statementID == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"json": statementsListResp,
 			"pdf":  nil,
@@ -877,16 +856,16 @@ func statements(c *gin.Context) {
 		return
 	}
 
-	statementsDownloadResp, _, err := client.PlaidApi.StatementsDownload(ctx).StatementsDownloadRequest(
-		*plaid.NewStatementsDownloadRequest(accessToken, statementId),
-	).Execute()
+	statementsDownloadResp, err := client.Statements.Download(ctx, &plaid.StatementsDownloadRequest{
+		AccessToken: accessToken,
+		StatementID: statementID,
+	})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	reader := bufio.NewReader(statementsDownloadResp)
-	content, err := io.ReadAll(reader)
+	content, err := io.ReadAll(statementsDownloadResp)
 	if err != nil {
 		renderError(c, err)
 		return
@@ -904,37 +883,33 @@ func statements(c *gin.Context) {
 func assets(c *gin.Context) {
 	ctx := context.Background()
 
-	createRequest := plaid.NewAssetReportCreateRequest(10)
-	createRequest.SetAccessTokens([]string{accessToken})
-
 	// create the asset report
-	assetReportCreateResp, _, err := client.PlaidApi.AssetReportCreate(ctx).AssetReportCreateRequest(
-		*createRequest,
-	).Execute()
+	assetReportCreateResp, err := client.AssetReport.Create(ctx, &plaid.AssetReportCreateRequest{
+		DaysRequested: 10,
+		AccessTokens:  []string{accessToken},
+	})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	assetReportToken := assetReportCreateResp.GetAssetReportToken()
+	assetReportToken := assetReportCreateResp.AssetReportToken
 
 	// get the asset report
-	assetReportGetResp, err := pollForAssetReport(ctx, client, assetReportToken)
+	assetReportGetResp, err := pollForAssetReport(ctx, assetReportToken)
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
 	// get it as a pdf
-	pdfRequest := plaid.NewAssetReportPDFGetRequest(assetReportToken)
-	pdfFile, _, err := client.PlaidApi.AssetReportPdfGet(ctx).AssetReportPDFGetRequest(*pdfRequest).Execute()
+	pdfFile, err := client.AssetReport.GetPdf(ctx, &plaid.AssetReportPdfGetRequest{AssetReportToken: assetReportToken})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	reader := bufio.NewReader(pdfFile)
-	content, err := io.ReadAll(reader)
+	content, err := io.ReadAll(pdfFile)
 	if err != nil {
 		renderError(c, err)
 		return
@@ -944,18 +919,25 @@ func assets(c *gin.Context) {
 	encodedPdf := base64.StdEncoding.EncodeToString(content)
 
 	c.JSON(http.StatusOK, gin.H{
-		"json": assetReportGetResp.GetReport(),
+		"json": assetReportGetResp.Report,
 		"pdf":  encodedPdf,
 	})
 }
 
-func pollForAssetReport(ctx context.Context, client *plaid.APIClient, assetReportToken string) (*plaid.AssetReportGetResponse, error) {
+func pollForAssetReport(ctx context.Context, assetReportToken string) (*plaid.AssetReportGetResponse, error) {
 	return pollWithRetries(func() (*plaid.AssetReportGetResponse, error) {
-		request := plaid.NewAssetReportGetRequest()
-		request.SetAssetReportToken(assetReportToken)
-		response, _, err := client.PlaidApi.AssetReportGet(ctx).AssetReportGetRequest(*request).Execute()
-		return &response, err
+		return client.AssetReport.Get(ctx, &plaid.AssetReportGetRequest{AssetReportToken: plaid.String(assetReportToken)})
 	}, 1000, 20)
+}
+
+// craUserRef mirrors the legacy "user_token if available, otherwise user_id" logic.
+func craUserRef() (token *string, id *string) {
+	if userToken != "" {
+		return plaid.String(userToken), nil
+	} else if userID != "" {
+		return nil, plaid.String(userID)
+	}
+	return nil, nil
 }
 
 // Retrieve CRA Base Report and PDF
@@ -969,21 +951,14 @@ func getCraBaseReportHandler(c *gin.Context) {
 		return
 	}
 
-	pdfRequest := plaid.NewCraCheckReportPDFGetRequest()
-	// Use user_token if available, otherwise use user_id
-	if userToken != "" {
-		pdfRequest.SetUserToken(userToken)
-	} else if userID != "" {
-		pdfRequest.SetUserId(userID)
-	}
-	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
+	token, id := craUserRef()
+	pdfResponse, err := client.CheckReport.GetPdf(ctx, &plaid.CraCheckReportPdfGetRequest{UserToken: token, UserID: id})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	reader := bufio.NewReader(pdfResponse)
-	content, err := io.ReadAll(reader)
+	content, err := io.ReadAll(pdfResponse)
 	if err != nil {
 		renderError(c, err)
 		return
@@ -1000,15 +975,8 @@ func getCraBaseReportHandler(c *gin.Context) {
 
 func getCraBaseReportWithRetries(ctx context.Context) (*plaid.CraCheckReportBaseReportGetResponse, error) {
 	return pollWithRetries(func() (*plaid.CraCheckReportBaseReportGetResponse, error) {
-		request := plaid.NewCraCheckReportBaseReportGetRequest()
-		// Use user_token if available, otherwise use user_id
-		if userToken != "" {
-			request.SetUserToken(userToken)
-		} else if userID != "" {
-			request.SetUserId(userID)
-		}
-		response, _, err := client.PlaidApi.CraCheckReportBaseReportGet(ctx).CraCheckReportBaseReportGetRequest(*request).Execute()
-		return &response, err
+		token, id := craUserRef()
+		return client.CheckReport.GetBaseReport(ctx, &plaid.CraCheckReportBaseReportGetRequest{UserToken: token, UserID: id})
 	}, 1000, 20)
 }
 
@@ -1023,22 +991,18 @@ func getCraIncomeInsightsHandler(c *gin.Context) {
 		return
 	}
 
-	pdfRequest := plaid.NewCraCheckReportPDFGetRequest()
-	// Use user_token if available, otherwise use user_id
-	if userToken != "" {
-		pdfRequest.SetUserToken(userToken)
-	} else if userID != "" {
-		pdfRequest.SetUserId(userID)
-	}
-	pdfRequest.SetAddOns([]plaid.CraPDFAddOns{plaid.CRAPDFADDONS_INCOME_INSIGHTS})
-	pdfResponse, _, err := client.PlaidApi.CraCheckReportPdfGet(ctx).CraCheckReportPDFGetRequest(*pdfRequest).Execute()
+	token, id := craUserRef()
+	pdfResponse, err := client.CheckReport.GetPdf(ctx, &plaid.CraCheckReportPdfGetRequest{
+		UserToken: token,
+		UserID:    id,
+		AddOns:    []plaid.CraPdfAddOns{plaid.CraPdfAddOnsCraIncomeInsights},
+	})
 	if err != nil {
 		renderError(c, err)
 		return
 	}
 
-	reader := bufio.NewReader(pdfResponse)
-	content, err := io.ReadAll(reader)
+	content, err := io.ReadAll(pdfResponse)
 	if err != nil {
 		renderError(c, err)
 		return
@@ -1055,15 +1019,8 @@ func getCraIncomeInsightsHandler(c *gin.Context) {
 
 func getCraIncomeInsightsWithRetries(ctx context.Context) (*plaid.CraCheckReportIncomeInsightsGetResponse, error) {
 	return pollWithRetries(func() (*plaid.CraCheckReportIncomeInsightsGetResponse, error) {
-		request := plaid.NewCraCheckReportIncomeInsightsGetRequest()
-		// Use user_token if available, otherwise use user_id
-		if userToken != "" {
-			request.SetUserToken(userToken)
-		} else if userID != "" {
-			request.SetUserId(userID)
-		}
-		response, _, err := client.PlaidApi.CraCheckReportIncomeInsightsGet(ctx).CraCheckReportIncomeInsightsGetRequest(*request).Execute()
-		return &response, err
+		token, id := craUserRef()
+		return client.CheckReport.GetIncomeInsights(ctx, &plaid.CraCheckReportIncomeInsightsGetRequest{UserToken: token, UserID: id})
 	}, 1000, 20)
 }
 
@@ -1084,15 +1041,8 @@ func getCraPartnerInsightsHandler(c *gin.Context) {
 
 func getCraPartnerInsightsWithRetries(ctx context.Context) (*plaid.CraCheckReportPartnerInsightsGetResponse, error) {
 	return pollWithRetries(func() (*plaid.CraCheckReportPartnerInsightsGetResponse, error) {
-		request := plaid.NewCraCheckReportPartnerInsightsGetRequest()
-		// Use user_token if available, otherwise use user_id
-		if userToken != "" {
-			request.SetUserToken(userToken)
-		} else if userID != "" {
-			request.SetUserId(userID)
-		}
-		response, _, err := client.PlaidApi.CraCheckReportPartnerInsightsGet(ctx).CraCheckReportPartnerInsightsGetRequest(*request).Execute()
-		return &response, err
+		token, id := craUserRef()
+		return client.CheckReport.GetPartnerInsights(ctx, &plaid.CraCheckReportPartnerInsightsGetRequest{UserToken: token, UserID: id})
 	}, 1000, 20)
 }
 
@@ -1108,9 +1058,9 @@ func pollWithRetries[T any](requestCallback func() (T, error), ms int, retriesLe
 	}
 	response, err := requestCallback()
 	if err != nil {
-		plaidErr, parseErr := plaid.ToPlaidError(err)
-		isProductNotReady := parseErr == nil && plaidErr.ErrorCode == "PRODUCT_NOT_READY"
-		isServerError := parseErr == nil && plaidErr.HasStatus() && plaidErr.GetStatus() >= 500
+		plaidErr, status, ok := toPlaidError(err)
+		isProductNotReady := ok && plaidErr.ErrorCode == "PRODUCT_NOT_READY"
+		isServerError := status >= 500
 		if !isProductNotReady && !isServerError {
 			return zero, err
 		}
