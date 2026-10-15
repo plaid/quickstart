@@ -118,8 +118,8 @@ the dashboard: [https://dashboard.plaid.com/developers/keys](https://dashboard.p
 ### Pre-requisites
 
 - The language you intend to use is installed on your machine and available at your command line.
-  This repo should generally work with active LTS versions of each language such as node >= 18,
-  python >= 3.9, ruby >= 3.0, etc.
+  This repo should generally work with active LTS versions of each language such as node >= 20.19,
+  python >= 3.10, ruby >= 3.2, etc.
 - Your environment variables populated in `.env`
 - [npm](https://www.npmjs.com/get-npm)
 - If using Windows, a command line utility capable of running basic Unix shell commands

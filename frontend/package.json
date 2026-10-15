@@ -25,6 +25,6 @@
     "preview": "vite preview"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   }
 }
