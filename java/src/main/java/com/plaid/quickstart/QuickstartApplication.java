@@ -113,7 +113,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new AccountsResource(plaidClient));
     environment.jersey().register(new AssetsResource(plaidClient));
     environment.jersey().register(new AuthResource(plaidClient));
-    environment.jersey().register(new BalanceResource(plaidClient, signalRulesetKey));
+    environment.jersey().register(new BalanceResource(plaidClient));
     environment.jersey().register(new HoldingsResource(plaidClient));
     environment.jersey().register(new IdentityResource(plaidClient));
     environment.jersey().register(new InfoResource(plaidProducts));
