@@ -161,9 +161,9 @@ You may need to run the following command in your terminal for your particular v
 
 ```bash
 # examples:
-open /Applications/Python\ 3.9/Install\ Certificates.command
+open /Applications/Python\ 3.13/Install\ Certificates.command
 # or
-open /Applications/Python\ 3.6/Install\ Certificates.command
+open /Applications/Python\ 3.12/Install\ Certificates.command
 ```
 
 ##### Ruby
@@ -231,7 +231,7 @@ If Link works in Sandbox but fails in Production, the error is most likely one o
 View the server logs to see the associated error message with detailed troubleshooting instructions. If you can't view logs locally, view them via the [Dashboard activity logs](https://dashboard.plaid.com/activity/logs). 
 
 ### Works only when `PLAID_REDIRECT_URI` is not specified
-Make sure to add the redirect URI to the Allowed Redirect URIs list in the [Plaid Dashboard](https://dashboard.plaid.com/team/api).
+Make sure to add the redirect URI to the Allowed Redirect URIs list in the [Plaid Dashboard](https://dashboard.plaid.com/developers/api).
 
 ### "Connectivity not supported"
 
