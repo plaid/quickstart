@@ -2,7 +2,7 @@
 
 // read env vars from .env file
 require('dotenv').config();
-const { Configuration, PlaidApi, Products, PlaidEnvironments, CraCheckReportProduct } = require('plaid');
+const { PlaidClient, PlaidEnvironment, Plaid } = require('plaid');
 const util = require('util');
 const { randomUUID: uuidv4 } = require('crypto');
 const express = require('express');
@@ -19,7 +19,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // PLAID_PRODUCTS is a comma-separated list of products to use when initializing
 // Link. Note that this list must contain 'assets' in order for the app to be
 // able to create and retrieve asset reports.
-const PLAID_PRODUCTS = (process.env.PLAID_PRODUCTS || Products.Transactions).split(
+const PLAID_PRODUCTS = (process.env.PLAID_PRODUCTS || Plaid.Products.Transactions).split(
   ',',
 );
 
@@ -66,18 +66,23 @@ let TRANSFER_ID = null;
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
 
-const configuration = new Configuration({
-  basePath: PlaidEnvironments[PLAID_ENV],
-  baseOptions: {
-    headers: {
-      'PLAID-CLIENT-ID': PLAID_CLIENT_ID,
-      'PLAID-SECRET': PLAID_SECRET,
-      'Plaid-Version': '2020-09-14',
-    },
-  },
-});
+const PLAID_ENVIRONMENTS = {
+  sandbox: PlaidEnvironment.Sandbox,
+  production: PlaidEnvironment.Production,
+};
 
-const client = new PlaidApi(configuration);
+// The client sends requests to production when no environment is set, so
+// fail fast on an unknown PLAID_ENV.
+if (!Object.hasOwn(PLAID_ENVIRONMENTS, PLAID_ENV)) {
+  throw new Error(`Unknown PLAID_ENV '${PLAID_ENV}'`);
+}
+
+const client = new PlaidClient({
+  environment: PLAID_ENVIRONMENTS[PLAID_ENV],
+  clientId: PLAID_CLIENT_ID,
+  secret: PLAID_SECRET,
+  version: '2020-09-14',
+});
 
 const app = express();
 app.use(
@@ -119,7 +124,7 @@ app.post('/api/create_link_token', function (request, response, next) {
       if (PLAID_ANDROID_PACKAGE_NAME !== '') {
         configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME;
       }
-      if (PLAID_PRODUCTS.includes(Products.Statements)) {
+      if (PLAID_PRODUCTS.includes(Plaid.Products.Statements)) {
         const statementConfig = {
           end_date: moment().format('YYYY-MM-DD'),
           start_date: moment().subtract(30, 'days').format('YYYY-MM-DD'),
@@ -142,9 +147,9 @@ app.post('/api/create_link_token', function (request, response, next) {
         };
         configs.consumer_report_permissible_purpose = 'ACCOUNT_REVIEW_CREDIT';
       }
-      const createTokenResponse = await client.linkTokenCreate(configs);
+      const createTokenResponse = await client.link.createToken(configs);
       prettyPrintResponse(createTokenResponse);
-      response.json(createTokenResponse.data);
+      response.json(createTokenResponse);
     })
     .catch(next);
 });
@@ -188,19 +193,19 @@ app.post('/api/create_user_token', function (request, response, next) {
       }
 
       try {
-        const user = await client.userCreate(userRequest);
+        const user = await client.user.create(userRequest);
 
-        if (user.data.user_token) {
-          USER_TOKEN = user.data.user_token;
+        if (user.user_token) {
+          USER_TOKEN = user.user_token;
         }
-        if (user.data.user_id) {
-          USER_ID = user.data.user_id;
+        if (user.user_id) {
+          USER_ID = user.user_id;
         }
 
-        response.json(user.data);
+        response.json(user);
       } catch (error) {
-        if (error.response && error.response.data &&
-            error.response.data.error_code === 'INVALID_FIELD' &&
+        if (error.body &&
+            error.body.error_code === 'INVALID_FIELD' &&
             PLAID_PRODUCTS.some(product => product.startsWith("cra_"))) {
 
           // Retry with consumer_report_user_identity
@@ -220,16 +225,16 @@ app.post('/api/create_user_token', function (request, response, next) {
             }
           }
 
-          const retryUser = await client.userCreate(userRequest);
+          const retryUser = await client.user.create(userRequest);
 
-          if (retryUser.data.user_token) {
-            USER_TOKEN = retryUser.data.user_token;
+          if (retryUser.user_token) {
+            USER_TOKEN = retryUser.user_token;
           }
-          if (retryUser.data.user_id) {
-            USER_ID = retryUser.data.user_id;
+          if (retryUser.user_id) {
+            USER_ID = retryUser.user_id;
           }
 
-          response.json(retryUser.data);
+          response.json(retryUser);
         } else {
           throw error;
         }
@@ -249,7 +254,7 @@ app.post(
     Promise.resolve()
       .then(async function () {
         const createRecipientResponse =
-          await client.paymentInitiationRecipientCreate({
+          await client.paymentInitiation.createRecipient({
             name: 'Harry Potter',
             iban: 'GB33BUKB20201555555555',
             address: {
@@ -259,11 +264,11 @@ app.post(
               country: 'GB',
             },
           });
-        const recipientId = createRecipientResponse.data.recipient_id;
+        const recipientId = createRecipientResponse.recipient_id;
         prettyPrintResponse(createRecipientResponse);
 
         const createPaymentResponse =
-          await client.paymentInitiationPaymentCreate({
+          await client.paymentInitiation.createPayment({
             recipient_id: recipientId,
             reference: 'paymentRef',
             amount: {
@@ -272,7 +277,7 @@ app.post(
             },
           });
         prettyPrintResponse(createPaymentResponse);
-        const paymentId = createPaymentResponse.data.payment_id;
+        const paymentId = createPaymentResponse.payment_id;
 
         // We store the payment_id in memory for demo purposes - in production, store it in a secure
         // persistent data store along with the Payment metadata, such as userId.
@@ -290,7 +295,7 @@ app.post(
           country_codes: PLAID_COUNTRY_CODES,
           language: 'en',
           // The 'payment_initiation' product has to be the only element in the 'products' list.
-          products: [Products.PaymentInitiation],
+          products: [Plaid.Products.PaymentInitiation],
           payment_initiation: {
             payment_id: paymentId,
           },
@@ -298,9 +303,9 @@ app.post(
         if (PLAID_REDIRECT_URI !== '') {
           configs.redirect_uri = PLAID_REDIRECT_URI;
         }
-        const createTokenResponse = await client.linkTokenCreate(configs);
+        const createTokenResponse = await client.link.createToken(configs);
         prettyPrintResponse(createTokenResponse);
-        response.json(createTokenResponse.data);
+        response.json(createTokenResponse);
       })
       .catch(next);
   },
@@ -313,12 +318,12 @@ app.post('/api/set_access_token', function (request, response, next) {
   PUBLIC_TOKEN = request.body.public_token;
   Promise.resolve()
     .then(async function () {
-      const tokenResponse = await client.itemPublicTokenExchange({
+      const tokenResponse = await client.item.exchangePublicToken({
         public_token: PUBLIC_TOKEN,
       });
       prettyPrintResponse(tokenResponse);
-      ACCESS_TOKEN = tokenResponse.data.access_token;
-      ITEM_ID = tokenResponse.data.item_id;
+      ACCESS_TOKEN = tokenResponse.access_token;
+      ITEM_ID = tokenResponse.item_id;
       response.json({
         // the 'access_token' is a private token, DO NOT pass this token to the frontend in your production environment
         access_token: ACCESS_TOKEN,
@@ -334,11 +339,11 @@ app.post('/api/set_access_token', function (request, response, next) {
 app.get('/api/auth', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const authResponse = await client.authGet({
+      const authResponse = await client.auth.get({
         access_token: ACCESS_TOKEN,
       });
       prettyPrintResponse(authResponse);
-      response.json(authResponse.data);
+      response.json(authResponse);
     })
     .catch(next);
 });
@@ -363,8 +368,8 @@ app.get('/api/transactions', function (request, response, next) {
           access_token: ACCESS_TOKEN,
           cursor: cursor,
         };
-        const response = await client.transactionsSync(request)
-        const data = response.data;
+        const response = await client.transactions.sync(request)
+        const data = response;
 
         // If no transactions are available yet, wait and poll the endpoint.
         // Normally, we would listen for a webhook, but the Quickstart doesn't
@@ -407,11 +412,11 @@ app.get('/api/investments_transactions', function (request, response, next) {
         end_date: endDate,
       };
       const investmentTransactionsResponse =
-        await client.investmentsTransactionsGet(configs);
+        (await client.investments.getTransactions(configs)).response;
       prettyPrintResponse(investmentTransactionsResponse);
       response.json({
         error: null,
-        investments_transactions: investmentTransactionsResponse.data,
+        investments_transactions: investmentTransactionsResponse,
       });
     })
     .catch(next);
@@ -422,11 +427,11 @@ app.get('/api/investments_transactions', function (request, response, next) {
 app.get('/api/identity', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const identityResponse = await client.identityGet({
+      const identityResponse = await client.identity.get({
         access_token: ACCESS_TOKEN,
       });
       prettyPrintResponse(identityResponse);
-      response.json({ identity: identityResponse.data.accounts });
+      response.json({ identity: identityResponse.accounts });
     })
     .catch(next);
 });
@@ -436,11 +441,11 @@ app.get('/api/identity', function (request, response, next) {
 app.get('/api/balance', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const balanceResponse = await client.accountsBalanceGet({
+      const balanceResponse = await client.accounts.getBalance({
         access_token: ACCESS_TOKEN,
       });
       prettyPrintResponse(balanceResponse);
-      response.json({ accounts: balanceResponse.data.accounts });
+      response.json({ accounts: balanceResponse.accounts });
     })
     .catch(next);
 });
@@ -450,11 +455,11 @@ app.get('/api/balance', function (request, response, next) {
 app.get('/api/holdings', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const holdingsResponse = await client.investmentsHoldingsGet({
+      const holdingsResponse = await client.investments.getHoldings({
         access_token: ACCESS_TOKEN,
       });
       prettyPrintResponse(holdingsResponse);
-      response.json({ error: null, holdings: holdingsResponse.data });
+      response.json({ error: null, holdings: holdingsResponse });
     })
     .catch(next);
 });
@@ -464,11 +469,11 @@ app.get('/api/holdings', function (request, response, next) {
 app.get('/api/liabilities', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const liabilitiesResponse = await client.liabilitiesGet({
+      const liabilitiesResponse = await client.liabilities.get({
         access_token: ACCESS_TOKEN,
       });
       prettyPrintResponse(liabilitiesResponse);
-      response.json({ error: null, liabilities: liabilitiesResponse.data });
+      response.json({ error: null, liabilities: liabilitiesResponse });
     })
     .catch(next);
 });
@@ -480,19 +485,19 @@ app.get('/api/item', function (request, response, next) {
     .then(async function () {
       // Pull the Item - this includes information about available products,
       // billed products, webhook information, and more.
-      const itemResponse = await client.itemGet({
+      const itemResponse = await client.item.get({
         access_token: ACCESS_TOKEN,
       });
       // Also pull information about the institution
       const configs = {
-        institution_id: itemResponse.data.item.institution_id,
+        institution_id: itemResponse.item.institution_id,
         country_codes: PLAID_COUNTRY_CODES,
       };
-      const instResponse = await client.institutionsGetById(configs);
+      const instResponse = await client.institutions.getById(configs);
       prettyPrintResponse(itemResponse);
       response.json({
-        item: itemResponse.data.item,
-        institution: instResponse.data.institution,
+        item: itemResponse.item,
+        institution: instResponse.institution,
       });
     })
     .catch(next);
@@ -503,11 +508,11 @@ app.get('/api/item', function (request, response, next) {
 app.get('/api/accounts', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const accountsResponse = await client.accountsGet({
+      const accountsResponse = await client.accounts.get({
         access_token: ACCESS_TOKEN,
       });
       prettyPrintResponse(accountsResponse);
-      response.json(accountsResponse.data);
+      response.json(accountsResponse);
     })
     .catch(next);
 });
@@ -544,10 +549,10 @@ app.get('/api/assets', function (request, response, next) {
         days_requested: daysRequested,
         options,
       };
-      const assetReportCreateResponse = await client.assetReportCreate(configs);
+      const assetReportCreateResponse = await client.assetReport.create(configs);
       prettyPrintResponse(assetReportCreateResponse);
       const assetReportToken =
-        assetReportCreateResponse.data.asset_report_token;
+        assetReportCreateResponse.asset_report_token;
       const getResponse = await getAssetReportWithRetries(
         client,
         assetReportToken,
@@ -556,14 +561,13 @@ app.get('/api/assets', function (request, response, next) {
         asset_report_token: assetReportToken,
       };
 
-      const pdfResponse = await client.assetReportPdfGet(pdfRequest, {
-        responseType: 'arraybuffer',
-      });
+      const pdfResponse = await client.assetReport.getPdf(pdfRequest);
+      const pdf = Buffer.from(await pdfResponse.arrayBuffer());
       prettyPrintResponse(getResponse);
-      prettyPrintResponse(pdfResponse);
+      prettyPrintResponse(pdf);
       response.json({
-        json: getResponse.data.report,
-        pdf: pdfResponse.data.toString('base64'),
+        json: getResponse.report,
+        pdf: pdf.toString('base64'),
       });
     })
     .catch(next);
@@ -572,13 +576,13 @@ app.get('/api/assets', function (request, response, next) {
 app.get('/api/statements', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const statementsListResponse = await client.statementsList({ access_token: ACCESS_TOKEN });
+      const statementsListResponse = await client.statements.list({ access_token: ACCESS_TOKEN });
       prettyPrintResponse(statementsListResponse);
-      const accountWithStatement = statementsListResponse.data.accounts.find(
+      const accountWithStatement = statementsListResponse.accounts.find(
         (account) => account.statements.length > 0
       );
       if (!accountWithStatement) {
-        response.json({ json: statementsListResponse.data, pdf: null });
+        response.json({ json: statementsListResponse, pdf: null });
         return;
       }
       const pdfRequest = {
@@ -586,13 +590,12 @@ app.get('/api/statements', function (request, response, next) {
         statement_id: accountWithStatement.statements[0].statement_id
       };
 
-      const statementsDownloadResponse = await client.statementsDownload(pdfRequest, {
-        responseType: 'arraybuffer',
-      });
-      prettyPrintResponse(statementsDownloadResponse);
+      const statementsDownloadResponse = await client.statements.download(pdfRequest);
+      const pdf = Buffer.from(await statementsDownloadResponse.arrayBuffer());
+      prettyPrintResponse(pdf);
       response.json({
-        json: statementsListResponse.data,
-        pdf: statementsDownloadResponse.data.toString('base64'),
+        json: statementsListResponse,
+        pdf: pdf.toString('base64'),
       });
     })
     .catch(next);
@@ -603,11 +606,11 @@ app.get('/api/statements', function (request, response, next) {
 app.get('/api/payment', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const paymentGetResponse = await client.paymentInitiationPaymentGet({
+      const paymentGetResponse = await client.paymentInitiation.getPayment({
         payment_id: PAYMENT_ID,
       });
       prettyPrintResponse(paymentGetResponse);
-      response.json({ error: null, payment: paymentGetResponse.data });
+      response.json({ error: null, payment: paymentGetResponse });
     })
     .catch(next);
 });
@@ -617,11 +620,11 @@ app.get('/api/payment', function (request, response, next) {
 app.get('/api/income/verification/paystubs', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const paystubsGetResponse = await client.incomeVerificationPaystubsGet({
+      const paystubsGetResponse = await client.incomeVerification.getPaystubs({
         access_token: ACCESS_TOKEN
       });
       prettyPrintResponse(paystubsGetResponse);
-      response.json({ error: null, paystubs: paystubsGetResponse.data })
+      response.json({ error: null, paystubs: paystubsGetResponse })
     })
     .catch(next);
 })
@@ -631,7 +634,7 @@ const server = app.listen(APP_PORT, function () {
 });
 
 const prettyPrintResponse = (response) => {
-  console.log(util.inspect(response.data, { colors: true, depth: 4 }));
+  console.log(util.inspect(response, { colors: true, depth: 4 }));
 };
 
 // This is a helper function to poll for the completion of an Asset Report and
@@ -651,7 +654,7 @@ const getAssetReportWithRetries = (
 
   return pollWithRetries(
     async () => {
-      return await plaidClient.assetReportGet(request);
+      return await plaidClient.assetReport.get(request);
     },
     ms,
     retriesLeft,
@@ -660,19 +663,19 @@ const getAssetReportWithRetries = (
 
 const formatError = (error) => {
   return {
-    error: { ...error?.data, status_code: error?.status },
+    error: { ...error?.body, status_code: error?.statusCode },
   };
 };
 
 app.get('/api/transfer_authorize', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const accountsResponse = await client.accountsGet({
+      const accountsResponse = await client.accounts.get({
         access_token: ACCESS_TOKEN,
       });
-      ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
+      ACCOUNT_ID = accountsResponse.accounts[0].account_id;
 
-      const transferAuthorizationCreateResponse = await client.transferAuthorizationCreate({
+      const transferAuthorizationCreateResponse = await client.transfer.authorization.create({
         access_token: ACCESS_TOKEN,
         account_id: ACCOUNT_ID,
         type: 'debit',
@@ -692,8 +695,8 @@ app.get('/api/transfer_authorize', function (request, response, next) {
         },
       });
       prettyPrintResponse(transferAuthorizationCreateResponse);
-      AUTHORIZATION_ID = transferAuthorizationCreateResponse.data.authorization.id;
-      response.json(transferAuthorizationCreateResponse.data);
+      AUTHORIZATION_ID = transferAuthorizationCreateResponse.authorization.id;
+      response.json(transferAuthorizationCreateResponse);
     })
     .catch(next);
 });
@@ -702,17 +705,17 @@ app.get('/api/transfer_authorize', function (request, response, next) {
 app.get('/api/transfer_create', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const transferCreateResponse = await client.transferCreate({
+      const transferCreateResponse = await client.transfer.create({
         access_token: ACCESS_TOKEN,
         account_id: ACCOUNT_ID,
         authorization_id: AUTHORIZATION_ID,
         description: 'Debit',
       });
       prettyPrintResponse(transferCreateResponse);
-      TRANSFER_ID = transferCreateResponse.data.transfer.id
+      TRANSFER_ID = transferCreateResponse.transfer.id
       response.json({
         error: null,
-        transfer: transferCreateResponse.data.transfer,
+        transfer: transferCreateResponse.transfer,
       });
     })
     .catch(next);
@@ -721,10 +724,10 @@ app.get('/api/transfer_create', function (request, response, next) {
 app.get('/api/signal_evaluate', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      const accountsResponse = await client.accountsGet({
+      const accountsResponse = await client.accounts.get({
         access_token: ACCESS_TOKEN,
       });
-      ACCOUNT_ID = accountsResponse.data.accounts[0].account_id;
+      ACCOUNT_ID = accountsResponse.accounts[0].account_id;
 
       // Generate unique transaction ID using timestamp and random component
       const clientTransactionId = `txn-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
@@ -740,9 +743,9 @@ app.get('/api/signal_evaluate', function (request, response, next) {
         signalEvaluateRequest.ruleset_key = SIGNAL_RULESET_KEY;
       }
 
-      const signalEvaluateResponse = await client.signalEvaluate(signalEvaluateRequest);
+      const signalEvaluateResponse = await client.signal.evaluate(signalEvaluateRequest);
       prettyPrintResponse(signalEvaluateResponse);
-      response.json(signalEvaluateResponse.data);
+      response.json(signalEvaluateResponse);
     })
     .catch(next);
 });
@@ -763,13 +766,12 @@ app.get('/api/cra/get_base_report', function (request, response, next) {
       const pdfRequest = {};
       pdfRequest[identifierKey] = userIdentifier;
 
-      const pdfResponse = await client.craCheckReportPdfGet(pdfRequest, {
-        responseType: 'arraybuffer'
-      });
+      const pdfResponse = await client.checkReport.getPdf(pdfRequest);
+      const pdf = Buffer.from(await pdfResponse.arrayBuffer());
 
       response.json({
-        report: getResponse.data.report,
-        pdf: pdfResponse.data.toString('base64'),
+        report: getResponse.report,
+        pdf: pdf.toString('base64'),
       });
     })
     .catch(next);
@@ -785,7 +787,7 @@ const getCraBaseReportWithRetries = (
 
   return pollWithRetries(
     async () => {
-      return await plaidClient.craCheckReportBaseReportGet(requestBody)
+      return await plaidClient.checkReport.getBaseReport(requestBody)
     }
   );
 };
@@ -807,13 +809,12 @@ app.get('/api/cra/get_income_insights', async (req, res, next) => {
       pdfRequest[identifierKey] = userIdentifier;
       pdfRequest.add_ons = ['cra_income_insights'];
 
-      const pdfResponse = await client.craCheckReportPdfGet(pdfRequest, {
-        responseType: 'arraybuffer'
-      });
+      const pdfResponse = await client.checkReport.getPdf(pdfRequest);
+      const pdf = Buffer.from(await pdfResponse.arrayBuffer());
 
       res.json({
-        report: getResponse.data.report,
-        pdf: pdfResponse.data.toString('base64'),
+        report: getResponse.report,
+        pdf: pdf.toString('base64'),
       });
     })
     .catch(next);
@@ -828,7 +829,7 @@ const getCheckInsightsWithRetries = (
   async () => {
     const request = {};
     request[identifierKey] = userIdentifier;
-    return await plaidClient.craCheckReportIncomeInsightsGet(request);
+    return await plaidClient.checkReport.getIncomeInsights(request);
   }
 );
 
@@ -844,7 +845,7 @@ app.get('/api/cra/get_partner_insights', async (req, res, next) => {
       const response = await getCheckParnterInsightsWithRetries(client, userIdentifier, identifierKey);
       prettyPrintResponse(response);
 
-      res.json(response.data);
+      res.json(response);
     })
     .catch(next);
 });
@@ -860,7 +861,7 @@ const getCheckParnterInsightsWithRetries = (
 
   return pollWithRetries(
     async () => {
-      return await plaidClient.craCheckReportPartnerInsightsGet(requestBody);
+      return await plaidClient.checkReport.getPartnerInsights(requestBody);
     }
   );
 };
@@ -879,8 +880,8 @@ const pollWithRetries = (
     requestCallback()
       .then(resolve)
       .catch((error) => {
-        const errorCode = error?.response?.data?.error_code;
-        const statusCode = error?.response?.status;
+        const errorCode = error?.body?.error_code;
+        const statusCode = error?.statusCode;
         const isRetryable = errorCode === 'PRODUCT_NOT_READY' || (statusCode >= 500 && statusCode < 600);
         if (!isRetryable) {
           reject(error);
@@ -907,11 +908,11 @@ app.post('/api/link_exit_error', function (request, response, next) {
 });
 
 app.use('/api', function (error, request, response, next) {
-  if (error.response?.data) {
-    prettyPrintResponse(error.response);
+  if (error.body) {
+    prettyPrintResponse(error.body);
   } else {
     console.log(error.message || error);
   }
-  const statusCode = error.response?.status || 500;
-  response.status(statusCode).json(formatError(error.response));
+  const statusCode = error.statusCode || 500;
+  response.status(statusCode).json(formatError(error));
 });
