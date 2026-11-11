@@ -44,6 +44,7 @@ For legacy (non-CRA) Income, see the [Income sample app](https://github.com/plai
     - [Java](#java)
     - [.NET](#net) (community support only)
   - [2. Running the frontend](#2-running-the-frontend)
+- [Connect your own bank account](#connect-your-own-bank-account)
 - [Test credentials](#test-credentials)
 - [Troubleshooting](#troubleshooting)
 - [Testing OAuth with a redirect URI](#testing-oauth-with-a-redirect-uri-optional)
@@ -206,6 +207,21 @@ The frontend runs on http://localhost:3000. If that port is already in use — w
 you are running a second copy of the Quickstart — it will start on the next free port instead,
 and print the URL it chose.
 
+## Connect your own bank account
+
+To try the Quickstart with your own bank, use the free [Trial plan](https://plaid.com/docs/account/billing/#trial-plans). It gives a personal project production access for up to 10 of your own accounts in the US and Canada, and most requests are approved within a minute.
+
+```bash
+plaid trial    # opens the Trial form in your browser
+plaid samples create quickstart --env production --language node
+```
+
+A few things work differently on a Trial plan:
+
+- The Trial plan includes `auth`, `transactions`, `identity`, `assets`, `investments`, `liabilities` and `statements`. Remove `signal`, `transfer`, `payment_initiation` and the `cra_*` products from `PLAID_PRODUCTS` before you switch to production, or creating a link token fails.
+- Every Item counts toward your 10 connections, including duplicates, and removing an Item doesn't free one up. The Quickstart keeps its access token in memory, so restarting the backend loses the Item while it still counts against the limit.
+- OAuth institutions such as Chase are available without a separate registration. On desktop, Link opens them in a pop-up, so leave `PLAID_REDIRECT_URI` empty.
+
 ## Test credentials
 
 In Sandbox, you can log in to any supported institution using `user_good` as the username and `pass_good` as the password. If prompted to enter a 2-factor authentication code, enter `1234`. In Production, use real-life credentials.
@@ -239,7 +255,7 @@ If you get a "Connectivity not supported" error after selecting a financial inst
 
 ### "You need to update your app" or "institution not supported"
 
-If you get a "You need to update your app" or "institution not supported" error after selecting a financial institution in Link, you're probably running the Quickstart in Production and attempting to link an institution, such as Chase or Wells Fargo, that requires an OAuth-based connection. In order to make OAuth connections to US-based institutions in Production, you must have full Production access approval, and certain institutions may also require additional approvals before you can be enabled. To use this institution, [apply for full Production access](https://dashboard.plaid.com/overview/production) and see the [OAuth institutions page](https://dashboard.plaid.com/activity/status/oauth-institutions) for any other required steps and to track your OAuth enablement status.
+If you get a "You need to update your app" or "institution not supported" error after selecting a financial institution in Link, you're probably running the Quickstart in Production and attempting to link an institution, such as Chase or Wells Fargo, that requires an OAuth-based connection. In order to make OAuth connections to US-based institutions in Production, you need Production access, either through the [Trial plan](https://dashboard.plaid.com/trial-plan) or full Production approval. With full Production access, certain institutions may also require additional approvals before you can be enabled. To use this institution, [apply for full Production access](https://dashboard.plaid.com/overview/production) or the Trial plan, and see the [OAuth institutions page](https://dashboard.plaid.com/activity/status/oauth-institutions) for any other required steps and to track your OAuth enablement status.
 
 ### "oauth uri does not contain a valid oauth_state_id query parameter"
 
