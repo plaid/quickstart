@@ -368,7 +368,21 @@ app.get('/api/transactions', function (request, response, next) {
           access_token: ACCESS_TOKEN,
           cursor: cursor,
         };
-        const response = await client.transactions.sync(request)
+        let response;
+        try {
+          response = await client.transactions.sync(request);
+        } catch (error) {
+          // If the data changed mid-pagination, restart the whole loop from the
+          // cursor this update started with, discarding the pages fetched so far.
+          if (error?.body?.error_code !== 'TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION') {
+            throw error;
+          }
+          cursor = null;
+          added = [];
+          modified = [];
+          removed = [];
+          continue;
+        }
         const data = response;
 
         // If no transactions are available yet, wait and poll the endpoint.

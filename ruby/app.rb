@@ -94,7 +94,24 @@ get '/api/transactions' do
         cursor: cursor
       }
     )
-    response = client.transactions_sync(request)
+    begin
+      response = client.transactions_sync(request)
+    rescue Plaid::ApiError => e
+      # If the data changed mid-pagination, restart the whole loop from the
+      # cursor this update started with, discarding the pages fetched so far.
+      error_code = begin
+        JSON.parse(e.response_body)['error_code']
+      rescue JSON::ParserError, TypeError
+        nil
+      end
+      raise e unless error_code == 'TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION'
+
+      cursor = ''
+      added = []
+      modified = []
+      removed = []
+      next
+    end
     cursor = response.next_cursor
 
     # If no transactions are available yet, wait and poll the endpoint.

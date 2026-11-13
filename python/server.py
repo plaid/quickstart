@@ -393,7 +393,20 @@ def get_transactions():
             access_token=access_token,
             cursor=cursor,
         )
-        response = client.transactions_sync(request).to_dict()
+        try:
+            response = client.transactions_sync(request).to_dict()
+        except plaid.ApiException as e:
+            # If the data changed mid-pagination, restart the whole loop from the
+            # cursor this update started with, discarding the pages fetched so far.
+            try:
+                error_code = json.loads(e.body).get('error_code')
+            except (json.JSONDecodeError, TypeError):
+                error_code = None
+            if error_code != 'TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION':
+                raise
+            cursor = ''
+            added, modified, removed = [], [], []
+            continue
         cursor = response['next_cursor']
         # If no transactions are available yet, wait and poll the endpoint.
         # Normally, we would listen for a webhook, but the Quickstart doesn't
