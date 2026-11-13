@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -12,6 +13,7 @@ import com.plaid.client.model.TransactionsSyncRequest;
 import com.plaid.client.model.TransactionsSyncResponse;
 import com.plaid.client.model.Transaction;
 import com.plaid.client.model.RemovedTransaction;
+import com.plaid.quickstart.PlaidApiException;
 import com.plaid.quickstart.PlaidApiHelper;
 import com.plaid.quickstart.QuickstartApplication;
 
@@ -46,8 +48,22 @@ public class TransactionsResource {
         .accessToken(QuickstartApplication.accessToken)
         .cursor(cursor);
 
-      TransactionsSyncResponse responseBody = PlaidApiHelper.callPlaid(
-        plaidClient.transactionsSync(request));
+      TransactionsSyncResponse responseBody;
+      try {
+        responseBody = PlaidApiHelper.callPlaid(plaidClient.transactionsSync(request));
+      } catch (PlaidApiException e) {
+        // If the data changed mid-pagination, restart the whole loop from the
+        // cursor this update started with, discarding the pages fetched so far.
+        Map<?, ?> error = (Map<?, ?>) e.getErrorResponse().get("error");
+        if (!"TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION".equals(error.get("error_code"))) {
+          throw e;
+        }
+        cursor = null;
+        added.clear();
+        modified.clear();
+        removed.clear();
+        continue;
+      }
 
       cursor = responseBody.getNextCursor();
 
