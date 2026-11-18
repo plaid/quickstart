@@ -182,9 +182,11 @@ get '/api/investments_transactions' do
     end_date: end_date
   }
   transactions_response = client.investments.get_transactions(**investments_transactions_get_request).pages.first
-  pretty_print_response(transactions_response.to_h)
+  # pages.first is nil when the Item has no investment transactions in the date range.
+  transactions_data = transactions_response&.to_h || { investment_transactions: [], securities: [] }
+  pretty_print_response(transactions_data)
   content_type :json
-  { investments_transactions: transactions_response.to_h }.to_json
+  { investments_transactions: transactions_data }.to_json
 end
 
 # Create and then retrieve an Asset Report for one or more Items. Note that an
