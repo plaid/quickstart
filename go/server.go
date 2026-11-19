@@ -137,6 +137,8 @@ func main() {
 	r.GET("/api/cra/get_income_insights", getCraIncomeInsightsHandler)
 	r.GET("/api/cra/get_partner_insights", getCraPartnerInsightsHandler)
 
+	preloadItem()
+
 	err := r.Run(":" + APP_PORT)
 	if err != nil {
 		panic("unable to start server")
@@ -149,6 +151,7 @@ var accessToken string
 var userToken string
 var userID string
 var itemID string
+var itemPreloaded bool
 
 var paymentID string
 
@@ -596,10 +599,31 @@ func holdings(c *gin.Context) {
 
 func info(context *gin.Context) {
 	context.JSON(http.StatusOK, map[string]interface{}{
-		"item_id":      itemID,
-		"access_token": accessToken,
-		"products":     strings.Split(PLAID_PRODUCTS, ","),
+		"item_id":        itemID,
+		"access_token":   accessToken,
+		"products":       strings.Split(PLAID_PRODUCTS, ","),
+		"item_preloaded": itemPreloaded,
 	})
+}
+
+// preloadItem starts the app with an existing Item already connected when
+// PLAID_ACCESS_TOKEN is set, such as an Item linked with the Plaid CLI.
+func preloadItem() {
+	preloadedAccessToken := os.Getenv("PLAID_ACCESS_TOKEN")
+	if preloadedAccessToken == "" {
+		return
+	}
+
+	itemGetResp, err := client.Item.Get(context.Background(), &plaid.ItemGetRequest{AccessToken: preloadedAccessToken})
+	if err != nil || itemGetResp.Item == nil {
+		fmt.Println("Could not load the Item for PLAID_ACCESS_TOKEN; starting without a connected Item:", err)
+		return
+	}
+
+	accessToken = preloadedAccessToken
+	itemID = itemGetResp.Item.ItemID
+	itemPreloaded = true
+	fmt.Println("Started with Item " + itemID + " from PLAID_ACCESS_TOKEN")
 }
 
 func createPublicToken(c *gin.Context) {
