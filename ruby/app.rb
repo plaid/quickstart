@@ -70,7 +70,6 @@ post '/api/set_access_token' do
     )
   access_token = exchange_token_response.access_token
   item_id = exchange_token_response.item_id
-  pretty_print_response(exchange_token_response.to_hash)
   content_type :json
   exchange_token_response.to_hash.to_json
 end
