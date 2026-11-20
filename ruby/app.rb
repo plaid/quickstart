@@ -53,12 +53,31 @@ item_id = nil
 authorization_id = nil
 account_id = nil
 
+# Optional: the access_token of an existing Item, such as one linked with the
+# Plaid CLI. When set, the app starts with that Item already connected.
+item_preloaded = false
+unless ENV['PLAID_ACCESS_TOKEN'].to_s.empty?
+  begin
+    preloaded_item_response = client.item_get(
+      Plaid::ItemGetRequest.new({ access_token: ENV['PLAID_ACCESS_TOKEN'] })
+    )
+    access_token = ENV['PLAID_ACCESS_TOKEN']
+    item_id = preloaded_item_response.item.item_id
+    item_preloaded = true
+    puts "Started with Item #{item_id} from PLAID_ACCESS_TOKEN"
+  rescue Plaid::ApiError => preload_error
+    puts 'Could not load the Item for PLAID_ACCESS_TOKEN; starting without a connected Item:'
+    puts preload_error.response_body || preload_error.message
+  end
+end
+
 post '/api/info' do
   content_type :json
   {
-    item_id:      item_id,
-    access_token: access_token,
-    products:     ENV['PLAID_PRODUCTS'].split(','),
+    item_id:        item_id,
+    access_token:   access_token,
+    products:       ENV['PLAID_PRODUCTS'].split(','),
+    item_preloaded: item_preloaded,
   }.to_json
 end
 

@@ -38,7 +38,22 @@ const App = () => {
         isUserTokenFlow: isUserTokenFlow,
       },
     });
-    return { paymentInitiation, isUserTokenFlow };
+
+    // The backend loaded an Item from PLAID_ACCESS_TOKEN, so skip Link.
+    const isItemPreloaded: boolean =
+      data.item_preloaded === true && !paymentInitiation && !isUserTokenFlow;
+    if (isItemPreloaded) {
+      dispatch({
+        type: "SET_STATE",
+        state: {
+          itemId: data.item_id,
+          accessToken: data.access_token,
+          isItemAccess: true,
+          linkSuccess: true,
+        },
+      });
+    }
+    return { paymentInitiation, isUserTokenFlow, isItemPreloaded };
   }, [dispatch]);
 
   const generateUserToken = useCallback(async () => {
@@ -126,7 +141,11 @@ const App = () => {
 
   useEffect(() => {
     const init = async () => {
-      const { paymentInitiation, isUserTokenFlow } = await getInfo(); // used to determine which path to take when generating token
+      const { paymentInitiation, isUserTokenFlow, isItemPreloaded } =
+        await getInfo(); // used to determine which path to take when generating token
+      if (isItemPreloaded) {
+        return;
+      }
       // do not generate a new token for OAuth redirect; instead
       // setLinkToken from localStorage
       if (window.location.href.includes("?oauth_state_id=")) {

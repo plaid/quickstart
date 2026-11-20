@@ -62,6 +62,10 @@ let PAYMENT_ID = null;
 // persistent data store
 let AUTHORIZATION_ID = null;
 let TRANSFER_ID = null;
+// Optional: the access_token of an existing Item, such as one linked with the
+// Plaid CLI. When set, the app starts with that Item already connected.
+const PLAID_ACCESS_TOKEN = process.env.PLAID_ACCESS_TOKEN || '';
+let ITEM_PRELOADED = false;
 
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
@@ -98,6 +102,7 @@ app.post('/api/info', function (request, response, next) {
     item_id: ITEM_ID,
     access_token: ACCESS_TOKEN,
     products: PLAID_PRODUCTS,
+    item_preloaded: ITEM_PRELOADED,
   });
 });
 
@@ -629,8 +634,30 @@ app.get('/api/income/verification/paystubs', function (request, response, next) 
     .catch(next);
 })
 
-const server = app.listen(APP_PORT, function () {
-  console.log('plaid-quickstart server listening on port ' + APP_PORT);
+const preloadItem = async () => {
+  if (PLAID_ACCESS_TOKEN === '') {
+    return;
+  }
+  try {
+    const itemResponse = await client.item.get({
+      access_token: PLAID_ACCESS_TOKEN,
+    });
+    ACCESS_TOKEN = PLAID_ACCESS_TOKEN;
+    ITEM_ID = itemResponse.item.item_id;
+    ITEM_PRELOADED = true;
+    console.log('Started with Item ' + ITEM_ID + ' from PLAID_ACCESS_TOKEN');
+  } catch (error) {
+    console.log(
+      'Could not load the Item for PLAID_ACCESS_TOKEN; starting without a connected Item:',
+    );
+    console.log(util.inspect(error.body || error.message, { colors: true, depth: 4 }));
+  }
+};
+
+preloadItem().then(function () {
+  app.listen(APP_PORT, function () {
+    console.log('plaid-quickstart server listening on port ' + APP_PORT);
+  });
 });
 
 const prettyPrintResponse = (response) => {

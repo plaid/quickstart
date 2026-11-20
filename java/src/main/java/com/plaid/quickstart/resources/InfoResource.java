@@ -26,17 +26,25 @@ public class InfoResource {
     private final String accessToken;
     @JsonProperty
     private final List<String> products;
+    @JsonProperty
+    private final boolean itemPreloaded;
 
     public InfoResponse(List<String> plaidProducts, String accessToken, String itemId) {
+      this(plaidProducts, accessToken, itemId, false);
+    }
+
+    public InfoResponse(List<String> plaidProducts, String accessToken, String itemId,
+      boolean itemPreloaded) {
       this.products = plaidProducts;
       this.accessToken = accessToken;
       this.itemId = itemId;
+      this.itemPreloaded = itemPreloaded;
     }
   }
 
   @POST
   public InfoResponse getInfo() {
     return new InfoResponse(plaidProducts, QuickstartApplication.accessToken,
-      QuickstartApplication.itemId);
+      QuickstartApplication.itemId, QuickstartApplication.itemPreloaded);
   }
 }
