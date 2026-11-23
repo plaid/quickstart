@@ -133,6 +133,21 @@ user_id = None
 
 item_id = None
 
+# Optional: the access_token of an existing Item, such as one linked with the
+# Plaid CLI. When set, the app starts with that Item already connected.
+item_preloaded = False
+PLAID_ACCESS_TOKEN = empty_to_none('PLAID_ACCESS_TOKEN')
+if PLAID_ACCESS_TOKEN is not None:
+    try:
+        item_response = client.item_get(ItemGetRequest(access_token=PLAID_ACCESS_TOKEN))
+        access_token = PLAID_ACCESS_TOKEN
+        item_id = item_response['item']['item_id']
+        item_preloaded = True
+        print('Started with Item ' + item_id + ' from PLAID_ACCESS_TOKEN')
+    except plaid.ApiException as e:
+        print('Could not load the Item for PLAID_ACCESS_TOKEN; starting without a connected Item:')
+        print(e.body)
+
 
 @app.route('/api/info', methods=['POST'])
 def info():
@@ -141,7 +156,8 @@ def info():
     return jsonify({
         'item_id': item_id,
         'access_token': access_token,
-        'products': PLAID_PRODUCTS
+        'products': PLAID_PRODUCTS,
+        'item_preloaded': item_preloaded
     })
 
 

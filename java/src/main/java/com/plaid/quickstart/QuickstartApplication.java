@@ -2,6 +2,8 @@ package com.plaid.quickstart;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.plaid.client.ApiClient;
+import com.plaid.client.model.ItemGetRequest;
+import com.plaid.client.model.ItemGetResponse;
 import com.plaid.client.request.PlaidApi;
 import com.plaid.quickstart.resources.AccessTokenResource;
 import com.plaid.quickstart.resources.AccountsResource;
@@ -30,18 +32,23 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class QuickstartApplication extends Application<QuickstartConfiguration> {
+  private static final Logger LOG = LoggerFactory.getLogger(QuickstartApplication.class);
   // We store the accessToken in memory - in production, store it in a secure
   // persistent data store.
   public static String accessToken;
   public static String userToken;
   public static String userId;
   public static String itemId;
+  public static boolean itemPreloaded;
   // The paymentId is only relevant for the UK Payment Initiation product.
   // We store the paymentId in memory - in production, store it in a secure
   // persistent data store.
@@ -107,6 +114,7 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     apiClient.setPlaidAdapter(plaidEnv);
 
     plaidClient = apiClient.createService(PlaidApi.class);
+    preloadItem(System.getenv("PLAID_ACCESS_TOKEN"));
 
     environment.jersey().register(new PlaidApiExceptionMapper());
     environment.jersey().register(new AccessTokenResource(plaidClient, plaidProducts));
@@ -131,6 +139,25 @@ public class QuickstartApplication extends Application<QuickstartConfiguration> 
     environment.jersey().register(new TransferCreateResource(plaidClient));
     environment.jersey().register(new UserTokenResource(plaidClient, plaidProducts));
     environment.jersey().register(new CraResource(plaidClient));
+  }
+
+  // Starts the app with an existing Item already connected when PLAID_ACCESS_TOKEN
+  // is set, such as an Item linked with the Plaid CLI.
+  private void preloadItem(String preloadedAccessToken) {
+    if (preloadedAccessToken == null || preloadedAccessToken.isEmpty()) {
+      return;
+    }
+    try {
+      ItemGetResponse itemResponse = PlaidApiHelper.callPlaid(
+        plaidClient.itemGet(new ItemGetRequest().accessToken(preloadedAccessToken)));
+      accessToken = preloadedAccessToken;
+      itemId = itemResponse.getItem().getItemId();
+      itemPreloaded = true;
+      LOG.info("Started with Item " + itemId + " from PLAID_ACCESS_TOKEN");
+    } catch (IOException | PlaidApiException e) {
+      LOG.warn("Could not load the Item for PLAID_ACCESS_TOKEN; starting without a connected Item: "
+        + e.getMessage());
+    }
   }
 
   protected PlaidApi client() {
