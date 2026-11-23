@@ -218,7 +218,7 @@ plaid samples create quickstart --env production --language node
 
 A few things work differently on a Trial plan:
 
-- The Trial plan includes `auth`, `transactions`, `identity`, `assets`, `investments`, `liabilities` and `statements`. Remove `signal`, `transfer`, `payment_initiation` and the `cra_*` products from `PLAID_PRODUCTS` before you switch to production, or creating a link token fails.
+- The Trial plan includes `auth`, `transactions`, `identity`, `assets`, `investments`, `liabilities` and `statements`. It doesn't include `transfer`, `payment_initiation` or the `cra_*` products, and older Trial teams don't have `signal`. If creating a link token fails with `INVALID_PRODUCT`, remove the product it names from `PLAID_PRODUCTS`.
 - Every Item counts toward your 10 connections, including duplicates, and removing an Item doesn't free one up. The Quickstart keeps its access token in memory, so restarting the backend loses the Item while it still counts against the limit.
 - OAuth institutions such as Chase are available without a separate registration. On desktop, Link opens them in a pop-up, so leave `PLAID_REDIRECT_URI` empty.
 
