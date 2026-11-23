@@ -58,16 +58,15 @@ account_id = nil
 item_preloaded = false
 unless ENV['PLAID_ACCESS_TOKEN'].to_s.empty?
   begin
-    preloaded_item_response = client.item_get(
-      Plaid::ItemGetRequest.new({ access_token: ENV['PLAID_ACCESS_TOKEN'] })
-    )
+    preloaded_item_response = client.item.get(access_token: ENV['PLAID_ACCESS_TOKEN'])
     access_token = ENV['PLAID_ACCESS_TOKEN']
     item_id = preloaded_item_response.item.item_id
     item_preloaded = true
     puts "Started with Item #{item_id} from PLAID_ACCESS_TOKEN"
-  rescue Plaid::ApiError => preload_error
+  rescue Plaid::Errors::ApiError => preload_error
     puts 'Could not load the Item for PLAID_ACCESS_TOKEN; starting without a connected Item:'
-    puts preload_error.response_body || preload_error.message
+    body = preload_error.respond_to?(:body) ? preload_error.body : nil
+    puts body.respond_to?(:to_h) ? body.to_h.to_json : (body || preload_error.message)
   end
 end
 
