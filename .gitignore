@@ -58,3 +58,5 @@ python/venv/*
 
 # Claude Code local settings
 .claude/
+# Python bytecode
+__pycache__/
