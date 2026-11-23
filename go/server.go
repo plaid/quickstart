@@ -397,6 +397,13 @@ func transactions(c *gin.Context) {
 			Cursor:      cursor,
 		})
 		if err != nil {
+			// If the data changed mid-pagination, restart the whole loop from the
+			// cursor this update started with, discarding the pages fetched so far.
+			if plaidErr, _, ok := toPlaidError(err); ok && plaidErr.ErrorCode == "TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION" {
+				cursor = nil
+				added, modified, removed = nil, nil, nil
+				continue
+			}
 			renderError(c, err)
 			return
 		}
