@@ -321,7 +321,6 @@ app.post('/api/set_access_token', function (request, response, next) {
       const tokenResponse = await client.item.exchangePublicToken({
         public_token: PUBLIC_TOKEN,
       });
-      prettyPrintResponse(tokenResponse);
       ACCESS_TOKEN = tokenResponse.access_token;
       ITEM_ID = tokenResponse.item_id;
       response.json({

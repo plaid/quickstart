@@ -226,8 +226,6 @@ func getAccessToken(c *gin.Context) {
 	accessToken = exchangePublicTokenResp.AccessToken
 	itemID = exchangePublicTokenResp.ItemID
 
-	fmt.Println("public token: " + publicToken)
-	fmt.Println("access token: " + accessToken)
 	fmt.Println("item ID: " + itemID)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -719,7 +717,7 @@ func linkTokenCreate(
 	if isCraProductList(products) {
 		// Use user_token if available, otherwise use user_id
 		if userToken != "" {
-			fmt.Println("Creating link token with user_token:", userToken)
+			fmt.Println("Creating link token with a user_token")
 			request.UserToken = plaid.String(userToken)
 			// Keep user object when using user_token
 		} else if userID != "" {
@@ -823,7 +821,7 @@ func userTokenCreate() error {
 	// Store both user_token and user_id
 	if userCreateResp.UserToken != nil {
 		userToken = *userCreateResp.UserToken
-		fmt.Println("Created user with user_token:", userToken)
+		fmt.Println("Created user with a user_token")
 	}
 	if userCreateResp.UserID != "" {
 		userID = userCreateResp.UserID
